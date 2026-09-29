@@ -7,7 +7,7 @@ const close = (a, b, eps = 1e-7) => assert.ok(Math.abs(a - b) < eps, `${a} != ${
 function scenario(seed = 1700, type = 'sloop', a = 'kingston', b = 'havana') {
   const s = createGame(seed); buyLicense(s, 'spain');
   if (type === 'brig') { s.cash += 8000; s.initialCash += 8000; }
-  const ship = buyShip(s, type, a); const route = setRoute(s, ship.id, a, b);
+  const ship = buyShip(s, type); const route = setRoute(s, ship.id, a, b);
   return { s, ship, route };
 }
 test('integrated prices: split and bulk trades agree including tax and cash', () => {
@@ -57,18 +57,18 @@ test('loading honors allowed goods, margin, stock, capacity and operating reserv
   assert.equal(optimizeLoad(s, 'kingston', 'havana', 30, 1000, ['rum'], 1000).cargo.length, 0);
   assert.throws(() => updateRoute(s, route.id, [], 0)); assert.throws(() => updateRoute(s, route.id, ['rum'], NaN));
 });
-test('licenses, range, ship location and duplicate assignment are enforced', () => {
+test('licenses, range and duplicate assignment are enforced without ship location', () => {
   const s = createGame(), ship = buyShip(s, 'sloop');
   assert.throws(() => setRoute(s, ship.id, 'kingston', 'havana'));
   buyLicense(s, 'spain'); assert.throws(() => setRoute(s, ship.id, 'kingston', 'london'));
-  assert.throws(() => setRoute(s, ship.id, 'cadiz', 'london'));
-  setRoute(s, ship.id, 'kingston', 'havana'); assert.throws(() => setRoute(s, ship.id, 'kingston', 'havana'));
+  assert.equal('city' in ship, false);
+  setRoute(s, ship.id, 'cadiz', 'london'); assert.throws(() => setRoute(s, ship.id, 'kingston', 'havana'));
 });
 test('pause finishes voyage, sells cargo once, permits release and reassignment', () => {
   const { s, ship, route } = scenario(); tick(s); toggleRoute(s, route.id);
   assert.throws(() => removeRoute(s, route.id));
   for (let i = 0; i < 5; i++) tick(s);
-  assert.equal(ship.city, 'havana'); assert.equal(ship.voyage, null); assert.equal(ship.cargo.length, 0); assert.equal(route.deliveries, 1);
+  assert.equal(ship.nextFrom, 'havana'); assert.equal(ship.voyage, null); assert.equal(ship.cargo.length, 0); assert.equal(route.deliveries, 1);
   const sales = s.totals.sale; tick(s); assert.equal(s.totals.sale, sales);
   removeRoute(s, route.id); assert.equal(ship.routeId, null);
   setRoute(s, ship.id, 'havana', 'kingston'); tick(s); assert.ok(ship.voyage);
@@ -76,9 +76,9 @@ test('pause finishes voyage, sells cargo once, permits release and reassignment'
 test('empty return and no-opportunity waiting rules', () => {
   const { s, ship, route } = scenario(); updateRoute(s, route.id, ['rum'], 10);
   for (let i = 0; i < 7; i++) tick(s);
-  assert.ok(ship.voyage); assert.equal(ship.cargo.length, 0); assert.equal(route.status, 'empty');
+  assert.ok(ship.voyage); assert.equal(ship.cargo.length, 0); assert.equal(ship.status, 'empty');
   const waiting = scenario(); updateRoute(waiting.s, waiting.route.id, ['rum'], 1000); tick(waiting.s);
-  assert.equal(waiting.ship.voyage, null); assert.equal(waiting.route.status, 'waiting');
+  assert.equal(waiting.ship.voyage, null); assert.equal(waiting.ship.status, 'waiting');
 });
 test('in-transit save restoration gives identical future, no lost or duplicated cargo', () => {
   const { s } = scenario(); for (let i = 0; i < 3; i++) tick(s);
@@ -88,7 +88,7 @@ test('in-transit save restoration gives identical future, no lost or duplicated 
 });
 test('save rejects incompatible, malformed and inconsistent states without modifying live game', () => {
   const { s } = scenario(); tick(s); const original = serialize(s);
-  const mutations = [v => v.version++, v => v.cash = null, v => v.markets.havana.rum.stock = -1, v => v.ships.push(v.ships[0]), v => v.routes[0].shipId = 'missing', v => v.ships[0].voyage.remaining = 0, v => v.ships[0].cargo[0].quantity = 999, v => v.cash += 100, v => v.routes[0].allowed = ['bad']];
+  const mutations = [v => v.version++, v => v.cash = null, v => v.markets.havana.rum.stock = -1, v => v.ships.push(v.ships[0]), v => v.ships[0].routeId = 'missing', v => v.ships[0].voyage.remaining = 0, v => v.ships[0].cargo[0].quantity = 999, v => v.cash += 100, v => v.routes[0].allowed = ['bad']];
   for (const mutate of mutations) { const v = JSON.parse(original); mutate(v); assert.throws(() => deserialize(JSON.stringify(v))); }
   assert.throws(() => deserialize('{')); assert.equal(serialize(s), original);
 });
@@ -110,7 +110,7 @@ test('multiple ships remain distinct through simultaneous trades and save restor
   const second = buyShip(s, 'sloop'); setRoute(s, second.id, 'kingston', 'havana');
   for (let i = 0; i < 60; i++) tick(s);
   assert.equal(s.gameOver, false); assert.notEqual(ship.id, second.id);
-  assert.equal(s.routes.length, 2); assert.ok(second.voyages > 0);
+  assert.equal(s.routes.length, 1); assert.ok(second.voyages > 0);
   const restored = deserialize(serialize(s));
   for (let i = 0; i < 120; i++) { tick(s); tick(restored); }
   assert.deepEqual(s, restored);

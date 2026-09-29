@@ -1,6 +1,6 @@
 # 外部ライブラリ・ライセンス一覧
 
-対象：Sails & Flags 0.1.0（2026-09-29）。
+対象：Sails & Flags 0.3.0（2026-09-29）。連続再生・都市間ドラッグの変更でも外部ライブラリは追加していません。ブラウザー標準のrequestAnimationFrame・Pointer Events・DOMPointを使用します。
 
 ## アプリケーションの依存ライブラリ
 

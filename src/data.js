@@ -6,8 +6,8 @@ export const GOODS = [
   { id: 'food', name: '食料', base: 24 },
 ];
 export const NATIONS = {
-  england: { name: 'イングランド', fee: 250, daily: 0.5, tax: 0.025, color: '#dca26e' },
-  spain: { name: 'スペイン', fee: 250, daily: 0.5, tax: 0.025, color: '#e2cf79' },
+  england: { name: 'イングランド', fee: 250, daily: 0.5, tax: 0.025, color: '#ef4444' },
+  spain: { name: 'スペイン', fee: 250, daily: 0.5, tax: 0.025, color: '#facc15' },
 };
 // Coordinates on an original schematic map, not navigational geography.
 export const CITIES = {
