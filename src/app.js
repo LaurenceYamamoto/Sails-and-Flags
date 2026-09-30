@@ -1,228 +1,201 @@
 import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { createGame, price, tick, buyShip, buyLicense, setRoute, updateRoute, toggleRoute, removeRoute, assignShip, releaseShip, routeShips, serialize, deserialize, assets, operatingProfit } from './engine.js';
-import { t } from './i18n.js';
-import { renderRoutes } from './routes-view.js';
+import { createGame, price, tick, buyShip, buyLicense, setCircuit, circuitKey, routeLegs, normalizeStops, MAX_STOPS, updateRoute, toggleRoute, removeRoute, assignShip, releaseShip, serialize, deserialize, assets, operatingProfit } from './engine.js';
+import { t, tx, locale, setLanguage, getLanguage, nameOf as name, errorMessage } from './i18n.js';
+import { renderRoutes, routeTitle } from './routes-view.js';
+import { renderMap } from './map-view.js';
 import { createClock, voyageProgress } from './clock.js';
+import { saveGame, listSaves } from './storage.js';
 
-let state = createGame(), running = false, speed = 1, selectedCity = 'kingston', editing = null, confirmation = null, pendingRestore = null;
-const SAVE_KEY = 'sails-and-flags.save.v2';
-const LEGACY_SAVE_KEY = 'sails-and-flags.save.v1';
-let pendingMigration = false;
-let selectedRoute = null, creating = false, drag = null, suppressPortClick = false;
-const clock = createClock();
-let draft = { shipId: '', a: 'kingston', b: 'havana', margin: 10, allowed: GOODS.map(g => g.id) };
-const app = document.querySelector('#app');
-const money = n => new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 0 }).format(n);
-const decimal = n => new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 1 }).format(n);
-const cash = n => `¤ ${decimal(Math.abs(n) < 0.05 ? 0 : n)}`;
-const signed = n => `${n >= 0 ? '+' : '−'}${cash(Math.abs(n))}`;
-const tone = n => n >= 0 ? 'positive' : 'negative';
-const date = () => new Date(Date.UTC(1700, 0, 1) + state.day * 86400000).toLocaleDateString('ja-JP', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
-const fixedCost = () => state.ships.reduce((v, s) => v + SHIPS[s.type].daily, 0) + state.licenses.reduce((v, n) => v + NATIONS[n].daily, 0);
-function notice(message) { const el = document.querySelector('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(notice.timer); notice.timer = setTimeout(() => el.classList.remove('show'), 4500); }
-const option = (value, label, selected) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`;
-function map() {
-  const lines = state.routes.map(r => {
-    const a = CITIES[r.a], b = CITIES[r.b];
-    const markers = routeShips(state, r).map(ship => {
-      return `<g class="ship-marker ${r.id === selectedRoute ? 'selected' : ''}" data-ship="${ship.id}" data-action="select-route" data-id="${r.id}" tabindex="0" role="button" aria-label="${SHIPS[ship.type].name} #${ship.id.split('-')[1]}の交易路を表示" transform="${shipTransform(ship)}"><title>${SHIPS[ship.type].name} #${ship.id.split('-')[1]} · ${CITIES[r.a].name} ⇄ ${CITIES[r.b].name}</title><circle r="14" class="ship-hit"/><circle r="10" fill="#edc786"/><path d="M-5 3H6L3 6H-3ZM0-8V1H6Z" fill="#17383b"/></g>`;
-    }).join('');
-    return `<line class="route-line ${r.active ? '' : 'inactive'} ${r.id === selectedRoute ? 'selected' : ''}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>${markers}`;
-  }).join('');
-  return `<svg class="map" viewBox="0 0 900 450" role="group" aria-label="カリブ海と西ヨーロッパの交易地図">
-    <defs><pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" fill="none" stroke="#ffffff" stroke-opacity=".055"/></pattern><radialGradient id="sea"><stop stop-color="#24515b"/><stop offset="1" stop-color="#153740"/></radialGradient></defs>
-    <rect width="900" height="450" fill="url(#sea)"/><rect width="900" height="450" fill="url(#grid)"/>
-    <g fill="#496268" stroke="#85958d" stroke-opacity=".5" stroke-width="1.2">
-    <path d="M0 0H295L270 25L251 31L235 57L205 72L184 104L165 130L135 162L135 199L155 236L146 250L129 241L107 210L75 203L47 226L0 232Z"/>
-    <path d="M0 249L48 238L72 250L80 286L103 311L120 351L160 374L193 406L178 420L148 399L124 394L97 363L66 346L47 311L0 295Z"/>
-    <path d="M135 289L160 290L186 302L210 310L224 325L196 323L175 310L151 309Z"/><path d="M205 355L229 352L244 360L225 365Z"/>
-    <path d="M244 330L279 329L301 341L295 350L266 346Z"/><path d="M310 347L330 346L340 352L320 357Z"/>
-    <path d="M223 421L265 400L319 405L364 420L396 450H216Z"/>
-    <path d="M720 29L730 48L719 65L728 83L748 87L758 100L747 108L727 101L715 86L709 64Z"/><path d="M693 60L705 65L703 82L691 87L685 76Z"/>
-    <path d="M829 0L808 33L815 56L792 89L768 111L750 118L754 134L734 142L738 155L707 165L697 190L711 210L745 214L762 197L778 184L800 186L820 164L850 185L900 189V0Z"/>
-    <path d="M733 233L774 226L813 231L858 214L900 227V450H756L742 401L710 360L698 307L704 260Z"/>
-    </g>
-    <g class="map-label"><text x="389" y="210" class="ocean">NORTH ATLANTIC</text><text x="390" y="231">北 大 西 洋</text><text x="82" y="389">CARIBBEAN SEA</text><text x="782" y="74">EUROPE</text></g>
-    <g stroke="#9baeb0" fill="none" opacity=".5" transform="translate(840 360)"><circle r="25"/><path d="M0-35V35M-35 0H35M0-25L7 0L0 25L-7 0Z"/><text y="-43" fill="#bbc9c7" stroke="none" text-anchor="middle" font-size="12">N</text></g>
-    ${lines}<line id="route-drag-preview" hidden/><text id="route-drag-label" x="450" y="420" text-anchor="middle" hidden></text>
-    ${Object.entries(CITIES).map(([id, c]) => `<g class="port ${id === selectedCity ? 'selected' : ''}" data-city="${id}" tabindex="0" role="button" aria-label="${c.name}の市場を表示"><circle cx="${c.x}" cy="${c.y}" r="13" class="halo"/><circle cx="${c.x}" cy="${c.y}" r="5" fill="${NATIONS[c.nation].color}"/><text x="${c.x + (id === 'kingston' ? 17 : -17)}" y="${c.y - 13}" text-anchor="${id === 'kingston' ? 'start' : 'end'}">${c.name}</text></g>`).join('')}
-  </svg>`;
+let state=createGame(), running=false, speed=1, selectedCity='kingston', selectedRoute=null;
+let creating=false, editing=null, confirmation=null, pendingRestore=null, saves=null, drag=null, suppressPortClick=false, routeSort='profit';
+let storageWarning=false, autoDay=null, exportURL=null, exportText=null;
+let mapPlanning=false, plannedStops=[], showRivals=true, selectedCompetitor=null;
+try { setLanguage(localStorage.getItem('sails-and-flags.language')); } catch { storageWarning=true; }
+let draft={shipId:'',a:'kingston',b:'havana',extra:[],margin:10,allowed:GOODS.map(g=>g.id)};
+const clock=createClock(), app=document.querySelector('#app');
+const money=n=>new Intl.NumberFormat(locale(),{maximumFractionDigits:0}).format(n);
+const decimal=n=>new Intl.NumberFormat(locale(),{maximumFractionDigits:1}).format(n);
+const cash=n=>`¤ ${decimal(Math.abs(n)<0.05?0:n)}`;
+const signed=n=>`${n>=0?'+':'−'}${cash(Math.abs(n))}`;
+const tone=n=>n>=0?'positive':'negative';
+const date=()=>new Date(Date.UTC(1700,0,1)+state.day*86400000).toLocaleDateString(locale(),{timeZone:'UTC',year:'numeric',month:'long',day:'numeric'});
+const fixedCost=()=>state.ships.reduce((v,s)=>v+SHIPS[s.type].daily,0)+state.licenses.reduce((v,n)=>v+NATIONS[n].daily,0);
+const option=(value,label,selected)=>`<option value="${value}" ${value===selected?'selected':''}>${label}</option>`;
+const stops=()=>normalizeStops([draft.a,draft.b,...draft.extra.filter(Boolean)]);
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function notice(message) { const el=document.querySelector('#toast'); el.textContent=message; el.classList.add('show'); clearTimeout(notice.timer); notice.timer=setTimeout(()=>el.classList.remove('show'),5000); }
+function persist(slot='auto') {
+  try { saveGame(localStorage,state,slot); storageWarning=false; if(slot==='auto') autoDay=state.day; return true; }
+  catch { storageWarning=true; notice(t('storageError')); return false; }
 }
 function shipTransform(ship) {
-  const w = ship.voyage, p = voyageProgress(w, clock.fraction);
-  const from = CITIES[w?.from ?? ship.nextFrom], to = CITIES[w?.to ?? ship.nextFrom];
-  // Offset the icon from the city hit target, including when berthed.
-  return `translate(${from.x + (to.x - from.x) * p},${from.y + (to.y - from.y) * p + 23})`;
+  const w=ship.voyage,p=voyageProgress(w,clock.fraction),from=CITIES[w?.from??ship.nextFrom],to=CITIES[w?.to??ship.nextFrom];
+  return `translate(${from.x+(to.x-from.x)*p},${from.y+(to.y-from.y)*p+23})`;
 }
 function animateTime() {
-  for (const marker of app.querySelectorAll('[data-ship]')) {
-    const ship = state.ships.find(s => s.id === marker.dataset.ship);
-    if (ship?.routeId) marker.setAttribute('transform', shipTransform(ship));
-  }
-  const bar = app.querySelector('#day-progress');
-  if (bar) bar.style.transform = `scaleX(${clock.fraction})`;
-  for (const bar of app.querySelectorAll('[data-voyage-progress]')) {
-    const ship = state.ships.find(s => s.id === bar.dataset.voyageProgress);
-    bar.style.width = `${100 * voyageProgress(ship?.voyage, clock.fraction)}%`;
-  }
+  for(const marker of app.querySelectorAll('[data-rival-ship]')) { const ship=state.competitors[Number(marker.dataset.company)]?.ships.find(s=>s.id===marker.dataset.rivalShip); if(ship?.routeId)marker.setAttribute('transform',shipTransform(ship)); }
+  for(const marker of app.querySelectorAll('[data-ship]')) { const ship=state.ships.find(s=>s.id===marker.dataset.ship); if(ship?.routeId) marker.setAttribute('transform',shipTransform(ship)); }
+  const bar=app.querySelector('#day-progress'); if(bar) bar.style.transform=`scaleX(${clock.fraction})`;
+  for(const bar of app.querySelectorAll('[data-voyage-progress]')) { const ship=state.ships.find(s=>s.id===bar.dataset.voyageProgress); bar.style.width=`${100*voyageProgress(ship?.voyage,clock.fraction)}%`; }
 }
 function market() {
-  const c = CITIES[selectedCity], n = NATIONS[c.nation];
-  return `<div class="section-top"><div><p class="eyebrow">PORT MARKET</p><h2>${c.name}</h2></div><span class="badge">${n.name}</span></div><p class="muted small">${t('taxRate')} ${n.tax * 100}% · ${state.licenses.includes(c.nation) ? t('owned') : '交易免許が必要'}</p>
-    <div class="table-wrap"><table><thead><tr><th>${t('product')}</th><th>${t('price')}</th><th>${t('stock')}</th><th>${t('production')}</th><th>${t('demand')}</th></tr></thead><tbody>${GOODS.map(g => { const m = state.markets[selectedCity][g.id]; return `<tr><td><span class="good-icon ${g.id}"></span>${g.name}</td><td>${decimal(price(g.id, m.stock))}</td><td>${money(m.stock)}</td><td class="positive">+${decimal(m.production)}</td><td>${decimal(m.demand)}</td></tr>`; }).join('')}</tbody></table></div><p class="muted small">表示単価は現在在庫の限界価格。実際の売買額は数量による価格変化と税を含めて計算します。</p>`;
+  const c=CITIES[selectedCity],n=NATIONS[c.nation];
+  return `<div class="section-top"><h2>${name(c)}</h2><label class="small">${t('ports')}<select id="city-select">${Object.entries(CITIES).map(([id,c])=>option(id,name(c),selectedCity)).join('')}</select></label></div><p class="muted small"><span class="nation-color" style="background:${n.color}"></span> ${name(n)} · ${t('taxRate')} ${n.tax*100}% · ${state.licenses.includes(c.nation)?t('owned'):tx('交易免許が必要','License required')}</p>
+    <div class="table-wrap"><table><thead><tr>${['product','price','stock','production','demand'].map(k=>`<th>${t(k)}</th>`).join('')}</tr></thead><tbody>${GOODS.map(g=>{const m=state.markets[selectedCity][g.id];return `<tr><td><span class="good-icon ${g.id}"></span>${name(g)}</td><td>${decimal(price(g.id,m.stock))}</td><td>${money(m.stock)}</td><td class="positive">+${decimal(m.production)}</td><td>${decimal(m.demand)}</td></tr>`;}).join('')}</tbody></table></div><p class="muted small">${tx('単価は現在在庫の限界価格です。売買量に応じた価格変化と税を含めて決済します。競合も同じ在庫で取引します。','Prices are marginal prices at current stock. Trades integrate price changes across the quantity and include tax. Competitors use the same inventory.')}</p>`;
 }
-function policyFields(source) { return `<label>${t('margin')}<input type="number" name="margin" min="0" max="1000" step="1" required value="${source.margin ?? source.minMargin}"></label><fieldset><legend>${t('allowed')}</legend><div class="checks">${GOODS.map(g => `<label><input type="checkbox" name="good" value="${g.id}" ${source.allowed.includes(g.id) ? 'checked' : ''}>${g.name}</label>`).join('')}</div></fieldset>`; }
+function mapTools() {
+  return `<div class="map-tools"><button data-action="plan-map" ${state.gameOver?'disabled':''}>${tx('地図で巡回ルートを作る','Plan a circuit on the map')}</button><label><input type="checkbox" id="show-rivals" ${showRivals?'checked':''}>${tx('競合航路を表示','Show competitor routes')}</label></div><div class="map-legend"><span><i class="legend-player"></i>${tx('自社航路・丸い船印','Your routes · round ships')}</span><span><i class="legend-rival"></i>${tx('競合航路・菱形の船印（クリックで会社情報）','Competitors · diamond ships (click for company details)')}</span></div>${mapPlanning?`<div class="map-planner" role="region" aria-label="${tx('寄港地を選択','Choose ports')}"><strong>${tx('地図上の都市を寄港順にクリック（最大12回・再訪可）','Click cities in visiting order (up to 12 stops; revisits allowed)')}</strong><p aria-live="polite">${plannedStops.length?plannedStops.map((id,i)=>`${i+1}. ${name(CITIES[id])}`).join(' → '):tx('最初の港を選んでください。','Choose the first port.')}${plannedStops.length>=2?' ↻':''}</p><p class="small muted">${tx('同じ港を再訪できます（連続指定は不可）。最後は起点へ戻るため、起点の再選択は省略できます。淡い点線は帰路です。','Ports may be revisited, but not consecutively. The final return to the first port is automatic; selecting it again is optional. The faint dotted line is the return leg.')}</p><div class="buttons"><button data-action="finish-map" class="primary" ${plannedStops.length<2?'disabled':''}>${tx('この寄港順で設定','Configure this circuit')}</button><button data-action="undo-map" ${plannedStops.length?'':'disabled'}>${tx('1港戻す','Undo last port')}</button><button data-action="cancel-map">${t('cancel')}</button></div></div>`:''}`;
+}
+function appendStop(id) {
+  if(plannedStops.at(-1)===id) return;
+  if(plannedStops.length>=MAX_STOPS && !(plannedStops.length===MAX_STOPS && id===plannedStops[0])) {
+    notice(tx('寄港順は最大12回です（最後の起点への帰港を除く）。','Up to 12 stops are allowed, excluding the final return to the first port.'));return;
+  }
+  plannedStops.push(id);
+}
+function selectPort(id) {
+  pauseTime();selectedCity=id;
+  if(mapPlanning) appendStop(id);
+  render();
+}
+function policyFields(source) { return `<label>${t('margin')}<input type="number" name="margin" min="0" max="1000" step="1" required value="${source.margin??source.minMargin}"></label><fieldset><legend>${t('allowed')}</legend><div class="checks">${GOODS.map(g=>`<label><input type="checkbox" name="good" value="${g.id}" ${source.allowed.includes(g.id)?'checked':''}>${name(g)}</label>`).join('')}</div></fieldset>`; }
+function findCircuit(ports) { return state.routes.find(r=>circuitKey(r.stops)===circuitKey(ports)); }
+function findRoute(a,b) { return a!==b ? state.routes.find(r=>routeLegs(r).some(([from,to])=>from===a&&to===b||from===b&&to===a)) : null; }
+function estimate(type) {
+  const ports=stops();
+  if(ports.length<2 || ports.some((id,i)=>id===ports[(i+1)%ports.length])) return tx('同じ港を連続して指定できません。','Consecutive stops must be different.');
+  if(!type) return t('noShip');
+  const legs=routeLegs({stops:ports}),days=legs.reduce((n,[a,b])=>n+daysFor(type,a,b)+1,0);
+  return `${money(legs.reduce((n,[a,b])=>n+distance(a,b),0))} nm · ${tx('一周','Cycle')} ${days} ${t('dayUnit')} · ${t('upkeep')} ${cash(SHIPS[type].daily*days)}${legs.some(([a,b])=>distance(a,b)>SHIPS[type].range)?' · ⚠ '+tx('航続距離超過','Range exceeded'):''}`;
+}
 function setup() {
-  const idle = state.ships.filter(s => !s.routeId);
-  if (!idle.some(v => v.id === draft.shipId)) draft.shipId = idle[0]?.id || '';
-  const ship = idle.find(v => v.id === draft.shipId);
-  const existing = findRoute(draft.a, draft.b);
-  return `<form id="route-form"><h2 id="create-title">${t('routeSetup')}</h2><div class="form-row"><label>${t('departure')}<select name="from">${Object.entries(CITIES).map(([id, c]) => option(id, c.name, draft.a)).join('')}</select></label><span class="arrow">⇄</span><label>${t('destination')}<select name="to">${Object.entries(CITIES).map(([id, c]) => option(id, c.name, draft.b)).join('')}</select></label></div>
-    ${existing ? '<p class="small">この経路は開設済みです。ルート情報を開き、船の追加や積載条件の変更を行えます。</p>' : `<label>${t('vessel')}<select name="ship" required ${idle.length ? '' : 'disabled'}>${idle.length ? idle.map(s => option(s.id, `${SHIPS[s.type].name} #${s.id.split('-')[1]}`, draft.shipId)).join('') : '<option value="">未使用の船がありません</option>'}</select></label>${!idle.length ? '<p class="small">船の購入後にルートを開設できます。</p>' : ''}${policyFields(draft)}<p class="muted small" id="route-estimate">${estimate(ship?.type, draft.a, draft.b)}</p>`}
-    <div class="buttons"><button class="primary" ${!existing && (!idle.length || state.gameOver) ? 'disabled' : ''}>${existing ? '既存ルートの情報を表示' : '＋ ' + t('create')}</button><button type="button" data-action="cancel">${t('cancel')}</button></div><p class="muted small">${t('reserveNote')}</p></form>`;
-}
-function findRoute(a, b) { return a !== b ? state.routes.find(r => [r.a, r.b].includes(a) && [r.a, r.b].includes(b)) : null; }
-function estimate(type, a, b) {
-  if (a === b) return '異なる2つの港を指定してください。';
-  if (!type) return '初回に配置する船を購入してください。';
-  const days = daysFor(type, a, b);
-  return `${money(distance(a, b))}海里 · 片道${days}日 · 往復${2 * (days + 1)}日（寄港含む） · 船の往復運営費 ${cash(SHIPS[type].daily * 2 * (days + 1))}${distance(a, b) > SHIPS[type].range ? ' · ⚠ 航続距離超過' : ''}`;
+  const idle=state.ships.filter(s=>!s.routeId);
+  if(!idle.some(v=>v.id===draft.shipId)) draft.shipId=idle[0]?.id||'';
+  const existing=findCircuit(stops());
+  const portSelect=(field,value,caption,optional=false)=>`<label>${caption}<select name="${field}">${optional?option('',tx('寄港しない','No stop'),value):''}${Object.entries(CITIES).map(([id,c])=>option(id,name(c),value)).join('')}</select></label>`;
+  return `<form id="route-form"><h2 id="create-title">${t('routeSetup')}</h2><div class="form-row">${portSelect('from',draft.a,t('departure'))}${portSelect('to',draft.b,t('destination'))}</div><details ${draft.extra.some(Boolean)?'open':''}><summary>${tx('追加の寄港地（最大12回・再訪可）','Additional stops (up to 12; revisits allowed)')}</summary><div class="extra-stops">${Array.from({length:Math.min(MAX_STOPS-2,Math.max(4,draft.extra.length+1))},(_,i)=>i).map(i=>portSelect('extra',draft.extra[i]||'',`${tx('寄港地','Port')} ${i+3}`,true)).join('')}</div></details><p class="small muted">${tx('同じ港への再訪も指定できます。指定順に巡回し、最後の港から起点に戻ります。全寄港地で売却・再購入します。','Allows revisiting ports. Visits ports in order, then returns to the starting port. Cargo is sold and purchased again at every stop.')}</p>
+  ${existing?`<p>${tx('開設済みのルート情報を表示します。','This route already exists. Open its details to add ships.')}</p>`:`<label>${t('vessel')}<select name="ship" required ${idle.length?'':'disabled'}>${idle.length?idle.map(s=>option(s.id,`${name(SHIPS[s.type])} #${s.id.split('-')[1]}`,draft.shipId)).join(''):`<option value="">${t('noShip')}</option>`}</select></label>${policyFields(draft)}<p id="route-estimate" class="small muted">${estimate(idle.find(s=>s.id===draft.shipId)?.type)}</p>`}
+  <div class="buttons"><button type="button" data-action="edit-map-stops">${tx('地図で寄港地を選ぶ','Choose ports on map')}</button><button class="primary" ${!existing&&(!idle.length||state.gameOver)?'disabled':''}>${existing?tx('ルート情報を表示','Open route'):t('create')}</button><button type="button" data-action="cancel">${t('cancel')}</button></div><p class="small muted">${t('reserveNote')}</p></form>`;
 }
 function routes() {
-  const route = state.routes.find(r => r.id === selectedRoute);
-  const choices = `<nav class="route-choices" aria-label="交易ルートの選択">${state.routes.map(r => `<button data-action="select-route" data-id="${r.id}" aria-pressed="${r.id === selectedRoute}">${CITIES[r.a].name} ⇄ ${CITIES[r.b].name}</button>`).join('')}</nav>`;
-  return choices + renderRoutes({ ...state, routes: route ? [route] : [] }, { decimal, cash, signed, tone });
-}
-function focusRoute() { document.querySelector('#route-panel-title')?.focus({ preventScroll: true }); document.querySelector('#route-panel')?.scrollIntoView({ block: 'start' }); }
-function selectConnection(a, b) {
-  pauseTime();
-  const route = findRoute(a, b);
-  if (route) { selectedRoute = route.id; creating = false; render(); focusRoute(); }
-  else { draft = { ...draft, a, b }; creating = true; render(); }
+  const list=[...state.routes].sort((a,b)=>routeSort==='profit'?b.profit-a.profit:a.started-b.started),route=state.routes.find(r=>r.id===selectedRoute);
+  return `<label class="small">${tx('並び順','Sort routes')} <select id="route-sort">${option('profit',tx('収益順','Profit'),routeSort)}${option('created',tx('開設順','Creation order'),routeSort)}</select></label><nav class="route-choices" aria-label="${t('routes')}">${list.map(r=>`<button data-action="select-route" data-id="${r.id}" aria-pressed="${r.id===selectedRoute}">${routeTitle(r)} · ${signed(r.profit)}${r.lastActual<0?' ⚠':''}</button>`).join('')}</nav>${renderRoutes({...state,routes:route?[route]:[]},{decimal,cash,signed,tone})}`;
 }
 function ledger() {
-  const records = [...state.ledger].reverse().slice(0, 24);
-  return `<div class="table-wrap ledger"><table><thead><tr><th>日付</th><th>${t('transaction')}</th><th>港 / 航路</th><th>${t('amount')}</th></tr></thead><tbody>${records.map(e => `<tr><td>${e.day}日目</td><td>${t(e.category)}${e.good ? ` · ${GOODS.find(g => g.id === e.good).name}` : ''}${e.quantity ? ` ×${decimal(e.quantity)}` : ''}</td><td>${e.city ? CITIES[e.city].name : '—'}${e.routeId ? ` / #${e.routeId.split('-')[1]}` : ''}</td><td class="${tone(e.amount)}">${signed(e.amount)}</td></tr>`).join('') || `<tr><td colspan="4">${t('noEntry')}</td></tr>`}</tbody></table></div>`;
+  return `<div class="table-wrap ledger"><table><thead><tr><th>${t('day')}</th><th>${t('transaction')}</th><th>${t('ports')} / ${t('routes')}</th><th>${t('amount')}</th></tr></thead><tbody>${[...state.ledger].reverse().slice(0,60).map(e=>`<tr><td>${e.day}</td><td>${t(e.category)}${e.good?' · '+name(GOODS.find(g=>g.id===e.good)):''}${e.quantity?' ×'+decimal(e.quantity):''}${e.shipId?' #'+e.shipId.split('-')[1]:''}</td><td>${e.city?name(CITIES[e.city]):e.nation?name(NATIONS[e.nation]):'—'}${e.routeId?' / #'+e.routeId.split('-')[1]:''}</td><td class="${tone(e.amount)}">${signed(e.amount)}</td></tr>`).join('')||`<tr><td colspan="4">${t('noEntry')}</td></tr>`}</tbody></table></div>`;
 }
 function chart() {
-  const h = state.history;
-  if (h.length < 2) return `<p class="muted small">${t('historyEmpty')}</p>`;
-  const lo = Math.min(...h.map(v => v.cash)), hi = Math.max(...h.map(v => v.cash));
-  const points = h.map((v, i) => `${i / (h.length - 1) * 600},${75 - (v.cash - lo) / Math.max(1, hi - lo) * 65}`).join(' ');
-  return `<svg viewBox="0 0 600 85" class="chart" role="img" aria-label="現金推移 最低${money(lo)} 最高${money(hi)}"><polyline points="${points}" fill="none" stroke="#2c756b" stroke-width="2.5"/></svg><div class="section-top muted small"><span>${h[0].day}日目</span><span>最低 ${cash(lo)} / 最高 ${cash(hi)}</span><span>${state.day}日目</span></div>`;
+  const h=state.history;
+  if(h.length<2) return `<p class="small muted">${t('historyEmpty')}</p>`;
+  const lo=Math.min(...h.flatMap(v=>[v.cash,v.assets])),hi=Math.max(...h.flatMap(v=>[v.cash,v.assets]));
+  const points=key=>h.map((v,i)=>`${i/(h.length-1)*600},${85-(v[key]-lo)/Math.max(1,hi-lo)*75}`).join(' ');
+  return `<svg viewBox="0 0 600 95" class="chart" role="img" aria-label="${t('cashTrend')}"><polyline points="${points('assets')}" fill="none" stroke="#b88340" stroke-width="2.5" stroke-dasharray="6 3"/><polyline points="${points('cash')}" fill="none" stroke="#247364" stroke-width="2.5"/></svg><div class="section-top small muted"><span>${h[0].day} → ${state.day} ${t('dayUnit')}</span><span style="color:#247364">━ ${t('cash')}</span><span style="color:#956620">┄ ${t('assets')}</span><span>${cash(lo)} – ${cash(hi)}</span></div>`;
+}
+function competitors() {
+  return `<section class="panel competitors"><h2>${tx('競合会社','Competitors')}</h2><p class="small muted">${tx('固定航路で運航する2社。購入で在庫が減り、売却で増え、あなたの取引価格にも影響します。','Two companies operate fixed routes. Their purchases and sales change shared inventory and the prices you pay.')}</p>${state.competitors.map((c,index)=>`<div class="competitor ${selectedCompetitor===index?'selected':''}" ><h3>${escape(c.name)}</h3><button data-action="select-competitor" data-id="${index}" aria-pressed="${selectedCompetitor===index}">${tx('地図で航路を強調','Highlight route on map')}</button><p class="small">${routeTitle(c.routes[0])}</p><p class="small muted">${t('cash')} ${cash(c.cash)} · ${t('profit')} ${signed(operatingProfit(c))}<br>${tx('到着','Arrivals')} ${c.routes[0].deliveries} · ${c.gameOver?t('bankrupt'):c.ships[0].voyage?t('sailing'):t('wait')}</p></div>`).join('')}</section>`;
+}
+function saveDialog() {
+  const labels={manual:tx('手動保存','Manual save'),auto:tx('自動保存','Autosave'),backup:tx('前回の保存','Previous save'),v2:'v2',v1:'v1'};
+  return `<dialog aria-labelledby="saves-title"><h2 id="saves-title">${t('load')}</h2>${saves.length?saves.map(s=>`<p><button data-action="choose-save" data-id="${s.slot}" ${s.valid?'':'disabled'}>${labels[s.slot]} · ${s.valid?`${s.day} ${t('dayUnit')} · ${cash(s.state.cash)}`:tx('破損データ','Invalid data')}</button></p>`).join(''):`<p>${t('noSave')}</p>`}<button data-action="cancel">${t('cancel')}</button></dialog>`;
 }
 function render() {
-  if (!state.routes.some(r => r.id === selectedRoute)) selectedRoute = state.routes[0]?.id ?? null;
-  const focused = document.activeElement;
-  const restoreFocus = focused?.closest('form') ? { form: focused.closest('form').id, name: focused.name, value: focused.value } : null;
-  const view = document.createElement('template');
-  view.innerHTML = `<header><div class="brand"><div class="brand-icon">⚑</div><div><h1>SAILS <i>&</i> FLAGS</h1><span>${t('subtitle')}</span></div></div><div class="time"><span class="eyebrow">${t('prototype')}</span><strong>${date()}</strong><span class="small">${state.day}日目 · <span id="time-status">${running ? '進行中' : '一時停止中'}</span></span><div class="day-track" aria-hidden="true"><span id="day-progress"></span></div></div><div class="time-controls"><button data-action="play" class="primary" ${state.gameOver ? 'disabled' : ''}>${running ? 'Ⅱ ' + t('pause') : '▶ ' + t('play')}</button><select id="speed" aria-label="時間の進行速度">${[1, 4, 16].map(n => option(String(n), `${n}倍速`, String(speed))).join('')}</select></div></header>
-  <main><div class="summary"><div><span>${t('cash')}</span><strong id="cash">${cash(state.cash)}</strong></div><div><span>${t('assets')}</span><strong>${cash(assets(state))}</strong></div><div><span>${t('operating')}</span><strong class="${tone(operatingProfit(state))}">${signed(operatingProfit(state))}</strong></div><div><span>${t('dailyCost')}</span><strong>${cash(fixedCost())}<small> / 日</small></strong></div><div class="save-buttons"><button data-action="save">${t('save')}</button><button data-action="load">${t('load')}</button><button data-action="reset" class="text-button">${t('reset')}</button></div></div>
-  ${state.gameOver ? `<section class="warning danger" role="alert"><h2>${t('bankrupt')}</h2><p>${t('bankruptBody')}</p></section>` : state.cash < fixedCost() * 30 ? `<div class="warning" role="alert">${t('cashWarning')}</div>` : ''}
-  <div class="layout"><div class="main-column"><section class="panel map-panel"><div class="section-top panel-heading"><div><p class="eyebrow">THE TRADING ATLAS</p><h2>${t('map')}</h2></div><span class="muted small">4 PORTS · 1700</span></div>${map()}<div class="map-caption"><span><i class="dot"></i> ${t('mapSub')}</span><span>${t('schematic')}</span></div></section>
-  <section class="panel route-panel" id="route-panel"><div class="section-top"><div><p class="eyebrow">YOUR TRADE NETWORK</p><h2 id="route-panel-title" tabindex="-1">${t('fleet')}</h2></div><span class="badge">${state.ships.length}隻 / ${state.routes.length}航路</span></div><p class="muted small">${t('fleetSub')}</p><button data-action="new-route" ${state.gameOver ? 'disabled' : ''}>＋ 新規ルート</button><div id="routes">${routes()}</div></section>
-  <section class="panel market-panel">${market()}</section>
-  <section class="panel ledger-panel"><div class="section-top"><div><p class="eyebrow">COMPANY LEDGER</p><h2>${t('journal')}</h2></div><span class="muted small">${t('investments')} ${cash(-(state.totals.shipPurchase || 0) - (state.totals.licensePurchase || 0))}</span></div><p class="small muted">${t('ledgerNote')}</p><h3>${t('cashTrend')}</h3>${chart()}${ledger()}</section></div>
-  <aside><section class="guide"><p class="eyebrow">CAPTAIN'S FIRST STEPS</p><h2>${t('guideTitle')}</h2><p>${t('guideBody')}</p><ol>${['guide1', 'guide2', 'guide3'].map((k, i) => `<li class="${[state.licenses.includes('spain'), state.ships.length > 0, state.routes.length > 0][i] ? 'done' : ''}">${t(k)}</li>`).join('')}</ol></section>
-  <section class="panel"><p class="eyebrow">TRADING LICENSES</p><h2>${t('licenses')}</h2><p class="small muted">国名の色印は、地図上の所属都市の点と同じ色です。</p>${Object.entries(NATIONS).map(([id, n]) => `<div class="license"><div><strong class="nation-name"><span class="nation-color" style="background-color:${n.color}" aria-hidden="true"></span>${n.name}</strong><small>${cash(n.daily)} / 日 · 税 ${n.tax * 100}%</small></div><button data-action="license" data-id="${id}" ${state.licenses.includes(id) || state.cash < n.fee || state.gameOver ? 'disabled' : ''}>${state.licenses.includes(id) ? '✓ ' + t('owned') : cash(n.fee) + ' 取得'}</button></div>`).join('')}</section>
-  <section class="panel"><p class="eyebrow">THE SHIPYARD</p><h2>船を購入</h2><p class="small muted">購入した船は共通の未使用船として保有し、任意のルートに配置できます。</p>${Object.entries(SHIPS).map(([id, v]) => `<div class="ship-offer"><div class="section-top"><h3>♧ ${v.name}</h3><strong>${cash(v.price)}</strong></div><p class="small muted">${t('capacity')} ${v.capacity} · ${t('range')} ${money(v.range)}海里<br>${t('speed')} ${v.speed}海里/日 · ${t('upkeep')} ${cash(v.daily)} / 日</p><button class="full" data-action="buy" data-id="${id}" ${state.cash < v.price || state.gameOver ? 'disabled' : ''}>${v.name}を${t('buy')}</button></div>`).join('')}<p class="small muted">未使用船にも維持費がかかります。</p>${state.ships.filter(s => !s.routeId).map(s => `<p class="small">⚓ ${SHIPS[s.type].name} #${s.id.split('-')[1]} · 未使用</p>`).join('')}</section>
-  </aside></div>
+  if(!state.routes.some(r=>r.id===selectedRoute)) selectedRoute=state.routes[0]?.id??null;
+  const focused=document.activeElement, focusedForm=focused?.closest('form');
+  const restoreFocus=focusedForm && focused.name ? {form:focusedForm.id,name:focused.name,index:[...focusedForm.elements].indexOf(focused)} : null;
+  const view=document.createElement('template');
+  view.innerHTML=`<header><div class="brand"><div class="brand-icon">⚑</div><div><h1>SAILS <i>&</i> FLAGS</h1><span>${t('subtitle')}</span></div></div><div class="time"><span class="eyebrow">${t('prototype')}</span><strong>${date()}</strong><span class="small">${state.day} ${t('dayUnit')} · <span id="time-status">${running?tx('進行中','Running'):tx('一時停止中','Paused')}</span></span><div class="day-track" aria-hidden="true"><span id="day-progress"></span></div></div><div class="time-controls"><button data-action="play" class="primary" ${state.gameOver?'disabled':''}>${running?'Ⅱ '+t('pause'):'▶ '+t('play')}</button><select id="speed" aria-label="${t('speed')}">${[1,4,16].map(n=>option(String(n),`${n}×`,String(speed))).join('')}</select><select id="language" aria-label="Language">${option('ja','日本語',getLanguage())}${option('en','English',getLanguage())}</select></div></header>
+  <main><div class="summary"><div><span>${t('cash')}</span><strong id="cash">${cash(state.cash)}</strong></div><div><span>${t('assets')}</span><strong>${cash(assets(state))}</strong></div><div><span>${t('operating')}</span><strong class="${tone(operatingProfit(state))}">${signed(operatingProfit(state))}</strong></div><div><span>${t('dailyCost')}</span><strong>${cash(fixedCost())}<small> ${t('daily')}</small></strong></div></div>
+  <div class="save-toolbar"><button data-action="save">${t('save')}</button><button data-action="load">${t('load')}</button><button data-action="export">${tx('書き出し','Export')}</button><button data-action="import">${tx('ファイル読込','Import')}</button><button data-action="reset" class="text-button">${t('reset')}</button><span class="small muted">${tx('自動保存：操作時・30日ごと','Autosave: on changes and every 30 days')}${autoDay!==null?` · ${autoDay} ${t('dayUnit')}`:''}</span><input type="file" id="import-file" accept=".json,application/json" hidden></div>
+  ${storageWarning?`<div class="warning" role="alert">${t('storageError')}</div>`:''}${state.gameOver?`<section class="warning danger" role="alert"><h2>${t('bankrupt')}</h2><p>${t('bankruptBody')}</p></section>`:state.cash<fixedCost()*30?`<div class="warning" role="alert">${t('cashWarning')}</div>`:''}
+  <div class="layout"><div class="main-column"><section class="panel map-panel"><div class="section-top panel-heading"><div><p class="eyebrow">THE TRADING ATLAS</p><h2>${t('map')}</h2></div><span class="small muted">12 PORTS · 1700</span></div>${mapTools()}<div class="map-scroll">${renderMap(state,selectedCity,selectedRoute,shipTransform,{plannedStops:mapPlanning?plannedStops:[],mapPlanning,showRivals,selectedCompetitor})}</div><div class="map-caption"><span>${t('mapSub')}</span><span>${t('schematic')}</span></div></section>
+  <section class="panel route-panel" id="route-panel"><div class="section-top"><h2 id="route-panel-title" tabindex="-1">${t('fleet')}</h2><span class="badge">${state.ships.length} ${t('ships')} / ${state.routes.length} ${t('routes')}</span></div><p class="small muted">${t('fleetSub')}</p><button data-action="new-route" ${state.gameOver?'disabled':''}>＋ ${tx('新規ルート','New route')}</button><div id="routes">${routes()}</div></section>
+  <section class="panel market-panel">${market()}</section><section class="panel ledger-panel"><div class="section-top"><h2>${t('journal')}</h2><span class="small muted">${t('investments')} ${cash(-(state.totals.shipPurchase||0)-(state.totals.licensePurchase||0))}</span></div><p class="small muted">${t('ledgerNote')}</p><h3>${t('cashTrend')}</h3>${chart()}${ledger()}</section></div>
+  <aside><section class="guide"><p class="eyebrow">CAPTAIN'S FIRST STEPS</p><h2>${t('guideTitle')}</h2><p>${t('guideBody')}</p><ol>${['guide1','guide2','guide3'].map((k,i)=>`<li class="${[state.licenses.includes('spain'),state.ships.length>0,state.routes.length>0][i]?'done':''}">${t(k)}</li>`).join('')}</ol></section>
+  <section class="panel"><h2>${t('licenses')}</h2><p class="small muted">${tx('色印は地図の都市と同じ国を示します。','The color matches this country’s cities on the map.')}</p>${Object.entries(NATIONS).map(([id,n])=>`<div class="license"><div><strong class="nation-name"><span class="nation-color" style="background:${n.color}" aria-hidden="true"></span>${name(n)}</strong><small>${cash(n.daily)} ${t('daily')} · ${t('tax')} ${n.tax*100}%</small></div><button data-action="license" data-id="${id}" ${state.licenses.includes(id)||state.cash<n.fee||state.gameOver?'disabled':''}>${state.licenses.includes(id)?'✓ '+t('owned'):cash(n.fee)+' '+t('buy')}</button></div>`).join('')}</section>
+  <section class="panel"><h2>${tx('船を購入','Buy a ship')}</h2><p class="small muted">${tx('購入した船は未使用船として保有し、任意のルートに配置できます。未使用船にも維持費がかかります。','Ships enter your idle inventory and can be assigned to any compatible route. Idle ships still incur upkeep.')}</p>${Object.entries(SHIPS).map(([id,v])=>`<div class="ship-offer"><div class="section-top"><h3>♧ ${name(v)}</h3><strong>${cash(v.price)}</strong></div><p class="small muted">${t('capacity')} ${v.capacity} · ${t('range')} ${money(v.range)} nm<br>${t('speed')} ${v.speed} nm ${t('daily')} · ${t('upkeep')} ${cash(v.daily)} ${t('daily')}</p><button class="full" data-action="buy" data-id="${id}" ${state.cash<v.price||state.gameOver?'disabled':''}>${t('buy')} · ${name(v)}</button></div>`).join('')}${state.ships.filter(s=>!s.routeId).map(s=>`<p class="small">⚓ ${name(SHIPS[s.type])} #${s.id.split('-')[1]} · ${t('unassigned')}</p>`).join('')}</section>${competitors()}</aside></div>
   <footer>${t('footer')}<br><a href="Architecture.md" target="_blank">Architecture</a> · <a href="ImplementationNote.md" target="_blank">Implementation notes</a> · <a href="ExternalLibrary.md" target="_blank">Libraries & licenses</a></footer></main>
-  ${creating ? `<dialog aria-labelledby="create-title">${setup()}</dialog>` : ''}
-  ${editing ? `<dialog aria-labelledby="edit-title"><form id="edit-form"><h2 id="edit-title">${t('policy')}</h2>${policyFields(state.routes.find(r => r.id === editing))}<p class="small muted">航行中の積み荷は変更せず、次回出港時から適用します。</p><div class="buttons"><button class="primary">${t('apply')}</button><button type="button" data-action="cancel">${t('cancel')}</button></div></form></dialog>` : ''}
-  ${confirmation ? `<dialog aria-labelledby="confirm-title"><h2 id="confirm-title">${confirmation === 'load' ? t('load') : t('reset')}</h2><p class="small">${t(confirmation === 'load' ? 'loadConfirm' : 'resetConfirm')}</p><div class="buttons"><button data-action="cancel" autofocus>キャンセル</button><button class="primary" data-action="confirm">${confirmation === 'load' ? '保存データを読み込む' : '新しい会社を設立'}</button></div></dialog>` : ''}`;
-  // Preserve time controls so a daily update cannot close the speed selector
-  // or steal focus from the pause button.
-  if (app.querySelector('header')) {
+  ${creating?`<dialog aria-labelledby="create-title">${setup()}</dialog>`:''}
+  ${editing?`<dialog aria-labelledby="edit-title"><form id="edit-form"><h2 id="edit-title">${t('policy')}</h2>${policyFields(state.routes.find(r=>r.id===editing))}<p class="small muted">${tx('航行中の積み荷は変更せず、次回出港時から適用します。','Applies to the next departure. Cargo already at sea is unchanged.')}</p><div class="buttons"><button class="primary">${t('apply')}</button><button type="button" data-action="cancel">${t('cancel')}</button></div></form></dialog>`:''}
+  ${saves?saveDialog():''}${exportURL?`<dialog aria-labelledby="export-title"><h2 id="export-title">${tx('セーブを書き出す','Export save')}</h2><p><a class="download-link" href="${exportURL}" download="sails-and-flags-day-${state.day}.json">${tx('JSONファイルをダウンロード','Download JSON file')}</a></p><details><summary>${tx('ダウンロードできない場合','If downloads are unavailable')}</summary><p class="small">${tx('以下の内容をコピーして、拡張子.jsonのファイルに保存してください。','Copy the text below into a file with the .json extension.')}</p><textarea readonly aria-label="Save JSON">${escape(exportText)}</textarea></details><button data-action="cancel">${t('cancel')}</button></dialog>`:''}${confirmation?`<dialog aria-labelledby="confirm-title"><h2 id="confirm-title">${confirmation==='load'?t('load'):t('reset')}</h2><p>${t(confirmation==='load'?'loadConfirm':'resetConfirm')}</p><div class="buttons"><button data-action="cancel" autofocus>${t('cancel')}</button><button class="primary" data-action="confirm">${confirmation==='load'?t('load'):t('reset')}</button></div></dialog>`:''}`;
+  // Preserve focused time controls while the daily economic state rerenders.
+  if(app.querySelector('header')) {
     app.querySelector('.time').replaceWith(view.content.querySelector('.time'));
-    const play = app.querySelector('[data-action="play"]');
-    play.textContent = running ? 'Ⅱ ' + t('pause') : '▶ ' + t('play'); play.disabled = state.gameOver;
-    app.querySelector('#speed').value = String(speed);
+    app.querySelector('.brand').replaceWith(view.content.querySelector('.brand'));
+    const play=app.querySelector('[data-action="play"]'); play.textContent=running?'Ⅱ '+t('pause'):'▶ '+t('play'); play.disabled=state.gameOver||mapPlanning;
+    app.querySelector('#speed').value=String(speed); app.querySelector('#speed').setAttribute('aria-label',t('speed'));
+    app.querySelector('#language').value=getLanguage();
     app.querySelector('main').replaceWith(view.content.querySelector('main'));
-    app.querySelectorAll('dialog').forEach(dialog => dialog.remove());
-    app.append(...view.content.querySelectorAll('dialog'));
+    app.querySelectorAll('dialog').forEach(d=>d.remove()); app.append(...view.content.querySelectorAll('dialog'));
   } else app.append(view.content);
-  const dialog = app.querySelector('dialog');
-  if (dialog) {
-    dialog.showModal();
-    dialog.addEventListener('cancel', e => { e.preventDefault(); creating = false; editing = null; confirmation = null; pendingRestore = null; render(); focusRoute(); });
-  }
-  if (restoreFocus) {
-    const elements = [...(document.getElementById(restoreFocus.form)?.elements || [])];
-    const el = elements.find(e => e.name === restoreFocus.name && (e.type !== 'checkbox' || e.value === restoreFocus.value)); el?.focus();
-  }
+  document.documentElement.lang=getLanguage(); document.title='Sails & Flags — '+t('subtitle');
+  const dialog=app.querySelector('dialog');
+  if(dialog) { dialog.showModal(); dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialogs();render();focusRoute();}); }
+  if(restoreFocus) { const elements=[...(document.getElementById(restoreFocus.form)?.elements||[])]; const el=elements[restoreFocus.index]; if(el?.name===restoreFocus.name) el.focus(); }
   animateTime();
 }
-function readDraft(form) {
-  const data = new FormData(form);
-  return { shipId: data.get('ship') ?? draft.shipId, a: data.get('from'), b: data.get('to'), margin: data.has('margin') ? Number(data.get('margin')) : draft.margin, allowed: data.has('margin') ? data.getAll('good') : draft.allowed };
-}
-app.addEventListener('input', e => {
-  if (e.target.closest('#route-form')) {
-    draft = readDraft(document.querySelector('#route-form'));
-    const estimateEl = document.querySelector('#route-estimate');
-    if (estimateEl) estimateEl.textContent = estimate(state.ships.find(s => s.id === draft.shipId)?.type, draft.a, draft.b);
+function closeDialogs() { creating=false; editing=null; confirmation=null; pendingRestore=null; saves=null; if(exportURL)URL.revokeObjectURL(exportURL);exportURL=null;exportText=null; }
+function focusRoute() { document.querySelector('#route-panel-title')?.focus({preventScroll:true}); document.querySelector('#route-panel')?.scrollIntoView({block:'start'}); }
+function selectConnection(a,b) { pauseTime(); selectedCompetitor=null; if(mapPlanning) {for(const id of [a,b])appendStop(id);render();return;}  const r=findRoute(a,b); if(r) {selectedRoute=r.id;creating=false;render();focusRoute();} else {draft={...draft,a,b,extra:[]};creating=true;render();} }
+function readDraft(form) { const data=new FormData(form); return {shipId:data.get('ship')??draft.shipId,a:data.get('from'),b:data.get('to'),extra:data.getAll('extra'),margin:data.has('margin')?Number(data.get('margin')):draft.margin,allowed:data.has('margin')?data.getAll('good'):draft.allowed}; }
+app.addEventListener('input',e=>{if(e.target.closest('#route-form')) {draft=readDraft(e.target.form);const el=document.querySelector('#route-estimate');if(el) el.textContent=estimate(state.ships.find(s=>s.id===draft.shipId)?.type);}});
+app.addEventListener('change',async e=>{
+  if(e.target.id==='show-rivals'){pauseTime();showRivals=e.target.checked;if(!showRivals)selectedCompetitor=null;render();}
+  if(e.target.id==='speed') {const next=Number(e.target.value),days=advanceTime(performance.now());speed=next;if(days)render();}
+  if(e.target.id==='language') {pauseTime();setLanguage(e.target.value);try{localStorage.setItem('sails-and-flags.language',getLanguage());}catch{storageWarning=true;}render();}
+  if(e.target.id==='route-sort') {pauseTime();routeSort=e.target.value;render();}
+  if(e.target.id==='city-select') {pauseTime();selectedCity=e.target.value;render();}
+  if(e.target.closest('#route-form')&&['from','to','extra'].includes(e.target.name)) {draft=readDraft(e.target.form);render();}
+  if(e.target.id==='import-file') {
+    pauseTime();const file=e.target.files[0];if(!file)return;
+    try {if(file.size>5_000_000)throw new Error(tx('ファイルが大きすぎます。','File exceeds 5 MB.'));pendingRestore=deserialize(await file.text());confirmation='load';render();}
+    catch(error){notice(errorMessage(error));e.target.value='';}
   }
 });
-app.addEventListener('change', e => {
-  if (e.target.id === 'speed') { const nextSpeed = Number(e.target.value), days = advanceTime(performance.now()); speed = nextSpeed; if (days) render(); }
-  if (e.target.closest('#route-form') && ['from', 'to'].includes(e.target.name)) { draft = readDraft(e.target.form); render(); }
-});
-app.addEventListener('submit', e => {
-  e.preventDefault();
+app.addEventListener('submit',e=>{
+  e.preventDefault();pauseTime();
   try {
-    if (e.target.id === 'route-form') {
-      draft = readDraft(e.target);
-      const route = findRoute(draft.a, draft.b) ?? setRoute(state, draft.shipId, draft.a, draft.b, draft.allowed, draft.margin);
-      selectedRoute = route.id; creating = false;
-      notice('ルート情報を表示しました。船の追加はここから行えます。');
-    }
-    if (e.target.matches('.assign-form')) { assignShip(state, e.target.dataset.route, new FormData(e.target).get('ship')); notice('船を追加し、出港間隔を再調整しました。'); }
-    if (e.target.id === 'edit-form') { const data = new FormData(e.target); updateRoute(state, editing, data.getAll('good'), Number(data.get('margin'))); editing = null; }
-    render();
-    if (e.target.id === 'route-form') focusRoute();
-  } catch (error) { notice(error.message); }
+    const wasCreate=e.target.id==='route-form';
+    if(wasCreate) {draft=readDraft(e.target);const route=findCircuit(stops())??setCircuit(state,draft.shipId,stops(),draft.allowed,draft.margin);selectedRoute=route.id;creating=false;}
+    if(e.target.matches('.assign-form')) assignShip(state,e.target.dataset.route,new FormData(e.target).get('ship'));
+    if(e.target.id==='edit-form') {const data=new FormData(e.target);updateRoute(state,editing,data.getAll('good'),Number(data.get('margin')));editing=null;}
+    persist();render();if(wasCreate)focusRoute();
+  } catch(error){notice(errorMessage(error));}
 });
-app.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && drag) { cancelDrag(); return; }
-  if (!['Enter', ' '].includes(e.key)) return;
-  const control = e.target.closest('[data-city], .ship-marker');
-  if (control) { e.preventDefault(); control.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
-});
-app.addEventListener('click', e => {
-  if (suppressPortClick) { suppressPortClick = false; return; }
-  const port = e.target.closest('[data-city]'); if (port) { selectedCity = port.dataset.city; render(); return; }
-  const button = e.target.closest('[data-action]'); if (!button) return;
-  const { action, id } = button.dataset;
+app.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag){cancelDrag();return;}if(e.key==='Escape'&&mapPlanning){mapPlanning=false;plannedStops=[];render();return;}if(!['Enter',' '].includes(e.key))return;const control=e.target.closest('[data-city], .ship-marker, .rival-route, .rival-ship');if(control){e.preventDefault();control.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+app.addEventListener('click',e=>{
+  if(suppressPortClick){suppressPortClick=false;return;}
+  const port=e.target.closest('[data-city]');if(port){selectPort(port.dataset.city);return;}
+  const button=e.target.closest('[data-action]');if(!button)return;
+  const {action,id}=button.dataset;
+  if(action!=='play')pauseTime();
   try {
-    if (action === 'buy') buyShip(state, id);
-    if (action === 'license') buyLicense(state, id);
-    if (action === 'toggle') toggleRoute(state, id);
-    if (action === 'release') removeRoute(state, id);
-    if (action === 'release-ship') releaseShip(state, id);
-    if (action === 'select-route') { pauseTime(); selectedRoute = id; }
-    if (action === 'new-route') { pauseTime(); creating = true; }
-    if (action === 'edit') { pauseTime(); editing = id; }
-    if (action === 'cancel') { creating = false; editing = null; confirmation = null; pendingRestore = null; }
-    if (action === 'play') { advanceTime(performance.now()); running = !running && !state.gameOver; }
-    if (action === 'save') {
-      try { localStorage.setItem(SAVE_KEY, serialize(state)); notice(t('saved')); } catch { notice(t('storageError')); }
-    }
-    if (action === 'load') {
-      pauseTime();
-      let raw; try { raw = localStorage.getItem(SAVE_KEY) ?? localStorage.getItem(LEGACY_SAVE_KEY); } catch { throw new Error(t('storageError')); }
-      if (!raw) throw new Error(t('noSave'));
-      pendingRestore = deserialize(raw); pendingMigration = JSON.parse(raw).version === 1; confirmation = 'load';
-    }
-    if (action === 'reset') { pauseTime(); confirmation = 'reset'; }
-    if (action === 'confirm') {
-      if (confirmation === 'load') { state = pendingRestore; notice(pendingMigration ? '旧セーブを復元し、同じ経路を統合しました。最初のルートの積載条件を引き継ぎ、停止中の船がある経路は全体を停止しています。旧セーブは保持しています。' : t('loaded')); }
-      if (confirmation === 'reset') { state = createGame(); selectedCity = 'kingston'; }
-      clock.reset(); selectedRoute = null; creating = false; editing = null; confirmation = null; pendingRestore = null;
-    }
-    render();
-    if (['select-route', 'cancel'].includes(action)) focusRoute();
-  } catch (error) { notice(error.message); }
+    if(action==='plan-map' || action==='edit-map-stops'){pauseTime();plannedStops=action==='edit-map-stops'?[...stops()]:[];creating=false;mapPlanning=true;selectedCompetitor=null;}
+    if(action==='undo-map')plannedStops.pop();
+    if(action==='cancel-map'){mapPlanning=false;plannedStops=[];}
+    if(action==='finish-map' && plannedStops.length>=2){const ports=normalizeStops(plannedStops);draft={...draft,a:ports[0],b:ports[1],extra:ports.slice(2)};mapPlanning=false;creating=true;}
+    if(action==='select-competitor'){selectedCompetitor=Number(id);showRivals=true;}
+    if(action==='buy')buyShip(state,id);
+    if(action==='license')buyLicense(state,id);
+    if(action==='toggle')toggleRoute(state,id);
+    if(action==='release')removeRoute(state,id);
+    if(action==='release-ship')releaseShip(state,id);
+    if(action==='select-route'){selectedRoute=id;selectedCompetitor=null;}
+    if(action==='new-route'){mapPlanning=false;plannedStops=[];draft.extra=[];creating=true;}
+    if(action==='edit')editing=id;
+    if(action==='cancel')closeDialogs();
+    if(action==='play'){advanceTime(performance.now());running=!running&&!state.gameOver&&!mapPlanning;}
+    if(action==='save'&&persist('manual'))notice(t('saved'));
+    if(action==='load'){try{saves=listSaves(localStorage);}catch{throw new Error(t('storageError'));}}
+    if(action==='choose-save'){pendingRestore=saves.find(s=>s.slot===id&&s.valid)?.state;if(!pendingRestore)throw new Error(t('noSave'));saves=null;confirmation='load';}
+    if(action==='reset')confirmation='reset';
+    if(action==='confirm') {state=confirmation==='load'?pendingRestore:createGame();clock.reset();selectedRoute=null;selectedCompetitor=null;mapPlanning=false;plannedStops=[];selectedCity='kingston';closeDialogs();persist();notice(t('loaded'));}
+    if(action==='export') {exportText=serialize(state);exportURL=URL.createObjectURL(new Blob([exportText],{type:'application/json'}));}
+    if(action==='import'){document.querySelector('#import-file').click();return;}
+    if(['buy','license','toggle','release','release-ship'].includes(action))persist();
+    render();if(['select-route','cancel'].includes(action))focusRoute();
+    if(['plan-map','edit-map-stops'].includes(action))app.querySelector('.map-panel')?.scrollIntoView({block:'start'});
+    if(action==='select-competitor')app.querySelector(button.closest('.competitors')?'.map-panel':'.competitors')?.scrollIntoView({block:'start'});
+  }catch(error){notice(errorMessage(error));}
 });
 function mapPoint(svg, event) {
   const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
@@ -264,7 +237,7 @@ app.addEventListener('pointermove', event => {
   for (const [key, value] of Object.entries({ x1: city.x, y1: city.y, x2: target.x, y2: target.y })) line.setAttribute(key, value);
   line.removeAttribute('hidden');
   const label = drag.svg.querySelector('#route-drag-label');
-  label.textContent = b && b !== drag.a ? `${city.name} ⇄ ${CITIES[b].name} · ${findRoute(drag.a, b) ? 'ルート情報を表示' : '新規ルートを設定'}` : '終点都市で離してください';
+  label.textContent = b && b !== drag.a ? `${name(city)} ⇄ ${name(CITIES[b])} · ${findRoute(drag.a, b) ? tx('ルート情報を表示','Open route') : tx('新規ルートを設定','Create route')}` : tx('終点都市で離してください','Drop on another city');
   label.removeAttribute('hidden');
   drag.svg.querySelectorAll('[data-city]').forEach(port => port.classList.toggle('drop-target', port.dataset.city === b && b !== drag.a));
 });
@@ -275,32 +248,25 @@ app.addEventListener('pointerup', event => {
   if (moved) {
     suppressPortClick = true; setTimeout(() => { suppressPortClick = false; }, 0);
     if (b && b !== a) selectConnection(a, b);
-    else notice('異なる都市までドラッグして離すと、ルートを選択できます。');
-  } else { selectedCity = a; render(); }
+    else notice(tx('異なる都市までドラッグして離すと、ルートを選択できます。','Drag to a different city to select a route.'));
+  } else { suppressPortClick=true;setTimeout(()=>{suppressPortClick=false;},0);selectPort(a); }
 });
 app.addEventListener('pointercancel', cancelDrag);
 app.addEventListener('lostpointercapture', cancelDrag);
 
+
+
 function advanceTime(now) {
-  const days = clock.advance(now, running, speed, () => { tick(state); return !state.gameOver; });
-  if (state.gameOver) running = false;
+  const days=clock.advance(now,running,speed,()=>{tick(state);if(state.day%30===0||state.gameOver)persist();return !state.gameOver;});
+  if(state.gameOver)running=false;
   return days;
 }
 function pauseTime() {
-  running = false;
-  // Synchronize the timestamp without consuming paused wall time.
-  clock.advance(performance.now(), false, speed, () => {});
-  const button = app.querySelector('[data-action="play"]');
-  if (button) button.textContent = '▶ ' + t('play');
-  const status = app.querySelector('#time-status');
-  if (status) status.textContent = '一時停止中';
+  running=false;clock.advance(performance.now(),false,speed,()=>{});
+  const button=app.querySelector('[data-action="play"]');if(button)button.textContent='▶ '+t('play');
+  const status=app.querySelector('#time-status');if(status)status.textContent=tx('一時停止中','Paused');
 }
-app.addEventListener('focusin', e => { if (e.target.closest('form')) pauseTime(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelDrag(); pauseTime(); } });
-function frame(now) {
-  if (advanceTime(now)) render();
-  animateTime();
-  requestAnimationFrame(frame);
-}
-render();
-requestAnimationFrame(frame);
+app.addEventListener('focusin',e=>{if(e.target.closest('form'))pauseTime();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelDrag();pauseTime();}});
+function frame(now) {if(advanceTime(now))render();animateTime();requestAnimationFrame(frame);}
+render();requestAnimationFrame(frame);

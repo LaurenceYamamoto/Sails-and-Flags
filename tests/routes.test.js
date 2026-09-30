@@ -50,7 +50,7 @@ test('unused ownership has no port; purchase needs no license; reassignment need
 });
 test('two ships depart each end six days apart on a twelve-day cycle', () => {
   const { s, route } = fleet();
-  assert.deepEqual(routeSchedule(s, route), { halfCycle: 6, cycle: 12, interval: 6 });
+  assert.deepEqual(routeSchedule(s, route), { halfCycle: 6, cycle: 12, offsets: {kingston:0,havana:6}, stopOffsets:[0,6], interval: 6 });
   const events = runScheduled(s, 37);
   assert.deepEqual(events.filter(e => e.from === route.a).map(e => e.day), [1, 7, 13, 19, 25, 31, 37]);
   assert.deepEqual(events.filter(e => e.from === route.b).map(e => e.day), [7, 13, 19, 25, 31, 37]);
@@ -113,7 +113,7 @@ test('no-opportunity departures skip slots instead of bunching on a later day', 
 });
 test('v1 migration merges reversed routes without changing cash, cargo or voyages', () => {
   const old = JSON.parse(legacyRaw), s = deserialize(legacyRaw), route = s.routes[0];
-  assert.equal(s.version, 2); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
+  assert.equal(s.version, 3); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
   close(s.cash, old.cash); close(assets(s), assets(old));
   assert.deepEqual(s.totals, old.totals); assert.deepEqual(s.history, old.history);
   assert.deepEqual(route.allowed, old.routes[0].allowed); assert.equal(route.minMargin, old.routes[0].minMargin);
@@ -139,7 +139,7 @@ test('migration does not reactivate a partially paused legacy route', () => {
 test('a fleet waiting at the far end can resume tomorrow with evenly spaced slots', () => {
   const { s, route } = fleet();
   // Both ships have reached B before the user enables the route again.
-  for (const ship of s.ships) ship.nextFrom = route.b;
+  for (const ship of s.ships) { ship.nextFrom = route.b; ship.nextStop = 1; }
   toggleRoute(s, route.id); toggleRoute(s, route.id);
   assert.equal(nextDeparture(s, route, s.ships[0]), 1);
   assert.equal(nextDeparture(s, route, s.ships[1]), 7);

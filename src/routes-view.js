@@ -1,47 +1,28 @@
 import { CITIES, GOODS, SHIPS, distance } from './data.js';
-import { routeShips, routeSchedule, nextDeparture } from './engine.js';
-import { t } from './i18n.js';
-
+import { routeShips, routeSchedule, nextDeparture, routeLegs } from './engine.js';
+import { t, tx, nameOf as name } from './i18n.js';
+export const routeTitle = route => route.stops.map(id => name(CITIES[id])).join(route.stops.length === 2 ? ' ⇄ ' : ' → ');
 export function renderRoutes(state, { decimal, cash, signed, tone }) {
   if (!state.routes.length) return `<div class="empty-state"><span>⚓</span><p>${t('noRoute')}</p></div>`;
   return state.routes.map(route => {
-    const fleet = routeShips(state, route);
-    const { cycle, interval } = routeSchedule(state, route);
-    const available = state.ships.filter(ship => !ship.routeId && distance(route.a, route.b) <= SHIPS[ship.type].range);
-    const title = `${CITIES[route.a].name} ⇄ ${CITIES[route.b].name}`;
+    const fleet = routeShips(state, route), { cycle, interval } = routeSchedule(state, route);
+    const available = state.ships.filter(ship => !ship.routeId && routeLegs(route).every(([a,b])=>distance(a,b)<=SHIPS[ship.type].range));
+    const title = routeTitle(route);
     const shipRows = fleet.map(ship => {
-      const voyage = ship.voyage;
-      const departure = nextDeparture(state, route, ship);
-      const name = `${SHIPS[ship.type].name} #${ship.id.split('-')[1]}`;
-      const status = voyage
-        ? `${CITIES[voyage.to].name}へ · あと${voyage.remaining}日${!route.active ? ' · 到着後に停止' : ''}`
-        : !route.active ? t('stopped') : ship.status === 'waiting' ? t('wait') : '出港間隔を調整中';
-      const next = departure === null ? '' : `${CITIES[voyage?.to ?? ship.nextFrom].name}発：${departure}日目（あと${departure - state.day}日）`;
-      return `<li class="fleet-row">
-        <div class="section-top"><strong>${name}</strong><button data-action="release-ship" data-id="${ship.id}" aria-label="${name}をルートから外す" ${voyage || state.gameOver ? 'disabled' : ''}>配置解除</button></div>
-        <p class="small">${status}</p><p class="small muted">${next}</p>
-        <div class="progress"><span data-voyage-progress="${ship.id}" style="width:${voyage ? 100 * (voyage.total - voyage.remaining) / voyage.total : 0}%"></span></div>
-        <p class="small">${t('cargo')}：${ship.cargo.length ? ship.cargo.map(c => `${GOODS.find(g => g.id === c.good).name} ${c.quantity}`).join(' / ') : t('noCargo')}</p>
-      </li>`;
+      const voyage = ship.voyage, departure = nextDeparture(state, route, ship);
+      const label = `${name(SHIPS[ship.type])} #${ship.id.split('-')[1]}`;
+      const status = voyage ? `${name(CITIES[voyage.to])} · ${voyage.remaining} ${t('dayUnit')}${!route.active ? ' · '+t('stopping') : ''}` : !route.active ? t('stopped') : ship.status === 'waiting' ? t('wait') : tx('出港間隔を調整中','Waiting for departure slot');
+      const next = departure === null ? '' : `${name(CITIES[voyage?.to ?? ship.nextFrom])} · ${tx('出港','Departure')}: ${tx('経過','Day')} ${departure} (+${departure-state.day})`;
+      return `<li class="fleet-row"><div class="section-top"><strong>${label}</strong><button data-action="release-ship" data-id="${ship.id}" aria-label="${label} · ${t('release')}" ${voyage || state.gameOver ? 'disabled' : ''}>${t('release')}</button></div><p class="small">${status}</p><p class="small muted">${next}</p><div class="progress"><span data-voyage-progress="${ship.id}" style="width:${voyage ? 100*(voyage.total-voyage.remaining)/voyage.total : 0}%"></span></div><p class="small">${t('cargo')}: ${ship.cargo.length ? ship.cargo.map(c=>`${name(GOODS.find(g=>g.id===c.good))} ${c.quantity}`).join(' / ') : t('noCargo')}</p></li>`;
     }).join('');
-    return `<article class="route-card" aria-label="${title}">
-      <div class="section-top"><h3>${title}</h3><span class="badge ${route.active ? 'live' : ''}">${route.active ? '運航中' : '停止予約・停止'}</span></div>
-      <p class="small muted">配置 ${fleet.length}隻 · 総積載量 ${fleet.reduce((sum, ship) => sum + SHIPS[ship.type].capacity, 0)} · 各港から約${decimal(interval)}日間隔</p>
-      <div class="route-stats">
-        <div><span>${t('profit')}</span><strong class="${tone(route.profit)}">${signed(route.profit)}</strong></div>
-        <div><span>${t('perDay')}</span><strong class="${tone(route.profit)}">${signed(route.profit / Math.max(1, state.day - route.started))}</strong></div>
-        <div><span>配船周期</span><strong>${cycle}日</strong></div>
-        <div><span>累計利益率</span><strong class="${tone(route.profit)}">${route.expenses > 0 ? decimal(route.profit / route.expenses * 100) + '%' : '—'}</strong></div>
-      </div>
-      <div class="forecast"><span>${t('forecast')} <b class="${tone(route.lastForecast)}">${signed(route.lastForecast)}</b></span><span>${t('actual')} <b class="${tone(route.lastActual || 0)}">${route.lastActual === null ? t('notArrived') : signed(route.lastActual)}</b></span></div>
-      <p class="small muted">共通の積載条件：最低価格差 ${route.minMargin}% · ${route.allowed.map(id => GOODS.find(g => g.id === id).name).join('・')} · 到着合計 ${route.deliveries}回</p>
-      <div class="buttons"><button data-action="toggle" data-id="${route.id}" ${state.gameOver ? 'disabled' : ''}>${route.active ? t('stop') : t('resume')}</button><button data-action="edit" data-id="${route.id}" ${state.gameOver ? 'disabled' : ''}>${t('edit')}</button><button data-action="release" data-id="${route.id}" ${fleet.some(ship => ship.voyage) || state.gameOver ? 'disabled' : ''}>ルートを解除</button></div>
-      <form class="assign-form" id="assign-${route.id}" data-route="${route.id}">
-        <label>未使用船を追加<select name="ship" aria-label="${title}に追加する船" required ${available.length ? '' : 'disabled'}>${available.length ? available.map(ship => `<option value="${ship.id}">${SHIPS[ship.type].name} #${ship.id.split('-')[1]}</option>`).join('') : '<option value="">配置可能な未使用船がありません</option>'}</select></label>
-        <button ${available.length && !state.gameOver ? '' : 'disabled'}>このルートに船を追加</button>
-      </form>
-      <ul class="fleet-list">${shipRows}</ul>
-      <p class="small muted">船の増減・再開時に時刻表を再調整。航行中の船はそのまま到着します。速い船は出港まで待機し、商機のない便は見送ります。船の維持費合計 ${cash(fleet.reduce((sum, ship) => sum + SHIPS[ship.type].daily, 0))} / 日。</p>
-    </article>`;
+    return `<article class="route-card" aria-label="${title}"><div class="section-top"><h3>${title}${route.stops.length>2 ? ' ↻' : ''}</h3><span class="badge ${route.active?'live':''}">${route.active?tx('運航中','Active'):t('stopped')}</span></div>
+      <p class="small muted">${fleet.length} ${t('ships')} · ${t('capacity')} ${fleet.reduce((n,v)=>n+SHIPS[v.type].capacity,0)} · ${tx('各港から約','Departure interval: about')} ${decimal(interval)} ${t('dayUnit')}</p>
+      <div class="route-stats"><div><span>${t('profit')}</span><strong class="${tone(route.profit)}">${signed(route.profit)}</strong></div><div><span>${t('perDay')}</span><strong class="${tone(route.profit)}">${signed(route.profit/Math.max(1,state.day-route.started))}</strong></div><div><span>${tx('配船周期','Service cycle')}</span><strong>${cycle} ${t('dayUnit')}</strong></div><div><span>${tx('累計利益率','Profit / expenses')}</span><strong>${route.expenses?decimal(route.profit/route.expenses*100)+'%':'—'}</strong></div></div>
+      <div class="forecast"><span>${t('forecast')} <b class="${tone(route.lastForecast)}">${signed(route.lastForecast)}</b></span><span>${t('actual')} <b class="${tone(route.lastActual||0)}">${route.lastActual===null?t('notArrived'):signed(route.lastActual)}</b></span></div>
+      ${route.lastActual < 0 ? `<p class="warning" role="status">${tx('直近の航海で赤字が発生しました。市場価格と積載条件を確認してください。','The latest voyage made a loss. Check market prices and cargo policy.')}</p>`:''}
+      <p class="small muted">${t('margin')}: ${route.minMargin}% · ${route.allowed.map(id=>name(GOODS.find(g=>g.id===id))).join(' / ')} · ${tx('到着合計','Arrivals')} ${route.deliveries}</p>
+      <div class="buttons"><button data-action="toggle" data-id="${route.id}" ${state.gameOver?'disabled':''}>${route.active?t('stop'):t('resume')}</button><button data-action="edit" data-id="${route.id}" ${state.gameOver?'disabled':''}>${t('edit')}</button><button data-action="release" data-id="${route.id}" ${fleet.some(v=>v.voyage)||state.gameOver?'disabled':''}>${tx('ルートを解除','Remove route')}</button></div>
+      <form class="assign-form" id="assign-${route.id}" data-route="${route.id}"><label>${tx('未使用船を追加','Add an idle ship')}<select name="ship" aria-label="${title} · ${t('ships')}" required ${available.length?'':'disabled'}>${available.length?available.map(v=>`<option value="${v.id}">${name(SHIPS[v.type])} #${v.id.split('-')[1]}</option>`).join(''):`<option value="">${t('noShip')}</option>`}</select></label><button ${available.length&&!state.gameOver?'':'disabled'}>${tx('このルートに船を追加','Add ship to route')}</button></form>
+      <ul class="fleet-list">${shipRows}</ul><p class="small muted">${tx('増減・再開時に出港間隔を調整します。各港で全量売却し、翌日以降に次区間向けに再購入します。商機のない便は見送ります。','Fleet changes and resuming service rebalance departure slots. All cargo is sold at each port; the next leg purchases a new load on a later day. Unprofitable departures may be skipped.')} ${t('upkeep')} ${cash(fleet.reduce((n,v)=>n+SHIPS[v.type].daily,0))} ${t('daily')}</p></article>`;
   }).join('');
 }

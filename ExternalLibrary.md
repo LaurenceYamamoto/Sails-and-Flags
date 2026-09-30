@@ -1,6 +1,6 @@
 # 外部ライブラリ・ライセンス一覧
 
-対象：Sails & Flags 0.3.0（2026-09-29）。連続再生・都市間ドラッグの変更でも外部ライブラリは追加していません。ブラウザー標準のrequestAnimationFrame・Pointer Events・DOMPointを使用します。
+対象：Sails & Flags 0.4.2（2026-09-30）。外部ライブラリは追加せず、地形データとしてNatural Earthを採用しました。
 
 ## アプリケーションの依存ライブラリ
 
@@ -9,10 +9,11 @@
 | 区分 | 使用内容 | ライセンス・配布上の扱い |
 | --- | --- | --- |
 | 実行時ライブラリ | なし | 第三者ライブラリの同梱なし |
-| UI / 地図 | 標準DOM・SVG・CSS、独自作成の海域略図 | 地図データ、画像素材、アイコンパッケージの転載なし |
+| UI | 標準DOM・SVG・CSS | UIライブラリ、画像・アイコンパッケージの同梱なし |
+| 地形データ | Natural Earth 1:50m Land v5.1.2。大西洋地域をクリップしたassets/maps/land.jsを同梱 | パブリックドメイン。[利用条件](https://www.naturalearthdata.com/about/terms-of-use/)・[固定版データ](https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_50m_land.geojson)。出典・加工手順・ハッシュは[assets/maps/README.md](assets/maps/README.md)と生成ファイルに記録 |
 | フォント | OSにインストール済みのGeorgia、Yu Gothic UI、Meiryo等をCSSで指定 | フォントファイルを取得・同梱・再配布しない |
 | 絵文字・記号 | Unicode文字をブラウザで表示 | 外部の画像アセットを同梱しない |
-| 保存 | ブラウザ標準localStorage / JSON | 追加ライブラリなし |
+| 保存 | ブラウザ標準localStorage / JSON / Blob / File / URL | 追加ライブラリなし |
 
 ## 開発・検証環境
 

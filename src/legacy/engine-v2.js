@@ -1,12 +1,5 @@
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v2.js';
-export const SAVE_VERSION = 3;
-export const MAX_STOPS = 12;
-// The closing return is implicit; accept it explicitly in route input as well.
-export function normalizeStops(stops) {
-  return Array.isArray(stops) && stops.length > 1 && stops.at(-1) === stops[0] ? stops.slice(0,-1) : stops;
-}
-const stopIndex = (route, ship) => ship.nextStop ?? route.stops.indexOf(ship.nextFrom);
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v2.js';
+export const SAVE_VERSION = 2;
 const finite = n => typeof n === 'number' && Number.isFinite(n);
 const check = (ok, message) => { if (!ok) throw new Error(message); };
 export function price(good, stock) { return GOODS.find(g => g.id === good).base * (0.35 + 180 / (stock + 60)); }
@@ -24,9 +17,7 @@ export function createGame(seed = 1700) {
   let rng = seed >>> 0;
   const random = () => { rng = (Math.imul(rng, 1664525) + 1013904223) >>> 0; return rng / 4294967296; };
   const markets = Object.fromEntries(Object.entries(CITIES).map(([id, c]) => [id, Object.fromEntries(GOODS.map((g, i) => [g.id, { stock: c.stocks[i] * (0.98 + random() * 0.04), production: c.supply[i], demand: c.demand[i] }]))]));
-  const state = { version: SAVE_VERSION, seed: seed >>> 0, rng, day: 0, cash: 5000, initialCash: 5000, licenses: ['england'], ships: [], routes: [], markets, ledger: [], totals: {}, history: [{ day: 0, cash: 5000, assets: 5000 }], nextId: 1, gameOver: false, competitors: [] };
-  state.competitors = createCompetitors(markets);
-  return state;
+  return { version: SAVE_VERSION, seed: seed >>> 0, rng, day: 0, cash: 5000, initialCash: 5000, licenses: ['england'], ships: [], routes: [], markets, ledger: [], totals: {}, history: [{ day: 0, cash: 5000, assets: 5000 }], nextId: 1, gameOver: false };
 }
 function entry(s, category, amount, routeId = null, details = {}) {
   s.cash += amount;
@@ -58,68 +49,56 @@ export function buyShip(s, type) {
   return ship;
 }
 export function setRoute(s, shipId, a, b, allowed = GOODS.map(g => g.id), minMargin = 10) {
-  return setCircuit(s, shipId, [a,b], allowed, minMargin);
-}
-export function setCircuit(s, shipId, stops, allowed = GOODS.map(g => g.id), minMargin = 10) {
   playing(s);
-  stops = normalizeStops(stops);
   const ship = s.ships.find(v => v.id === shipId);
   check(ship && !ship.routeId && !ship.voyage, '未使用の船を選んでください。');
-  validateStops(stops);
-  const [a,b] = stops;
-  check(stops.every(c => s.licenses.includes(CITIES[c].nation)), '全寄港地の交易免許が必要です。');
-  check(routeLegs({stops}).every(([from,to])=>distance(from,to)<=SHIPS[ship.type].range), 'この船の航続距離を超えています。');
+  check(Object.hasOwn(CITIES, a) && Object.hasOwn(CITIES, b) && a !== b, '異なる2港を選んでください。');
+  check([a, b].every(c => s.licenses.includes(CITIES[c].nation)), '両方の港の交易免許が必要です。');
+  check(distance(a, b) <= SHIPS[ship.type].range, 'この船の航続距離を超えています。');
   validatePolicy(allowed, minMargin);
-  // Rotations share a service; reversing a circuit with 3+ ports changes its direction.
-  let route = s.routes.find(r => circuitKey(r.stops) === circuitKey(stops));
+  // Both directions belong to the same service. Existing policy always wins.
+  let route = s.routes.find(r => routeKey(r.a, r.b) === routeKey(a, b));
   if (!route) {
-    route = { id: `route-${s.nextId++}`, a, b, stops:[...stops], allowed: [...allowed], minMargin, active: true, started: s.day, profit: 0, expenses: 0, revenue: 0, deliveries: 0, lastForecast: 0, lastActual: null, scheduleEpoch: s.day + 1 };
+    route = { id: `route-${s.nextId++}`, a, b, allowed: [...allowed], minMargin, active: true, started: s.day, profit: 0, expenses: 0, revenue: 0, deliveries: 0, lastForecast: 0, lastActual: null, scheduleEpoch: s.day + 1 };
     s.routes.push(route);
   }
   assignShip(s, route.id, ship.id);
   return route;
 }
-
-function validateStops(stops) { check(Array.isArray(stops) && stops.length >= 2 && stops.length <= MAX_STOPS && stops.every((c,i)=>Object.hasOwn(CITIES,c) && c!==stops[(i+1)%stops.length]), '寄港順は2～12回で指定し、同じ港を連続させないでください。'); }
-export function circuitKey(stops) { stops=normalizeStops(stops); return stops.map((_,i)=>[...stops.slice(i),...stops.slice(0,i)].join(':')).sort()[0]; }
-export function routeLegs(route) { const stops=normalizeStops(route.stops ?? [route.a,route.b]); return stops.map((from,i)=>[from,stops[(i+1)%stops.length]]); }
-export function nextPort(route, from, index=route.stops.indexOf(from)) { return route.stops[(index+1)%route.stops.length]; }
+const routeKey = (a, b) => [a, b].sort().join(':');
 export function routeShips(s, route) { return s.ships.filter(v => v.routeId === route.id); }
 export function routeSchedule(s, route) {
   const fleet = routeShips(s, route);
-  let cycle=0; const offsets={}, stopOffsets=[];
-  for (const [from,to] of routeLegs(route)) { stopOffsets.push(cycle); offsets[from]??=cycle; cycle += Math.max(...fleet.map(v=>daysFor(v.type,from,to)))+1; }
-  return { halfCycle: stopOffsets[1], cycle, offsets, stopOffsets, interval: cycle / fleet.length };
+  const halfCycle = Math.max(...fleet.map(v => daysFor(v.type, route.a, route.b))) + 1;
+  return { halfCycle, cycle: halfCycle * 2, interval: halfCycle * 2 / fleet.length };
 }
 // One repeating slot per ship at each end. Floor-spaced slots differ by at most
 // one day; faster ships wait for their slot rather than catching the slower ones.
 export function nextDeparture(s, route, ship, notBefore = s.day + 1) {
   if (!route.active) return null;
-  const fleet = routeShips(s, route), { cycle, stopOffsets } = routeSchedule(s, route);
-  const index = (stopIndex(route,ship)+(ship.voyage?1:0))%route.stops.length;
+  const fleet = routeShips(s, route), { cycle, halfCycle } = routeSchedule(s, route);
+  const from = ship.voyage?.to ?? ship.nextFrom;
   const ready = ship.voyage ? s.day + ship.voyage.remaining + 1 : ship.readyDay;
   const phase = Math.floor(fleet.indexOf(ship) * cycle / fleet.length);
-  const first = route.scheduleEpoch + phase + stopOffsets[index];
+  const first = route.scheduleEpoch + phase + (from === route.b ? halfCycle : 0);
   return first + Math.max(0, Math.ceil((Math.max(notBefore, ready) - first) / cycle)) * cycle;
 }
 function reschedule(s, route) {
   const first = routeShips(s, route)[0];
   // Anchor the timetable at the leading ship's next leg. A fleet waiting at B
   // can begin tomorrow instead of wasting an additional half-cycle at startup.
-  route.scheduleEpoch = s.day + 1 - routeSchedule(s, route).stopOffsets[stopIndex(route,first)];
+  route.scheduleEpoch = s.day + 1 - (first.nextFrom === route.b ? routeSchedule(s, route).halfCycle : 0);
 }
 export function assignShip(s, routeId, shipId) {
   playing(s);
   const route = s.routes.find(r => r.id === routeId), ship = s.ships.find(v => v.id === shipId);
   check(route && ship && ship.routeId === null && !ship.voyage, 'ルートと未使用の船を選んでください。');
-  check(routeLegs(route).every(([a,b])=>distance(a,b)<=SHIPS[ship.type].range), 'この船の航続距離を超えています。');
+  check(distance(route.a, route.b) <= SHIPS[ship.type].range, 'この船の航続距離を超えています。');
   ship.routeId = route.id; ship.nextFrom = route.a; ship.readyDay = s.day + 1; ship.status = 'ready';
-  ship.nextStop = 0;
   reschedule(s, route);
 }
 function unassign(ship) {
   ship.routeId = null; ship.nextFrom = null; ship.readyDay = 0; ship.status = 'idle';
-  delete ship.nextStop;
 }
 export function releaseShip(s, shipId) {
   playing(s);
@@ -210,15 +189,14 @@ export function optimizeLoad(s, from, to, capacity, budget, allowed, minMargin =
   search(0, capacity, 0, 0, []); return best;
 }
 function depart(s, ship, route) {
-  const from = ship.nextFrom, index=stopIndex(route,ship), to = nextPort(route, from, index);
+  const from = ship.nextFrom, to = from === route.a ? route.b : route.a;
   const days = daysFor(ship.type, from, to);
   const daily = s.ships.reduce((sum, v) => sum + SHIPS[v.type].daily, 0) + s.licenses.reduce((sum, n) => sum + NATIONS[n].daily, 0);
   const reserve = daily * (days + 1);
   const load = optimizeLoad(s, from, to, SHIPS[ship.type].capacity, Math.max(0, s.cash - reserve), route.allowed, route.minMargin);
   if (!load.cargo.length || load.profit <= SHIPS[ship.type].daily * days) {
-    const futureLegs = routeLegs(route).filter((_,i)=>i!==index);
-    const profitableLater = futureLegs.some(([a,b])=>optimizeLoad(s,a,b,SHIPS[ship.type].capacity,Math.max(0,s.cash-reserve*2),route.allowed,route.minMargin).profit > SHIPS[ship.type].daily * (days+daysFor(ship.type,a,b)));
-    if (!profitableLater) { ship.status = 'waiting'; return; }
+    const reverse = optimizeLoad(s, to, from, SHIPS[ship.type].capacity, Math.max(0, s.cash - reserve * 2), route.allowed, route.minMargin);
+    if (reverse.profit <= SHIPS[ship.type].daily * days * 2) { ship.status = 'waiting'; return; }
     load.cargo = []; load.cost = 0; load.profit = 0;
   }
   ship.cargo = load.cargo.map(item => ({ ...item, ...trade(s, from, item.good, item.quantity, 'buy', route.id) }));
@@ -226,10 +204,10 @@ function depart(s, ship, route) {
   ship.voyage = { from, to, remaining: days, total: days, cost: load.cost, forecast: route.lastForecast };
   ship.status = ship.cargo.length ? 'sailing' : 'empty';
 }
-export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
+export function tick(s) {
   if (s.gameOver) return;
   s.day++;
-  if (updateMarkets) for (const city of Object.values(s.markets)) for (const [good, m] of Object.entries(city)) {
+  for (const city of Object.values(s.markets)) for (const [good, m] of Object.entries(city)) {
     m.stock += m.production;
     const base = GOODS.find(g => g.id === good).base;
     const consumption = m.demand * Math.max(0.25, Math.min(3, base / price(good, m.stock)));
@@ -249,15 +227,10 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
         let revenue = 0;
         for (const item of ship.cargo) revenue += trade(s, ship.voyage.to, item.good, item.quantity, 'sell', route.id).total;
         route.lastActual = revenue - ship.voyage.cost - ship.voyage.total * SHIPS[ship.type].daily;
-        ship.nextStop = (stopIndex(route,ship)+1)%route.stops.length;
         route.deliveries++; ship.voyages++; ship.nextFrom = ship.voyage.to; ship.voyage = null; ship.cargo = []; ship.status = 'ready'; ship.readyDay = s.day + 1;
       }
       // One day in port after arrival. No duplicate sale/departure in the same tick.
     } else if (route.active && nextDeparture(s, route, ship, s.day) === s.day) depart(s, ship, route);
-  }
-  if (runCompetitors) for (const competitor of s.competitors ?? []) {
-    competitor.markets = s.markets;
-    tick(competitor, {updateMarkets:false,runCompetitors:false});
   }
   s.history.push({ day: s.day, cash: s.cash, assets: assets(s) });
   if (s.history.length > 365) s.history.shift();
@@ -266,32 +239,15 @@ export function assets(s) {
   return s.cash + s.ships.reduce((sum, ship) => sum + SHIPS[ship.type].price + ship.cargo.reduce((v, c) => v + c.total, 0), 0);
 }
 export function operatingProfit(s) { return ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily'].reduce((sum, key) => sum + (s.totals[key] || 0), 0); }
-function createCompetitors(markets) {
-  return [['Channel Company',['nantes','amsterdam']],['Antilles Company',['santiago','sanjuan']]].map(([name,stops])=>{
-    const company={version:SAVE_VERSION,name,seed:1700,rng:1700,day:0,cash:5000,initialCash:5000,licenses:[...new Set(stops.map(c=>CITIES[c].nation))],ships:[],routes:[],markets,ledger:[],totals:{},history:[],nextId:1,gameOver:false,competitors:[]};
-    const ship=buyShip(company,'sloop'); setCircuit(company,ship.id,stops);
-    return company;
-  });
-}
-export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='competitors' ? value.map(({markets,...company})=>company) : value); }
-export function deserialize(raw, nested = false) {
+export function serialize(s) { return JSON.stringify(s); }
+export function deserialize(raw) {
   check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2].includes(s.version) && !nested) {
-    const old=readLegacy(raw), expanded=createGame(old.seed);
-    for (const [city,goods] of Object.entries(old.markets)) Object.assign(expanded.markets[city],goods);
-    const migrated={...old,version:SAVE_VERSION,markets:expanded.markets,competitors:expanded.competitors};
-    for (const r of migrated.routes) r.stops=[r.a,r.b];
-    for (const c of migrated.competitors) { c.day=migrated.day; for(const ship of c.ships) ship.readyDay=c.day+1; for(const route of c.routes) {route.started=c.day;route.scheduleEpoch=c.day+1;} }
-    return deserialize(serialize(migrated));
-  }
-  check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
-
+  check(s && [1, SAVE_VERSION].includes(s.version), '対応していないセーブ形式です。');
+  const legacy = s.version === 1;
   check(Number.isSafeInteger(s.day) && s.day >= 0 && finite(s.cash) && s.initialCash === 5000 && typeof s.gameOver === 'boolean' && s.gameOver === (s.cash < 0), '会社情報が不正です。');
   check(Number.isSafeInteger(s.nextId) && s.nextId > 0 && Number.isInteger(s.seed) && Number.isInteger(s.rng), '識別子・シードが不正です。');
   check(Array.isArray(s.licenses) && new Set(s.licenses).size === s.licenses.length && s.licenses.every(n => Object.hasOwn(NATIONS, n)), '免許が不正です。');
-  check(s.markets && Object.keys(s.markets).length === Object.keys(CITIES).length && Object.keys(s.markets).every(id => Object.hasOwn(CITIES,id)), '市場データが不正です。');
-  for (const market of Object.values(s.markets)) check(market && Object.keys(market).length===GOODS.length && Object.keys(market).every(id=>GOODS.some(g=>g.id===id)), '市場データが不正です。');
   for (const id of Object.keys(CITIES)) for (const g of GOODS) {
     const m = s.markets?.[id]?.[g.id]; check(m && ['stock', 'production', 'demand'].every(k => finite(m[k]) && m[k] >= 0), '市場データが不正です。');
   }
@@ -300,40 +256,70 @@ export function deserialize(raw, nested = false) {
   check(ids.every(id => /^(ship|route)-[1-9]\d*$/.test(id) && Number(id.split('-')[1]) < s.nextId) && new Set(ids).size === ids.length, '識別子が重複または不正です。');
   for (const r of s.routes) {
     validatePolicy(r.allowed, r.minMargin);
-    validateStops(r.stops);
-    check(r.a===r.stops[0] && r.b===r.stops[1] && r.stops.every(c => s.licenses.includes(CITIES[c].nation)), '航路の港・免許が不正です。');
+    check(Object.hasOwn(CITIES, r.a) && Object.hasOwn(CITIES, r.b) && r.a !== r.b && [r.a, r.b].every(c => s.licenses.includes(CITIES[c].nation)), '航路の港・免許が不正です。');
     check(typeof r.active === 'boolean' && ['profit', 'expenses', 'revenue', 'lastForecast', 'started', 'deliveries'].every(k => finite(r[k])) && (r.lastActual === null || finite(r.lastActual)), '航路の収支が不正です。');
-    const fleet = routeShips(s, r);
-    check(fleet.length > 0 && fleet.every(v => SHIPS[v.type] && routeLegs(r).every(([a,b])=>distance(a,b) <= SHIPS[v.type].range)), '航路と船の対応が不正です。');
-    check(!Object.hasOwn(r, 'shipId') && Number.isSafeInteger(r.scheduleEpoch) && r.scheduleEpoch >= 1 - Math.max(...routeSchedule(s, r).stopOffsets) && r.scheduleEpoch <= s.day + 1, '運航時刻表が不正です。');
+    if (legacy) {
+      check(['ready', 'waiting', 'sailing', 'empty'].includes(r.status), '航路の状態が不正です。');
+      const ship = s.ships.find(v => v.id === r.shipId);
+      check(ship && ship.routeId === r.id && SHIPS[ship.type] && distance(r.a, r.b) <= SHIPS[ship.type].range, '航路と船の対応が不正です。');
+    } else {
+      const fleet = routeShips(s, r);
+      check(fleet.length > 0 && fleet.every(v => SHIPS[v.type] && distance(r.a, r.b) <= SHIPS[v.type].range), '航路と船の対応が不正です。');
+      check(!Object.hasOwn(r, 'shipId') && Number.isSafeInteger(r.scheduleEpoch) && r.scheduleEpoch >= 1 - routeSchedule(s, r).halfCycle && r.scheduleEpoch <= s.day + 1, '運航時刻表が不正です。');
+    }
   }
-  check(new Set(s.routes.map(r => circuitKey(r.stops))).size === s.routes.length, '同じ経路が重複しています。');
+  if (!legacy) check(new Set(s.routes.map(r => routeKey(r.a, r.b))).size === s.routes.length, '同じ経路が重複しています。');
   for (const v of s.ships) {
     check(Object.hasOwn(SHIPS, v.type) && Array.isArray(v.cargo) && Number.isInteger(v.voyages) && v.voyages >= 0, '船が不正です。');
     const r = s.routes.find(r => r.id === v.routeId);
-    check(!Object.hasOwn(v, 'city') && Number.isSafeInteger(v.readyDay) && v.readyDay >= 0 && v.readyDay <= s.day + 1, '船の運航状態が不正です。');
-    check(v.routeId === null ? v.nextFrom === null && v.status === 'idle' && v.readyDay === 0 : r && r.stops.includes(v.nextFrom) && ['ready', 'waiting', 'sailing', 'empty'].includes(v.status), '船の割当が不正です。');
-    // Old v3 saves had unique ports, so their cursor is unambiguous. Revisited
-    // ports require an explicit cursor; never guess which occurrence was saved.
-    check(v.nextStop === undefined ? !r || new Set(r.stops).size===r.stops.length : r && Number.isInteger(v.nextStop) && v.nextStop>=0 && v.nextStop<r.stops.length && r.stops[v.nextStop]===v.nextFrom, '船の寄港順が不正です。');
-    check(v.voyage ? ['sailing', 'empty'].includes(v.status) : !['sailing', 'empty'].includes(v.status), '船の航行状態が不正です。');
+    if (legacy) {
+      check(Object.hasOwn(CITIES, v.city) && (v.routeId === null || (r && r.shipId === v.id && [r.a, r.b].includes(v.city))), '船の割当が不正です。');
+    } else {
+      check(!Object.hasOwn(v, 'city') && Number.isSafeInteger(v.readyDay) && v.readyDay >= 0 && v.readyDay <= s.day + 1, '船の運航状態が不正です。');
+      check(v.routeId === null ? v.nextFrom === null && v.status === 'idle' && v.readyDay === 0 : r && [r.a, r.b].includes(v.nextFrom) && ['ready', 'waiting', 'sailing', 'empty'].includes(v.status), '船の割当が不正です。');
+      check(v.voyage ? ['sailing', 'empty'].includes(v.status) : !['sailing', 'empty'].includes(v.status), '船の航行状態が不正です。');
+    }
     check(v.cargo.every(c => GOODS.some(g => g.id === c.good) && finite(c.quantity) && c.quantity > 0 && finite(c.total) && c.total >= 0) && new Set(v.cargo.map(c => c.good)).size === v.cargo.length && v.cargo.reduce((sum, c) => sum + c.quantity, 0) <= SHIPS[v.type].capacity + 1e-8, '積み荷が不正です。');
     if (v.voyage) {
       const w = v.voyage;
-      check(r && w.from === v.nextFrom && nextPort(r,w.from,stopIndex(r,v))===w.to && w.total === daysFor(v.type, w.from, w.to) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast), '航海データが不正です。');
+      check(r && w.from === (legacy ? v.city : v.nextFrom) && [r.a, r.b].includes(w.to) && w.from !== w.to && w.total === daysFor(v.type, w.from, w.to) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast), '航海データが不正です。');
     } else check(v.cargo.length === 0, '停泊中の積み荷が不正です。');
   }
   const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase'];
   check(s.totals && Object.entries(s.totals).every(([k, v]) => categories.includes(k) && finite(v)), '会計集計が不正です。');
   check(Math.abs(s.initialCash + Object.values(s.totals).reduce((a, b) => a + b, 0) - s.cash) < 0.001, '会計残高が一致しません。');
   check(Array.isArray(s.ledger) && s.ledger.length <= 600 && s.ledger.every(e => categories.includes(e.category) && finite(e.amount) && Number.isInteger(e.day) && e.day >= 0 && e.day <= s.day && (e.routeId === null || /^route-[1-9]\d*$/.test(e.routeId)) && (!e.city || Object.hasOwn(CITIES, e.city)) && (!e.good || GOODS.some(g => g.id === e.good)) && (e.quantity === undefined || finite(e.quantity) && e.quantity >= 0)), '取引履歴が不正です。');
-  check(s.ledger.every(e => (e.shipId===undefined || typeof e.shipId==='string' && /^ship-[1-9]\d*$/.test(e.shipId)) && (e.nation===undefined || Object.hasOwn(NATIONS,e.nation))), '取引履歴が不正です。');
   check(Array.isArray(s.history) && s.history.length <= 365 && s.history.every(h => finite(h.cash) && finite(h.assets) && Number.isInteger(h.day) && h.day >= 0 && h.day <= s.day), '資産履歴が不正です。');
+  if (legacy) return deserialize(serialize(migrateV1(s)));
+  return s;
+}
 
-  check(Array.isArray(s.competitors) && s.competitors.length <= 2 && (!nested || s.competitors.length===0), '競合データが不正です。');
-  for (let i=0;i<s.competitors.length;i++) {
-    const c=s.competitors[i]; check(typeof c.name==='string' && c.name.length<=80 && c.day<=s.day && (s.gameOver || c.gameOver || c.day===s.day), '競合情報が不正です。');
-    c.markets=s.markets; s.competitors[i]=deserialize(JSON.stringify(c),true); s.competitors[i].markets=s.markets;
+function migrateV1(s) {
+  const grouped = new Map(), idMap = new Map();
+  // Creation order is the stable tie-breaker for conflicting legacy policies.
+  for (const old of s.routes) {
+    const key = routeKey(old.a, old.b);
+    let route = grouped.get(key);
+    if (!route) {
+      route = { ...old, scheduleEpoch: s.day + 1 };
+      delete route.shipId; delete route.status;
+      grouped.set(key, route);
+    } else {
+      for (const key of ['profit', 'expenses', 'revenue', 'deliveries']) route[key] += old[key];
+      route.started = Math.min(route.started, old.started);
+      route.active = route.active && old.active;
+    }
+    idMap.set(old.id, route.id);
   }
+  for (const ship of s.ships) {
+    ship.nextFrom = ship.routeId ? ship.city : null;
+    ship.routeId = idMap.get(ship.routeId) ?? null;
+    ship.readyDay = ship.routeId ? s.day + 1 : 0;
+    ship.status = ship.voyage ? (ship.cargo.length ? 'sailing' : 'empty') : ship.routeId ? 'ready' : 'idle';
+    delete ship.city;
+  }
+  for (const e of s.ledger) if (idMap.has(e.routeId)) e.routeId = idMap.get(e.routeId);
+  s.routes = [...grouped.values()]; s.version = SAVE_VERSION;
+  for (const route of s.routes) reschedule(s, route);
   return s;
 }
