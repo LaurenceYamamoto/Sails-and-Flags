@@ -56,7 +56,7 @@ test('competitors share stock, pay normal integrated prices and survive restore 
 });
 test('v2 migration preserves balances, five original markets, cargo and arrival timing',()=>{
   const legacy=old.createGame();old.buyLicense(legacy,'spain');old.setRoute(legacy,old.buyShip(legacy,'sloop').id,'kingston','havana');old.tick(legacy);
-  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,5);assert.equal(s.cash,legacy.cash);assert.deepEqual(s.ships,legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
+  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,6);assert.equal(s.cash,legacy.cash);assert.deepEqual(s.ships,legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
   for(const [city,goods]of Object.entries(legacy.markets))for(const [good,market]of Object.entries(goods))assert.deepEqual(s.markets[city][good],market);
   assert.deepEqual(s,deserialize(serialize(s)));assert.equal(JSON.parse(raw).version,2);
   legacy.cash++;assert.throws(()=>deserialize(old.serialize(legacy)));

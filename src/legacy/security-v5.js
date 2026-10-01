@@ -1,7 +1,6 @@
-import {shipSpec,canProduce,confiscateDevelopment} from './industry.js';
-import {CITIES,NATIONS,SHIPS,distance} from './data.js';
-import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine.js';
-import {monthFor,managementLog} from './management.js';
+import {CITIES,NATIONS,SHIPS,distance} from './data-v5.js';
+import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine-v5.js';
+import {monthFor,managementLog} from './management-v5.js';
 export const RULES={initial:60,buy:30,warn:35,revoke:20,hostile:10,escortDaily:4,grace:60};
 const nations=Object.keys(NATIONS),cap=n=>Math.max(0,Math.min(100,n));
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
@@ -60,7 +59,6 @@ export function revokeLicense(s,n){
     }
     removeRoute(s,r.id);
   }
-  confiscateDevelopment(s,n);
   s.licenses=s.licenses.filter(id=>id!==n);incident(s,'revoked',{nation:n,cargoCost,ships});
 }
 export function advanceDiplomacy(s){
@@ -84,7 +82,7 @@ export function setEscort(s,id,count){
   const r=s.routes.find(r=>r.id===id);check(!s.gameOver&&r&&Number.isInteger(count)&&count>=0&&count<=3,'護衛船は0～3隻で指定してください。');r.escorts=count;
 }
 export function riskFor(s,r,type,from=r.a,to=r.b){
-  const ship=shipSpec(s,type),caribbean=CITIES[from].lon<-20||CITIES[to].lon<-20;
+  const ship=SHIPS[type],caribbean=CITIES[from].lon<-20||CITIES[to].lon<-20;
   // Nearby hostile ports can intercept services even after their license is revoked.
   const hostile=Object.entries(CITIES).some(([id,c])=>s.diplomacy.friendship[c.nation]<=RULES.hostile&&(id===from||id===to||Math.min(distance(id,from),distance(id,to))<=400));
   const base=(caribbean?.002:.0008)+(hostile?.004:0),defense=1+ship.guns/10+Math.max(0,ship.speed-90)/100+r.escorts*.8;
@@ -96,7 +94,7 @@ export function resolveAttack(s,r,v,severity,sinking){
   for(const c of v.cargo){const fraction=lost?1:risk.lossFraction*(.5+severity/2),q=Math.min(c.quantity,Math.ceil(c.quantity*fraction)),cost=c.total*q/c.quantity;c.quantity-=q;c.total-=cost;cargoCost+=cost;}
   v.cargo=v.cargo.filter(c=>c.quantity>0);v.voyage.lostCost=(v.voyage.lostCost??0)+cargoCost;v.voyage.cost=Math.max(0,v.voyage.cost-cargoCost);
   r.transport.costs+=cargoCost;r.losses.cargo+=cargoCost;
-  const shipValue=lost?shipSpec(s,v.type).price:0;
+  const shipValue=lost?SHIPS[v.type].price:0;
   incident(s,lost?'shipLost':'raided',{routeId:r.id,type:v.type,cargoCost,shipValue,hostile:risk.hostile});
   if(lost){
     r.losses.ships+=shipValue;r.losses.count++;r.transport.costs+=shipValue;
@@ -119,8 +117,8 @@ export function runReplacements(s){
   if(!a.enabled||!a.replaceLost||s.gameOver)return;
   for(const r of s.routes){
     if(!r.active||!r.autoManage||!r.pendingReplacements.length)continue;
-    const type=r.pendingReplacements[0],idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type),cost=idle?0:shipSpec(s,type).price;
-    const reason=!idle&&!canProduce(s,type)?'noOpportunity':!idle&&s.ships.length>=200?'limit':a.spent+cost>a.monthlyBudget?'budget':s.cash-cost<a.minCash?'reserve':null;
+    const type=r.pendingReplacements[0],idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type),cost=idle?0:SHIPS[type].price;
+    const reason=!idle&&s.ships.length>=200?'limit':a.spent+cost>a.monthlyBudget?'budget':s.cash-cost<a.minCash?'reserve':null;
     if(reason){managementLog(s,reason,r.id);continue;}
     const ship=idle??buyShip(s,type);assignShip(s,r.id,ship.id);a.spent+=cost;
     r.cooldownUntil=s.day+routeSchedule(s,r).cycle;r.transport={since:s.day,sales:0,costs:0,upkeep:0,deliveries:0};
@@ -137,6 +135,6 @@ export function validateSecurity(s,nested=false){
   check(nested||w.events.every(e=>e.day<=s.day),'戦争履歴の時刻が不正です。');
   check(d&&keys(d.friendship)&&keys(d.investment)&&keys(d.tradeToday)&&keys(d.lastChange)&&nations.every(n=>amount(d.friendship[n])&&d.friendship[n]<=100&&amount(d.investment[n])&&amount(d.tradeToday[n])&&d.tradeToday[n]<=5000&&['trade','enemies','investment'].every(k=>Number.isFinite(d.lastChange[n]?.[k]))),'外交設定が不正です。');
   check(typeof s.automation.replaceLost==='boolean','補充設定が不正です。');
-  check(Array.isArray(s.incidents)&&s.incidents.length<=100&&s.incidents.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['raided','shipLost','warning','revoked','donation','investmentSkipped'].includes(e.kind)&&(e.nation===undefined||country(e.nation))&&(e.routeId===undefined||/^route-[1-9]\d*$/.test(e.routeId))&&(e.type===undefined||Boolean(shipSpec(s,e.type)))&&['cargoCost','shipValue','cost','ships'].every(k=>e[k]===undefined||amount(e[k]))),'被害・外交履歴が不正です。');
-  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>Boolean(shipSpec(s,type))&&routeLegs(r).every(([a,b])=>distance(a,b)<=shipSpec(s,type).range))&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
+  check(Array.isArray(s.incidents)&&s.incidents.length<=100&&s.incidents.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['raided','shipLost','warning','revoked','donation','investmentSkipped'].includes(e.kind)&&(e.nation===undefined||country(e.nation))&&(e.routeId===undefined||/^route-[1-9]\d*$/.test(e.routeId))&&(e.type===undefined||Object.hasOwn(SHIPS,e.type))&&['cargoCost','shipValue','cost','ships'].every(k=>e[k]===undefined||amount(e[k]))),'被害・外交履歴が不正です。');
+  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>Object.hasOwn(SHIPS,type)&&routeLegs(r).every(([a,b])=>distance(a,b)<=SHIPS[type].range))&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
 }

@@ -1,8 +1,6 @@
-import {shipName} from './identity.js';
-import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v5.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v5.js';
+import {licenseTerms} from './security-v5.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
@@ -40,13 +38,13 @@ export function setAutomation(s,settings) {
   check(monthlyBudget>=spent,'月間予算を今月の使用額より小さくできません。');
   Object.assign(s.automation,{enabled,replaceLost,monthlyBudget,minCash,expandThreshold,shrinkThreshold,spent,month:monthFor(s.day)});
 }
-export function automationShipTypes(r,s) {
-  return Object.keys(shipCatalog(s)).filter(type=>routeLegs(r).every(([from,to])=>distance(from,to)<=shipSpec(s,type).range));
+export function automationShipTypes(r) {
+  return Object.keys(SHIPS).filter(type=>routeLegs(r).every(([from,to])=>distance(from,to)<=SHIPS[type].range));
 }
 export function setRouteAutomationShip(s,routeId,type) {
   check(!s.gameOver,'破産後は操作できません。新しいゲームを開始してください。');
   const r=s.routes.find(r=>r.id===routeId);
-  check(r&&automationShipTypes(r,s).includes(type),'このルートで使用できる自動増減用の船種を選んでください。');
+  check(r&&automationShipTypes(r).includes(type),'このルートで使用できる自動増減用の船種を選んでください。');
   r.autoShipType=type;
 }
 function adjusted(s,r,cycle) {
@@ -68,8 +66,7 @@ export function runAutomation(s) {
     if(margin>a.expandThreshold) {
       const type=r.autoShipType;
       const idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type);
-      const cost=idle?0:shipSpec(s,type).price;
-      if(!idle&&!canProduce(s,type)){skip('noOpportunity');continue;}
+      const cost=idle?0:SHIPS[type].price;
       if(!idle&&s.ships.length>=200){skip('limit');continue;}
       if(a.spent+cost>a.monthlyBudget){skip('budget');continue;}
       if(s.cash-cost<a.minCash){skip('reserve');continue;}
@@ -78,8 +75,8 @@ export function runAutomation(s) {
     } else if(margin<a.shrinkThreshold) {
       if(fleet.length<=1){skip('minimumFleet');continue;}
       const preferred=fleet.filter(v=>v.type===r.autoShipType);
-      const minimum=Math.min(...fleet.map(v=>shipSpec(s,v.type).capacity));
-      const candidates=preferred.length?preferred:fleet.filter(v=>shipSpec(s,v.type).capacity===minimum);
+      const minimum=Math.min(...fleet.map(v=>SHIPS[v.type].capacity));
+      const candidates=preferred.length?preferred:fleet.filter(v=>SHIPS[v.type].capacity===minimum);
       // Keep type/capacity priority even while the preferred ships are at sea.
       const ship=[...candidates].reverse().find(v=>!v.voyage);
       if(!ship){skip('sailing');continue;}
@@ -107,7 +104,7 @@ export function runCompetitor(s) {
   }
   const p=PROFILES[s.strategy.kind],ids=Object.keys(CITIES),candidates=[];
   for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)for(const type of p.types) {
-    const a=ids[i],b=ids[j],ship=shipSpec(s,type);if(distance(a,b)>ship.range)continue;
+    const a=ids[i],b=ids[j],ship=SHIPS[type];if(distance(a,b)>ship.range)continue;
     const existing=s.routes.find(r=>circuitKey(r.stops)===circuitKey([a,b]));
     if(existing&&routeShips(s,existing).length>=3)continue;
     const missing=[...new Set([CITIES[a].nation,CITIES[b].nation])].filter(n=>!s.licenses.includes(n));
@@ -116,12 +113,12 @@ export function runCompetitor(s) {
     const cost=(idle?0:ship.price)+missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
     if(s.cash-cost<p.reserve || (!idle&&s.ships.length>=p.maxShips))continue;
     if(!existing&&s.routes.length>=p.maxRoutes)continue;
-    const cycle=2*(sailingDays(s,type,a,b)+1);
+    const cycle=2*(daysFor(type,a,b)+1);
     const estimate=[[a,b],[b,a]].reduce((sum,[from,to])=>sum+Math.max(0,...GOODS.map(g=>(price(g.id,s.markets[to][g.id].stock)*(1-licenseTerms(s,CITIES[to].nation).tax)-price(g.id,s.markets[from][g.id].stock)*(1+licenseTerms(s,CITIES[from].nation).tax))*Math.min(ship.capacity,s.markets[from][g.id].stock))),0)/cycle-ship.daily;
     candidates.push({a,b,type,existing,missing,idle,cost,cycle,estimate});
   }
   const best=candidates.sort((a,b)=>b.estimate-a.estimate).slice(0,4).map(c=>{
-    const ship=shipSpec(s,c.type),budget=Math.max(0,s.cash-c.cost-p.reserve);
+    const ship=SHIPS[c.type],budget=Math.max(0,s.cash-c.cost-p.reserve);
     const profit=[[c.a,c.b],[c.b,c.a]].reduce((sum,[a,b])=>sum+optimizeLoad(s,a,b,ship.capacity,budget,GOODS.map(g=>g.id),10).profit,0);
     return {...c,score:profit/c.cycle-ship.daily-c.missing.reduce((v,n)=>v+licenseTerms(s,n).daily,0)};
   }).sort((a,b)=>b.score-a.score)[0];
@@ -156,12 +153,12 @@ export function acquireCompany(s,index) {
     routeMap.set(old.id,{route,offset,old});touched.add(route);
   }
   for(const old of c.ships) {
-    const ship={...structuredClone(old),name:shipName(c,old),id:`ship-${copy.nextId++}`};
+    const ship={...structuredClone(old),id:`ship-${copy.nextId++}`};
     if(old.routeId){const {route,offset,old:oldRoute}=routeMap.get(old.routeId);ship.routeId=route.id;ship.nextStop=((old.nextStop??oldRoute.stops.indexOf(old.nextFrom))+offset)%route.stops.length;ship.readyDay=Math.min(copy.day+1,old.readyDay+copy.day-c.day);}
     copy.ships.push(ship);
   }
   for(const route of touched){reschedule(copy,route);route.cooldownUntil=copy.day+routeSchedule(copy,route).cycle;}
-  transferIndustry(copy,c);copy.competitors.splice(index,1);managementLog(copy,'acquired',null,q.price+q.licenseCost);recordRank(copy);
+  copy.competitors.splice(index,1);managementLog(copy,'acquired',null,q.price+q.licenseCost);recordRank(copy);
   const validated=deserialize(serialize(copy));Object.assign(s,validated);
   return q;
 }
@@ -175,7 +172,7 @@ export function validateManagement(s,nested) {
     // Additive v4 migration: only an absent field gets a default. Preserve all
     // budget, observation and voyage state; reject explicitly invalid choices.
     if(!Object.hasOwn(r,'autoShipType'))r.autoShipType=routeShips(s,r)[0].type;
-    check(automationShipTypes(r,s).includes(r.autoShipType),'航路の自動増減用の船種が不正です。');
+    check(automationShipTypes(r).includes(r.autoShipType),'航路の自動増減用の船種が不正です。');
     const m=r.transport;check(typeof r.autoManage==='boolean'&&Number.isSafeInteger(r.cooldownUntil)&&r.cooldownUntil>=0&&m&&Number.isSafeInteger(m.since)&&m.since>=0&&m.since<=s.day&&['sales','costs','upkeep'].every(k=>amount(m[k]))&&Number.isSafeInteger(m.deliveries)&&m.deliveries>=0,'航路の自動化実績が不正です。');
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "sails-and-flags",
-  "version": "0.6.0",
+  "version": "0.7.2",
   "private": true,
   "type": "module",
   "scripts": { "start": "node scripts/serve.mjs", "test": "node --test", "benchmark": "node scripts/benchmark.mjs" },

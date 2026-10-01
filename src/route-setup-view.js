@@ -1,8 +1,9 @@
+import {shipSpec,shipDaily} from './industry.js';
 import { SHIPS } from './data.js';
 import { tx, t, nameOf, errorMessage } from './i18n.js';
 
 export function renderOpeningQuote(s,type,q,cash) {
-  const shipName=nameOf(SHIPS[type]);
+  const shipName=nameOf(shipSpec(s,type));
   return `<p><strong>${q.shipId
     ?tx(`未使用の${shipName} #${q.shipId.split('-')[1]}を利用します。`,`Use idle ${shipName} #${q.shipId.split('-')[1]}.`)
     :tx(`未使用の${shipName}がないため、開設時に1隻購入します。`,`No idle ${shipName} is available. Buy one when opening the route.`)}</strong></p>
