@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, buyLicense, buyShip, setCircuit, routeSchedule, routeLegs, nextDeparture, tick, serialize, deserialize, trade, toggleRoute, releaseShip, assignShip } from '../src/engine.js';
+import { buyLicense, buyShip, setCircuit, routeSchedule, routeLegs, nextDeparture, tick, serialize, deserialize, trade, toggleRoute, releaseShip, assignShip } from '../src/engine.js';
+import {createGame} from './baseline.js';
 import { renderMap } from '../src/map-view.js';
 const stops=['cadiz','lisbon','sanjuan','santodomingo','sanjuan','lisbon'];
 function fixture() {

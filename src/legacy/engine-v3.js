@@ -1,4 +1,4 @@
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from '../data.js';
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v4.js';
 import { deserialize as readLegacy } from './engine-v2.js';
 export const SAVE_VERSION = 3;
 export const MAX_STOPS = 12;

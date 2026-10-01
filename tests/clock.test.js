@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createClock, voyageProgress } from '../src/clock.js';
-import { createGame, tick, buyShip, buyLicense, setRoute } from '../src/engine.js';
+import { tick, buyShip, buyLicense, setRoute } from '../src/engine.js';
+import {createGame} from './baseline.js';
 
 test('16x advances daily throughout the second rather than in a 16-day burst', () => {
   const clock = createClock(), updates = [];

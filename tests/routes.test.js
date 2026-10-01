@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createGame, buyShip, buyLicense, setRoute, assignShip, releaseShip, removeRoute, toggleRoute, updateRoute, routeShips, routeSchedule, nextDeparture, tick, serialize, deserialize, trade, assets } from '../src/engine.js';
+import { buyShip, buyLicense, setRoute, assignShip, releaseShip, removeRoute, toggleRoute, updateRoute, routeShips, routeSchedule, nextDeparture, tick, serialize, deserialize, trade, assets } from '../src/engine.js';
+import {createGame} from './baseline.js';
 const legacyRaw = readFileSync(new URL('./fixtures/v1-two-routes.json', import.meta.url), 'utf8');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-7, `${a} != ${b}`);
 function fleet(types = ['sloop', 'sloop'], ports = ['kingston', 'havana']) {
@@ -113,7 +114,7 @@ test('no-opportunity departures skip slots instead of bunching on a later day', 
 });
 test('v1 migration merges reversed routes without changing cash, cargo or voyages', () => {
   const old = JSON.parse(legacyRaw), s = deserialize(legacyRaw), route = s.routes[0];
-  assert.equal(s.version, 4); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
+  assert.equal(s.version, 5); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
   close(s.cash, old.cash); close(assets(s), assets(old));
   assert.deepEqual(s.totals, old.totals); assert.deepEqual(s.history, old.history);
   assert.deepEqual(route.allowed, old.routes[0].allowed); assert.equal(route.minMargin, old.routes[0].minMargin);

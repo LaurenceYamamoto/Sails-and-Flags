@@ -4,7 +4,8 @@ import { LAND } from '../assets/maps/land.js';
 import { CITIES } from '../src/data.js';
 import { PORT_GEOGRAPHY,project } from '../src/geography.js';
 import { setLanguage,nameOf } from '../src/i18n.js';
-import { createGame,serialize } from '../src/engine.js';
+import { serialize } from '../src/engine.js';
+import {createGame} from './baseline.js';
 import { renderMap } from '../src/map-view.js';
 function inside(p,ring){let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a.y>p.y)!==(b.y>p.y)&&p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)yes=!yes;}return yes;}
 function segmentDistance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}

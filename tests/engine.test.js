@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { GOODS, SHIPS, CITIES, NATIONS, daysFor } from '../src/data.js';
-import { createGame, quote, trade, price, buyShip, buyLicense, setRoute, updateRoute, toggleRoute, removeRoute, optimizeLoad, tick, serialize, deserialize, assets, operatingProfit } from '../src/engine.js';
+import { quote, trade, price, buyShip, buyLicense, setRoute, updateRoute, toggleRoute, removeRoute, optimizeLoad, tick, serialize, deserialize, assets, operatingProfit } from '../src/engine.js';
+import {createGame} from './baseline.js';
 const close = (a, b, eps = 1e-7) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 function scenario(seed = 1700, type = 'sloop', a = 'kingston', b = 'havana') {
   const s = createGame(seed); buyLicense(s, 'spain');

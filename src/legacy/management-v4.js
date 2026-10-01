@@ -1,6 +1,5 @@
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v4.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v4.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
@@ -17,11 +16,11 @@ export function initializeRoute(r,day,type=r.autoShipType) {
   r.autoManage=true;r.autoShipType=type;r.cooldownUntil=day;
   r.transport={since:day,sales:0,costs:0,upkeep:0,deliveries:0};
 }
-const REASONS=['expanded','reused','replaced','shrunk','cooldown','sample','budget','reserve','minimumFleet','sailing','threshold','stopped','limit','noOpportunity','rivalExpanded','rivalReassigned','acquired','firstRank'];
+const REASONS=['expanded','reused','shrunk','cooldown','sample','budget','reserve','minimumFleet','sailing','threshold','stopped','limit','noOpportunity','rivalExpanded','rivalReassigned','acquired','firstRank'];
 export function managementLog(s,reason,routeId=null,cost=0) {
   // Keep the latest reason per route without filling the log on every tick.
   const last=[...s.managementLog].reverse().find(e=>e.routeId===routeId);
-  if(last?.reason===reason && !['expanded','reused','replaced','shrunk','rivalExpanded','rivalReassigned','acquired'].includes(reason))return;
+  if(last?.reason===reason && !['expanded','reused','shrunk','rivalExpanded','rivalReassigned','acquired'].includes(reason))return;
   s.managementLog.push({day:s.day,reason,routeId,cost});
   if(s.managementLog.length>100)s.managementLog.shift();
 }
@@ -33,10 +32,9 @@ export function setAutomation(s,settings) {
   check(!s.gameOver,'破産後は操作できません。新しいゲームを開始してください。');
   const {enabled,monthlyBudget,minCash,expandThreshold,shrinkThreshold}=settings;
   check(typeof enabled==='boolean'&&amount(monthlyBudget)&&amount(minCash)&&finite(expandThreshold)&&finite(shrinkThreshold)&&shrinkThreshold>=-100&&expandThreshold<=10000&&expandThreshold>=shrinkThreshold,'自動化の予算・最低資金・利益率閾値を確認してください。');
-  const replaceLost=settings.replaceLost??s.automation.replaceLost;check(typeof replaceLost==='boolean','補充設定が不正です。');
   const spent=s.automation.month===monthFor(s.day)?s.automation.spent:0;
   check(monthlyBudget>=spent,'月間予算を今月の使用額より小さくできません。');
-  Object.assign(s.automation,{enabled,replaceLost,monthlyBudget,minCash,expandThreshold,shrinkThreshold,spent,month:monthFor(s.day)});
+  Object.assign(s.automation,{enabled,monthlyBudget,minCash,expandThreshold,shrinkThreshold,spent,month:monthFor(s.day)});
 }
 export function automationShipTypes(r) {
   return Object.keys(SHIPS).filter(type=>routeLegs(r).every(([from,to])=>distance(from,to)<=SHIPS[type].range));
@@ -57,7 +55,7 @@ export function runAutomation(s) {
   if(!a.enabled || s.gameOver)return;
   const ordered=[...s.routes].sort((x,y)=>(transportMargin(y)??-Infinity)-(transportMargin(x)??-Infinity)||x.id.localeCompare(y.id));
   for(const r of ordered) {
-    if(!r.autoManage||r.pendingReplacements.length)continue;
+    if(!r.autoManage)continue;
     const fleet=routeShips(s,r),cycle=routeSchedule(s,r).cycle,margin=transportMargin(r);
     const skip=reason=>managementLog(s,reason,r.id);
     if(!r.active){skip('stopped');continue;}
@@ -108,19 +106,18 @@ export function runCompetitor(s) {
     const existing=s.routes.find(r=>circuitKey(r.stops)===circuitKey([a,b]));
     if(existing&&routeShips(s,existing).length>=3)continue;
     const missing=[...new Set([CITIES[a].nation,CITIES[b].nation])].filter(n=>!s.licenses.includes(n));
-    if(missing.some(n=>!licenseTerms(s,n).canBuy))continue;
     const idle=s.ships.find(v=>!v.routeId&&v.type===type);
-    const cost=(idle?0:ship.price)+missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
+    const cost=(idle?0:ship.price)+missing.reduce((n,id)=>n+NATIONS[id].fee,0);
     if(s.cash-cost<p.reserve || (!idle&&s.ships.length>=p.maxShips))continue;
     if(!existing&&s.routes.length>=p.maxRoutes)continue;
     const cycle=2*(daysFor(type,a,b)+1);
-    const estimate=[[a,b],[b,a]].reduce((sum,[from,to])=>sum+Math.max(0,...GOODS.map(g=>(price(g.id,s.markets[to][g.id].stock)*(1-licenseTerms(s,CITIES[to].nation).tax)-price(g.id,s.markets[from][g.id].stock)*(1+licenseTerms(s,CITIES[from].nation).tax))*Math.min(ship.capacity,s.markets[from][g.id].stock))),0)/cycle-ship.daily;
+    const estimate=[[a,b],[b,a]].reduce((sum,[from,to])=>sum+Math.max(0,...GOODS.map(g=>(price(g.id,s.markets[to][g.id].stock)*(1-NATIONS[CITIES[to].nation].tax)-price(g.id,s.markets[from][g.id].stock)*(1+NATIONS[CITIES[from].nation].tax))*Math.min(ship.capacity,s.markets[from][g.id].stock))),0)/cycle-ship.daily;
     candidates.push({a,b,type,existing,missing,idle,cost,cycle,estimate});
   }
   const best=candidates.sort((a,b)=>b.estimate-a.estimate).slice(0,4).map(c=>{
     const ship=SHIPS[c.type],budget=Math.max(0,s.cash-c.cost-p.reserve);
     const profit=[[c.a,c.b],[c.b,c.a]].reduce((sum,[a,b])=>sum+optimizeLoad(s,a,b,ship.capacity,budget,GOODS.map(g=>g.id),10).profit,0);
-    return {...c,score:profit/c.cycle-ship.daily-c.missing.reduce((v,n)=>v+licenseTerms(s,n).daily,0)};
+    return {...c,score:profit/c.cycle-ship.daily-c.missing.reduce((v,n)=>v+NATIONS[n].daily,0)};
   }).sort((a,b)=>b.score-a.score)[0];
   if(!best || best.score<=2){managementLog(s,'noOpportunity');return;}
   for(const nation of best.missing)buyLicense(s,nation);
@@ -132,13 +129,12 @@ export function acquisitionQuote(s,index) {
   const c=s.competitors[index];check(c,'買収対象が存在しません。');
   const price=Math.ceil(Math.max(0,assets(c))*1.15);
   const missing=c.licenses.filter(n=>!s.licenses.includes(n));
-  const licenseCost=missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
-  return {price,licenseCost,missing,eligible:missing.every(n=>licenseTerms(s,n).canBuy),cash:c.cash,assets:assets(c),ships:c.ships.length,routes:c.routes.length,required:price+licenseCost+Math.max(0,-c.cash)};
+  const licenseCost=missing.reduce((n,id)=>n+NATIONS[id].fee,0);
+  return {price,licenseCost,missing,cash:c.cash,assets:assets(c),ships:c.ships.length,routes:c.routes.length,required:price+licenseCost+Math.max(0,-c.cash)};
 }
 export function acquireCompany(s,index) {
   check(!s.gameOver,'破産後は操作できません。新しいゲームを開始してください。');
   const q=acquisitionQuote(s,index),target=s.competitors[index];
-  check(q.eligible,'友好度30以上で交易免許を取得できます。');
   check(s.cash>=q.required,'買収代金と必要な免許・債務を支払う資金が不足しています。');
   check(s.ships.length+target.ships.length<=200,'試作版の保有船上限（200隻）に達しました。');
   // Work on a validated clone: failed transfers cannot partially spend money.
@@ -148,7 +144,7 @@ export function acquireCompany(s,index) {
   entry(copy,'acquiredCash',c.cash);
   for(const old of c.routes) {
     let route=copy.routes.find(r=>circuitKey(r.stops)===circuitKey(old.stops));
-    if(!route){route={...structuredClone(old),id:`route-${copy.nextId++}`,started:copy.day,profit:0,expenses:0,revenue:0,deliveries:0,lastForecast:0,lastActual:null,scheduleEpoch:copy.day+1};initializeRoute(route,copy.day);copy.routes.push(route);}else{check(route.pendingReplacements.length+old.pendingReplacements.length<=200,'補充待ちの上限を超えています。');route.pendingReplacements.push(...old.pendingReplacements);}
+    if(!route){route={...structuredClone(old),id:`route-${copy.nextId++}`,started:copy.day,profit:0,expenses:0,revenue:0,deliveries:0,lastForecast:0,lastActual:null,scheduleEpoch:copy.day+1};initializeRoute(route,copy.day);copy.routes.push(route);}
     const offset=route.stops.findIndex((_,i)=>old.stops.every((port,j)=>route.stops[(i+j)%route.stops.length]===port));
     routeMap.set(old.id,{route,offset,old});touched.add(route);
   }

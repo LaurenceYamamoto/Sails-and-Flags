@@ -21,18 +21,19 @@ export const ja = {
   storageError: 'ブラウザの保存領域を利用できません。ブラウザ設定を確認してください。',
   resetConfirm: '現在の未保存の進行を破棄し、新しい会社を設立しますか？', loadConfirm: '現在の未保存の進行を破棄し、保存したゲームに戻りますか？',
   footer: '1700年をモチーフにした経済試作。海賊・外交変動・競合・造船・都市開発・陸上交易は今後の実装です。',
-  ledgerNote: '営業収支は仕入支出を即時反映。航海途中は赤字に見える場合があります。船・免許取得は一時投資として区分。',
-  investments: '一時投資', licenseDaily: '免許維持費', purchase: '商品仕入', sale: '商品売上', tax: '取引税', shipPurchase: '船の購入', licensePurchase: '免許取得', acquisition:'競合買収', acquiredCash:'買収による現金・債務引継',
+  ledgerNote: '営業収支は仕入支出を即時反映。航海途中は赤字に見える場合があります。船・免許・買収・外交への支出は投資として区分。',
+  investments: '投資支出', licenseDaily: '免許維持費', purchase: '商品仕入', sale: '商品売上', tax: '取引税', shipPurchase: '船の購入', licensePurchase: '免許取得', acquisition:'競合買収', acquiredCash:'買収による現金・債務引継',
   reserveNote: '自動積載は全保有船・免許の航海期間分の運営資金を確保します。到着時の価格は変動します。',
   cashTrend: '直近の現金推移', historyEmpty: '日数を進めると現金の推移が表示されます。',
   ports: '寄港先', taxRate: '取引税', speed: '速度', policy: '積載条件', volume: '積載量', dailyCost: '会社の固定費', capital: '開始資金',
 };
-ja.prototype = 'P3 地域限定アルファ';
-ja.footer = '1700年をモチーフにした地域限定アルファ。海賊・動的外交・造船・都市開発・陸上交易は今後の実装です。';
+ja.prototype = 'P4 地域限定アルファ';
+ja.footer = '1700年をモチーフにした地域限定アルファ。造船・都市開発・陸上交易は今後の実装です。';
 ja.cashTrend = '直近365日の現金・総資産';
+ja.escort='護衛費';ja.diplomacyInvestment='外交投資';
 ja.destination = '寄港地2';
 export const en = {
-  subtitle:'A trading company’s logbook', prototype:'P3 Regional alpha', day:'Elapsed days', cash:'Cash', assets:'Total assets', operating:'Operating result',
+  subtitle:'A trading company’s logbook', prototype:'P4 Regional alpha', day:'Elapsed days', cash:'Cash', assets:'Total assets', operating:'Operating result',
   play:'Run', pause:'Pause', save:'Save', load:'Load', reset:'New company', map:'Atlantic trade network', mapSub:'Drag for two ports; use Plan a circuit for multiple stops. Click ships or competitor routes for details.', schematic:'Coastline: Natural Earth · gameplay distances',
   market:'Port market', product:'Commodity', price:'Unit price', stock:'Stock', production:'Production / day', demand:'Base demand / day', fleet:'Trade route details', fleetSub:'Select a route to add ships, set cargo policy and inspect results. Configuration pauses time.', routes:'Routes', ships:'Ships', licenses:'Trading licenses',
   buy:'Buy', owned:'Owned', acquire:'Buy license', capacity:'Capacity', range:'Range', upkeep:'Upkeep', daily:'/ day', departure:'Starting port', destination:'Port 2', vessel:'First ship', margin:'Minimum price gap (%)', allowed:'Allowed commodities', create:'Create route', routeSetup:'Create a trade route', noShip:'No idle ships', noRoute:'Drag between cities or choose New route, then select a ship type to begin.',
@@ -40,9 +41,10 @@ export const en = {
   wait:'Waiting for a profitable opportunity', ready:'Ready', sailing:'Sailing', empty:'Repositioning empty', stopped:'Service stopped', stopping:'Stop on arrival', dayUnit:'days', cargo:'Cargo', noCargo:'Empty', unassigned:'Idle', journal:'Company ledger', journalSub:'Purchases, sales, tax and operating costs.', transaction:'Transaction', amount:'Amount', noEntry:'Your trading history starts here.',
   guideTitle:'Begin your first voyage', guide1:'1. Buy a Spanish license', guide2:'2. Drag Kingston to Havana and open with a sloop', guide3:'3. Run time to start trading', guideBody:'Sell rum in Havana and sugar in Kingston. Watch prices and invest trading profits in another ship.', cashWarning:'Cash covers less than 30 days of fixed costs. Check arrival times and expenses.', bankrupt:'The company is bankrupt', bankruptBody:'Cash is negative, so time has stopped. Inspect the ledger, load a save or start a new company.',
   saved:'Game saved.', loaded:'Game loaded.', noSave:'No saved games.', storageError:'Browser storage is unavailable or full. Export a save file to protect your progress.', resetConfirm:'Discard current unsaved progress and establish a new company?', loadConfirm:'Discard current unsaved progress and load this save?',
-  footer:'Regional alpha inspired by 1700. Pirates, dynamic diplomacy, shipbuilding, city development and land trade are planned for later phases.', ledgerNote:'Purchases immediately affect the operating result; a voyage may appear unprofitable before arrival. Ships and licenses are separate investments.', investments:'Investments', licenseDaily:'License upkeep', purchase:'Commodity purchase', sale:'Commodity sale', tax:'Transaction tax', shipPurchase:'Ship purchase', licensePurchase:'License purchase', acquisition:'Company acquisition', acquiredCash:'Acquired cash / debt',
+  footer:'Regional alpha inspired by 1700. Shipbuilding, city development and land trade are planned for later phases.', ledgerNote:'Purchases immediately affect the operating result; a voyage may appear unprofitable before arrival. Ships, licenses, acquisitions and diplomacy are separate investments.', investments:'Investments', licenseDaily:'License upkeep', purchase:'Commodity purchase', sale:'Commodity sale', tax:'Transaction tax', shipPurchase:'Ship purchase', licensePurchase:'License purchase', acquisition:'Company acquisition', acquiredCash:'Acquired cash / debt',
   reserveNote:'Auto-loading reserves operating cash for the voyage. Arrival prices can change.', cashTrend:'Cash and total assets · last 365 days', historyEmpty:'Run time to see financial history.', ports:'Ports', taxRate:'Tax', speed:'Speed', policy:'Cargo policy', volume:'Cargo volume', dailyCost:'Fixed costs', capital:'Starting cash',
 };
+en.escort='Escort fees';en.diplomacyInvestment='Diplomatic investment';
 let language = 'ja';
 export const locale = () => language === 'ja' ? 'ja-JP' : 'en-GB';
 export function setLanguage(value) { language = value === 'en' ? 'en' : 'ja'; }
@@ -51,12 +53,15 @@ export const tx = (japanese, english) => language === 'ja' ? japanese : english;
 export function t(key) { return (language === 'ja' ? ja : en)[key] ?? key; }
 const names = {
   キングストン:'Kingston', ハバナ:'Havana', ロンドン:'London', カディス:'Cadiz', ナント:'Nantes', アムステルダム:'Amsterdam', リスボン:'Lisbon', サンティアゴ:'Santiago', サントドミンゴ:'Santo Domingo', サンフアン:'San Juan', ブリッジタウン:'Bridgetown', ウィレムスタット:'Willemstad',
-  イングランド:'England', スペイン:'Spain', フランス:'France', オランダ:'Netherlands', ポルトガル:'Portugal', 砂糖:'Sugar', ラム酒:'Rum', 織物:'Cloth', 工具:'Tools', 食料:'Food', タバコ:'Tobacco', 木材:'Timber', カカオ:'Cocoa', スループ:'Sloop', ブリッグ:'Brig', フリュート:'Fluyt',
+  イングランド:'England', スペイン:'Spain', フランス:'France', オランダ:'Netherlands', ポルトガル:'Portugal', 砂糖:'Sugar', ラム酒:'Rum', 織物:'Cloth', 工具:'Tools', 食料:'Food', タバコ:'Tobacco', 木材:'Timber', カカオ:'Cocoa', 武器:'Weapons', スループ:'Sloop', ブリッグ:'Brig', フリュート:'Fluyt',
 };
 // Geographic names may retain their native script regardless of UI language.
 export const nameOf = entity => entity.mapName ?? tx(entity.name, names[entity.name] ?? entity.name);
 export function errorMessage(error) {
   const messages = {
+    '友好度30以上で交易免許を取得できます。':'Friendship must be at least 30 to buy a license.',
+    '外交投資の国・金額を確認してください。':'Check the country, investment amount and available cash.',
+    '護衛船は0～3隻で指定してください。':'Choose 0 to 3 escort ships.',
     '船種を確認してください。':'Choose a valid ship type.',
     '試作版の保有船上限（200隻）に達しました。':'The fleet limit of 200 ships has been reached.',
     'このルートで使用できる自動増減用の船種を選んでください。':'Choose an automation ship type with enough range for this route.',

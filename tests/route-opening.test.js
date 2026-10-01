@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createGame,buyLicense,buyShip,quoteCircuitOpening,openCircuit,serialize,deserialize,trade,entry,releaseShip,tick} from '../src/engine.js';
+import {buyLicense,buyShip,quoteCircuitOpening,openCircuit,serialize,deserialize,trade,entry,releaseShip,tick} from '../src/engine.js';
+import {createGame} from './baseline.js';
 import {renderOpeningQuote} from '../src/route-setup-view.js';
 import {setLanguage} from '../src/i18n.js';
 const ports=['kingston','havana'];
