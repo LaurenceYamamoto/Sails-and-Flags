@@ -1,7 +1,7 @@
 import { serialize, deserialize } from './engine.js';
 export const SAVE_KEYS = {
-  manual: 'sails-and-flags.save.v3', auto: 'sails-and-flags.auto.v3',
-  backup: 'sails-and-flags.backup.v3', v2: 'sails-and-flags.save.v2', v1: 'sails-and-flags.save.v1',
+  manual: 'sails-and-flags.save.v4', auto: 'sails-and-flags.auto.v4',
+  backup: 'sails-and-flags.backup.v4', v3:'sails-and-flags.save.v3', autoV3:'sails-and-flags.auto.v3', backupV3:'sails-and-flags.backup.v3', v2: 'sails-and-flags.save.v2', v1: 'sails-and-flags.save.v1',
 };
 // Validate before overwriting a slot. A failed write leaves the last save intact.
 export function saveGame(storage, state, slot = 'manual') {

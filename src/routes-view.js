@@ -1,6 +1,7 @@
 import { CITIES, GOODS, SHIPS, distance } from './data.js';
 import { routeShips, routeSchedule, nextDeparture, routeLegs } from './engine.js';
 import { t, tx, nameOf as name } from './i18n.js';
+import { routeAutomation } from './management-view.js';
 export const routeTitle = route => route.stops.map(id => name(CITIES[id])).join(route.stops.length === 2 ? ' ⇄ ' : ' → ');
 export function renderRoutes(state, { decimal, cash, signed, tone }) {
   if (!state.routes.length) return `<div class="empty-state"><span>⚓</span><p>${t('noRoute')}</p></div>`;
@@ -18,7 +19,7 @@ export function renderRoutes(state, { decimal, cash, signed, tone }) {
     return `<article class="route-card" aria-label="${title}"><div class="section-top"><h3>${title}${route.stops.length>2 ? ' ↻' : ''}</h3><span class="badge ${route.active?'live':''}">${route.active?tx('運航中','Active'):t('stopped')}</span></div>
       <p class="small muted">${fleet.length} ${t('ships')} · ${t('capacity')} ${fleet.reduce((n,v)=>n+SHIPS[v.type].capacity,0)} · ${tx('各港から約','Departure interval: about')} ${decimal(interval)} ${t('dayUnit')}</p>
       <div class="route-stats"><div><span>${t('profit')}</span><strong class="${tone(route.profit)}">${signed(route.profit)}</strong></div><div><span>${t('perDay')}</span><strong class="${tone(route.profit)}">${signed(route.profit/Math.max(1,state.day-route.started))}</strong></div><div><span>${tx('配船周期','Service cycle')}</span><strong>${cycle} ${t('dayUnit')}</strong></div><div><span>${tx('累計利益率','Profit / expenses')}</span><strong>${route.expenses?decimal(route.profit/route.expenses*100)+'%':'—'}</strong></div></div>
-      <div class="forecast"><span>${t('forecast')} <b class="${tone(route.lastForecast)}">${signed(route.lastForecast)}</b></span><span>${t('actual')} <b class="${tone(route.lastActual||0)}">${route.lastActual===null?t('notArrived'):signed(route.lastActual)}</b></span></div>
+      ${routeAutomation(route,state,decimal)}<div class="forecast"><span>${t('forecast')} <b class="${tone(route.lastForecast)}">${signed(route.lastForecast)}</b></span><span>${t('actual')} <b class="${tone(route.lastActual||0)}">${route.lastActual===null?t('notArrived'):signed(route.lastActual)}</b></span></div>
       ${route.lastActual < 0 ? `<p class="warning" role="status">${tx('直近の航海で赤字が発生しました。市場価格と積載条件を確認してください。','The latest voyage made a loss. Check market prices and cargo policy.')}</p>`:''}
       <p class="small muted">${t('margin')}: ${route.minMargin}% · ${route.allowed.map(id=>name(GOODS.find(g=>g.id===id))).join(' / ')} · ${tx('到着合計','Arrivals')} ${route.deliveries}</p>
       <div class="buttons"><button data-action="toggle" data-id="${route.id}" ${state.gameOver?'disabled':''}>${route.active?t('stop'):t('resume')}</button><button data-action="edit" data-id="${route.id}" ${state.gameOver?'disabled':''}>${t('edit')}</button><button data-action="release" data-id="${route.id}" ${fleet.some(v=>v.voyage)||state.gameOver?'disabled':''}>${tx('ルートを解除','Remove route')}</button></div>

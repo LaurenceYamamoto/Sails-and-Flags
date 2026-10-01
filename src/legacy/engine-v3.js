@@ -1,7 +1,6 @@
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v3.js';
-import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-export const SAVE_VERSION = 4;
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from '../data.js';
+import { deserialize as readLegacy } from './engine-v2.js';
+export const SAVE_VERSION = 3;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -26,11 +25,10 @@ export function createGame(seed = 1700) {
   const random = () => { rng = (Math.imul(rng, 1664525) + 1013904223) >>> 0; return rng / 4294967296; };
   const markets = Object.fromEntries(Object.entries(CITIES).map(([id, c]) => [id, Object.fromEntries(GOODS.map((g, i) => [g.id, { stock: c.stocks[i] * (0.98 + random() * 0.04), production: c.supply[i], demand: c.demand[i] }]))]));
   const state = { version: SAVE_VERSION, seed: seed >>> 0, rng, day: 0, cash: 5000, initialCash: 5000, licenses: ['england'], ships: [], routes: [], markets, ledger: [], totals: {}, history: [{ day: 0, cash: 5000, assets: 5000 }], nextId: 1, gameOver: false, competitors: [] };
-  initializeManagement(state);
   state.competitors = createCompetitors(markets);
   return state;
 }
-export function entry(s, category, amount, routeId = null, details = {}) {
+function entry(s, category, amount, routeId = null, details = {}) {
   s.cash += amount;
   s.totals[category] = (s.totals[category] || 0) + amount;
   s.ledger.push({ day: s.day, category, amount, routeId, ...details });
@@ -62,48 +60,20 @@ export function buyShip(s, type) {
 export function setRoute(s, shipId, a, b, allowed = GOODS.map(g => g.id), minMargin = 10) {
   return setCircuit(s, shipId, [a,b], allowed, minMargin);
 }
-function validateCircuit(s,type,stops,allowed,minMargin) {
-  validateStops(stops);
-  check(Object.hasOwn(SHIPS,type), '船種を確認してください。');
-  check(stops.every(c => s.licenses.includes(CITIES[c].nation)), '全寄港地の交易免許が必要です。');
-  check(routeLegs({stops}).every(([from,to])=>distance(from,to)<=SHIPS[type].range), 'この船の航続距離を超えています。');
-  validatePolicy(allowed,minMargin);
-}
-// The UI and submission use the same quote. No funds, IDs or ships change
-// until every opening condition has been checked against the current state.
-export function quoteCircuitOpening(s,type,stops,allowed=GOODS.map(g=>g.id),minMargin=10) {
-  const idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type);
-  const cost=Object.hasOwn(SHIPS,type)?(idle?0:SHIPS[type].price):null;
-  const result={shipId:idle?.id??null,cost,remaining:cost===null?null:s.cash-cost,existingRouteId:null,error:null};
-  try {
-    playing(s);stops=normalizeStops(stops);validateStops(stops);
-    const existing=s.routes.find(r=>circuitKey(r.stops)===circuitKey(stops));
-    if(existing)return {...result,shipId:null,cost:0,remaining:s.cash,existingRouteId:existing.id};
-    validateCircuit(s,type,stops,allowed,minMargin);
-    check(idle||s.ships.length<200,'試作版の保有船上限（200隻）に達しました。');
-    check(s.cash>=cost,'船の購入資金が不足しています。');
-  } catch(error) {result.error=error.message;}
-  return result;
-}
-export function openCircuit(s,type,stops,allowed=GOODS.map(g=>g.id),minMargin=10) {
-  const q=quoteCircuitOpening(s,type,stops,allowed,minMargin);
-  check(!q.error,q.error);
-  if(q.existingRouteId)return s.routes.find(r=>r.id===q.existingRouteId);
-  const shipId=q.shipId??buyShip(s,type).id;
-  return setCircuit(s,shipId,stops,allowed,minMargin);
-}
 export function setCircuit(s, shipId, stops, allowed = GOODS.map(g => g.id), minMargin = 10) {
   playing(s);
   stops = normalizeStops(stops);
   const ship = s.ships.find(v => v.id === shipId);
   check(ship && !ship.routeId && !ship.voyage, '未使用の船を選んでください。');
-  validateCircuit(s,ship.type,stops,allowed,minMargin);
+  validateStops(stops);
   const [a,b] = stops;
+  check(stops.every(c => s.licenses.includes(CITIES[c].nation)), '全寄港地の交易免許が必要です。');
+  check(routeLegs({stops}).every(([from,to])=>distance(from,to)<=SHIPS[ship.type].range), 'この船の航続距離を超えています。');
+  validatePolicy(allowed, minMargin);
   // Rotations share a service; reversing a circuit with 3+ ports changes its direction.
   let route = s.routes.find(r => circuitKey(r.stops) === circuitKey(stops));
   if (!route) {
     route = { id: `route-${s.nextId++}`, a, b, stops:[...stops], allowed: [...allowed], minMargin, active: true, started: s.day, profit: 0, expenses: 0, revenue: 0, deliveries: 0, lastForecast: 0, lastActual: null, scheduleEpoch: s.day + 1 };
-    initializeRoute(route,s.day,ship.type);
     s.routes.push(route);
   }
   assignShip(s, route.id, ship.id);
@@ -132,7 +102,7 @@ export function nextDeparture(s, route, ship, notBefore = s.day + 1) {
   const first = route.scheduleEpoch + phase + stopOffsets[index];
   return first + Math.max(0, Math.ceil((Math.max(notBefore, ready) - first) / cycle)) * cycle;
 }
-export function reschedule(s, route) {
+function reschedule(s, route) {
   const first = routeShips(s, route)[0];
   // Anchor the timetable at the leading ship's next leg. A fleet waiting at B
   // can begin tomorrow instead of wasting an additional half-cycle at startup.
@@ -259,7 +229,6 @@ function depart(s, ship, route) {
 export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
   if (s.gameOver) return;
   s.day++;
-  if(s.automation.month!==monthFor(s.day)){s.automation.month=monthFor(s.day);s.automation.spent=0;}
   if (updateMarkets) for (const city of Object.values(s.markets)) for (const [good, m] of Object.entries(city)) {
     m.stock += m.production;
     const base = GOODS.find(g => g.id === good).base;
@@ -269,7 +238,6 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
   for (const n of s.licenses) { entry(s, 'licenseDaily', -NATIONS[n].daily, null, { nation: n }); if (s.gameOver) return; }
   for (const ship of s.ships) {
     entry(s, 'upkeep', -SHIPS[ship.type].daily, ship.routeId, { shipId: ship.id });
-    const r=s.routes.find(r=>r.id===ship.routeId);if(r)r.transport.upkeep+=SHIPS[ship.type].daily;
     if (s.gameOver) return;
   }
   for (const ship of s.ships) {
@@ -280,8 +248,6 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
       if (ship.voyage.remaining === 0) {
         let revenue = 0;
         for (const item of ship.cargo) revenue += trade(s, ship.voyage.to, item.good, item.quantity, 'sell', route.id).total;
-        const saleTax=revenue/(1-NATIONS[CITIES[ship.voyage.to].nation].tax)-revenue;
-        route.transport.sales+=revenue+saleTax;route.transport.costs+=ship.voyage.cost+saleTax;route.transport.deliveries++;
         route.lastActual = revenue - ship.voyage.cost - ship.voyage.total * SHIPS[ship.type].daily;
         ship.nextStop = (stopIndex(route,ship)+1)%route.stops.length;
         route.deliveries++; ship.voyages++; ship.nextFrom = ship.voyage.to; ship.voyage = null; ship.cargo = []; ship.status = 'ready'; ship.readyDay = s.day + 1;
@@ -289,12 +255,10 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
       // One day in port after arrival. No duplicate sale/departure in the same tick.
     } else if (route.active && nextDeparture(s, route, ship, s.day) === s.day) depart(s, ship, route);
   }
-  runAutomation(s);if(s.strategy)runCompetitor(s);
   if (runCompetitors) for (const competitor of s.competitors ?? []) {
     competitor.markets = s.markets;
     tick(competitor, {updateMarkets:false,runCompetitors:false});
   }
-  if(!s.strategy)recordRank(s);
   s.history.push({ day: s.day, cash: s.cash, assets: assets(s) });
   if (s.history.length > 365) s.history.shift();
 }
@@ -303,9 +267,8 @@ export function assets(s) {
 }
 export function operatingProfit(s) { return ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily'].reduce((sum, key) => sum + (s.totals[key] || 0), 0); }
 function createCompetitors(markets) {
-  return [['Channel Company',['nantes','amsterdam'],'large'],['Antilles Company',['santiago','sanjuan'],'small']].map(([name,stops,kind])=>{
+  return [['Channel Company',['nantes','amsterdam']],['Antilles Company',['santiago','sanjuan']]].map(([name,stops])=>{
     const company={version:SAVE_VERSION,name,seed:1700,rng:1700,day:0,cash:5000,initialCash:5000,licenses:[...new Set(stops.map(c=>CITIES[c].nation))],ships:[],routes:[],markets,ledger:[],totals:{},history:[],nextId:1,gameOver:false,competitors:[]};
-    company.cash=company.initialCash=PROFILES[kind].cash;initializeManagement(company,kind);
     const ship=buyShip(company,'sloop'); setCircuit(company,ship.id,stops);
     return company;
   });
@@ -314,14 +277,17 @@ export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='comp
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3].includes(s.version) && !nested) {
-    const migrated=readLegacy(raw);migrated.version=SAVE_VERSION;initializeManagement(migrated);
-    for(const [i,c] of migrated.competitors.entries()){c.version=SAVE_VERSION;initializeManagement(c,i===0?'large':'small');}
+  if (s && [1,2].includes(s.version) && !nested) {
+    const old=readLegacy(raw), expanded=createGame(old.seed);
+    for (const [city,goods] of Object.entries(old.markets)) Object.assign(expanded.markets[city],goods);
+    const migrated={...old,version:SAVE_VERSION,markets:expanded.markets,competitors:expanded.competitors};
+    for (const r of migrated.routes) r.stops=[r.a,r.b];
+    for (const c of migrated.competitors) { c.day=migrated.day; for(const ship of c.ships) ship.readyDay=c.day+1; for(const route of c.routes) {route.started=c.day;route.scheduleEpoch=c.day+1;} }
     return deserialize(serialize(migrated));
   }
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
 
-  check(Number.isSafeInteger(s.day) && s.day >= 0 && finite(s.cash) && (s.initialCash === 5000 || nested && s.initialCash===25000) && typeof s.gameOver === 'boolean' && s.gameOver === (s.cash < 0), '会社情報が不正です。');
+  check(Number.isSafeInteger(s.day) && s.day >= 0 && finite(s.cash) && s.initialCash === 5000 && typeof s.gameOver === 'boolean' && s.gameOver === (s.cash < 0), '会社情報が不正です。');
   check(Number.isSafeInteger(s.nextId) && s.nextId > 0 && Number.isInteger(s.seed) && Number.isInteger(s.rng), '識別子・シードが不正です。');
   check(Array.isArray(s.licenses) && new Set(s.licenses).size === s.licenses.length && s.licenses.every(n => Object.hasOwn(NATIONS, n)), '免許が不正です。');
   check(s.markets && Object.keys(s.markets).length === Object.keys(CITIES).length && Object.keys(s.markets).every(id => Object.hasOwn(CITIES,id)), '市場データが不正です。');
@@ -357,7 +323,7 @@ export function deserialize(raw, nested = false) {
       check(r && w.from === v.nextFrom && nextPort(r,w.from,stopIndex(r,v))===w.to && w.total === daysFor(v.type, w.from, w.to) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast), '航海データが不正です。');
     } else check(v.cargo.length === 0, '停泊中の積み荷が不正です。');
   }
-  const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase', 'acquisition', 'acquiredCash'];
+  const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase'];
   check(s.totals && Object.entries(s.totals).every(([k, v]) => categories.includes(k) && finite(v)), '会計集計が不正です。');
   check(Math.abs(s.initialCash + Object.values(s.totals).reduce((a, b) => a + b, 0) - s.cash) < 0.001, '会計残高が一致しません。');
   check(Array.isArray(s.ledger) && s.ledger.length <= 600 && s.ledger.every(e => categories.includes(e.category) && finite(e.amount) && Number.isInteger(e.day) && e.day >= 0 && e.day <= s.day && (e.routeId === null || /^route-[1-9]\d*$/.test(e.routeId)) && (!e.city || Object.hasOwn(CITIES, e.city)) && (!e.good || GOODS.some(g => g.id === e.good)) && (e.quantity === undefined || finite(e.quantity) && e.quantity >= 0)), '取引履歴が不正です。');
@@ -369,6 +335,5 @@ export function deserialize(raw, nested = false) {
     const c=s.competitors[i]; check(typeof c.name==='string' && c.name.length<=80 && c.day<=s.day && (s.gameOver || c.gameOver || c.day===s.day), '競合情報が不正です。');
     c.markets=s.markets; s.competitors[i]=deserialize(JSON.stringify(c),true); s.competitors[i].markets=s.markets;
   }
-  validateManagement(s,nested);
   return s;
 }
