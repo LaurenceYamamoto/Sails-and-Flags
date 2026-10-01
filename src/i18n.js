@@ -1,3 +1,5 @@
+import {translations} from './translations.js';
+import {extraTranslations} from './translation-extras.js';
 import {escapeName} from './identity.js';
 // UI locale is separate from simulation and save data.
 export const ja = {
@@ -28,13 +30,13 @@ export const ja = {
   cashTrend: '直近の現金推移', historyEmpty: '日数を進めると現金の推移が表示されます。',
   ports: '寄港先', taxRate: '取引税', speed: '速度', policy: '積載条件', volume: '積載量', dailyCost: '会社の固定費', capital: '開始資金',
 };
-ja.prototype = 'P5 地域限定ベータ';
-ja.footer = '1700年をモチーフにした地域限定ベータ。陸上交易と対応言語の拡充は今後の実装です。';
+ja.prototype = 'P6 地域限定リリース候補';
+ja.footer = '1700年をモチーフにした地域限定リリース候補。陸上交易は今後の実装です。';
 ja.cashTrend = '直近365日の現金・総資産';
 ja.escort='護衛費';ja.diplomacyInvestment='外交投資';
 ja.destination = '寄港地2';
 export const en = {
-  subtitle:'A trading company’s logbook', prototype:'P5 Regional beta', day:'Elapsed days', cash:'Cash', assets:'Total assets', operating:'Operating result',
+  subtitle:'A trading company’s logbook', prototype:'P6 Regional release candidate', day:'Elapsed days', cash:'Cash', assets:'Total assets', operating:'Operating result',
   play:'Run', pause:'Pause', save:'Save', load:'Load', reset:'New company', map:'Atlantic trade network', mapSub:'Drag for two ports; use Plan a circuit for multiple stops. Click ships or competitor routes for details.', schematic:'Coastline: Natural Earth · gameplay distances',
   market:'Port market', product:'Commodity', price:'Unit price', stock:'Stock', production:'Production / day', demand:'Base demand / day', fleet:'Trade route details', fleetSub:'Select a route to add ships, set cargo policy and inspect results. Configuration pauses time.', routes:'Routes', ships:'Ships', licenses:'Trading licenses',
   buy:'Buy', owned:'Owned', acquire:'Buy license', capacity:'Capacity', range:'Range', upkeep:'Upkeep', daily:'/ day', departure:'Starting port', destination:'Port 2', vessel:'First ship', margin:'Minimum price gap (%)', allowed:'Allowed commodities', create:'Create route', routeSetup:'Create a trade route', noShip:'No idle ships', noRoute:'Drag between cities or choose New route, then select a ship type to begin.',
@@ -42,7 +44,7 @@ export const en = {
   wait:'Waiting for a profitable opportunity', ready:'Ready', sailing:'Sailing', empty:'Repositioning empty', stopped:'Service stopped', stopping:'Stop on arrival', dayUnit:'days', cargo:'Cargo', noCargo:'Empty', unassigned:'Idle', journal:'Company ledger', journalSub:'Purchases, sales, tax and operating costs.', transaction:'Transaction', amount:'Amount', noEntry:'Your trading history starts here.',
   guideTitle:'Begin your first voyage', guide1:'1. Buy a Spanish license', guide2:'2. Drag Kingston to Havana and open with a sloop', guide3:'3. Run time to start trading', guideBody:'Sell rum in Havana and sugar in Kingston. Watch prices and invest trading profits in another ship.', cashWarning:'Cash covers less than 30 days of fixed costs. Check arrival times and expenses.', bankrupt:'The company is bankrupt', bankruptBody:'Cash is negative, so time has stopped. Inspect the ledger, load a save or start a new company.',
   saved:'Game saved.', loaded:'Game loaded.', noSave:'No saved games.', storageError:'Browser storage is unavailable or full. Export a save file to protect your progress.', resetConfirm:'Discard current unsaved progress and establish a new company?', loadConfirm:'Discard current unsaved progress and load this save?',
-  footer:'Regional beta inspired by 1700. Land trade and additional languages are planned for later phases.', ledgerNote:'Purchases immediately affect the operating result; a voyage may appear unprofitable before arrival. Ships, licenses, acquisitions, diplomacy, technology, shipbuilding and city development are separate investments.', investments:'Investments', licenseDaily:'License upkeep', purchase:'Commodity purchase', sale:'Commodity sale', tax:'Transaction tax', shipPurchase:'Ship purchase', licensePurchase:'License purchase', acquisition:'Company acquisition', acquiredCash:'Acquired cash / debt',
+  footer:'Regional release candidate inspired by 1700. Land trade is planned for a later phase.', ledgerNote:'Purchases immediately affect the operating result; a voyage may appear unprofitable before arrival. Ships, licenses, acquisitions, diplomacy, technology, shipbuilding and city development are separate investments.', investments:'Investments', licenseDaily:'License upkeep', purchase:'Commodity purchase', sale:'Commodity sale', tax:'Transaction tax', shipPurchase:'Ship purchase', licensePurchase:'License purchase', acquisition:'Company acquisition', acquiredCash:'Acquired cash / debt',
   reserveNote:'Auto-loading reserves operating cash for the voyage. Arrival prices can change.', cashTrend:'Cash and total assets · last 365 days', historyEmpty:'Run time to see financial history.', ports:'Ports', taxRate:'Tax', speed:'Speed', policy:'Cargo policy', volume:'Cargo volume', dailyCost:'Fixed costs', capital:'Starting cash',
 };
 en.escort='Escort fees';en.diplomacyInvestment='Diplomatic investment';
@@ -56,17 +58,30 @@ ja.developmentPurchase="都市開発権取得";en.developmentPurchase="Developme
 ja.developmentSale="都市開発権売却";en.developmentSale="Development right sale";
 ja.cityInvestment="都市投資";en.cityInvestment="City investment";
 ja.developmentIncome="都市の税収分配";en.developmentIncome="City tax share";
-export const locale = () => language === 'ja' ? 'ja-JP' : 'en-GB';
-export function setLanguage(value) { language = value === 'en' ? 'en' : 'ja'; }
+export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
+export const catalog = Object.freeze({...translations,...extraTranslations});
+const languageIndex={'zh-CN':0,ko:1,fr:2,es:3};
+export const locale = () => LANGUAGES[language].locale;
+export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'ja'; }
 export const getLanguage = () => language;
-export const tx = (japanese, english) => language === 'ja' ? japanese : english;
-export function t(key) { return (language === 'ja' ? ja : en)[key] ?? key; }
+export function tx(japanese, english, values = {}) {
+  const text = language === 'ja' ? japanese : language === 'en' ? english : catalog[english]?.[languageIndex[language]] ?? english;
+  return text.replace(/\{(\w+)\}/g, (token,key) => Object.hasOwn(values,key) ? String(values[key]) : token);
+}
+export function t(key) { return tx(ja[key] ?? key,en[key] ?? key); }
 const names = {
   キングストン:'Kingston', ハバナ:'Havana', ロンドン:'London', カディス:'Cadiz', ナント:'Nantes', アムステルダム:'Amsterdam', リスボン:'Lisbon', サンティアゴ:'Santiago', サントドミンゴ:'Santo Domingo', サンフアン:'San Juan', ブリッジタウン:'Bridgetown', ウィレムスタット:'Willemstad',
   イングランド:'England', スペイン:'Spain', フランス:'France', オランダ:'Netherlands', ポルトガル:'Portugal', 砂糖:'Sugar', ラム酒:'Rum', 織物:'Cloth', 工具:'Tools', 食料:'Food', タバコ:'Tobacco', 木材:'Timber', カカオ:'Cocoa', 武器:'Weapons', スループ:'Sloop', ブリッグ:'Brig', フリュート:'Fluyt',
 };
 // Geographic names may retain their native script regardless of UI language.
-export const nameOf = entity => entity.customName!==undefined?escapeName(entity.customName):entity.mapName ?? tx(entity.name, entity.nameEn ?? names[entity.name] ?? entity.name);
+export function nameOf(entity) {
+  if(entity.customName!==undefined) return escapeName(entity.customName);
+  if(entity.mapName!==undefined) return entity.mapName;
+  const english=entity.nameEn ?? names[entity.name] ?? entity.name;
+  const design=english.match(/^(Sloop|Brig|Fluyt|Corvette) design( #\d+)?$/);
+  if(design && language!=='ja') return tx(entity.name,'{hull} design{suffix}',{hull:tx(design[1],design[1]),suffix:design[2]??''});
+  return tx(entity.name,english);
+}
 export function errorMessage(error) {
   const messages = {
 "技術投資の項目・金額を確認してください。":"Check the technology and investment amount.",
@@ -112,5 +127,5 @@ export function errorMessage(error) {
     '航行中は解除できません。停止して到着を待ってください。':'Stop departures and wait for ships to arrive before unassigning.',
     '破産後は操作できません。新しいゲームを開始してください。':'This company is bankrupt. Load a save or start a new company.',
   };
-  return language === 'ja' || !/[\u3000-\u9fff]/.test(error.message) ? error.message : messages[error.message] ?? 'Invalid operation or save data. Check the selected ships, licenses and file.';
+  return language === 'ja' ? error.message : tx(error.message,messages[error.message] ?? (catalog[error.message] ? error.message : 'Invalid operation or save data. Check the selected ships, licenses and file.'));
 }

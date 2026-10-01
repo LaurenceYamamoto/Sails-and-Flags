@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sails & Flags · component benchmark</title><link rel="stylesheet" href="../style.css">
+<body><main><h1>200 ships / 200 routes · component benchmark</h1><p>Isolated synthetic workload: no player saves are read or written. Measures simulation, map and selected-route DOM updates at 16× for 10 seconds. Keep this page active. This is not a measurement of the complete application.</p><button id="start">Run benchmark</button><pre id="result" aria-live="polite">Ready</pre><section id="map" class="panel map-panel"></section><section id="routes" class="panel"></section></main>
+<script type="module">
+import {stressFixture} from './stress-fixture.js';
+import {tick,serialize,deserialize} from '../src/engine.js';
+import {renderMap} from '../src/map-view.js';
+import {renderRoutes} from '../src/routes-view.js';
+import {CITIES} from '../src/data.js';
+import {createClock,voyageProgress} from '../src/clock.js';
+import {setLanguage} from '../src/i18n.js';
+setLanguage('en');
+const startButton=document.querySelector('#start'),result=document.querySelector('#result'),map=document.querySelector('#map'),routes=document.querySelector('#routes');
+const stats=values=>{values.sort((a,b)=>a-b);return {p95:values[Math.floor(values.length*.95)],max:values.at(-1)};};
+startButton.onclick=()=>{
+ startButton.disabled=true;result.textContent='Running';const s=stressFixture(),clock=createClock(),frames=[],updates=[];
+ const transform=v=>{const w=v.voyage,p=voyageProgress(w,clock.fraction),a=CITIES[w?.from??v.nextFrom],b=CITIES[w?.to??v.nextFrom];return `translate(${a.x+(b.x-a.x)*p},${a.y+(b.y-a.y)*p+23})`;};
+ const draw=()=>{map.innerHTML=renderMap(s,'kingston',s.routes[0].id,transform);routes.innerHTML=renderRoutes({...s,routes:[s.routes[0]]},{cash:String,decimal:String,signed:String,tone:()=>''});};
+ draw();let first=null,previous=null,paused=false;
+ const visibility=()=>{if(document.hidden)paused=true;};document.addEventListener('visibilitychange',visibility);
+ function frame(now){
+  first??=now;if(previous!==null)frames.push(now-previous);previous=now;
+  const start=performance.now();const days=clock.advance(now,true,16,()=>{tick(s);if(s.day%30===0)deserialize(serialize(s));});if(days){draw();updates.push(performance.now()-start);}
+  for(const marker of map.querySelectorAll('[data-ship]'))marker.setAttribute('transform',transform(s.ships.find(v=>v.id===marker.dataset.ship)));
+  if(now-first<10000&&!paused){requestAnimationFrame(frame);return;}
+  document.removeEventListener('visibilitychange',visibility);
+  result.textContent=JSON.stringify({userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],ships:s.ships.length,routes:s.routes.length,seconds:(now-first)/1000,days:s.day,hiddenDuringRun:paused,frameMs:stats(frames),dailySimulationAndDOMMs:stats(updates),criteria:'Visible run: >=140 days / 10s; p95 frame <=50ms; p95 update <=62.5ms',pass:!paused&&s.day>=140&&stats(frames).p95<=50&&stats(updates).p95<=62.5},null,2);startButton.disabled=false;
+ }
+ requestAnimationFrame(frame);
+};
+</script></body></html>

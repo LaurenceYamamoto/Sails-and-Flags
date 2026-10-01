@@ -1,8 +1,16 @@
 {
   "name": "sails-and-flags",
-  "version": "0.7.2",
+  "version": "1.0.0-rc.1",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node scripts/serve.mjs", "test": "node --test", "benchmark": "node scripts/benchmark.mjs" },
-  "engines": { "node": ">=22" }
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test",
+    "benchmark": "node scripts/benchmark.mjs",
+    "test:campaign": "node --test tests/campaign.test.js",
+    "benchmark:scale": "node scripts/benchmark-scale.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

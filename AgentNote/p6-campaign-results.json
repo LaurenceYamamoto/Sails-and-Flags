@@ -1,0 +1,137 @@
+[
+  {
+    "seed": 1,
+    "days": 18250,
+    "elapsedMs": 13366.4269,
+    "p95TickMs": 1.7099000000002889,
+    "maxTickMs": 29.7162,
+    "cash": 219840.49728545957,
+    "assets": 252296.33750221765,
+    "ships": 14,
+    "maxShips": 14,
+    "maxRoutes": 1,
+    "firstRankDay": null,
+    "restores": 50,
+    "saveBytes": 339335,
+    "events": {
+      "raided": 151,
+      "war": 20,
+      "peace": 19,
+      "shipLost": 1
+    },
+    "decisions": {
+      "expanded": 13,
+      "cooldown": 472,
+      "budget": 1,
+      "threshold": 187,
+      "reserve": 1,
+      "shrunk": 230,
+      "reused": 228,
+      "replaced": 1,
+      "sailing": 1
+    },
+    "competitors": [
+      {
+        "name": "Channel Company",
+        "bankrupt": false,
+        "ships": 12,
+        "assets": 19745295.663631137
+      },
+      {
+        "name": "Antilles Company",
+        "bankrupt": false,
+        "ships": 4,
+        "assets": 1324050.8196277306
+      }
+    ]
+  },
+  {
+    "seed": 42,
+    "days": 18250,
+    "elapsedMs": 7838.9498,
+    "p95TickMs": 0.8918999999987136,
+    "maxTickMs": 4.561200000000099,
+    "cash": 188912.5702342095,
+    "assets": 221457.67398784464,
+    "ships": 14,
+    "maxShips": 14,
+    "maxRoutes": 1,
+    "firstRankDay": null,
+    "restores": 50,
+    "saveBytes": 338787,
+    "events": {
+      "war": 22,
+      "raided": 140,
+      "peace": 20,
+      "shipLost": 2
+    },
+    "decisions": {
+      "expanded": 12,
+      "cooldown": 170,
+      "budget": 2,
+      "threshold": 65,
+      "shrunk": 79,
+      "reused": 77,
+      "reserve": 2,
+      "sailing": 1,
+      "replaced": 2
+    },
+    "competitors": [
+      {
+        "name": "Channel Company",
+        "bankrupt": false,
+        "ships": 12,
+        "assets": 19719281.442247037
+      },
+      {
+        "name": "Antilles Company",
+        "bankrupt": false,
+        "ships": 4,
+        "assets": 1320857.7160343458
+      }
+    ]
+  },
+  {
+    "seed": 1700,
+    "days": 18250,
+    "elapsedMs": 7893.318800000001,
+    "p95TickMs": 0.8814999999995052,
+    "maxTickMs": 9.486300000000483,
+    "cash": 326484.363828366,
+    "assets": 358717.2966732354,
+    "ships": 14,
+    "maxShips": 15,
+    "maxRoutes": 1,
+    "firstRankDay": null,
+    "restores": 50,
+    "saveBytes": 338742,
+    "events": {
+      "war": 18,
+      "raided": 154,
+      "peace": 18,
+      "shipLost": 2
+    },
+    "decisions": {
+      "expanded": 13,
+      "cooldown": 315,
+      "shrunk": 151,
+      "reused": 149,
+      "threshold": 109,
+      "replaced": 2
+    },
+    "competitors": [
+      {
+        "name": "Channel Company",
+        "bankrupt": false,
+        "ships": 12,
+        "assets": 20971722.18984437
+      },
+      {
+        "name": "Antilles Company",
+        "bankrupt": false,
+        "ships": 4,
+        "assets": 1389540.366357081
+      }
+    ]
+  }
+]

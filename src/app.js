@@ -7,7 +7,7 @@ import {renderIndustry,renderDevelopment,renderDesignEstimate,initialDesign} fro
 let designDraft=initialDesign();
 import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
 import { createGame, price, tick, buyShip, buyLicense, openCircuit, quoteCircuitOpening, circuitKey, routeLegs, normalizeStops, MAX_STOPS, updateRoute, toggleRoute, removeRoute, assignShip, releaseShip, serialize, deserialize, assets, operatingProfit } from './engine.js';
-import { t, tx, locale, setLanguage, getLanguage, nameOf as name, errorMessage } from './i18n.js';
+import { LANGUAGES, t, tx, locale, setLanguage, getLanguage, nameOf as name, errorMessage } from './i18n.js';
 import { renderOpeningQuote } from './route-setup-view.js';
 import { renderRoutes, routeTitle } from './routes-view.js';
 import { renderMap } from './map-view.js';
@@ -103,7 +103,7 @@ function chart() {
 }
 function competitors() { return renderCompetition(state,selectedCompetitor,{cash,signed}); }
 function saveDialog() {
-  const labels={manual:tx('手動保存','Manual save'),auto:tx('自動保存','Autosave'),backup:tx('前回の保存','Previous save'),v5:'v5',autoV5:tx('v5 自動保存','v5 Autosave'),backupV5:tx('v5 前回保存','v5 Previous save'),v4:'v4',autoV4:tx('v4 自動保存','v4 Autosave'),backupV4:tx('v4 前回保存','v4 Previous save'),v3:'v3',autoV3:tx('v3 自動保存','v3 Autosave'),backupV3:tx('v3 前回保存','v3 Previous save'),v2:'v2',v1:'v1'};
+  const labels={preserved:tx('保全保存（P6）','Preserved save (P6)'),manual:tx('手動保存','Manual save'),auto:tx('自動保存','Autosave'),backup:tx('前回の保存','Previous save'),v5:'v5',autoV5:tx('v5 自動保存','v5 Autosave'),backupV5:tx('v5 前回保存','v5 Previous save'),v4:'v4',autoV4:tx('v4 自動保存','v4 Autosave'),backupV4:tx('v4 前回保存','v4 Previous save'),v3:'v3',autoV3:tx('v3 自動保存','v3 Autosave'),backupV3:tx('v3 前回保存','v3 Previous save'),v2:'v2',v1:'v1'};
   return `<dialog aria-labelledby="saves-title"><h2 id="saves-title">${t('load')}</h2>${saves.length?saves.map(s=>`<p><button data-action="choose-save" data-id="${s.slot}" ${s.valid?'':'disabled'}>${labels[s.slot]} · ${s.valid?`${s.day} ${t('dayUnit')} · ${cash(s.state.cash)}`:tx('破損データ','Invalid data')}</button></p>`).join(''):`<p>${t('noSave')}</p>`}<button data-action="cancel">${t('cancel')}</button></dialog>`;
 }
 function render() {
@@ -112,7 +112,7 @@ function render() {
   const focused=document.activeElement, focusedForm=focused?.closest('form');
   const restoreFocus=focusedForm && focused.name ? {form:focusedForm.id,name:focused.name,index:[...focusedForm.elements].indexOf(focused)} : null;
   const view=document.createElement('template');
-  view.innerHTML=`<header><div class="brand"><div class="brand-icon">⚑</div><div><h1>SAILS <i>&</i> FLAGS</h1><span>${state.companyName?escape(state.companyName):t('subtitle')}</span><button data-action="rename-company">${tx('会社名を変更','Rename company')}</button></div></div><div class="time"><span class="eyebrow">${t('prototype')}</span><strong>${date()}</strong><span class="small">${state.day} ${t('dayUnit')} · <span id="time-status">${running?tx('進行中','Running'):tx('一時停止中','Paused')}</span></span><div class="day-track" aria-hidden="true"><span id="day-progress"></span></div></div><div class="time-controls"><button data-action="play" class="primary" ${state.gameOver?'disabled':''}>${running?'Ⅱ '+t('pause'):'▶ '+t('play')}</button><select id="speed" aria-label="${t('speed')}">${[1,4,16].map(n=>option(String(n),`${n}×`,String(speed))).join('')}</select><select id="language" aria-label="Language">${option('ja','日本語',getLanguage())}${option('en','English',getLanguage())}</select></div></header>
+  view.innerHTML=`<header><div class="brand"><div class="brand-icon">⚑</div><div><h1>SAILS <i>&</i> FLAGS</h1><span>${state.companyName?escape(state.companyName):t('subtitle')}</span><button data-action="rename-company">${tx('会社名を変更','Rename company')}</button></div></div><div class="time"><span class="eyebrow">${t('prototype')}</span><strong>${date()}</strong><span class="small">${state.day} ${t('dayUnit')} · <span id="time-status">${running?tx('進行中','Running'):tx('一時停止中','Paused')}</span></span><div class="day-track" aria-hidden="true"><span id="day-progress"></span></div></div><div class="time-controls"><button data-action="play" class="primary" ${state.gameOver?'disabled':''}>${running?'Ⅱ '+t('pause'):'▶ '+t('play')}</button><select id="speed" aria-label="${t('speed')}">${[1,4,16].map(n=>option(String(n),`${n}×`,String(speed))).join('')}</select><select id="language" aria-label="${tx('言語','Language')}">${Object.entries(LANGUAGES).map(([id,l])=>option(id,l.label,getLanguage())).join('')}</select></div></header>
   <main><div class="summary"><div><span>${t('cash')}</span><strong id="cash">${cash(state.cash)}</strong></div><div><span>${t('assets')}</span><strong>${cash(assets(state))}</strong></div><div><span>${t('operating')}</span><strong class="${tone(operatingProfit(state))}">${signed(operatingProfit(state))}</strong></div><div><span>${t('dailyCost')}</span><strong>${cash(fixedCost())}<small> ${t('daily')}</small></strong></div></div>
   <div class="save-toolbar"><button data-action="save">${t('save')}</button><button data-action="load">${t('load')}</button><button data-action="export">${tx('書き出し','Export')}</button><button data-action="import">${tx('ファイル読込','Import')}</button><button data-action="reset" class="text-button">${t('reset')}</button><span class="small muted">${tx('自動保存：操作時・30日ごと','Autosave: on changes and every 30 days')}${autoDay!==null?` · ${autoDay} ${t('dayUnit')}`:''}</span><input type="file" id="import-file" accept=".json,application/json" hidden></div>
   ${storageWarning?`<div class="warning" role="alert">${t('storageError')}</div>`:''}${state.gameOver?`<section class="warning danger" role="alert"><h2>${t('bankrupt')}</h2><p>${t('bankruptBody')}</p></section>`:state.cash<fixedCost()*30?`<div class="warning" role="alert">${t('cashWarning')}</div>`:''}
@@ -132,7 +132,7 @@ function render() {
     app.querySelector('.brand').replaceWith(view.content.querySelector('.brand'));
     const play=app.querySelector('[data-action="play"]'); play.textContent=running?'Ⅱ '+t('pause'):'▶ '+t('play'); play.disabled=state.gameOver||mapPlanning;
     app.querySelector('#speed').value=String(speed); app.querySelector('#speed').setAttribute('aria-label',t('speed'));
-    app.querySelector('#language').value=getLanguage();
+    app.querySelector('#language').value=getLanguage(); app.querySelector('#language').setAttribute('aria-label',tx('言語','Language'));
     app.querySelector('main').replaceWith(view.content.querySelector('main'));
     app.querySelectorAll('dialog').forEach(d=>d.remove()); app.append(...view.content.querySelectorAll('dialog'));
   } else app.append(view.content);
@@ -161,7 +161,7 @@ app.addEventListener('change',async e=>{
   if(e.target.id==='show-rivals'){pauseTime();showRivals=e.target.checked;if(!showRivals)selectedCompetitor=null;render();}
   if(e.target.closest('#design-form')){pauseTime();try{designDraft=readDesign(e.target.form);render();}catch(error){notice(errorMessage(error));}return;}
   if(e.target.id==='speed') {const next=Number(e.target.value),days=advanceTime(performance.now());speed=next;if(days)render();}
-  if(e.target.id==='language') {pauseTime();setLanguage(e.target.value);try{localStorage.setItem('sails-and-flags.language',getLanguage());}catch{storageWarning=true;}render();}
+  if(e.target.id==='language') {pauseTime();clearTimeout(notice.timer);document.querySelector('#toast').classList.remove('show');document.querySelector('#toast').textContent='';setLanguage(e.target.value);try{localStorage.setItem('sails-and-flags.language',getLanguage());}catch{storageWarning=true;}render();}
   if(e.target.id==='route-sort') {pauseTime();routeSort=e.target.value;render();}
   if(e.target.id==='city-select') {pauseTime();selectedCity=e.target.value;render();}
   if(e.target.closest('#route-form')&&['from','to','extra','shipType'].includes(e.target.name)) {draft=readDraft(e.target.form);render();}
@@ -203,7 +203,7 @@ app.addEventListener('click',e=>{
     if(action==='select-competitor'){selectedCompetitor=Number(id);showRivals=true;}
     if(['replace-types','replace-automation','replace-route'].includes(action)){const catalog=Object.keys(shipCatalog(state)),mode=action==='replace-types'?'type':action==='replace-automation'?'automation':'route',source=mode==='automation'?(state.routes[0]?.autoShipType??catalog[0]):mode==='route'?(state.ships.find(v=>v.routeId===id)?.type??catalog[0]):(state.ships[0]?.type??catalog[0]);fleetEdit={mode,source,target:catalog.find(type=>type!==source)??source,routeId:mode==='route'?id:undefined};}
     if(action==='rename-company')nameEdit={kind:'company',value:state.companyName??tx('あなたの会社','Your company')};
-    if(action==='rename-design'){const spec=shipSpec(state,id);nameEdit={kind:'design',id,value:spec.customName??(getLanguage()==='ja'?spec.name:spec.nameEn)};}
+    if(action==='rename-design'){const spec=shipSpec(state,id);nameEdit={kind:'design',id,value:spec.customName??name(spec)};}
     if(action==='rename-ship')nameEdit={kind:'ship',id,value:shipName(state,state.ships.find(v=>v.id===id))};
     if(action==='buy')buyShip(state,id);
     if(action==='buy-yard')buyShipyard(state);
@@ -225,7 +225,7 @@ app.addEventListener('click',e=>{
     if(action==='load'){try{saves=listSaves(localStorage);}catch{throw new Error(t('storageError'));}}
     if(action==='choose-save'){pendingRestore=saves.find(s=>s.slot===id&&s.valid)?.state;if(!pendingRestore)throw new Error(t('noSave'));saves=null;confirmation='load';}
     if(action==='reset')confirmation='reset';
-    if(action==='confirm') {state=confirmation==='load'?pendingRestore:createGame();clock.reset();selectedRoute=null;selectedCompetitor=null;mapPlanning=false;plannedStops=[];selectedCity='kingston';closeDialogs();persist();notice(t('loaded'));}
+    if(action==='confirm') {const restoring=confirmation==='load';state=restoring?pendingRestore:createGame();clock.reset();selectedRoute=null;selectedCompetitor=null;mapPlanning=false;plannedStops=[];selectedCity='kingston';closeDialogs();persist();notice(restoring?t('loaded'):tx('新しい会社を設立しました。','New company established.'));}
     if(action==='export') {exportText=serialize(state);exportURL=URL.createObjectURL(new Blob([exportText],{type:'application/json'}));}
     if(action==='import'){document.querySelector('#import-file').click();return;}
     if(['buy','buy-yard','buy-right','license','toggle','release','release-ship','confirm-acquisition','auto-route'].includes(action))persist();

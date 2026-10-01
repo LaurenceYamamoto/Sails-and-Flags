@@ -7,6 +7,7 @@ import { setLanguage,nameOf } from '../src/i18n.js';
 import { serialize } from '../src/engine.js';
 import {createGame} from './baseline.js';
 import { renderMap } from '../src/map-view.js';
+import {stressFixture} from '../scripts/stress-fixture.js';
 function inside(p,ring){let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a.y>p.y)!==(b.y>p.y)&&p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)yes=!yes;}return yes;}
 function segmentDistance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
 test('all cities use the same projection as land and lie on land or its generalized coast',()=>{
@@ -26,4 +27,13 @@ test('map renders all circuit preview legs and selectable rival routes without c
   const html=renderMap(state,'kingston',null,transform,{mapPlanning:true,plannedStops:['kingston','havana','santiago'],selectedCompetitor:1});
   assert.equal((html.match(/class="planned-route/g)||[]).length,3);assert.match(html,/return-leg/);assert.equal((html.match(/class="rival-route/g)||[]).length,2);assert.match(html,/Antilles Company/);assert.match(html,/data-action="select-competitor"/);assert.match(html,/Santiago 〔3〕/);
   const hidden=renderMap(state,'kingston',null,transform,{showRivals:false});assert.doesNotMatch(hidden,/class="rival-route/);assert.equal(serialize(state),before);
+});
+
+test('200 routes share visual legs while all 200 ships remain selectable and the selected route stays on top',()=>{
+  const s=stressFixture(),before=serialize(s),html=renderMap(s,'kingston',s.routes[0].id,()=> 'translate(0,0)');
+  assert.ok((html.match(/class="route-line/g)||[]).length<=69);
+  assert.equal((html.match(/data-ship=/g)||[]).length,200);
+  const lines=[...html.matchAll(/class="route-line ([^"]*)"/g)].map(m=>m[1]);
+  assert.ok(lines.slice(-3).every(v=>v.includes('selected')));
+  assert.equal(serialize(s),before);
 });

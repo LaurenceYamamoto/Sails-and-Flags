@@ -1,0 +1,22 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "viewport": [
+    1280,
+    720
+  ],
+  "ships": 200,
+  "routes": 200,
+  "seconds": 10.000504,
+  "days": 160,
+  "hiddenDuringRun": false,
+  "frameMs": {
+    "p95": 133.29999999999927,
+    "max": 200
+  },
+  "dailySimulationAndDOMMs": {
+    "p95": 21.400000035762787,
+    "max": 158.89999997615814
+  },
+  "criteria": "Visible run: >=140 days / 10s; p95 frame <=50ms; p95 update <=62.5ms",
+  "pass": false
+}

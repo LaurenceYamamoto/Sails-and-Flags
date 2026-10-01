@@ -11,7 +11,15 @@ const landPath=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=pr
 function line(a,b,attributes=''){const from=CITIES[a],to=CITIES[b];return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" ${attributes}/>`;}
 export function renderMap(state, selectedCity, selectedRoute, shipTransform, {plannedStops=[],mapPlanning=false,showRivals=true,selectedCompetitor=null}={}) {
   const rivalLines=showRivals?state.competitors.map((company,index)=>company.routes.map(r=>`<g class="rival-route ${selectedCompetitor===index?'selected':''} ${company.gameOver?'inactive':''}" data-action="select-competitor" data-id="${index}" role="button" tabindex="0" aria-label="${escape(company.name)} · ${routeTitle(r)}"><title>${escape(company.name)} · ${routeTitle(r)}</title>${routeLegs(r).map(([a,b])=>line(a,b,'class="rival-hit"')+line(a,b,'class="rival-line"')).join('')}</g>`).join('')+company.ships.filter(s=>s.routeId).map(ship=>`<g class="rival-ship" data-rival-ship="${ship.id}" data-company="${index}" data-action="select-competitor" data-id="${index}" role="button" tabindex="0" aria-label="${escape(company.name)} · ${escape(shipName(company,ship))} · ${name(shipSpec(company,ship.type))}" transform="${shipTransform(ship)}"><title>${escape(company.name)}</title><circle r="13" class="ship-hit"/><path d="M0-8L8 0L0 8L-8 0Z" fill="#93e2f5" stroke="#153740" stroke-width="2"/></g>`).join('')).join(''):'';
-  const lines=state.routes.map(r=>routeLegs(r).map(([a,b])=>line(a,b,`class="route-line ${r.active?'':'inactive'} ${r.id===selectedRoute&&selectedCompetitor===null?'selected':''}"`)).join('')).join('');
+  // Player routes are selected via ships; draw shared legs once per visual state.
+  // Selected legs go last so an overlapping route cannot obscure the selection.
+  const shared=new Map();
+  for(const r of state.routes)for(const [a,b] of routeLegs(r)) {
+    const selected=r.id===selectedRoute&&selectedCompetitor===null;
+    const key=[a,b].sort().join(':')+':'+r.active+':'+selected;
+    shared.set(key,{a,b,active:r.active,selected});
+  }
+  const lines=[...shared.values()].sort((a,b)=>Number(a.selected)-Number(b.selected)).map(({a,b,active,selected})=>line(a,b,`class="route-line ${active?'':'inactive'} ${selected?'selected':''}"`)).join('');
   const markers=state.routes.map(r=>routeShips(state,r).map(ship=>`<g class="ship-marker ${r.id===selectedRoute&&selectedCompetitor===null?'selected':''}" data-ship="${ship.id}" data-action="select-route" data-id="${r.id}" tabindex="0" role="button" aria-label="${escape(shipName(state,ship))} · ${name(shipSpec(state,ship.type))} #${ship.id.split('-')[1]} · ${t('routes')}" transform="${shipTransform(ship)}"><title>${routeTitle(r)}</title><circle r="14" class="ship-hit"/><circle r="10" fill="#edc786"/><path d="M-5 3H6L3 6H-3ZM0-8V1H6Z" fill="#17383b"/></g>`).join('')).join('');
   const planned=plannedStops.length>1?routeLegs({stops:plannedStops}).map(([a,b],i)=>line(a,b,`class="planned-route ${i===normalizeStops(plannedStops).length-1?'return-leg':''}"`)).join(''):'';
   return `<svg class="map" viewBox="0 0 900 520" role="group" aria-label="${t('map')}">
