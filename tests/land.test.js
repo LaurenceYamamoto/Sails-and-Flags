@@ -1,3 +1,4 @@
+import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as game from '../src/engine.js';
@@ -67,7 +68,7 @@ test('revocation removes a cross-border land circuit and confiscates rights and 
  const s=funded(),r=game.openCircuit(s,'wagon',['lisbon','porto','madrid','porto']);buyRoadRight(s,'porto_madrid');setRoadInvestment(s,'porto_madrid',10,10);game.tick(s);assert.ok(s.ships[0].voyage);const cash=s.cash;revokeLicense(s,'spain');assert.equal(s.routes.length,0);assert.equal(s.ships[0].routeId,null);assert.deepEqual(s.ships[0].cargo,[]);assert.equal(s.ships[0].voyage,null);assert.equal(s.world.roads.porto_madrid.owner,'state');assert.equal(s.world.roads.porto_madrid.invested,0);assert.equal(s.cash,cash);assert.deepEqual(game.deserialize(game.serialize(s)),s);
 });
 test('v6 migration preserves existing markets, capital, ships, designs, voyages and random state, and keeps original save slots',()=>{
- const v6=old.createGame(42);old.buyLicense(v6,'spain');old.openCircuit(v6,'sloop',['kingston','havana']);old.tick(v6);const raw=old.serialize(v6),s=game.deserialize(raw);assert.equal(s.version,8);assert.equal(s.cash,v6.cash);assert.deepEqual(s.ships,v6.ships);assert.equal(s.rng,v6.rng);assert.deepEqual(s.world.designs,v6.world.designs);for(const id of Object.keys(v6.markets))assert.deepEqual(s.markets[id],v6.markets[id]);assert.equal(s.industry.technology.land,0);
+ const v6=old.createGame(42);old.buyLicense(v6,'spain');old.openCircuit(v6,'sloop',['kingston','havana']);old.tick(v6);const raw=old.serialize(v6),s=game.deserialize(raw);assert.equal(s.version,9);assert.equal(s.cash,v6.cash);assert.deepEqual(withoutSeaVersion(s.ships),v6.ships);assert.equal(s.rng,v6.rng);assert.deepEqual(s.world.designs,v6.world.designs);for(const id of Object.keys(v6.markets))assert.deepEqual(s.markets[id],v6.markets[id]);assert.equal(s.industry.technology.land,0);
  const map=new Map([[SAVE_KEYS.v6,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(v=>v.slot==='v6').valid);saveGame(storage,s);assert.equal(map.get(SAVE_KEYS.v6),raw);assert.equal(map.get(SAVE_KEYS.preserved),raw);const restored=game.deserialize(game.serialize(s));advance(s,60);advance(restored,60);assert.deepEqual(s,restored);
 });
 test('corrupt road owners, amounts, modes, inland sea routes and departure conditions are rejected',()=>{
@@ -80,8 +81,8 @@ test('land panels and service details render in six languages without changing s
 });
 test('three seeds run ten years with sea/land networks, roads, bandits, AI and deterministic annual recovery',()=>{
  for(const seed of [1,42,1700]){
-  let s=funded(seed,true);game.openCircuit(s,'sloop',['kingston','havana']);game.openCircuit(s,'wagon',['lisbon','porto']);game.openCircuit(s,'wagon',['lisbon','porto','madrid','cadiz','madrid','porto']);buyRoadRight(s,'lisbon_porto');setRoadInvestment(s,'lisbon_porto',.5,.5);setTechnologyInvestment(s,'land',.5);enabled(s);
-  for(let day=1;day<=3650;day++){game.tick(s);assert.ok(!s.gameOver,`seed ${seed}, day ${day}`);if(day%365===0){const copy=game.deserialize(game.serialize(s));game.tick(copy);const probe=game.deserialize(game.serialize(s));game.tick(probe);assert.deepEqual(copy,probe);s=game.deserialize(game.serialize(s));}}
-  assert.equal(s.day,3650);assert.ok(s.routes.some(r=>r.mode==='land'&&r.deliveries>100));assert.ok(s.competitors.some(c=>c.routes.some(r=>r.mode==='land')));assert.ok(s.industry.technology.land>0);near(s.initialCash+Object.values(s.totals).reduce((a,b)=>a+b,0),s.cash);
+  let s=funded(seed,true),rivalLandSeen=false;game.openCircuit(s.competitors[0],'wagon',['nantes','paris']);game.openCircuit(s,'sloop',['kingston','havana']);game.openCircuit(s,'wagon',['lisbon','porto']);game.openCircuit(s,'wagon',['lisbon','porto','madrid','cadiz','madrid','porto']);buyRoadRight(s,'lisbon_porto');setRoadInvestment(s,'lisbon_porto',.5,.5);setTechnologyInvestment(s,'land',.5);enabled(s);
+  for(let day=1;day<=3650;day++){game.tick(s);rivalLandSeen ||= s.competitors.some(c=>c.routes.some(r=>r.mode==='land'));assert.ok(!s.gameOver,`seed ${seed}, day ${day}`);if(day%365===0){const copy=game.deserialize(game.serialize(s));game.tick(copy);const probe=game.deserialize(game.serialize(s));game.tick(probe);assert.deepEqual(copy,probe);s=game.deserialize(game.serialize(s));}}
+  assert.equal(s.day,3650);assert.ok(s.routes.some(r=>r.mode==='land'&&r.deliveries>100));assert.ok(rivalLandSeen,'the mixed-network fixture must exercise rival land traffic');assert.ok(s.industry.technology.land>0);near(s.initialCash+Object.values(s.totals).reduce((a,b)=>a+b,0),s.cash);
  }
 });

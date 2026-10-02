@@ -1,3 +1,4 @@
+import {seaPosition} from './sea-routing.js';
 import {RETIRED_CITIES} from './retired-network.js';
 import {roadPosition,roadBetween} from './land-data.js';
 import {renderLand,roadTitle} from './land-view.js';
@@ -48,7 +49,7 @@ function persist(slot='auto') {
 }
 function shipTransform(ship) {
   const w=ship.voyage,p=voyageProgress(w,clock.fraction);if(w&&shipSpec(state,ship.type)?.mode==='land'){const point=roadPosition(w.from,w.to,p);return `translate(${point.x},${point.y})`;}const from=CITIES[w?.from??ship.nextFrom],to=CITIES[w?.to??ship.nextFrom];
-  return `translate(${from.x+(to.x-from.x)*p},${from.y+(to.y-from.y)*p+(shipSpec(state,ship.type)?.mode==='land'?0:23)})`;
+  const point=w?seaPosition(w.from,w.to,p):from;return `translate(${point.x},${point.y})`;
 }
 function animateTime() {
   for(const marker of app.querySelectorAll('[data-rival-ship]')) { const ship=state.competitors[Number(marker.dataset.company)]?.ships.find(s=>s.id===marker.dataset.rivalShip); if(ship?.routeId)marker.setAttribute('transform',shipTransform(ship)); }
@@ -108,7 +109,7 @@ function chart() {
 }
 function competitors() { return renderCompetition(state,selectedCompetitor,{cash,signed}); }
 function saveDialog() {
-  const labels={preservedP7:tx('保全保存（P7）','Preserved save (P7)'),v7:'v7',autoV7:'v7 '+tx('自動保存','Autosave'),backupV7:'v7 '+tx('前回の保存','Previous save'),preserved:tx('都市再編前の保全保存','Preserved save before city revision'),preservedP6:tx('保全保存（P6）','Preserved save (P6)'),v6:'v6',autoV6:'v6 '+tx('自動保存','Autosave'),backupV6:'v6 '+tx('前回の保存','Previous save'),manual:tx('手動保存','Manual save'),auto:tx('自動保存','Autosave'),backup:tx('前回の保存','Previous save'),v5:'v5',autoV5:tx('v5 自動保存','v5 Autosave'),backupV5:tx('v5 前回保存','v5 Previous save'),v4:'v4',autoV4:tx('v4 自動保存','v4 Autosave'),backupV4:tx('v4 前回保存','v4 Previous save'),v3:'v3',autoV3:tx('v3 自動保存','v3 Autosave'),backupV3:tx('v3 前回保存','v3 Previous save'),v2:'v2',v1:'v1'};
+  const labels={v8:'v8',autoV8:'v8 '+tx('自動保存','Autosave'),backupV8:'v8 '+tx('前回の保存','Previous save'),preservedCities:tx('都市再編前の保全保存','Preserved save before city revision'),preservedP7:tx('保全保存（P7）','Preserved save (P7)'),v7:'v7',autoV7:'v7 '+tx('自動保存','Autosave'),backupV7:'v7 '+tx('前回の保存','Previous save'),preserved:tx('海上経路修正前の保全保存','Preserved save before sea route revision'),preservedP6:tx('保全保存（P6）','Preserved save (P6)'),v6:'v6',autoV6:'v6 '+tx('自動保存','Autosave'),backupV6:'v6 '+tx('前回の保存','Previous save'),manual:tx('手動保存','Manual save'),auto:tx('自動保存','Autosave'),backup:tx('前回の保存','Previous save'),v5:'v5',autoV5:tx('v5 自動保存','v5 Autosave'),backupV5:tx('v5 前回保存','v5 Previous save'),v4:'v4',autoV4:tx('v4 自動保存','v4 Autosave'),backupV4:tx('v4 前回保存','v4 Previous save'),v3:'v3',autoV3:tx('v3 自動保存','v3 Autosave'),backupV3:tx('v3 前回保存','v3 Previous save'),v2:'v2',v1:'v1'};
   return `<dialog aria-labelledby="saves-title"><h2 id="saves-title">${t('load')}</h2>${saves.length?saves.map(s=>`<p><button data-action="choose-save" data-id="${s.slot}" ${s.valid?'':'disabled'}>${labels[s.slot]} · ${s.valid?`${s.day} ${t('dayUnit')} · ${cash(s.state.cash)}`:tx('破損データ','Invalid data')}</button></p>`).join(''):`<p>${t('noSave')}</p>`}<button data-action="cancel">${t('cancel')}</button></dialog>`;
 }
 function render() {

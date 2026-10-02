@@ -1,8 +1,8 @@
-import {routeNations,confiscateRoads,roadRisk,canServe} from './land.js';
-import {shipSpec,canProduce,confiscateDevelopment} from './industry.js';
-import {CITIES,NATIONS,SHIPS,distance} from './data.js';
-import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine.js';
-import {monthFor,managementLog} from './management.js';
+import {routeNations,confiscateRoads,roadRisk,canServe} from './land-v8.js';
+import {shipSpec,canProduce,confiscateDevelopment} from './industry-v8.js';
+import {CITIES,NATIONS,SHIPS,distance} from './data-v8.js';
+import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine-v8.js';
+import {monthFor,managementLog} from './management-v8.js';
 export const RULES={initial:60,buy:30,warn:35,revoke:20,hostile:10,escortDaily:4,grace:60};
 const nations=Object.keys(NATIONS),cap=n=>Math.max(0,Math.min(100,n));
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
@@ -140,5 +140,5 @@ export function validateSecurity(s,nested=false){
   check(d&&keys(d.friendship)&&keys(d.investment)&&keys(d.tradeToday)&&keys(d.lastChange)&&nations.every(n=>amount(d.friendship[n])&&d.friendship[n]<=100&&amount(d.investment[n])&&amount(d.tradeToday[n])&&d.tradeToday[n]<=5000&&['trade','enemies','investment'].every(k=>Number.isFinite(d.lastChange[n]?.[k]))),'外交設定が不正です。');
   check(typeof s.automation.replaceLost==='boolean','補充設定が不正です。');
   check(Array.isArray(s.incidents)&&s.incidents.length<=100&&s.incidents.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['raided','shipLost','warning','revoked','donation','investmentSkipped'].includes(e.kind)&&(e.nation===undefined||country(e.nation))&&(e.routeId===undefined||/^route-[1-9]\d*$/.test(e.routeId))&&(e.type===undefined||Boolean(shipSpec(s,e.type)))&&['cargoCost','shipValue','cost','ships'].every(k=>e[k]===undefined||amount(e[k]))),'被害・外交履歴が不正です。');
-  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>canServe(s,type,r)||r.rangeReview&&shipSpec(s,type)?.mode==='sea')&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
+  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>canServe(s,type,r))&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
 }

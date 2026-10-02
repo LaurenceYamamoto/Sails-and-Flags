@@ -1,3 +1,4 @@
+import {seaPoints} from './sea-routing.js';
 import {ROADS,roadPoints} from './land-data.js';
 import {shipName} from './identity.js';
 import {shipSpec} from './industry.js';
@@ -9,7 +10,7 @@ import { project } from './geography.js';
 import { LAND } from '../assets/maps/land.js';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const landPath=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');
-function line(a,b,attributes='',land=false){if(land){const points=roadPoints(a,b);if(points.length)return `<polyline points="${points.map(p=>p.x+','+p.y).join(' ')}" fill="none" ${attributes}/>`;}const from=CITIES[a],to=CITIES[b];return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" ${attributes}/>`;}
+function line(a,b,attributes='',land=false){const points=land?roadPoints(a,b):seaPoints(a,b);return points.length?`<polyline points="${points.map(p=>p.x+','+p.y).join(' ')}" fill="none" ${attributes}/>`:'';}
 export function renderMap(state, selectedCity, selectedRoute, shipTransform, {plannedStops=[],mapPlanning=false,showRivals=true,selectedCompetitor=null,mapRegion='world'}={}) {
   const rivalLines=showRivals?state.competitors.map((company,index)=>company.routes.map(r=>`<g class="rival-route ${selectedCompetitor===index?'selected':''} ${company.gameOver?'inactive':''}" data-action="select-competitor" data-id="${index}" role="button" tabindex="0" aria-label="${escape(company.name)} · ${routeTitle(r)}"><title>${escape(company.name)} · ${routeTitle(r)}</title>${routeLegs(r).map(([a,b])=>line(a,b,'class="rival-hit"',r.mode==='land')+line(a,b,'class="rival-line"',r.mode==='land')).join('')}</g>`).join('')+company.ships.filter(s=>s.routeId).map(ship=>`<g class="rival-ship" data-rival-ship="${ship.id}" data-company="${index}" data-action="select-competitor" data-id="${index}" role="button" tabindex="0" aria-label="${escape(company.name)} · ${escape(shipName(company,ship))} · ${name(shipSpec(company,ship.type))}" transform="${shipTransform(ship)}"><title>${escape(company.name)}</title><circle r="13" class="ship-hit"/><path d="M0-8L8 0L0 8L-8 0Z" fill="#93e2f5" stroke="#153740" stroke-width="2"/></g>`).join('')).join(''):'';
   // Player routes are selected via ships; draw shared legs once per visual state.

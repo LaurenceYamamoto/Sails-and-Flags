@@ -1,6 +1,5 @@
-import {seaRoute} from './sea-routing.js';
-import {INLAND} from './land-data.js';
-import { PORT_GEOGRAPHY, project } from './geography.js';
+import {INLAND} from './land-data-v8.js';
+import { PORT_GEOGRAPHY, project } from './geography-v8.js';
 export const GOODS = [
   { id: 'sugar', name: '砂糖', base: 42 },
   { id: 'rum', name: 'ラム酒', base: 62 },
@@ -61,10 +60,23 @@ for (const [id, city] of Object.entries(CITIES)) {
   city.stocks.push(europe?240:70);city.supply.push(europe?2.4:.5);city.demand.push(europe?1.6:1.3);
 }
 for(const [id,c] of Object.entries(INLAND)) CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,inland:true,stocks:[60,65,80,75,360,60,340,80,65],supply:[.5,.5,.7,.6,3.8,.5,3.5,.7,.5],demand:[2.2,2.2,2.7,2.8,1.1,1.7,1.2,1.6,1.8]};
+// Approximate nautical distances for gameplay; the six P1 distances stay fixed.
+const coordinates = { kingston:[18,-76.8],havana:[23.1,-82.4],london:[51.5,0],cadiz:[36.5,-6.3],nantes:[47.2,-1.6],amsterdam:[52.4,4.9],lisbon:[38.7,-9.1],santiago:[20,-75.8],santodomingo:[18.5,-69.9],sanjuan:[18.5,-66.1],bridgetown:[13.1,-59.6],willemstad:[12.1,-68.9] };
 export const SHIPS = {
   sloop: { name: 'スループ', mode: 'sea', price: 1800, capacity: 30, speed: 150, range: 1800, daily: 3, guns:6 },
   brig: { name: 'ブリッグ', mode: 'sea', price: 5200, capacity: 70, speed: 125, range: 5000, daily: 6, guns:12 },
   fluyt: { name: 'フリュート', mode: 'sea', price: 8500, capacity: 110, speed: 100, range: 5500, daily: 8, guns:4 },
 };
-export function distance(a,b){return seaRoute(a,b)?.nm??Infinity;}
+export const LANES = [
+  ['kingston', 'havana', 620], ['london', 'cadiz', 1300],
+  ['kingston', 'london', 4100], ['kingston', 'cadiz', 3800],
+  ['havana', 'london', 4200], ['havana', 'cadiz', 3900],
+];
+export function distance(a, b) {
+  if (!Object.hasOwn(CITIES,a) || !Object.hasOwn(CITIES,b) || a === b || CITIES[a].inland || CITIES[b].inland) return Infinity;
+  const fixed = LANES.find(l => l.includes(a) && l.includes(b)); if (fixed) return fixed[2];
+  const [lat1,lon1] = (coordinates[a]??[CITIES[a].lat,CITIES[a].lon]).map(v=>v*Math.PI/180), [lat2,lon2] = (coordinates[b]??[CITIES[b].lat,CITIES[b].lon]).map(v=>v*Math.PI/180);
+  const h = Math.sin((lat2-lat1)/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin((lon2-lon1)/2)**2;
+  return Math.max(80, Math.round(3440 * 2 * Math.asin(Math.min(1,Math.sqrt(h))) * 1.15 / 10)*10);
+}
 export function daysFor(type, a, b) { return Math.ceil(distance(a, b) / SHIPS[type].speed); }

@@ -1,3 +1,4 @@
+import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as old from '../src/legacy/engine-v7.js';
@@ -34,7 +35,7 @@ test('city selection prioritizes ports and inland hubs without a country quota',
 });
 test('v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners',()=>{
  const before=fixture(),raw=old.serialize(before),s=game.deserialize(raw);
- assert.equal(old.serialize(before),raw);assert.equal(s.version,8);
+ assert.equal(old.serialize(before),raw);assert.equal(s.version,9);
  for(const [index,c] of [before,...before.competitors].entries()){
   const after=[s,...s.competitors][index],removed=c.routes.filter(r=>r.stops.some(id=>RETIRED_CITIES[id]));
   const vehicles=c.ships.filter(v=>removed.some(r=>r.id===v.routeId));
@@ -43,7 +44,7 @@ test('v7 migration returns vehicles and refunds remaining cargo and removed inve
   const roads=Object.entries(c.world.roads).filter(([id,d])=>RETIRED_ROADS[id]&&d.owner===c.industry.id).reduce((n,[,d])=>n+d.basis+d.invested+d.tollPool,0);
   near(after.cash,c.cash+cargo+city+roads);assert.equal(after.ships.length,c.ships.length);
   for(const v of vehicles){const returned=after.ships.find(x=>x.id===v.id);assert.equal(returned.name,v.name);assert.equal(returned.routeId,null);assert.equal(returned.voyage,null);assert.deepEqual(returned.cargo,[]);assert.equal(returned.nextStop,undefined);}
-  for(const v of c.ships.filter(v=>!vehicles.includes(v)))assert.deepEqual(after.ships.find(x=>x.id===v.id),v);
+  for(const v of c.ships.filter(v=>!vehicles.includes(v)))assert.deepEqual(withoutSeaVersion(after.ships.find(x=>x.id===v.id)),v);
   assert.equal(after.rng,c.rng);near(game.operatingProfit(after),old.operatingProfit(c));
  }
  assert.deepEqual(s.world.roads.nantes_paris,before.world.roads.nantes_paris);

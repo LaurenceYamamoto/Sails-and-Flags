@@ -1,9 +1,9 @@
-import {canServe,travelDistance,roadToll,routeNations} from './land.js';
-import {shipName} from './identity.js';
-import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import {canServe,travelDistance,roadToll,routeNations} from './land-v8.js';
+import {shipName} from './identity-v8.js';
+import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry-v8.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v8.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v8.js';
+import {licenseTerms} from './security-v8.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
@@ -161,10 +161,7 @@ export function acquireCompany(s,index) {
     if(old.routeId){const {route,offset,old:oldRoute}=routeMap.get(old.routeId);ship.routeId=route.id;ship.nextStop=((old.nextStop??oldRoute.stops.indexOf(old.nextFrom))+offset)%route.stops.length;ship.readyDay=Math.min(copy.day+1,old.readyDay+copy.day-c.day);}
     copy.ships.push(ship);
   }
-  for(const route of touched){
-    if(route.mode==='sea'&&[...routeShips(copy,route).map(v=>v.type),route.autoShipType,...route.pendingReplacements].some(type=>!canServe(copy,type,route))){route.rangeReview=true;route.active=false;}
-    reschedule(copy,route);route.cooldownUntil=copy.day+routeSchedule(copy,route).cycle;
-  }
+  for(const route of touched){reschedule(copy,route);route.cooldownUntil=copy.day+routeSchedule(copy,route).cycle;}
   transferIndustry(copy,c);copy.competitors.splice(index,1);managementLog(copy,'acquired',null,q.price+q.licenseCost);recordRank(copy);
   const validated=deserialize(serialize(copy));Object.assign(s,validated);
   return q;
@@ -179,7 +176,7 @@ export function validateManagement(s,nested) {
     // Additive v4 migration: only an absent field gets a default. Preserve all
     // budget, observation and voyage state; reject explicitly invalid choices.
     if(!Object.hasOwn(r,'autoShipType'))r.autoShipType=routeShips(s,r)[0].type;
-    check(automationShipTypes(r,s).includes(r.autoShipType)||r.rangeReview&&shipSpec(s,r.autoShipType)?.mode==='sea','航路の自動増減用の船種が不正です。');
+    check(automationShipTypes(r,s).includes(r.autoShipType),'航路の自動増減用の船種が不正です。');
     const m=r.transport;check(typeof r.autoManage==='boolean'&&Number.isSafeInteger(r.cooldownUntil)&&r.cooldownUntil>=0&&m&&Number.isSafeInteger(m.since)&&m.since>=0&&m.since<=s.day&&['sales','costs','upkeep'].every(k=>amount(m[k]))&&Number.isSafeInteger(m.deliveries)&&m.deliveries>=0,'航路の自動化実績が不正です。');
   }
 }

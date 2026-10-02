@@ -1,15 +1,14 @@
-import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
-import {ROADS,roadBetween,WAGONS} from './land-data.js';
-import {migrateSeaRoutes} from './sea-migration.js';
-import {distance as oldSeaDistance} from './legacy/data-v8.js';
-import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
-import {shipName,validName} from './identity.js';
-import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v8.js';
-import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 9;
+import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land-v8.js';
+import {ROADS,roadBetween,WAGONS} from './land-data-v8.js';
+import {migrateNetwork} from './network-migration-v8.js';
+import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network-v8.js';
+import {shipName,validName} from './identity-v8.js';
+import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry-v8.js';
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v8.js';
+import { deserialize as readLegacy } from './engine-v7.js';
+import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management-v8.js';
+import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security-v8.js';
+export const SAVE_VERSION = 8;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -186,9 +185,7 @@ export function updateRoute(s, id, allowed, margin) {
   r.allowed = [...allowed]; r.minMargin = margin;
 }
 export function toggleRoute(s, id) {
-  playing(s); const r = s.routes.find(r => r.id === id); check(r, '航路が存在しません。');
-  if(!r.active)check([...routeShips(s,r).map(v=>v.type),r.autoShipType,...r.pendingReplacements].every(type=>canServe(s,type,r)), 'この船の航続距離を超えています。');
-  r.active = !r.active;if(r.active)delete r.rangeReview;
+  playing(s); const r = s.routes.find(r => r.id === id); check(r, '航路が存在しません。'); r.active = !r.active;
   if (r.active) reschedule(s, r);
 }
 export function removeRoute(s, id) {
@@ -342,7 +339,7 @@ export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='comp
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7,8].includes(s.version) && !nested) return deserialize(serialize(migrateSeaRoutes(readLegacy(raw))));
+  if (s && [1,2,3,4,5,6,7].includes(s.version) && !nested) return deserialize(serialize(migrateNetwork(readLegacy(raw))));
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
   check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');
@@ -361,12 +358,11 @@ export function deserialize(raw, nested = false) {
   check(ids.every(id => /^(ship|route)-[1-9]\d*$/.test(id) && Number(id.split('-')[1]) < s.nextId) && new Set(ids).size === ids.length, '識別子が重複または不正です。');
   for (const r of s.routes) {
     validatePolicy(r.allowed, r.minMargin);
-    check(r.rangeReview===undefined||r.rangeReview===true&&r.mode==='sea'&&!r.active,'航路の運航状態が不正です。');
     validateStops(r.stops);
     check(['sea','land'].includes(r.mode) && r.a===r.stops[0] && r.b===r.stops[1] && routeNations(r).every(n => s.licenses.includes(n)), '航路の港・免許が不正です。');
     check(typeof r.active === 'boolean' && ['profit', 'expenses', 'revenue', 'lastForecast', 'started', 'deliveries'].every(k => finite(r[k])) && (r.lastActual === null || finite(r.lastActual)), '航路の収支が不正です。');
     const fleet = routeShips(s, r);
-    check((fleet.length > 0 || Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length>0) && fleet.every(v => canServe(s,v.type,r)||r.rangeReview&&shipSpec(s,v.type)?.mode==='sea'), '航路と船の対応が不正です。');
+    check((fleet.length > 0 || Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length>0) && fleet.every(v => canServe(s,v.type,r)), '航路と船の対応が不正です。');
     check(!Object.hasOwn(r, 'shipId') && Number.isSafeInteger(r.scheduleEpoch) && r.scheduleEpoch >= 1 - (r.mode==='land'?routeLegs(r).slice(0,-1).reduce((n,[a,b])=>n+Math.max(...(fleet.length?fleet.map(v=>v.type):[r.autoShipType]).map(type=>roadDays(s,type,a,b,0)))+1,0):Math.max(...routeSchedule(s, r).stopOffsets)) && r.scheduleEpoch <= s.day + 1, '運航時刻表が不正です。');
   }
   check(new Set(s.routes.map(r => r.mode+':'+circuitKey(r.stops))).size === s.routes.length, '同じ経路が重複しています。');
@@ -384,9 +380,7 @@ export function deserialize(raw, nested = false) {
     check(v.cargo.every(c => GOODS.some(g => g.id === c.good) && finite(c.quantity) && c.quantity > 0 && finite(c.total) && c.total >= 0) && new Set(v.cargo.map(c => c.good)).size === v.cargo.length && v.cargo.reduce((sum, c) => sum + c.quantity, 0) <= shipSpec(s,departureType).capacity + 1e-8, '積み荷が不正です。');
     if (v.voyage) {
       const w = v.voyage;
-      check(w.seaDistanceVersion===undefined||r?.mode==='sea'&&w.seaDistanceVersion===8,'航海データが不正です。');
-      const seaDistance=w.seaDistanceVersion===8?oldSeaDistance(w.from,w.to):distance(w.from,w.to);
-      check(r && w.from === v.nextFrom && nextPort(r,w.from,stopIndex(r,v))===w.to && (r.mode==='sea'?seaDistance:travelDistance(s,departureType,w.from,w.to))<=shipSpec(s,departureType).range && shipSpec(s,departureType).mode===r.mode && (r.mode==='land'?finite(w.roadQuality)&&w.roadQuality>=0&&w.roadQuality<=1e12&&finite(w.toll)&&w.toll>=0&&w.total===roadDays(s,departureType,w.from,w.to,w.roadQuality):w.total===Math.ceil(seaDistance/shipSpec(s,departureType).speed)) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast) && (w.upkeep===undefined||finite(w.upkeep)&&w.upkeep>=0) && (w.lostCost===undefined||finite(w.lostCost)&&w.lostCost>=0), '航海データが不正です。');
+      check(r && w.from === v.nextFrom && nextPort(r,w.from,stopIndex(r,v))===w.to && travelDistance(s,departureType,w.from,w.to)<=shipSpec(s,departureType).range && shipSpec(s,departureType).mode===r.mode && (r.mode==='land'?finite(w.roadQuality)&&w.roadQuality>=0&&w.roadQuality<=1e12&&finite(w.toll)&&w.toll>=0&&w.total===roadDays(s,departureType,w.from,w.to,w.roadQuality):w.total===sailingDays(s,departureType,w.from,w.to)) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast) && (w.upkeep===undefined||finite(w.upkeep)&&w.upkeep>=0) && (w.lostCost===undefined||finite(w.lostCost)&&w.lostCost>=0), '航海データが不正です。');
     } else check(v.cargo.length === 0, '停泊中の積み荷が不正です。');
   }
   const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase', 'shipSale', 'acquisition', 'acquiredCash','escort','diplomacyInvestment','technologyInvestment','shipyardPurchase','designResearch','shipConstruction','developmentPurchase','developmentSale','cityInvestment','developmentIncome','roadPurchase','roadSale','roadInvestment','roadToll','roadIncome','networkCompensation'];

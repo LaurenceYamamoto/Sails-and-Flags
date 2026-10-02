@@ -1,3 +1,4 @@
+import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buyLicense, buyShip, setCircuit, tick, assets, serialize, deserialize, trade, routeSchedule, assignShip, toggleRoute} from '../src/engine.js';
@@ -89,8 +90,8 @@ test('monthly competitor decisions are deterministic, spend their own cash and e
 });
 test('v3 repeated-stop saves migrate without rewriting capital, voyages or old slots',()=>{
   const old=v3.createGame();v3.trade(old,'kingston','food',30000,'sell');v3.buyLicense(old,'spain');v3.buyLicense(old,'portugal');v3.setCircuit(old,v3.buyShip(old,'brig').id,['cadiz','lisbon','sanjuan','santodomingo','sanjuan','lisbon']);v3.tick(old);
-  const raw=v3.serialize(old),s=deserialize(raw);assert.equal(s.version,8);assert.deepEqual(s.ships,old.ships);assert.equal(s.cash,old.cash);assert.equal(s.competitors[0].cash,old.competitors[0].cash);assert.equal(s.automation.enabled,false);assert.deepEqual(s.routes[0].stops,old.routes[0].stops);
-  const map=new Map([[SAVE_KEYS.autoV3,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(x=>x.slot==='autoV3').valid);saveGame(storage,s,'auto');assert.equal(map.get(SAVE_KEYS.autoV3),raw);assert.equal(JSON.parse(map.get(SAVE_KEYS.auto)).version,8);
+  const raw=v3.serialize(old),s=deserialize(raw);assert.equal(s.version,9);assert.deepEqual(withoutSeaVersion(s.ships),old.ships);assert.equal(s.cash,old.cash);assert.equal(s.competitors[0].cash,old.competitors[0].cash);assert.equal(s.automation.enabled,false);assert.deepEqual(s.routes[0].stops,old.routes[0].stops);
+  const map=new Map([[SAVE_KEYS.autoV3,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(x=>x.slot==='autoV3').valid);saveGame(storage,s,'auto');assert.equal(map.get(SAVE_KEYS.autoV3),raw);assert.equal(JSON.parse(map.get(SAVE_KEYS.auto)).version,9);
   const broken=JSON.parse(raw);broken.cash++;assert.throws(()=>deserialize(JSON.stringify(broken)));
 });
 test('corrupt management data is rejected and new UI is localized in both languages',()=>{

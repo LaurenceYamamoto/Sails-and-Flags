@@ -22,6 +22,9 @@ export function validateCampaign(seed,days=365*50) {
     if(s.industry.shipyard&&!built&&s.cash>18000){const id=researchDesign(s,'sloop',{cargo:500,speed:800,guns:300,range:400,upkeep:600});assignShip(s,s.routes[0].id,buyShip(s,id).id);setRouteAutomationShip(s,s.routes[0].id,id);built=true;}
     if(!developed&&s.cash>22000){buyDevelopmentRight(s,'kingston');setCityInvestment(s,'kingston',1,1);developed=true;}
     if(built&&developed&&!automated){setAutomation(s,{enabled:true,replaceLost:true,monthlyBudget:5200,minCash:9000,expandThreshold:5,shrinkThreshold:0});automated=true;}
+    // Long sea passages change cash flow. Stop discretionary investment when
+    // the same visible cash reserve used by automation is under pressure.
+    if(built&&developed){const invest=s.cash>12000;setTechnologyInvestment(s,'shipbuilding',invest?6:0);setTechnologyInvestment(s,'seafaring',invest?2:0);setCityInvestment(s,'kingston',invest?1:0,invest?1:0);}
     // A visible friendship buffer is a player-manageable policy, not privileged war knowledge.
     for(const nation of s.licenses)setDiplomacyInvestment(s,nation,s.diplomacy.friendship[nation]<55?.25:0);
     maxShips=Math.max(maxShips,s.ships.length);maxRoutes=Math.max(maxRoutes,s.routes.length);

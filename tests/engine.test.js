@@ -68,7 +68,7 @@ test('licenses, range and duplicate assignment are enforced without ship locatio
 test('pause finishes voyage, sells cargo once, permits release and reassignment', () => {
   const { s, ship, route } = scenario(); tick(s); toggleRoute(s, route.id);
   assert.throws(() => removeRoute(s, route.id));
-  for (let i = 0; i < 5; i++) tick(s);
+  for (let i = 0; i < daysFor('sloop','kingston','havana'); i++) tick(s);
   assert.equal(ship.nextFrom, 'havana'); assert.equal(ship.voyage, null); assert.equal(ship.cargo.length, 0); assert.equal(route.deliveries, 1);
   const sales = s.totals.sale; tick(s); assert.equal(s.totals.sale, sales);
   removeRoute(s, route.id); assert.equal(ship.routeId, null);
@@ -76,7 +76,7 @@ test('pause finishes voyage, sells cargo once, permits release and reassignment'
 });
 test('empty return and no-opportunity waiting rules', () => {
   const { s, ship, route } = scenario(); updateRoute(s, route.id, ['rum'], 10);
-  for (let i = 0; i < 7; i++) tick(s);
+  for (let i = 0; i < daysFor('sloop','kingston','havana')+2; i++) tick(s);
   assert.ok(ship.voyage); assert.equal(ship.cargo.length, 0); assert.equal(ship.status, 'empty');
   const waiting = scenario(); updateRoute(waiting.s, waiting.route.id, ['rum'], 1000); tick(waiting.s);
   assert.equal(waiting.ship.voyage, null); assert.equal(waiting.ship.status, 'waiting');

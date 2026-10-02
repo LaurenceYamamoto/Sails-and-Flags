@@ -1,8 +1,8 @@
 import { serialize, deserialize } from './engine.js';
 export const SAVE_KEYS = {
-  manual: 'sails-and-flags.save.v8', auto: 'sails-and-flags.auto.v8',
-  backup: 'sails-and-flags.backup.v8', v7:'sails-and-flags.save.v7',autoV7:'sails-and-flags.auto.v7',backupV7:'sails-and-flags.backup.v7',v6:'sails-and-flags.save.v6', autoV6:'sails-and-flags.auto.v6', backupV6:'sails-and-flags.backup.v6', v5:'sails-and-flags.save.v5', autoV5:'sails-and-flags.auto.v5', backupV5:'sails-and-flags.backup.v5', v4:'sails-and-flags.save.v4', autoV4:'sails-and-flags.auto.v4', backupV4:'sails-and-flags.backup.v4', v3:'sails-and-flags.save.v3', autoV3:'sails-and-flags.auto.v3', backupV3:'sails-and-flags.backup.v3', v2: 'sails-and-flags.save.v2', v1: 'sails-and-flags.save.v1',
-  preserved: 'sails-and-flags.preserved.p7-cities', preservedP7:'sails-and-flags.preserved.p7', preservedP6:'sails-and-flags.preserved.p6',
+  manual: 'sails-and-flags.save.v9', auto: 'sails-and-flags.auto.v9',
+  backup: 'sails-and-flags.backup.v9', v8:'sails-and-flags.save.v8',autoV8:'sails-and-flags.auto.v8',backupV8:'sails-and-flags.backup.v8', v7:'sails-and-flags.save.v7',autoV7:'sails-and-flags.auto.v7',backupV7:'sails-and-flags.backup.v7',v6:'sails-and-flags.save.v6', autoV6:'sails-and-flags.auto.v6', backupV6:'sails-and-flags.backup.v6', v5:'sails-and-flags.save.v5', autoV5:'sails-and-flags.auto.v5', backupV5:'sails-and-flags.backup.v5', v4:'sails-and-flags.save.v4', autoV4:'sails-and-flags.auto.v4', backupV4:'sails-and-flags.backup.v4', v3:'sails-and-flags.save.v3', autoV3:'sails-and-flags.auto.v3', backupV3:'sails-and-flags.backup.v3', v2: 'sails-and-flags.save.v2', v1: 'sails-and-flags.save.v1',
+  preserved: 'sails-and-flags.preserved.sea-routing',preservedCities:'sails-and-flags.preserved.p7-cities', preservedP7:'sails-and-flags.preserved.p7', preservedP6:'sails-and-flags.preserved.p6',
 };
 // Validate before overwriting a slot. A failed write leaves the last save intact.
 export function saveGame(storage, state, slot = 'manual') {

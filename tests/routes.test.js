@@ -1,8 +1,11 @@
+import {daysFor} from '../src/data.js';
+import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buyShip, buyLicense, setRoute, assignShip, releaseShip, removeRoute, toggleRoute, updateRoute, routeShips, routeSchedule, nextDeparture, tick, serialize, deserialize, trade, assets } from '../src/engine.js';
 import {createGame} from './baseline.js';
+const legDays=daysFor('sloop','kingston','havana'),half=legDays+1,cycle=half*2;
 const legacyRaw = readFileSync(new URL('./fixtures/v1-two-routes.json', import.meta.url), 'utf8');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-7, `${a} != ${b}`);
 function fleet(types = ['sloop', 'sloop'], ports = ['kingston', 'havana']) {
@@ -49,12 +52,12 @@ test('unused ownership has no port; purchase needs no license; reassignment need
   setRoute(s, ship.id, 'kingston', 'havana');
   tick(s); assert.equal(ship.voyage.from, 'kingston');
 });
-test('two ships depart each end six days apart on a twelve-day cycle', () => {
+test('two ships depart at half-cycle intervals using navigable sailing days', () => {
   const { s, route } = fleet();
-  assert.deepEqual(routeSchedule(s, route), { halfCycle: 6, cycle: 12, offsets: {kingston:0,havana:6}, stopOffsets:[0,6], interval: 6 });
-  const events = runScheduled(s, 37);
-  assert.deepEqual(events.filter(e => e.from === route.a).map(e => e.day), [1, 7, 13, 19, 25, 31, 37]);
-  assert.deepEqual(events.filter(e => e.from === route.b).map(e => e.day), [7, 13, 19, 25, 31, 37]);
+  assert.deepEqual(routeSchedule(s, route), { halfCycle: half, cycle, offsets: {kingston:0,havana:half}, stopOffsets:[0,half], interval: half });
+  const events = runScheduled(s, 1+6*half);
+  assert.deepEqual(events.filter(e => e.from === route.a).map(e => e.day), Array.from({length:7},(_,i)=>1+i*half));
+  assert.deepEqual(events.filter(e => e.from === route.b).map(e => e.day), Array.from({length:6},(_,i)=>1+(i+1)*half));
 });
 test('non-divisible slots are evenly rounded; high fleets respect daily resolution', () => {
   for (const count of [3, 5, 14]) {
@@ -63,7 +66,7 @@ test('non-divisible slots are evenly rounded; high fleets respect daily resoluti
     for (const port of [route.a, route.b]) {
       const departures = events.filter(e => e.from === port).map(e => e.day);
       const gaps = departures.slice(1).map((day, i) => day - departures[i]);
-      const target = 12 / count;
+      const target = cycle / count;
       assert.ok(gaps.length > count);
       assert.ok(gaps.every(n => n === Math.floor(target) || n === Math.ceil(target)));
     }
@@ -87,12 +90,12 @@ test('adding a ship preserves in-flight cargo and redistributes subsequent saili
   const first = s.ships[0], voyage = structuredClone(first.voyage), cargo = structuredClone(first.cargo);
   const extra = buyShip(s, 'sloop'); assignShip(s, route.id, extra.id);
   assert.deepEqual(first.voyage, voyage); assert.deepEqual(first.cargo, cargo);
-  assert.equal(nextDeparture(s, route, extra), 9);
+  assert.equal(nextDeparture(s, route, extra), s.day+1+half);
   const events = runScheduled(s, 60).filter(e => e.from === route.a && e.day >= 15).map(e => e.day);
-  assert.ok(events.slice(1).every((day, i) => day - events[i] === 6));
+  assert.ok(events.slice(1).every((day, i) => day - events[i] === half));
 });
 test('pause affects all ships, safe individual release works, resume reschedules', () => {
-  const { s, route } = fleet(); runScheduled(s, 7);
+  const { s, route } = fleet(); runScheduled(s, half+1);
   toggleRoute(s, route.id);
   assert.equal(nextDeparture(s, route, s.ships[0]), null);
   assert.throws(() => releaseShip(s, s.ships[0].id));
@@ -101,7 +104,7 @@ test('pause affects all ships, safe individual release works, resume reschedules
   const deliveries = route.deliveries;
   const released = s.ships[1]; releaseShip(s, released.id);
   assert.equal(released.routeId, null); assert.equal(released.nextFrom, null);
-  assert.equal(routeSchedule(s, route).interval, 12); assert.equal(route.deliveries, deliveries);
+  assert.equal(routeSchedule(s, route).interval, cycle); assert.equal(route.deliveries, deliveries);
   toggleRoute(s, route.id); runScheduled(s, 20); assert.ok(route.deliveries > deliveries);
   const copy = deserialize(serialize(s)); assert.deepEqual(s, copy);
 });
@@ -109,18 +112,18 @@ test('no-opportunity departures skip slots instead of bunching on a later day', 
   const { s, route } = fleet(); updateRoute(s, route.id, ['rum'], 1000);
   tick(s); assert.equal(s.ships[0].voyage, null); assert.equal(s.ships[0].status, 'waiting');
   updateRoute(s, route.id, ['rum'], 0);
-  const events = runScheduled(s, 24).filter(e => e.from === route.a).map(e => e.day);
-  assert.deepEqual(events, [7, 13, 19, 25]);
+  const events = runScheduled(s, 4*half).filter(e => e.from === route.a).map(e => e.day);
+  assert.deepEqual(events, Array.from({length:4},(_,i)=>1+(i+1)*half));
 });
 test('v1 migration merges reversed routes without changing cash, cargo or voyages', () => {
   const old = JSON.parse(legacyRaw), s = deserialize(legacyRaw), route = s.routes[0];
-  assert.equal(s.version,8); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
+  assert.equal(s.version,9); assert.equal(s.routes.length, 1); assert.equal(s.ships.length, 2);
   close(s.cash, old.cash); close(assets(s), assets(old));
   assert.deepEqual(s.totals, old.totals); assert.deepEqual(s.history, old.history);
   assert.deepEqual(route.allowed, old.routes[0].allowed); assert.equal(route.minMargin, old.routes[0].minMargin);
   for (const key of ['profit', 'expenses', 'revenue', 'deliveries']) close(route[key], old.routes.reduce((n, r) => n + r[key], 0));
   for (let i = 0; i < s.ships.length; i++) {
-    assert.deepEqual(s.ships[i].cargo, old.ships[i].cargo); assert.deepEqual(s.ships[i].voyage, old.ships[i].voyage);
+    assert.deepEqual(s.ships[i].cargo, old.ships[i].cargo); assert.deepEqual(withoutSeaVersion(s.ships[i].voyage), old.ships[i].voyage);
     assert.equal(s.ships[i].routeId, route.id); assert.equal('city' in s.ships[i], false);
   }
   assert.ok(s.ledger.every(e => e.routeId === null || e.routeId === route.id));
@@ -143,7 +146,7 @@ test('a fleet waiting at the far end can resume tomorrow with evenly spaced slot
   for (const ship of s.ships) { ship.nextFrom = route.b; ship.nextStop = 1; }
   toggleRoute(s, route.id); toggleRoute(s, route.id);
   assert.equal(nextDeparture(s, route, s.ships[0]), 1);
-  assert.equal(nextDeparture(s, route, s.ships[1]), 7);
+  assert.equal(nextDeparture(s, route, s.ships[1]), 1+half);
   assert.deepEqual(deserialize(serialize(s)), s);
 });
 test('save validation rejects duplicate pairs, orphan vessels and corrupt schedules', () => {
