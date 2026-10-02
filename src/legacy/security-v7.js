@@ -1,8 +1,8 @@
-import {routeNations,confiscateRoads,roadRisk,canServe} from './land.js';
-import {shipSpec,canProduce,confiscateDevelopment} from './industry.js';
-import {CITIES,NATIONS,SHIPS,distance} from './data.js';
-import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine.js';
-import {monthFor,managementLog} from './management.js';
+import {routeNations,confiscateRoads,roadRisk,canServe} from './land-v7.js';
+import {shipSpec,canProduce,confiscateDevelopment} from './industry-v7.js';
+import {CITIES,NATIONS,SHIPS,distance} from './data-v7.js';
+import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine-v7.js';
+import {monthFor,managementLog} from './management-v7.js';
 export const RULES={initial:60,buy:30,warn:35,revoke:20,hostile:10,escortDaily:4,grace:60};
 const nations=Object.keys(NATIONS),cap=n=>Math.max(0,Math.min(100,n));
 const check=(ok,message)=>{if(!ok)throw new Error(message);};

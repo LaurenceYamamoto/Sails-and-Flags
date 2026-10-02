@@ -1,3 +1,4 @@
+import {landTranslations} from './translation-land.js';
 import {translations} from './translations.js';
 import {extraTranslations} from './translation-extras.js';
 import {escapeName} from './identity.js';
@@ -58,8 +59,10 @@ ja.developmentPurchase="都市開発権取得";en.developmentPurchase="Developme
 ja.developmentSale="都市開発権売却";en.developmentSale="Development right sale";
 ja.cityInvestment="都市投資";en.cityInvestment="City investment";
 ja.developmentIncome="都市の税収分配";en.developmentIncome="City tax share";
+Object.assign(ja,{prototype:'P7 海と陸の交易',footer:'1700年をモチーフにした地域限定版。海上交易と馬車による陸上交易。',ships:'船・車両',ports:'都市',market:'都市市場',departure:'起点都市',destination:'都市2',shipPurchase:'船・車両の購入',roadPurchase:'道路開発権取得',roadSale:'道路開発権売却',roadInvestment:'道路・治安投資',roadToll:'道路通行料',roadIncome:'通行料分配',networkCompensation:'都市再編による返還'});
+Object.assign(en,{prototype:'P7 Sea and land trade',footer:'A regional game inspired by 1700, with maritime and wagon trade.',ships:'Ships / vehicles',ports:'Cities',market:'City market',departure:'Starting city',destination:'City 2',shipPurchase:'Transport purchase',roadPurchase:'Road right purchase',roadSale:'Road right sale',roadInvestment:'Road and safety investment',roadToll:'Road toll',roadIncome:'Toll income',networkCompensation:'City revision refund'});
 export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
-export const catalog = Object.freeze({...translations,...extraTranslations});
+export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations});
 const languageIndex={'zh-CN':0,ko:1,fr:2,es:3};
 export const locale = () => LANGUAGES[language].locale;
 export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'ja'; }
@@ -84,6 +87,14 @@ export function nameOf(entity) {
 }
 export function errorMessage(error) {
   const messages = {
+'道路を確認してください。':'Check the road.',
+'すべての区間に道路が必要です。':'Every leg, including the return, needs a road.',
+'道路の通過国すべての交易免許が必要です。':'Trading licenses for all transit nations are required.',
+'道路開発権の資金が不足しています。':'Insufficient funds for road rights.',
+'道路の権利・投資額を確認してください。':'Check road ownership and investment amounts.',
+'道路データが不正です。':'Invalid road data.',
+'道路の免許が不正です。':'Invalid road licenses.',
+'道路の所有者が不正です。':'Invalid road owner.',
 "技術投資の項目・金額を確認してください。":"Check the technology and investment amount.",
 "造船技術5と設備資金4,000が必要です。":"Requires shipbuilding technology 5 and 4,000 for the shipyard.",
 "設計の船型・数値を確認してください。":"Check the hull and design allocations.",

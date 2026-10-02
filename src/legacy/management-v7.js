@@ -1,9 +1,9 @@
-import {canServe,travelDistance,roadToll,routeNations} from './land.js';
-import {shipName} from './identity.js';
-import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import {canServe,travelDistance,roadToll,routeNations} from './land-v7.js';
+import {shipName} from './identity-v7.js';
+import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry-v7.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v7.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v7.js';
+import {licenseTerms} from './security-v7.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);

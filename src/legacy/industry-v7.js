@@ -1,9 +1,8 @@
-import {RETIRED_CITIES} from './retired-network.js';
-import {WAGONS} from './land-data.js';
-import {roadDays,roadDaily,roadAssets,advanceRoads,transferRoads} from './land.js';
-import {validName} from './identity.js';
-import {CITIES,GOODS,SHIPS,distance} from './data.js';
-import {entry} from './engine.js';
+import {WAGONS} from './land-data-v7.js';
+import {roadDays,roadDaily,roadAssets,advanceRoads,transferRoads} from './land-v7.js';
+import {validName} from './identity-v7.js';
+import {CITIES,GOODS,SHIPS,distance} from './data-v7.js';
+import {entry} from './engine-v7.js';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
 export const HULLS={...SHIPS,corvette:{name:'コルベット',nameEn:'Corvette',mode:'sea',price:11000,capacity:50,speed:170,range:5500,daily:11,guns:20}};
@@ -84,6 +83,6 @@ export function validateIndustry(s,nested=false){
   check(Array.isArray(i.designIds)&&new Set(i.designIds).size===i.designIds.length&&i.designIds.every(id=>Object.hasOwn(w.designs,id)),'設計の所有が不正です。');
   check(hasKeys(w.development,Object.keys(CITIES)),'都市開発が不正です。');
   for(const [city,d]of Object.entries(w.development)){check(['state','private','player','company-1','company-2'].includes(d.owner)&&['basis','size','production','invested','dailySize','dailyProduction','taxPool'].every(k=>amount(d[k])),'都市開発が不正です。');if(d.owner===i.id)check(s.licenses.includes(CITIES[city].nation),'都市開発の免許が不正です。');}
-  check(Array.isArray(i.log)&&i.log.length<=60&&i.log.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['shipyard','research','sold','right','confiscated','skipped'].includes(e.kind)&&(e.city===null||(Object.hasOwn(CITIES,e.city)||Object.hasOwn(RETIRED_CITIES,e.city)))&&amount(e.cost)),'投資履歴が不正です。');
+  check(Array.isArray(i.log)&&i.log.length<=60&&i.log.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['shipyard','research','sold','right','confiscated','skipped'].includes(e.kind)&&(e.city===null||Object.hasOwn(CITIES,e.city))&&amount(e.cost)),'投資履歴が不正です。');
   if(!nested){const companies=[s,...s.competitors],ids=companies.map(c=>c.industry.id);check(s.industry.id==='player'&&new Set(ids).size===ids.length&&Object.values(w.development).every(d=>['state','private',...ids].includes(d.owner)),'開発権の所有者が不正です。');}
 }

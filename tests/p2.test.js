@@ -15,9 +15,9 @@ function forceMarkets(s) {
   const goods=['rum','sugar','tobacco'];
   ports.forEach((from,i)=>{s.markets[from][goods[i]].stock=400;s.markets[ports[(i+1)%3]][goods[i]].stock=40;});
 }
-test('P2 data is complete: 12 ports, 5 nations, 9 goods, 3 ships and symmetric distances',()=>{
-  assert.equal(Object.keys(CITIES).length,12);assert.equal(Object.keys(NATIONS).length,5);assert.equal(GOODS.length,9);assert.equal(Object.keys(SHIPS).length,3);
-  for(const [a,c] of Object.entries(CITIES)){assert.ok(NATIONS[c.nation]);for(const key of ['stocks','supply','demand'])assert.equal(c[key].length,9);for(const b of Object.keys(CITIES))if(a!==b){assert.ok(Number.isFinite(distance(a,b))&&distance(a,b)>0);assert.equal(distance(a,b),distance(b,a));}}
+test('P2 data is complete: 15 ports, 5 nations, 9 goods, 3 ships and symmetric distances',()=>{
+  assert.equal(Object.values(CITIES).filter(c=>!c.inland).length,15);assert.equal(Object.keys(NATIONS).length,5);assert.equal(GOODS.length,9);assert.equal(Object.keys(SHIPS).length,3);
+  for(const [a,c] of Object.entries(CITIES)){assert.ok(NATIONS[c.nation]);for(const key of ['stocks','supply','demand'])assert.equal(c[key].length,9);for(const b of Object.keys(CITIES))if(a!==b&&!c.inland&&!CITIES[b].inland){assert.ok(Number.isFinite(distance(a,b))&&distance(a,b)>0);assert.equal(distance(a,b),distance(b,a));}}
   assert.equal(NATIONS.england.color,'#ef4444');assert.equal(NATIONS.spain.color,'#facc15');
 });
 test('circuits deduplicate rotations, distinguish reverse direction and validate closing leg atomically',()=>{
@@ -56,7 +56,7 @@ test('competitors share stock, pay normal integrated prices and survive restore 
 });
 test('v2 migration preserves balances, five original markets, cargo and arrival timing',()=>{
   const legacy=old.createGame();old.buyLicense(legacy,'spain');old.setRoute(legacy,old.buyShip(legacy,'sloop').id,'kingston','havana');old.tick(legacy);
-  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,6);assert.equal(s.cash,legacy.cash);assert.deepEqual(s.ships,legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
+  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,8);assert.equal(s.cash,legacy.cash);assert.deepEqual(s.ships,legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
   for(const [city,goods]of Object.entries(legacy.markets))for(const [good,market]of Object.entries(goods))assert.deepEqual(s.markets[city][good],market);
   assert.deepEqual(s,deserialize(serialize(s)));assert.equal(JSON.parse(raw).version,2);
   legacy.cash++;assert.throws(()=>deserialize(old.serialize(legacy)));

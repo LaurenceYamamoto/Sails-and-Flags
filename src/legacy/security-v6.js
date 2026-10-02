@@ -1,8 +1,7 @@
-import {routeNations,confiscateRoads,roadRisk,canServe} from './land.js';
-import {shipSpec,canProduce,confiscateDevelopment} from './industry.js';
-import {CITIES,NATIONS,SHIPS,distance} from './data.js';
-import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine.js';
-import {monthFor,managementLog} from './management.js';
+import {shipSpec,canProduce,confiscateDevelopment} from './industry-v6.js';
+import {CITIES,NATIONS,SHIPS,distance} from './data-v6.js';
+import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine-v6.js';
+import {monthFor,managementLog} from './management-v6.js';
 export const RULES={initial:60,buy:30,warn:35,revoke:20,hostile:10,escortDaily:4,grace:60};
 const nations=Object.keys(NATIONS),cap=n=>Math.max(0,Math.min(100,n));
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
@@ -54,14 +53,14 @@ export function donate(s,n,value){
 export function revokeLicense(s,n){
   if(!s.licenses.includes(n))return;
   let cargoCost=0,ships=0;
-  for(const r of [...s.routes])if(routeNations(r).includes(n)){
+  for(const r of [...s.routes])if(r.stops.some(c=>CITIES[c].nation===n)){
     for(const v of routeShips(s,r)){
       cargoCost+=v.cargo.reduce((sum,c)=>sum+c.total,0);ships++;
       v.cargo=[];v.voyage=null;v.status='ready';
     }
     removeRoute(s,r.id);
   }
-  confiscateDevelopment(s,n);confiscateRoads(s,n);
+  confiscateDevelopment(s,n);
   s.licenses=s.licenses.filter(id=>id!==n);incident(s,'revoked',{nation:n,cargoCost,ships});
 }
 export function advanceDiplomacy(s){
@@ -85,10 +84,9 @@ export function setEscort(s,id,count){
   const r=s.routes.find(r=>r.id===id);check(!s.gameOver&&r&&Number.isInteger(count)&&count>=0&&count<=3,'護衛船は0～3隻で指定してください。');r.escorts=count;
 }
 export function riskFor(s,r,type,from=r.a,to=r.b){
-  if(shipSpec(s,type).mode==='land')return roadRisk(s,r,from,to);
   const ship=shipSpec(s,type),caribbean=CITIES[from].lon<-20||CITIES[to].lon<-20;
   // Nearby hostile ports can intercept services even after their license is revoked.
-  const hostile=Object.entries(CITIES).some(([id,c])=>!c.inland&&s.diplomacy.friendship[c.nation]<=RULES.hostile&&(id===from||id===to||Math.min(distance(id,from),distance(id,to))<=400));
+  const hostile=Object.entries(CITIES).some(([id,c])=>s.diplomacy.friendship[c.nation]<=RULES.hostile&&(id===from||id===to||Math.min(distance(id,from),distance(id,to))<=400));
   const base=(caribbean?.002:.0008)+(hostile?.004:0),defense=1+ship.guns/10+Math.max(0,ship.speed-90)/100+r.escorts*.8;
   return {daily:s.world.enabled?base/(1+r.escorts*.8):0,lossFraction:.6/defense,sinkChance:.025/defense,hostile};
 }
@@ -140,5 +138,5 @@ export function validateSecurity(s,nested=false){
   check(d&&keys(d.friendship)&&keys(d.investment)&&keys(d.tradeToday)&&keys(d.lastChange)&&nations.every(n=>amount(d.friendship[n])&&d.friendship[n]<=100&&amount(d.investment[n])&&amount(d.tradeToday[n])&&d.tradeToday[n]<=5000&&['trade','enemies','investment'].every(k=>Number.isFinite(d.lastChange[n]?.[k]))),'外交設定が不正です。');
   check(typeof s.automation.replaceLost==='boolean','補充設定が不正です。');
   check(Array.isArray(s.incidents)&&s.incidents.length<=100&&s.incidents.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['raided','shipLost','warning','revoked','donation','investmentSkipped'].includes(e.kind)&&(e.nation===undefined||country(e.nation))&&(e.routeId===undefined||/^route-[1-9]\d*$/.test(e.routeId))&&(e.type===undefined||Boolean(shipSpec(s,e.type)))&&['cargoCost','shipValue','cost','ships'].every(k=>e[k]===undefined||amount(e[k]))),'被害・外交履歴が不正です。');
-  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>canServe(s,type,r))&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
+  for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>Boolean(shipSpec(s,type))&&routeLegs(r).every(([a,b])=>distance(a,b)<=shipSpec(s,type).range))&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
 }

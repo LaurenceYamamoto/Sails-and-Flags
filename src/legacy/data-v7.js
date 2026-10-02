@@ -1,5 +1,5 @@
-import {INLAND} from './land-data.js';
-import { PORT_GEOGRAPHY, project } from './geography.js';
+import {INLAND} from './land-data-v7.js';
+import { PORT_GEOGRAPHY, project } from './geography-v7.js';
 export const GOODS = [
   { id: 'sugar', name: '砂糖', base: 42 },
   { id: 'rum', name: 'ラム酒', base: 62 },
@@ -27,9 +27,6 @@ export const CITIES = {
 };
 // Additional ports and their deliberately synthetic market profiles.
 Object.assign(CITIES, {
-  porto:{name:'Porto',nation:'portugal'},
-  barcelona:{name:'Barcelona',nation:'spain'},
-  marseille:{name:'Marseille',nation:'france'},
   nantes: { name: 'ナント', nation: 'france' },
   amsterdam: { name: 'アムステルダム', nation: 'netherlands' },
   lisbon: { name: 'リスボン', nation: 'portugal' },
@@ -40,9 +37,6 @@ Object.assign(CITIES, {
   willemstad: { name: 'ウィレムスタット', nation: 'netherlands' },
 });
 const profiles = {
-  porto:[[65,65,280,150,300,60,330,65],[.5,.5,3.2,1.6,3.4,.5,3.6,.5],[2.7,2.6,1.4,2.5,1.8,2.3,1.4,2.2]],
-  barcelona:[[60,60,350,280,160,65,130,60],[.5,.5,3.8,3,1.8,.5,1.4,.5],[2.8,2.7,1.3,1.6,2.7,2.2,2.6,2.3]],
-  marseille:[[65,70,250,320,220,70,160,65],[.5,.6,2.7,3.5,2.5,.6,1.7,.5],[2.9,2.6,1.8,1.4,2.1,2.4,2.6,2.2]],
   nantes: [[60,65,290,230,190,60,350,60],[.5,.5,3,2.5,2.8,.4,3.5,.4],[2.8,2.6,1.5,1.6,2.5,2.4,1.4,2.1]],
   amsterdam: [[50,70,310,350,140,70,220,55],[.4,.6,3.3,3.8,1.8,.5,2.4,.4],[3,2.8,1.4,1.3,2.5,2.8,2,2.2]],
   lisbon: [[80,75,220,260,300,80,200,70],[.7,.6,2.4,2.8,3.6,.7,2.3,.6],[2.6,2.5,1.5,1.4,1.8,2.3,2,2]],
@@ -75,7 +69,7 @@ export const LANES = [
 export function distance(a, b) {
   if (!Object.hasOwn(CITIES,a) || !Object.hasOwn(CITIES,b) || a === b || CITIES[a].inland || CITIES[b].inland) return Infinity;
   const fixed = LANES.find(l => l.includes(a) && l.includes(b)); if (fixed) return fixed[2];
-  const [lat1,lon1] = (coordinates[a]??[CITIES[a].lat,CITIES[a].lon]).map(v=>v*Math.PI/180), [lat2,lon2] = (coordinates[b]??[CITIES[b].lat,CITIES[b].lon]).map(v=>v*Math.PI/180);
+  const [lat1,lon1] = coordinates[a].map(v=>v*Math.PI/180), [lat2,lon2] = coordinates[b].map(v=>v*Math.PI/180);
   const h = Math.sin((lat2-lat1)/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin((lon2-lon1)/2)**2;
   return Math.max(80, Math.round(3440 * 2 * Math.asin(Math.min(1,Math.sqrt(h))) * 1.15 / 10)*10);
 }

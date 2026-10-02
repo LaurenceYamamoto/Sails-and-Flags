@@ -1,3 +1,5 @@
+import {canServe} from './land.js';
+import {WAGONS} from './land-data.js';
 import {SHIPS,distance} from './data.js';
 import {shipSpec,shipCatalog,shipDaily,canProduce} from './industry.js';
 import {entry,routeLegs,routeSchedule,reschedule,serialize,deserialize} from './engine.js';
@@ -20,7 +22,7 @@ export function quoteFleetReplacement(s,{mode,source,target,routeId}){
   result.sale=ships.reduce((n,v)=>n+shipSpec(s,v.type).price,0);result.purchase=ships.length*shipSpec(s,target).price;result.cost=result.purchase-result.sale;result.remaining=s.cash-result.cost;
   check(result.count>0,'置き換える対象がありません。');
   check([result.sale,result.purchase,result.cost,result.remaining].every(Number.isFinite),'置換金額が大きすぎます。');
-  check(routes.every(r=>routeLegs(r).every(([a,b])=>distance(a,b)<=shipSpec(s,target).range)),'置換先の航続距離が不足するルートがあります。');
+  check(routes.every(r=>canServe(s,target,r))&&ships.every(v=>shipSpec(s,v.type).mode===shipSpec(s,target).mode),'置換先の航続距離が不足するルートがあります。');
   check(result.remaining>=0,'置換差額の資金が不足しています。');
  }catch(error){result.error=error.message;}
  return result;
@@ -33,7 +35,7 @@ export function replaceFleet(s,options){
  for(const v of ships){
   if(v.voyage){v.voyage.departureType??=v.type;v.voyage.upkeep??=(v.voyage.total-v.voyage.remaining)*shipDaily(copy,v.type);}
   v.name=shipName(copy,v);v.type=q.target;
-  entry(copy,Object.hasOwn(SHIPS,q.target)?'shipPurchase':'shipConstruction',-shipSpec(copy,q.target).price,null,{shipId:v.id});
+  entry(copy,(Object.hasOwn(SHIPS,q.target)||Object.hasOwn(WAGONS,q.target))?'shipPurchase':'shipConstruction',-shipSpec(copy,q.target).price,null,{shipId:v.id});
  }
  for(const r of copy.routes.filter(r=>q.routeIds.includes(r.id))){
   if(q.mode==='automation')r.autoShipType=q.target;

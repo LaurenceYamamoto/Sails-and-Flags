@@ -1,14 +1,12 @@
-import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
-import {ROADS,roadBetween,WAGONS} from './land-data.js';
-import {migrateNetwork} from './network-migration.js';
-import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
-import {shipName,validName} from './identity.js';
-import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v7.js';
-import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 8;
+import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land-v7.js';
+import {ROADS,roadBetween,WAGONS} from './land-data-v7.js';
+import {shipName,validName} from './identity-v7.js';
+import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry-v7.js';
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v7.js';
+import { deserialize as readLegacy } from './engine-v6.js';
+import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management-v7.js';
+import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security-v7.js';
+export const SAVE_VERSION = 7;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -339,10 +337,14 @@ export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='comp
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7].includes(s.version) && !nested) return deserialize(serialize(migrateNetwork(readLegacy(raw))));
+  if (s && [1,2,3,4,5,6].includes(s.version) && !nested) {
+    const migrated=readLegacy(raw),fresh=createGame(migrated.seed);initializeRoads(migrated.world);
+    for(const id of Object.keys(CITIES))if(!migrated.markets[id]){migrated.markets[id]=fresh.markets[id];migrated.world.development[id]=fresh.world.development[id];}
+    for(const c of [migrated,...migrated.competitors]){c.version=SAVE_VERSION;c.industry.technology.land=0;c.industry.investment.land=0;for(const r of c.routes)r.mode='sea';}
+    return deserialize(serialize(migrated));
+  }
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
-  check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');
   check(s.companyName===undefined||validName(s.companyName),'会社名が不正です。');
 
   check(Number.isSafeInteger(s.day) && s.day >= 0 && finite(s.cash) && (s.initialCash === 5000 || nested && s.initialCash===25000) && typeof s.gameOver === 'boolean' && s.gameOver === (s.cash < 0), '会社情報が不正です。');
@@ -383,10 +385,10 @@ export function deserialize(raw, nested = false) {
       check(r && w.from === v.nextFrom && nextPort(r,w.from,stopIndex(r,v))===w.to && travelDistance(s,departureType,w.from,w.to)<=shipSpec(s,departureType).range && shipSpec(s,departureType).mode===r.mode && (r.mode==='land'?finite(w.roadQuality)&&w.roadQuality>=0&&w.roadQuality<=1e12&&finite(w.toll)&&w.toll>=0&&w.total===roadDays(s,departureType,w.from,w.to,w.roadQuality):w.total===sailingDays(s,departureType,w.from,w.to)) && Number.isInteger(w.remaining) && w.remaining > 0 && w.remaining <= w.total && finite(w.cost) && w.cost >= 0 && finite(w.forecast) && (w.upkeep===undefined||finite(w.upkeep)&&w.upkeep>=0) && (w.lostCost===undefined||finite(w.lostCost)&&w.lostCost>=0), '航海データが不正です。');
     } else check(v.cargo.length === 0, '停泊中の積み荷が不正です。');
   }
-  const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase', 'shipSale', 'acquisition', 'acquiredCash','escort','diplomacyInvestment','technologyInvestment','shipyardPurchase','designResearch','shipConstruction','developmentPurchase','developmentSale','cityInvestment','developmentIncome','roadPurchase','roadSale','roadInvestment','roadToll','roadIncome','networkCompensation'];
+  const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase', 'shipSale', 'acquisition', 'acquiredCash','escort','diplomacyInvestment','technologyInvestment','shipyardPurchase','designResearch','shipConstruction','developmentPurchase','developmentSale','cityInvestment','developmentIncome','roadPurchase','roadSale','roadInvestment','roadToll','roadIncome'];
   check(s.totals && Object.entries(s.totals).every(([k, v]) => categories.includes(k) && finite(v)), '会計集計が不正です。');
   check(Math.abs(s.initialCash + Object.values(s.totals).reduce((a, b) => a + b, 0) - s.cash) < 0.001, '会計残高が一致しません。');
-  check(Array.isArray(s.ledger) && s.ledger.length <= 600 && s.ledger.every(e => categories.includes(e.category) && finite(e.amount) && Number.isInteger(e.day) && e.day >= 0 && e.day <= s.day && (e.routeId === null || /^route-[1-9]\d*$/.test(e.routeId)) && (e.road===undefined||(Object.hasOwn(ROADS,e.road)||Object.hasOwn(RETIRED_ROADS,e.road))) && (!e.city || (Object.hasOwn(CITIES, e.city)||Object.hasOwn(RETIRED_CITIES,e.city))) && (!e.good || GOODS.some(g => g.id === e.good)) && (e.quantity === undefined || finite(e.quantity) && e.quantity >= 0)), '取引履歴が不正です。');
+  check(Array.isArray(s.ledger) && s.ledger.length <= 600 && s.ledger.every(e => categories.includes(e.category) && finite(e.amount) && Number.isInteger(e.day) && e.day >= 0 && e.day <= s.day && (e.routeId === null || /^route-[1-9]\d*$/.test(e.routeId)) && (e.road===undefined||Object.hasOwn(ROADS,e.road)) && (!e.city || Object.hasOwn(CITIES, e.city)) && (!e.good || GOODS.some(g => g.id === e.good)) && (e.quantity === undefined || finite(e.quantity) && e.quantity >= 0)), '取引履歴が不正です。');
   check(s.ledger.every(e => (e.shipId===undefined || typeof e.shipId==='string' && /^ship-[1-9]\d*$/.test(e.shipId)) && (e.nation===undefined || Object.hasOwn(NATIONS,e.nation))), '取引履歴が不正です。');
   check(Array.isArray(s.history) && s.history.length <= 365 && s.history.every(h => finite(h.cash) && finite(h.assets) && Number.isInteger(h.day) && h.day >= 0 && h.day <= s.day), '資産履歴が不正です。');
 

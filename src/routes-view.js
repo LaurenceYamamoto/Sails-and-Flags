@@ -1,3 +1,5 @@
+import {canServe} from './land.js';
+import {renderLandRoute} from './land-view.js';
 import {shipName,escapeName} from './identity.js';
 import {shipSpec,shipDaily} from './industry.js';
 import { CITIES, GOODS, SHIPS, distance } from './data.js';
@@ -9,8 +11,9 @@ export const routeTitle = route => route.stops.map(id => name(CITIES[id])).join(
 export function renderRoutes(state, { decimal, cash, signed, tone }) {
   if (!state.routes.length) return `<div class="empty-state"><span>⚓</span><p>${t('noRoute')}</p></div>`;
   return state.routes.map(route => {
+    if(route.mode==='land')return renderLandRoute(state,route,{decimal,cash,signed,tone});
     const fleet = routeShips(state, route), { cycle, interval } = routeSchedule(state, route);
-    const available = state.ships.filter(ship => !ship.routeId && routeLegs(route).every(([a,b])=>distance(a,b)<=shipSpec(state,ship.type).range));
+    const available = state.ships.filter(ship => !ship.routeId && canServe(state,ship.type,route));
     const title = routeTitle(route);
     const shipRows = fleet.map(ship => {
       const voyage = ship.voyage, departure = nextDeparture(state, route, ship);

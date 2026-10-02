@@ -6,7 +6,7 @@ export function stressFixture(count=200) {
   // Artificial capital isolates workload capacity from the economics of 200 overlapping routes.
   entry(s,'sale',100000000);s.companyName='Performance fixture';
   for(const id of Object.keys(NATIONS))if(!s.licenses.includes(id))buyLicense(s,id);
-  const cities=Object.keys(CITIES);
+  const cities=Object.keys(CITIES).filter(id=>!CITIES[id].inland);
   outer:for(const a of cities)for(const b of cities)for(const c of cities){
     if(new Set([a,b,c]).size!==3)continue;
     const stops=[a,b,c],key=circuitKey(stops);

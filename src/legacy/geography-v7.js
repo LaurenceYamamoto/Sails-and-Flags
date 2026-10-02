@@ -1,9 +1,6 @@
 // Display geography is independent of gameplay distance and save data.
 export function project(lon,lat) { return {x:30+(lon+90)*840/102,y:30+(58-lat)*460/50}; }
 export const PORT_GEOGRAPHY = {
-  porto:{lon:-8.611,lat:41.149,mapName:'Porto',label:[-17,-5]},
-  barcelona:{lon:2.173,lat:41.385,mapName:'Barcelona',label:[18,18]},
-  marseille:{lon:5.369,lat:43.296,mapName:'Marseille',label:[18,-4]},
   kingston: {lon:-76.793,lat:17.971,mapName:'Kingston',label:[-15,23]},
   havana: {lon:-82.366,lat:23.113,mapName:'Havana',label:[-13,-12]},
   london: {lon:-.128,lat:51.507,mapName:'London',label:[-17,4]},

@@ -23,3 +23,19 @@ dialog textarea{width:100%;height:160px;resize:vertical;font:11px monospace;marg
 
 .design-card,.development-panel{border-top:1px solid #dce3d9;margin-top:1rem;padding-top:1rem}.design-card p{font-size:.85rem}#industry-panel summary{cursor:pointer;font-weight:600;margin-top:1rem}#design-form{margin:1rem 0}#design-form .form-row{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
 .brand span,.fleet-row strong,.design-card strong,#fleet-panel strong,.ranking strong,.ship-offer h3{overflow-wrap:anywhere}.brand>div:last-child{min-width:0}.brand button{display:block;margin-top:6px;font-size:11px;padding:5px 9px}#fleet-panel summary{cursor:pointer;margin-top:1rem}#fleet-panel li{padding:8px 0;border-bottom:1px solid var(--line)}
+/* P7: keep road links visible below trade routes; detailed Europe map. */
+.road-link{stroke:#d9b778;stroke-width:1.7;stroke-dasharray:3 1;opacity:.8;pointer-events:none}
+.route-line.land-route{stroke:#ffe4a1;stroke-dasharray:4 2}
+.legend-road{display:inline-block;width:22px;border-top:3px dashed #a77536}
+.road-card{padding:12px 0;border-bottom:1px solid #d9d2c5}
+.road-card summary{cursor:pointer;font-weight:600}
+.map.europe .port text{font-size:5px!important;paint-order:stroke;stroke:#193a42;stroke-width:1.4px;stroke-linejoin:round}
+.map.europe .map-label{display:none}
+.map.europe .port .halo{r:5}
+.map.europe .port circle:not(.halo){r:2}
+.map.europe .ship-marker circle:not(.ship-hit){r:5}
+.map.europe .ship-marker path,.map.europe .rival-ship path{transform:scale(.5)}
+.map.europe .ship-hit{r:6}
+.map-tools label{white-space:nowrap}
+.map.europe .road-link{stroke-width:.7}
+.map.europe .route-line,.map.europe .rival-line{stroke-width:1}

@@ -1,15 +1,14 @@
-import {canServe,travelDistance,roadToll,routeNations} from './land.js';
-import {shipName} from './identity.js';
-import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import {shipName} from './identity-v6.js';
+import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry-v6.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v6.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v6.js';
+import {licenseTerms} from './security-v6.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
 const amount=n=>finite(n)&&n>=0&&n<=1e12;
 export const monthFor=day=>new Date(Date.UTC(1700,0,1)+day*86400000).toISOString().slice(0,7);
-export const PROFILES={small:{cash:5000,reserve:1000,maxShips:4,maxRoutes:3,types:['sloop','wagon']},large:{cash:25000,reserve:6000,maxShips:12,maxRoutes:6,types:['sloop','brig','fluyt','wagon']}};
+export const PROFILES={small:{cash:5000,reserve:1000,maxShips:4,maxRoutes:3,types:['sloop']},large:{cash:25000,reserve:6000,maxShips:12,maxRoutes:6,types:['sloop','brig','fluyt']}};
 export function initializeManagement(s, kind=null) {
   s.automation={enabled:false,monthlyBudget:0,minCash:1000,expandThreshold:25,shrinkThreshold:0,month:monthFor(s.day),spent:0};
   s.managementLog=[];s.firstRankDay=null;
@@ -42,7 +41,7 @@ export function setAutomation(s,settings) {
   Object.assign(s.automation,{enabled,replaceLost,monthlyBudget,minCash,expandThreshold,shrinkThreshold,spent,month:monthFor(s.day)});
 }
 export function automationShipTypes(r,s) {
-  return Object.keys(shipCatalog(s)).filter(type=>canServe(s,type,r));
+  return Object.keys(shipCatalog(s)).filter(type=>routeLegs(r).every(([from,to])=>distance(from,to)<=shipSpec(s,type).range));
 }
 export function setRouteAutomationShip(s,routeId,type) {
   check(!s.gameOver,'破産後は操作できません。新しいゲームを開始してください。');
@@ -108,23 +107,23 @@ export function runCompetitor(s) {
   }
   const p=PROFILES[s.strategy.kind],ids=Object.keys(CITIES),candidates=[];
   for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)for(const type of p.types) {
-    const a=ids[i],b=ids[j],ship=shipSpec(s,type);if(travelDistance(s,type,a,b)>ship.range)continue;
-    const existing=s.routes.find(r=>r.mode===ship.mode&&circuitKey(r.stops)===circuitKey([a,b]));
+    const a=ids[i],b=ids[j],ship=shipSpec(s,type);if(distance(a,b)>ship.range)continue;
+    const existing=s.routes.find(r=>circuitKey(r.stops)===circuitKey([a,b]));
     if(existing&&routeShips(s,existing).length>=3)continue;
-    const missing=routeNations({stops:[a,b],mode:ship.mode}).filter(n=>!s.licenses.includes(n));
+    const missing=[...new Set([CITIES[a].nation,CITIES[b].nation])].filter(n=>!s.licenses.includes(n));
     if(missing.some(n=>!licenseTerms(s,n).canBuy))continue;
     const idle=s.ships.find(v=>!v.routeId&&v.type===type);
     const cost=(idle?0:ship.price)+missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
     if(s.cash-cost<p.reserve || (!idle&&s.ships.length>=p.maxShips))continue;
     if(!existing&&s.routes.length>=p.maxRoutes)continue;
-    const cycle=2*(sailingDays(s,type,a,b)+1),toll=ship.mode==='land'?roadToll(s,a,b)*2:0;
-    const estimate=[[a,b],[b,a]].reduce((sum,[from,to])=>sum+Math.max(0,...GOODS.map(g=>(price(g.id,s.markets[to][g.id].stock)*(1-licenseTerms(s,CITIES[to].nation).tax)-price(g.id,s.markets[from][g.id].stock)*(1+licenseTerms(s,CITIES[from].nation).tax))*Math.min(ship.capacity,s.markets[from][g.id].stock))),0)/cycle-shipDaily(s,type)-toll/cycle;
-    candidates.push({a,b,type,existing,missing,idle,cost,cycle,toll,estimate});
+    const cycle=2*(sailingDays(s,type,a,b)+1);
+    const estimate=[[a,b],[b,a]].reduce((sum,[from,to])=>sum+Math.max(0,...GOODS.map(g=>(price(g.id,s.markets[to][g.id].stock)*(1-licenseTerms(s,CITIES[to].nation).tax)-price(g.id,s.markets[from][g.id].stock)*(1+licenseTerms(s,CITIES[from].nation).tax))*Math.min(ship.capacity,s.markets[from][g.id].stock))),0)/cycle-ship.daily;
+    candidates.push({a,b,type,existing,missing,idle,cost,cycle,estimate});
   }
   const best=candidates.sort((a,b)=>b.estimate-a.estimate).slice(0,4).map(c=>{
     const ship=shipSpec(s,c.type),budget=Math.max(0,s.cash-c.cost-p.reserve);
     const profit=[[c.a,c.b],[c.b,c.a]].reduce((sum,[a,b])=>sum+optimizeLoad(s,a,b,ship.capacity,budget,GOODS.map(g=>g.id),10).profit,0);
-    return {...c,score:(profit-c.toll)/c.cycle-shipDaily(s,c.type)-c.missing.reduce((v,n)=>v+licenseTerms(s,n).daily,0)};
+    return {...c,score:profit/c.cycle-ship.daily-c.missing.reduce((v,n)=>v+licenseTerms(s,n).daily,0)};
   }).sort((a,b)=>b.score-a.score)[0];
   if(!best || best.score<=2){managementLog(s,'noOpportunity');return;}
   for(const nation of best.missing)buyLicense(s,nation);
@@ -151,7 +150,7 @@ export function acquireCompany(s,index) {
   for(const n of q.missing)buyLicense(copy,n);
   entry(copy,'acquiredCash',c.cash);
   for(const old of c.routes) {
-    let route=copy.routes.find(r=>r.mode===old.mode&&circuitKey(r.stops)===circuitKey(old.stops));
+    let route=copy.routes.find(r=>circuitKey(r.stops)===circuitKey(old.stops));
     if(!route){route={...structuredClone(old),id:`route-${copy.nextId++}`,started:copy.day,profit:0,expenses:0,revenue:0,deliveries:0,lastForecast:0,lastActual:null,scheduleEpoch:copy.day+1};initializeRoute(route,copy.day);copy.routes.push(route);}else{check(route.pendingReplacements.length+old.pendingReplacements.length<=200,'補充待ちの上限を超えています。');route.pendingReplacements.push(...old.pendingReplacements);}
     const offset=route.stops.findIndex((_,i)=>old.stops.every((port,j)=>route.stops[(i+j)%route.stops.length]===port));
     routeMap.set(old.id,{route,offset,old});touched.add(route);
