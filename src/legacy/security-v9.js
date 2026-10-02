@@ -1,14 +1,14 @@
-import {routeNations,confiscateRoads,roadRisk,canServe} from './land.js';
-import {shipSpec,canProduce,confiscateDevelopment} from './industry.js';
-import {CITIES,NATIONS,SHIPS,distance} from './data.js';
-import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine.js';
-import {monthFor,managementLog} from './management.js';
+import {routeNations,confiscateRoads,roadRisk,canServe} from './land-v9.js';
+import {shipSpec,canProduce,confiscateDevelopment} from './industry-v9.js';
+import {CITIES,NATIONS,SHIPS,distance} from './data-v9.js';
+import {entry,routeShips,routeLegs,reschedule,removeRoute,buyShip,assignShip,routeSchedule} from './engine-v9.js';
+import {monthFor,managementLog} from './management-v9.js';
 export const RULES={initial:60,buy:30,warn:35,revoke:20,hostile:10,escortDaily:4,grace:60};
 const nations=Object.keys(NATIONS),cap=n=>Math.max(0,Math.min(100,n));
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>Number.isFinite(n)&&n>=0&&n<=1e12;
 const country=n=>Object.hasOwn(NATIONS,n);
-const capitals=Object.fromEntries(Object.entries(NATIONS).map(([id,n])=>[id,n.tradePort]));
+const capitals={england:'london',spain:'cadiz',france:'nantes',netherlands:'amsterdam',portugal:'lisbon'};
 const rivalry=[['england','france'],['england','spain'],['netherlands','france'],['netherlands','spain']];
 export function random(s){s.rng=(Math.imul(s.rng,1664525)+1013904223)>>>0;return s.rng/4294967296;}
 export function createWorld(day,seed,enabled=true){
@@ -134,7 +134,7 @@ export function validateSecurity(s,nested=false){
   const keys=o=>o&&Object.keys(o).length===nations.length&&nations.every(n=>Object.hasOwn(o,n));
   check(w&&typeof w.enabled==='boolean'&&Number.isInteger(w.rng)&&w.rng>=0&&w.rng<=0xffffffff&&Number.isSafeInteger(w.graceUntil)&&w.graceUntil>=0&&/^\d{4}-\d{2}$/.test(w.lastMonth),'世界情勢が不正です。');
   check(Number.isInteger(s.rng)&&s.rng>=0&&s.rng<=0xffffffff&&(nested||w.lastMonth<=monthFor(s.day)),'乱数・情勢時刻が不正です。');
-  const pairKeys=new Set();check(Array.isArray(w.pairs)&&w.pairs.length===nations.length*(nations.length-1)/2&&w.pairs.every(p=>{const key=[p.a,p.b].sort().join(':');if(pairKeys.has(key))return false;pairKeys.add(key);return country(p.a)&&country(p.b)&&p.a!==p.b&&amount(p.base)&&p.base<=100&&amount(p.relation)&&p.relation<=100&&(p.until===null||Number.isSafeInteger(p.until)&&p.until>=0)&&Number.isSafeInteger(p.cooldownUntil)&&p.cooldownUntil>=0;}),'国家間関係が不正です。');
+  const pairKeys=new Set();check(Array.isArray(w.pairs)&&w.pairs.length===10&&w.pairs.every(p=>{const key=[p.a,p.b].sort().join(':');if(pairKeys.has(key))return false;pairKeys.add(key);return country(p.a)&&country(p.b)&&p.a!==p.b&&amount(p.base)&&p.base<=100&&amount(p.relation)&&p.relation<=100&&(p.until===null||Number.isSafeInteger(p.until)&&p.until>=0)&&Number.isSafeInteger(p.cooldownUntil)&&p.cooldownUntil>=0;}),'国家間関係が不正です。');
   check(Array.isArray(w.events)&&w.events.length<=100&&w.events.every(e=>Number.isInteger(e.day)&&e.day>=0&&['war','peace'].includes(e.kind)&&country(e.a)&&country(e.b)&&e.a!==e.b),'戦争履歴が不正です。');
   check(nested||w.events.every(e=>e.day<=s.day),'戦争履歴の時刻が不正です。');
   check(d&&keys(d.friendship)&&keys(d.investment)&&keys(d.tradeToday)&&keys(d.lastChange)&&nations.every(n=>amount(d.friendship[n])&&d.friendship[n]<=100&&amount(d.investment[n])&&amount(d.tradeToday[n])&&d.tradeToday[n]<=5000&&['trade','enemies','investment'].every(k=>Number.isFinite(d.lastChange[n]?.[k]))),'外交設定が不正です。');

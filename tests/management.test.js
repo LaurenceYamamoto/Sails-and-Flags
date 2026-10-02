@@ -61,7 +61,7 @@ test('acquisition conserves market, cargo, travel and assets while merging rotat
   const r=service(s,['amsterdam','nantes']);tick(s);
   const target=s.competitors[0],q=acquisitionQuote(s,0),beforeAssets=assets(s),beforeCash=s.cash,markets=structuredClone(s.markets),voyages=target.ships.map(v=>structuredClone(v.voyage)),cargo=target.ships.map(v=>structuredClone(v.cargo));
   assert.ok(voyages[0]);const count=s.ships.length;acquireCompany(s,0);
-  assert.equal(s.competitors.length,1);assert.equal(s.routes.length,1);assert.equal(s.ships.length,count+1);
+  assert.equal(s.competitors.length,2);assert.equal(s.routes.length,1);assert.equal(s.ships.length,count+1);
   const imported=s.ships.at(-1);assert.equal(imported.routeId,r.id);assert.equal(imported.nextStop,1);assert.deepEqual(imported.voyage,voyages[0]);assert.deepEqual(imported.cargo,cargo[0]);
   assert.deepEqual(s.markets,markets);near(s.cash,beforeCash-q.price-q.licenseCost+q.cash);near(assets(s),beforeAssets-q.price-q.licenseCost+q.assets);
   assert.equal(new Set([...s.ships,...s.routes].map(v=>v.id)).size,s.ships.length+s.routes.length);
@@ -90,8 +90,8 @@ test('monthly competitor decisions are deterministic, spend their own cash and e
 });
 test('v3 repeated-stop saves migrate without rewriting capital, voyages or old slots',()=>{
   const old=v3.createGame();v3.trade(old,'kingston','food',30000,'sell');v3.buyLicense(old,'spain');v3.buyLicense(old,'portugal');v3.setCircuit(old,v3.buyShip(old,'brig').id,['cadiz','lisbon','sanjuan','santodomingo','sanjuan','lisbon']);v3.tick(old);
-  const raw=v3.serialize(old),s=deserialize(raw);assert.equal(s.version,9);assert.deepEqual(withoutSeaVersion(s.ships),old.ships);assert.equal(s.cash,old.cash);assert.equal(s.competitors[0].cash,old.competitors[0].cash);assert.equal(s.automation.enabled,false);assert.deepEqual(s.routes[0].stops,old.routes[0].stops);
-  const map=new Map([[SAVE_KEYS.autoV3,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(x=>x.slot==='autoV3').valid);saveGame(storage,s,'auto');assert.equal(map.get(SAVE_KEYS.autoV3),raw);assert.equal(JSON.parse(map.get(SAVE_KEYS.auto)).version,9);
+  const raw=v3.serialize(old),s=deserialize(raw);assert.equal(s.version,10);assert.deepEqual(withoutSeaVersion(s.ships),old.ships);assert.equal(s.cash,old.cash);assert.equal(s.competitors[0].cash,old.competitors[0].cash);assert.equal(s.automation.enabled,false);assert.deepEqual(s.routes[0].stops,old.routes[0].stops);
+  const map=new Map([[SAVE_KEYS.autoV3,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(x=>x.slot==='autoV3').valid);saveGame(storage,s,'auto');assert.equal(map.get(SAVE_KEYS.autoV3),raw);assert.equal(JSON.parse(map.get(SAVE_KEYS.auto)).version,10);
   const broken=JSON.parse(raw);broken.cash++;assert.throws(()=>deserialize(JSON.stringify(broken)));
 });
 test('corrupt management data is rejected and new UI is localized in both languages',()=>{

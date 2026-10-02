@@ -1,8 +1,7 @@
-import {COMPANY_IDS} from './region-data.js';
-import {CITIES,distance} from './data.js';
-import {ROADS,roadBetween} from './land-data.js';
-import {shipSpec} from './industry.js';
-import {entry,routeLegs} from './engine.js';
+import {CITIES,distance} from './data-v9.js';
+import {ROADS,roadBetween} from './land-data-v9.js';
+import {shipSpec} from './industry-v9.js';
+import {entry,routeLegs} from './engine-v9.js';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1e12;
 export function initializeRoads(w){w.roads=Object.fromEntries(Object.keys(ROADS).map(id=>[id,{owner:id==='nantes_paris'?'private':'state',basis:0,quality:0,security:0,invested:0,dailyRoad:0,dailySecurity:0,tollPool:0}]));}
@@ -22,4 +21,4 @@ export function roadAssets(s){return Object.values(s.world.roads).filter(d=>d.ow
 export function advanceRoads(s){for(const [id,d]of Object.entries(s.world.roads))if(d.owner===s.industry.id){if(d.tollPool){entry(s,'roadIncome',d.tollPool,null,{road:id});d.tollPool=0;}for(const [kind,key]of [['quality','dailyRoad'],['security','dailySecurity']]){const value=d[key];if(value>0&&s.cash>=value){entry(s,'roadInvestment',-value,null,{road:id});d.invested+=value;d[kind]+=Math.sqrt(value)/150/(1+d[kind]/5);}}}}
 export function confiscateRoads(s,nation){for(const [id,d]of Object.entries(s.world.roads))if(d.owner===s.industry.id&&ROADS[id].nations.includes(nation))Object.assign(d,{owner:'state',basis:0,quality:0,security:0,invested:0,dailyRoad:0,dailySecurity:0,tollPool:0});}
 export function transferRoads(buyer,seller){for(const d of Object.values(buyer.world.roads))if(d.owner===seller.industry.id){d.owner=buyer.industry.id;d.dailyRoad=0;d.dailySecurity=0;}}
-export function validateLand(s,nested){const roads=s.world.roads;check(roads&&Object.keys(roads).length===Object.keys(ROADS).length&&Object.keys(ROADS).every(id=>Object.hasOwn(roads,id)),'道路データが不正です。');for(const [id,d]of Object.entries(roads)){check(d&&['state','private','player',...COMPANY_IDS].includes(d.owner)&&['basis','quality','security','invested','dailyRoad','dailySecurity','tollPool'].every(k=>amount(d[k])),'道路データが不正です。');if(d.owner===s.industry.id)check(ROADS[id].nations.every(n=>s.licenses.includes(n)),'道路の免許が不正です。');}if(!nested){const ids=[s,...s.competitors].map(c=>c.industry.id);check(Object.values(roads).every(d=>['state','private',...ids].includes(d.owner)),'道路の所有者が不正です。');}}
+export function validateLand(s,nested){const roads=s.world.roads;check(roads&&Object.keys(roads).length===Object.keys(ROADS).length&&Object.keys(ROADS).every(id=>Object.hasOwn(roads,id)),'道路データが不正です。');for(const [id,d]of Object.entries(roads)){check(d&&['state','private','player','company-1','company-2'].includes(d.owner)&&['basis','quality','security','invested','dailyRoad','dailySecurity','tollPool'].every(k=>amount(d[k])),'道路データが不正です。');if(d.owner===s.industry.id)check(ROADS[id].nations.every(n=>s.licenses.includes(n)),'道路の免許が不正です。');}if(!nested){const ids=[s,...s.competitors].map(c=>c.industry.id);check(Object.values(roads).every(d=>['state','private',...ids].includes(d.owner)),'道路の所有者が不正です。');}}

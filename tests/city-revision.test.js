@@ -1,3 +1,4 @@
+import {NATIONS as OLD_NATIONS} from '../src/legacy/data-v7.js';
 import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,7 +15,7 @@ import {roadTitle} from '../src/land-view.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function fixture(){
  const s=old.createGame(42,{events:false});old.entry(s,'sale',100000);
- for(const n of Object.keys(NATIONS))if(!s.licenses.includes(n))old.buyLicense(s,n);
+ for(const n of Object.keys(OLD_NATIONS))if(!s.licenses.includes(n))old.buyLicense(s,n);
  old.openCircuit(s,'wagon',['london','oxford']);old.openCircuit(s,'wagon',['lisbon','evora','madrid','evora']);
  old.openCircuit(s,'wagon',['nantes','paris']);old.openCircuit(s,'sloop',['kingston','havana']);
  buyRoadRight(s,'london_oxford');setRoadInvestment(s,'london_oxford',10,5);
@@ -35,7 +36,7 @@ test('city selection prioritizes ports and inland hubs without a country quota',
 });
 test('v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners',()=>{
  const before=fixture(),raw=old.serialize(before),s=game.deserialize(raw);
- assert.equal(old.serialize(before),raw);assert.equal(s.version,9);
+ assert.equal(old.serialize(before),raw);assert.equal(s.version,10);
  for(const [index,c] of [before,...before.competitors].entries()){
   const after=[s,...s.competitors][index],removed=c.routes.filter(r=>r.stops.some(id=>RETIRED_CITIES[id]));
   const vehicles=c.ships.filter(v=>removed.some(r=>r.id===v.routeId));
@@ -48,7 +49,7 @@ test('v7 migration returns vehicles and refunds remaining cargo and removed inve
   assert.equal(after.rng,c.rng);near(game.operatingProfit(after),old.operatingProfit(c));
  }
  assert.deepEqual(s.world.roads.nantes_paris,before.world.roads.nantes_paris);
- for(const id of Object.keys(CITIES).filter(id=>before.markets[id]))assert.deepEqual(s.markets[id],before.markets[id]);
+ for(const id of Object.keys(CITIES).filter(id=>before.markets[id]))assert.deepEqual(Object.fromEntries(Object.keys(before.markets[id]).map(g=>[g,s.markets[id][g]])),before.markets[id]);
  assert.deepEqual(s.world.designs,before.world.designs);assert.equal(s.world.rng,before.world.rng);
  assert.equal(s.networkMigration.removedRoutes,2);
  assert.ok(s.ledger.some(e=>e.city==='oxford'));assert.match(roadTitle('london_oxford'),/Oxford/);

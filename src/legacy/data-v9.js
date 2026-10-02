@@ -1,7 +1,6 @@
-import {REGION_NATIONS,REGION_CITIES,REGION_GOODS,oilMarket} from './region-data.js';
-import {seaRoute} from './sea-routing.js';
-import {INLAND} from './land-data.js';
-import { PORT_GEOGRAPHY, project } from './geography.js';
+import {seaRoute} from './sea-routing-v9.js';
+import {INLAND} from './land-data-v9.js';
+import { PORT_GEOGRAPHY, project } from './geography-v9.js';
 export const GOODS = [
   { id: 'sugar', name: '砂糖', base: 42 },
   { id: 'rum', name: 'ラム酒', base: 62 },
@@ -14,11 +13,11 @@ export const GOODS = [
   { id: 'weapons', name: '武器', base: 125 },
 ];
 export const NATIONS = {
-  england: { tradePort:'london', name: 'イングランド', fee: 250, daily: 0.5, tax: 0.025, color: '#ef4444' },
-  spain: { tradePort:'cadiz', name: 'スペイン', fee: 250, daily: 0.5, tax: 0.025, color: '#facc15' },
-  france: { tradePort:'nantes', name: 'フランス', fee: 300, daily: 0.6, tax: 0.03, color: '#60a5fa' },
-  netherlands: { tradePort:'amsterdam', name: 'オランダ', fee: 300, daily: 0.6, tax: 0.02, color: '#fb923c' },
-  portugal: { tradePort:'lisbon', name: 'ポルトガル', fee: 250, daily: 0.5, tax: 0.025, color: '#4ade80' },
+  england: { name: 'イングランド', fee: 250, daily: 0.5, tax: 0.025, color: '#ef4444' },
+  spain: { name: 'スペイン', fee: 250, daily: 0.5, tax: 0.025, color: '#facc15' },
+  france: { name: 'フランス', fee: 300, daily: 0.6, tax: 0.03, color: '#60a5fa' },
+  netherlands: { name: 'オランダ', fee: 300, daily: 0.6, tax: 0.02, color: '#fb923c' },
+  portugal: { name: 'ポルトガル', fee: 250, daily: 0.5, tax: 0.025, color: '#4ade80' },
 };
 // Display coordinates are derived from geography.js; economic profiles are synthetic.
 export const CITIES = {
@@ -62,11 +61,6 @@ for (const [id, city] of Object.entries(CITIES)) {
   city.stocks.push(europe?240:70);city.supply.push(europe?2.4:.5);city.demand.push(europe?1.6:1.3);
 }
 for(const [id,c] of Object.entries(INLAND)) CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,inland:true,stocks:[60,65,80,75,360,60,340,80,65],supply:[.5,.5,.7,.6,3.8,.5,3.5,.7,.5],demand:[2.2,2.2,2.7,2.8,1.1,1.7,1.2,1.6,1.8]};
-Object.assign(NATIONS,REGION_NATIONS);
-Object.assign(CITIES,structuredClone(REGION_CITIES));
-for(const id of Object.keys(REGION_CITIES))Object.assign(CITIES[id],PORT_GEOGRAPHY[id],project(PORT_GEOGRAPHY[id].lon,PORT_GEOGRAPHY[id].lat));
-GOODS.push(...REGION_GOODS);
-for(const [id,c] of Object.entries(CITIES)){const m=oilMarket(id,c);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
 export const SHIPS = {
   sloop: { name: 'スループ', mode: 'sea', price: 1800, capacity: 30, speed: 150, range: 1800, daily: 3, guns:6 },
   brig: { name: 'ブリッグ', mode: 'sea', price: 5200, capacity: 70, speed: 125, range: 5000, daily: 6, guns:12 },

@@ -1,3 +1,4 @@
+import {regionTranslations} from './translation-region.js';
 import {landTranslations} from './translation-land.js';
 import {translations} from './translations.js';
 import {extraTranslations} from './translation-extras.js';
@@ -59,10 +60,10 @@ ja.developmentPurchase="都市開発権取得";en.developmentPurchase="Developme
 ja.developmentSale="都市開発権売却";en.developmentSale="Development right sale";
 ja.cityInvestment="都市投資";en.cityInvestment="City investment";
 ja.developmentIncome="都市の税収分配";en.developmentIncome="City tax share";
-Object.assign(ja,{prototype:'P7 海と陸の交易',footer:'1700年をモチーフにした地域限定版。海上交易と馬車による陸上交易。',ships:'船・車両',ports:'都市',market:'都市市場',departure:'起点都市',destination:'都市2',shipPurchase:'船・車両の購入',roadPurchase:'道路開発権取得',roadSale:'道路開発権売却',roadInvestment:'道路・治安投資',roadToll:'道路通行料',roadIncome:'通行料分配',networkCompensation:'都市再編による返還'});
-Object.assign(en,{prototype:'P7 Sea and land trade',footer:'A regional game inspired by 1700, with maritime and wagon trade.',ships:'Ships / vehicles',ports:'Cities',market:'City market',departure:'Starting city',destination:'City 2',shipPurchase:'Transport purchase',roadPurchase:'Road right purchase',roadSale:'Road right sale',roadInvestment:'Road and safety investment',roadToll:'Road toll',roadIncome:'Toll income',networkCompensation:'City revision refund'});
+Object.assign(ja,{map:'大西洋・西地中海の交易網',prototype:'P8 西地中海への拡張',footer:'1700年をモチーフにした地域限定版。海上交易と馬車による陸上交易。',ships:'船・車両',ports:'都市',market:'都市市場',departure:'起点都市',destination:'都市2',shipPurchase:'船・車両の購入',roadPurchase:'道路開発権取得',roadSale:'道路開発権売却',roadInvestment:'道路・治安投資',roadToll:'道路通行料',roadIncome:'通行料分配',networkCompensation:'都市再編による返還'});
+Object.assign(en,{map:'Atlantic and Western Mediterranean trade network',prototype:'P8 Western Mediterranean expansion',footer:'A regional game inspired by 1700, with maritime and wagon trade.',ships:'Ships / vehicles',ports:'Cities',market:'City market',departure:'Starting city',destination:'City 2',shipPurchase:'Transport purchase',roadPurchase:'Road right purchase',roadSale:'Road right sale',roadInvestment:'Road and safety investment',roadToll:'Road toll',roadIncome:'Toll income',networkCompensation:'City revision refund'});
 export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
-export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations});
+export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations,...regionTranslations});
 const languageIndex={'zh-CN':0,ko:1,fr:2,es:3};
 export const locale = () => LANGUAGES[language].locale;
 export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'ja'; }

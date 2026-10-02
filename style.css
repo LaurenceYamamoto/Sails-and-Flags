@@ -29,13 +29,16 @@ dialog textarea{width:100%;height:160px;resize:vertical;font:11px monospace;marg
 .legend-road{display:inline-block;width:22px;border-top:3px dashed #a77536}
 .road-card{padding:12px 0;border-bottom:1px solid #d9d2c5}
 .road-card summary{cursor:pointer;font-weight:600}
-.map.europe .port text{font-size:5px!important;paint-order:stroke;stroke:#193a42;stroke-width:1.4px;stroke-linejoin:round}
-.map.europe .map-label{display:none}
-.map.europe .port .halo{r:5}
-.map.europe .port circle:not(.halo){r:2}
-.map.europe .ship-marker circle:not(.ship-hit){r:5}
-.map.europe .ship-marker path,.map.europe .rival-ship path{transform:scale(.5)}
-.map.europe .ship-hit{r:6}
+:is(.map.europe,.map.mediterranean) .port text{font-size:5px!important;paint-order:stroke;stroke:#193a42;stroke-width:1.4px;stroke-linejoin:round}
+:is(.map.europe,.map.mediterranean) .map-label{display:none}
+:is(.map.europe,.map.mediterranean) .port .halo{r:5}
+:is(.map.europe,.map.mediterranean) .port circle:not(.halo){r:2}
+:is(.map.europe,.map.mediterranean) .ship-marker circle:not(.ship-hit){r:5}
+:is(.map.europe,.map.mediterranean) .ship-marker path,:is(.map.europe,.map.mediterranean) .rival-ship path{transform:scale(.5)}
+:is(.map.europe,.map.mediterranean) .ship-hit{r:6}
 .map-tools label{white-space:nowrap}
-.map.europe .road-link{stroke-width:.7}
-.map.europe .route-line,.map.europe .rival-line{stroke-width:1}
+:is(.map.europe,.map.mediterranean) .road-link{stroke-width:.7}
+:is(.map.europe,.map.mediterranean) .route-line,:is(.map.europe,.map.mediterranean) .rival-line{stroke-width:1}
+
+.good-icon.oliveOil{background:#889637}
+.region-guide{margin:0;padding:0 23px 14px}

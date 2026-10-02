@@ -16,7 +16,7 @@ const ports=Object.keys(PORT_APPROACHES);
 // Independent ray casting samples every offshore segment; port approaches are
 // separately declared because the generalized land omits navigable estuaries.
 function inside(p,ring){let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])yes=!yes;}return yes;}
-test('all 105 sea pairs avoid land offshore, have symmetric route-derived distances and exact port endpoints',()=>{
+test('all sea pairs avoid land offshore, have symmetric route-derived distances and exact port endpoints',()=>{
  for(const a of ports)for(const b of ports)if(a<b){
   const path=seaRoute(a,b),reverse=seaRoute(b,a);assert.equal(path.nm,reverse.nm);assert.deepEqual(path.coordinates,[...reverse.coordinates].reverse());
   const total=path.coordinates.slice(1).reduce((n,p,i)=>n+nauticalDistance(path.coordinates[i],p),0);assert.equal(distance(a,b),Math.ceil(total));

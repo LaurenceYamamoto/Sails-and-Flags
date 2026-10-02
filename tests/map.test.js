@@ -26,7 +26,7 @@ test('city labels keep configured script in Japanese and English, including futu
 test('map renders all circuit preview legs and selectable rival routes without changing the game',()=>{
   const state=createGame(),before=serialize(state),transform=()=> 'translate(0,0)';
   const html=renderMap(state,'kingston',null,transform,{mapPlanning:true,plannedStops:['kingston','havana','santiago'],selectedCompetitor:1});
-  assert.equal((html.match(/class="planned-route/g)||[]).length,3);assert.match(html,/return-leg/);assert.equal((html.match(/class="rival-route/g)||[]).length,2);assert.match(html,/Antilles Company/);assert.match(html,/data-action="select-competitor"/);assert.match(html,/Santiago 〔3〕/);
+  assert.equal((html.match(/class="planned-route/g)||[]).length,3);assert.match(html,/return-leg/);assert.equal((html.match(/class="rival-route/g)||[]).length,state.competitors.reduce((n,c)=>n+c.routes.length,0));assert.match(html,/Antilles Company/);assert.match(html,/data-action="select-competitor"/);assert.match(html,/Santiago 〔3〕/);
   const hidden=renderMap(state,'kingston',null,transform,{showRivals:false});assert.doesNotMatch(hidden,/class="rival-route/);assert.equal(serialize(state),before);
 });
 

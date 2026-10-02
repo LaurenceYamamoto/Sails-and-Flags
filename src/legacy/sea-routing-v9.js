@@ -1,13 +1,10 @@
-import {seaRoute as previousRoute} from './legacy/sea-routing-v9.js';
-import {REGION_PORTS} from './region-data.js';
-import {PORT_GEOGRAPHY,project} from './geography.js';
-import {LAND} from '../assets/maps/land.js';
+import {PORT_GEOGRAPHY,project} from './geography-v9.js';
+import {LAND} from '../../assets/maps/land.js';
 
 // Port approaches represent access through harbours/estuaries omitted by the
 // generalized land data. Only these short, explicit approaches may cross land.
 // Points are [longitude, latitude]; this is a game network, not navigation data.
 export const PORT_APPROACHES={
-  genoa:[[8.9,44.2]],livorno:[[10.05,43.5]],
   london:[[.5,51.5],[.95,51.5],[1.45,51.7]],
   nantes:[[-1.9,47.22],[-2.25,47.25],[-2.6,47.1]],
   amsterdam:[[5.15,52.45],[5.15,52.75],[4.9,53.05],[4.5,53.1]],
@@ -20,7 +17,6 @@ export const PORT_APPROACHES={
 // Headlands, straits and offshore alternatives seed a water-only visibility
 // graph. Dijkstra chooses the shortest navigable polyline between gateways.
 export const SEA_WAYPOINTS=[
-  [6.5,42.8],[8.5,43.5],[9.6,43.7],[9.5,43.3],[10.1,42.7],[7.5,41.5],
   [-85,22],[-84.5,21],[-80,19],[-84,23],[-79,24],[-74,22],[-73.8,20],
   [-75,18],[-72,17],[-68,17],[-67.5,19.3],[-65,19],[-63,17],[-60,15],
   [-70,26],[-65,24],[-60,30],[-35,35],[-13,43],[-9.8,43.3],[-9.7,44],
@@ -53,8 +49,6 @@ function network(){
 }
 const cache=new Map();
 export function seaRoute(a,b){
-  // Keep all existing v9 distances and voyage timing stable when adding ports.
-  if(!Object.hasOwn(REGION_PORTS,a)&&!Object.hasOwn(REGION_PORTS,b))return previousRoute(a,b);
   if(!Object.hasOwn(PORT_APPROACHES,a)||!Object.hasOwn(PORT_APPROACHES,b)||a===b)return null;
   const key=[a,b].sort().join(':');
   if(!cache.has(key)){

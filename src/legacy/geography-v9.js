@@ -1,4 +1,3 @@
-import {REGION_PORTS} from './region-data.js';
 // Display geography is independent of gameplay distance and save data.
 export function project(lon,lat) { return {x:30+(lon+90)*840/102,y:30+(58-lat)*460/50}; }
 export const PORT_GEOGRAPHY = {
@@ -18,5 +17,3 @@ export const PORT_GEOGRAPHY = {
   bridgetown: {lon:-59.616,lat:13.097,mapName:'Bridgetown',label:[17,0]},
   willemstad: {lon:-68.935,lat:12.109,mapName:'Willemstad',label:[12,29]},
 };
-
-Object.assign(PORT_GEOGRAPHY,REGION_PORTS);

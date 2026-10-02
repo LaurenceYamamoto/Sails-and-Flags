@@ -1,16 +1,15 @@
-import {COMPANY_STARTS} from './region-data.js';
-import {migrateRegion} from './region-migration.js';
-import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
-import {ROADS,roadBetween,WAGONS} from './land-data.js';
-import {distance as oldSeaDistance} from './legacy/data-v8.js';
-import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
-import {shipName,validName} from './identity.js';
-import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v9.js';
-import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 10;
+import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land-v9.js';
+import {ROADS,roadBetween,WAGONS} from './land-data-v9.js';
+import {migrateSeaRoutes} from './sea-migration-v9.js';
+import {distance as oldSeaDistance} from './data-v8.js';
+import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network-v8.js';
+import {shipName,validName} from './identity-v9.js';
+import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry-v9.js';
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v9.js';
+import { deserialize as readLegacy } from './engine-v8.js';
+import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management-v9.js';
+import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security-v9.js';
+export const SAVE_VERSION = 9;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -331,20 +330,19 @@ export function assets(s) {
   return s.cash + rightsAssets(s) + s.ships.reduce((sum, ship) => sum + shipSpec(s,ship.type).price + ship.cargo.reduce((v, c) => v + c.total, 0), 0);
 }
 export function operatingProfit(s) { return ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily','escort','developmentIncome','roadToll','roadIncome'].reduce((sum, key) => sum + (s.totals[key] || 0), 0); }
-export function createCompetitors(markets,world) {
-  return COMPANY_STARTS.map(def=>createCompetitor(def,markets,world));
-}
-export function createCompetitor({name,stops,kind,id},markets,world){
+function createCompetitors(markets,world) {
+  return [['Channel Company',['nantes','amsterdam'],'large'],['Antilles Company',['santiago','sanjuan'],'small']].map(([name,stops,kind],index)=>{
     const company={version:SAVE_VERSION,name,seed:1700,rng:1700,day:0,cash:5000,initialCash:5000,licenses:[...new Set(stops.map(c=>CITIES[c].nation))],ships:[],routes:[],markets,ledger:[],totals:{},history:[],nextId:1,gameOver:false,competitors:[]};
-    company.cash=company.initialCash=PROFILES[kind].cash;initializeManagement(company,kind);initializeSecurity(company,world);initializeIndustry(company,id);
+    company.cash=company.initialCash=PROFILES[kind].cash;initializeManagement(company,kind);initializeSecurity(company,world);initializeIndustry(company,`company-${index+1}`);
     const ship=buyShip(company,'sloop'); setCircuit(company,ship.id,stops);
     return company;
+  });
 }
 export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='competitors' ? value.map(({markets,world,...company})=>company) : value); }
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7,8,9].includes(s.version) && !nested) return deserialize(serialize(migrateRegion(readLegacy(raw))));
+  if (s && [1,2,3,4,5,6,7,8].includes(s.version) && !nested) return deserialize(serialize(migrateSeaRoutes(readLegacy(raw))));
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
   check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');
@@ -398,7 +396,7 @@ export function deserialize(raw, nested = false) {
   check(s.ledger.every(e => (e.shipId===undefined || typeof e.shipId==='string' && /^ship-[1-9]\d*$/.test(e.shipId)) && (e.nation===undefined || Object.hasOwn(NATIONS,e.nation))), '取引履歴が不正です。');
   check(Array.isArray(s.history) && s.history.length <= 365 && s.history.every(h => finite(h.cash) && finite(h.assets) && Number.isInteger(h.day) && h.day >= 0 && h.day <= s.day), '資産履歴が不正です。');
 
-  check(Array.isArray(s.competitors) && s.competitors.length <= COMPANY_STARTS.length && (!nested || s.competitors.length===0), '競合データが不正です。');
+  check(Array.isArray(s.competitors) && s.competitors.length <= 2 && (!nested || s.competitors.length===0), '競合データが不正です。');
   for (let i=0;i<s.competitors.length;i++) {
     const c=s.competitors[i]; check(typeof c.name==='string' && c.name.length<=80 && c.day<=s.day && (s.gameOver || c.gameOver || c.day===s.day), '競合情報が不正です。');
     c.markets=s.markets;c.world=s.world; s.competitors[i]=deserialize(JSON.stringify(c),true); s.competitors[i].markets=s.markets;s.competitors[i].world=s.world;

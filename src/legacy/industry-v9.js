@@ -1,10 +1,9 @@
-import {COMPANY_IDS} from './region-data.js';
-import {RETIRED_CITIES} from './retired-network.js';
-import {WAGONS} from './land-data.js';
-import {roadDays,roadDaily,roadAssets,advanceRoads,transferRoads} from './land.js';
-import {validName} from './identity.js';
-import {CITIES,GOODS,SHIPS,distance} from './data.js';
-import {entry} from './engine.js';
+import {RETIRED_CITIES} from './retired-network-v8.js';
+import {WAGONS} from './land-data-v9.js';
+import {roadDays,roadDaily,roadAssets,advanceRoads,transferRoads} from './land-v9.js';
+import {validName} from './identity-v9.js';
+import {CITIES,GOODS,SHIPS,distance} from './data-v9.js';
+import {entry} from './engine-v9.js';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
 export const HULLS={...SHIPS,corvette:{name:'コルベット',nameEn:'Corvette',mode:'sea',price:11000,capacity:50,speed:170,range:5500,daily:11,guns:20}};
@@ -79,12 +78,12 @@ export function advanceIndustry(s){
 export function transferIndustry(buyer,seller){transferRoads(buyer,seller);for(const d of Object.values(buyer.world.development))if(d.owner===seller.industry.id){d.owner=buyer.industry.id;d.dailySize=0;d.dailyProduction=0;}buyer.industry.designIds=[...new Set([...buyer.industry.designIds,...seller.industry.designIds])];buyer.industry.shipyard||=seller.industry.shipyard;buyer.industry.yardValue+=seller.industry.yardValue;}
 export function validateIndustry(s,nested=false){
   const i=s.industry,w=s.world,hasKeys=(o,keys)=>o&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
-  check(i&&['player',...COMPANY_IDS].includes(i.id)&&hasKeys(i.technology,['shipbuilding','seafaring','land'])&&hasKeys(i.investment,['shipbuilding','seafaring','land'])&&[...Object.values(i.technology),...Object.values(i.investment)].every(amount)&&typeof i.shipyard==='boolean'&&amount(i.yardValue)&&(i.shipyard?i.yardValue>=YARD_COST:i.yardValue===0),'技術・設備が不正です。');
+  check(i&&/^(player|company-[12])$/.test(i.id)&&hasKeys(i.technology,['shipbuilding','seafaring','land'])&&hasKeys(i.investment,['shipbuilding','seafaring','land'])&&[...Object.values(i.technology),...Object.values(i.investment)].every(amount)&&typeof i.shipyard==='boolean'&&amount(i.yardValue)&&(i.shipyard?i.yardValue>=YARD_COST:i.yardValue===0),'技術・設備が不正です。');
   check(w.designs&&typeof w.designs==='object'&&!Array.isArray(w.designs)&&Object.keys(w.designs).length<=100&&Number.isSafeInteger(w.nextDesign)&&w.nextDesign>0,'設計データが不正です。');
   for(const [id,d]of Object.entries(w.designs)){check(/^design-[1-9]\d*$/.test(id)&&Number(id.slice(7))<w.nextDesign&&amount(d.level),'設計データが不正です。');check(d.spec?.customName===undefined||validName(d.spec.customName),'設計名が不正です。');check(d.formulaVersion===undefined||d.formulaVersion===1||d.formulaVersion===2,'設計データが不正です。');const temp={industry:{technology:{shipbuilding:d.level},shipyard:true}},q=(d.formulaVersion===2?designQuote:legacyDesignQuote)(temp,d.hull,d.settings);check(d.formulaVersion!==2||d.spec?.maintenanceEfficiency===q.spec.maintenanceEfficiency,'設計性能が不正です。');check(d.level>=HULL_LEVELS[d.hull]&&d.spec&&['price','capacity','speed','range','daily','guns'].every(k=>d.spec[k]===q.spec[k])&&d.spec.mode==='sea'&&d.spec.name===q.spec.name+` #${id.slice(7)}`&&d.spec.nameEn===q.spec.nameEn+` #${id.slice(7)}`,'設計性能が不正です。');}
   check(Array.isArray(i.designIds)&&new Set(i.designIds).size===i.designIds.length&&i.designIds.every(id=>Object.hasOwn(w.designs,id)),'設計の所有が不正です。');
   check(hasKeys(w.development,Object.keys(CITIES)),'都市開発が不正です。');
-  for(const [city,d]of Object.entries(w.development)){check(['state','private','player',...COMPANY_IDS].includes(d.owner)&&['basis','size','production','invested','dailySize','dailyProduction','taxPool'].every(k=>amount(d[k])),'都市開発が不正です。');if(d.owner===i.id)check(s.licenses.includes(CITIES[city].nation),'都市開発の免許が不正です。');}
+  for(const [city,d]of Object.entries(w.development)){check(['state','private','player','company-1','company-2'].includes(d.owner)&&['basis','size','production','invested','dailySize','dailyProduction','taxPool'].every(k=>amount(d[k])),'都市開発が不正です。');if(d.owner===i.id)check(s.licenses.includes(CITIES[city].nation),'都市開発の免許が不正です。');}
   check(Array.isArray(i.log)&&i.log.length<=60&&i.log.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['shipyard','research','sold','right','confiscated','skipped'].includes(e.kind)&&(e.city===null||(Object.hasOwn(CITIES,e.city)||Object.hasOwn(RETIRED_CITIES,e.city)))&&amount(e.cost)),'投資履歴が不正です。');
   if(!nested){const companies=[s,...s.competitors],ids=companies.map(c=>c.industry.id);check(s.industry.id==='player'&&new Set(ids).size===ids.length&&Object.values(w.development).every(d=>['state','private',...ids].includes(d.owner)),'開発権の所有者が不正です。');}
 }
