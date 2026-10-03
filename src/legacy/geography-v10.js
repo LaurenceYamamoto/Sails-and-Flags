@@ -1,0 +1,22 @@
+import {REGION_PORTS} from './region-data-v10.js';
+// Display geography is independent of gameplay distance and save data.
+export function project(lon,lat) { return {x:30+(lon+90)*840/102,y:30+(58-lat)*460/50}; }
+export const PORT_GEOGRAPHY = {
+  porto:{lon:-8.611,lat:41.149,mapName:'Porto',label:[-17,-5]},
+  barcelona:{lon:2.173,lat:41.385,mapName:'Barcelona',label:[18,18]},
+  marseille:{lon:5.369,lat:43.296,mapName:'Marseille',label:[18,-4]},
+  kingston: {lon:-76.793,lat:17.971,mapName:'Kingston',label:[-15,23]},
+  havana: {lon:-82.366,lat:23.113,mapName:'Havana',label:[-13,-12]},
+  london: {lon:-.128,lat:51.507,mapName:'London',label:[-17,4]},
+  cadiz: {lon:-6.292,lat:36.529,mapName:'Cadiz',label:[15,20]},
+  nantes: {lon:-1.553,lat:47.218,mapName:'Nantes',label:[-17,1]},
+  amsterdam: {lon:4.904,lat:52.368,mapName:'Amsterdam',label:[-9,-16]},
+  lisbon: {lon:-9.139,lat:38.722,mapName:'Lisbon',label:[-17,-4]},
+  santiago: {lon:-75.821,lat:20.024,mapName:'Santiago',label:[15,-24]},
+  santodomingo: {lon:-69.931,lat:18.486,mapName:'Santo Domingo',label:[-10,45]},
+  sanjuan: {lon:-66.106,lat:18.466,mapName:'San Juan',label:[17,-9]},
+  bridgetown: {lon:-59.616,lat:13.097,mapName:'Bridgetown',label:[17,0]},
+  willemstad: {lon:-68.935,lat:12.109,mapName:'Willemstad',label:[12,29]},
+};
+
+Object.assign(PORT_GEOGRAPHY,REGION_PORTS);

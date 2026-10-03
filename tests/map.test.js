@@ -1,7 +1,7 @@
 import {INLAND,ROADS,roadPoints,roadPosition} from '../src/land-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LAND } from '../assets/maps/land.js';
+import { LAND } from '../assets/maps/world-land.js';
 import { CITIES } from '../src/data.js';
 import { PORT_GEOGRAPHY,project } from '../src/geography.js';
 import { setLanguage,nameOf } from '../src/i18n.js';

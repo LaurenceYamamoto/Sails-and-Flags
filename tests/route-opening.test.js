@@ -40,11 +40,12 @@ test('opening accepts exact funds, zero-cost reuse, and rechecks cash at submiss
   releaseShip(s,s.ships[0].id);assert.equal(quoteCircuitOpening(s,'sloop',ports).cost,0);openCircuit(s,'sloop',ports);assert.equal(s.cash,0);
   const other=company();assert.equal(quoteCircuitOpening(other,'sloop',ports).error,null);entry(other,'upkeep',-4000);const before=serialize(other);assert.throws(()=>openCircuit(other,'sloop',ports));assert.equal(serialize(other),before);
 });
-test('fleet cap forbids a purchase but still allows reuse of a matching idle ship',()=>{
-  const s=funded();trade(s,'kingston','food',300000,'sell');for(let i=0;i<200;i++)buyShip(s,'sloop');
-  const before=serialize(s);assert.match(quoteCircuitOpening(s,'brig',ports).error,/200/);assert.throws(()=>openCircuit(s,'brig',ports));assert.equal(serialize(s),before);
-  const r=openCircuit(s,'sloop',ports);assert.equal(s.ships.length,200);assert.equal(s.ships[0].routeId,r.id);
+test('player can purchase beyond 200 ships and still reuse an idle ship',()=>{
+ const s=funded();trade(s,'kingston','food',300000,'sell');for(let i=0;i<200;i++)buyShip(s,'sloop');
+ assert.equal(quoteCircuitOpening(s,'brig',ports).error,null);const r=openCircuit(s,'brig',ports);assert.equal(s.ships.length,201);
+ assert.equal(s.ships.at(-1).routeId,r.id);assert.deepEqual(deserialize(serialize(s)),s);
 });
+
 test('existing circuits open their details without buying, adding ships or changing policy',()=>{
   const s=company(),r=openCircuit(s,'sloop',ports),before=serialize(s);
   const q=quoteCircuitOpening(s,'brig',[...ports].reverse());assert.equal(q.cost,0);assert.equal(q.existingRouteId,r.id);

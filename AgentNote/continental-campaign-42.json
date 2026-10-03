@@ -1,0 +1,51 @@
+{
+  "seed": 42,
+  "days": 18250,
+  "elapsedMs": 368612.35620000004,
+  "p95TickMs": 25.967900000003283,
+  "maxTickMs": 427.075,
+  "cash": 937681.6033234384,
+  "assets": 1007753.5456314792,
+  "ships": 32,
+  "maxShips": 32,
+  "maxRoutes": 1,
+  "firstRankDay": null,
+  "restores": 50,
+  "saveBytes": 942749,
+  "events": {
+    "raided": 456,
+    "war": 21,
+    "peace": 18,
+    "shipLost": 6
+  },
+  "decisions": {
+    "expanded": 32,
+    "cooldown": 71,
+    "budget": 3,
+    "threshold": 19,
+    "reserve": 2,
+    "shrunk": 18,
+    "reused": 15,
+    "replaced": 6
+  },
+  "competitors": [
+    {
+      "name": "Channel Company",
+      "bankrupt": false,
+      "ships": 150,
+      "assets": 105326234.16550957
+    },
+    {
+      "name": "Antilles Company",
+      "bankrupt": false,
+      "ships": 150,
+      "assets": 78653239.96241933
+    },
+    {
+      "name": "Ligurian Company",
+      "bankrupt": false,
+      "ships": 150,
+      "assets": 60071233.96330354
+    }
+  ]
+}

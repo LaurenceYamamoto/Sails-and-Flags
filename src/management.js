@@ -9,7 +9,7 @@ const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
 const amount=n=>finite(n)&&n>=0&&n<=1e12;
 export const monthFor=day=>new Date(Date.UTC(1700,0,1)+day*86400000).toISOString().slice(0,7);
-export const PROFILES={small:{cash:5000,reserve:1000,maxShips:4,maxRoutes:3,types:['sloop','wagon']},large:{cash:25000,reserve:6000,maxShips:12,maxRoutes:6,types:['sloop','brig','fluyt','wagon']}};
+export const PROFILES={small:{cash:5000,reserve:1000,maxShips:150,maxRoutes:50,types:['sloop','wagon']},large:{cash:25000,reserve:6000,maxShips:150,maxRoutes:50,types:['sloop','brig','fluyt','wagon']}};
 export function initializeManagement(s, kind=null) {
   s.automation={enabled:false,monthlyBudget:0,minCash:1000,expandThreshold:25,shrinkThreshold:0,month:monthFor(s.day),spent:0};
   s.managementLog=[];s.firstRankDay=null;
@@ -71,7 +71,7 @@ export function runAutomation(s) {
       const idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type);
       const cost=idle?0:shipSpec(s,type).price;
       if(!idle&&!canProduce(s,type)){skip('noOpportunity');continue;}
-      if(!idle&&s.ships.length>=200){skip('limit');continue;}
+      if(!idle&&s.strategy&&s.ships.length>=PROFILES[s.strategy.kind].maxShips){skip('limit');continue;}
       if(a.spent+cost>a.monthlyBudget){skip('budget');continue;}
       if(s.cash-cost<a.minCash){skip('reserve');continue;}
       const ship=idle??buyShip(s,type);assignShip(s,r.id,ship.id);a.spent+=cost;
@@ -106,9 +106,15 @@ export function runCompetitor(s) {
   for(const old of [...s.routes])if(s.routes.length>1&&s.day-old.transport.since>90&&transportMargin(old)<0&&routeShips(s,old).every(v=>!v.voyage&&v.status==='waiting')) {
     removeRoute(s,old.id);managementLog(s,'rivalReassigned',old.id);break;
   }
-  const p=PROFILES[s.strategy.kind],ids=Object.keys(CITIES),candidates=[];
-  for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)for(const type of p.types) {
-    const a=ids[i],b=ids[j],ship=shipSpec(s,type);if(travelDistance(s,type,a,b)>ship.range)continue;
+  const p=PROFILES[s.strategy.kind],candidates=[];
+  const ids=Object.keys(CITIES),pairs=ids.flatMap((a,i)=>ids.slice(i+1).map(b=>[a,b]));
+  // Rotate a bounded planning window; always consider reinforcing current routes.
+  const month=Number(monthFor(s.day).slice(0,4))*12+Number(monthFor(s.day).slice(5));
+  const offset=(month*120+Number(s.industry.id.split('-')[1])*37)%pairs.length;
+  const sampled=new Map(s.routes.filter(r=>r.stops.length===2).map(r=>[circuitKey(r.stops),r.stops]));
+  for(let i=0;i<Math.min(120,pairs.length);i++){const pair=pairs[(offset+i)%pairs.length];sampled.set(circuitKey(pair),pair);}
+  for(const [a,b] of sampled.values())for(const type of p.types) {
+    const ship=shipSpec(s,type);if(travelDistance(s,type,a,b)>ship.range)continue;
     const existing=s.routes.find(r=>r.mode===ship.mode&&circuitKey(r.stops)===circuitKey([a,b]));
     if(existing&&routeShips(s,existing).length>=3)continue;
     const missing=routeNations({stops:[a,b],mode:ship.mode}).filter(n=>!s.licenses.includes(n));
@@ -144,7 +150,6 @@ export function acquireCompany(s,index) {
   const q=acquisitionQuote(s,index),target=s.competitors[index];
   check(q.eligible,'友好度30以上で交易免許を取得できます。');
   check(s.cash>=q.required,'買収代金と必要な免許・債務を支払う資金が不足しています。');
-  check(s.ships.length+target.ships.length<=200,'試作版の保有船上限（200隻）に達しました。');
   // Work on a validated clone: failed transfers cannot partially spend money.
   const copy=deserialize(serialize(s)),c=copy.competitors[index],routeMap=new Map(),touched=new Set();
   entry(copy,'acquisition',-q.price);

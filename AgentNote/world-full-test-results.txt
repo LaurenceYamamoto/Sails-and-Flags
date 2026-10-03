@@ -1,0 +1,223 @@
+P6 campaign {"seed":1,"days":18250,"elapsedMs":317159.6723,"p95TickMs":37.06130000000121,"maxTickMs":1635.3310999999999,"cash":1414186.557830937,"assets":1510800.4695150396,"ships":45,"maxShips":45,"maxRoutes":1,"firstRankDay":null,"restores":50,"saveBytes":854521,"events":{"raided":641,"war":20,"peace":18,"shipLost":5},"decisions":{"expanded":43,"cooldown":64,"reserve":5,"threshold":25,"shrunk":8,"reused":8,"replaced":5,"budget":1},"competitors":[{"name":"Channel Company","bankrupt":false,"ships":150,"assets":105599744.34569436},{"name":"Antilles Company","bankrupt":false,"ships":150,"assets":28433419.963399086},{"name":"Ligurian Company","bankrupt":false,"ships":150,"assets":31466717.45575904}]}
+P6 campaign {"seed":42,"days":18250,"elapsedMs":173323.8686,"p95TickMs":14.923300000024028,"maxTickMs":79.46549999999115,"cash":422633.57549285656,"assets":479634.598492821,"ships":24,"maxShips":24,"maxRoutes":1,"firstRankDay":null,"restores":50,"saveBytes":849695,"events":{"raided":344,"war":21,"peace":19,"shipLost":6},"decisions":{"expanded":24,"cooldown":58,"budget":4,"reserve":7,"threshold":21,"shrunk":15,"reused":13,"replaced":6},"competitors":[{"name":"Channel Company","bankrupt":false,"ships":150,"assets":96789089.96114093},{"name":"Antilles Company","bankrupt":false,"ships":150,"assets":37344566.947677635},{"name":"Ligurian Company","bankrupt":false,"ships":150,"assets":39374503.560159884}]}
+P6 campaign {"seed":1700,"days":18250,"elapsedMs":207264.1875,"p95TickMs":19.202600000076927,"maxTickMs":68.01320000004489,"cash":1149261.924015861,"assets":1241664.7923673363,"ships":39,"maxShips":39,"maxRoutes":1,"firstRankDay":null,"restores":50,"saveBytes":849223,"events":{"raided":545,"war":20,"peace":18,"shipLost":5},"decisions":{"expanded":38,"cooldown":64,"reserve":6,"shrunk":11,"reused":10,"threshold":21,"replaced":5,"budget":1},"competitors":[{"name":"Channel Company","bankrupt":false,"ships":150,"assets":96980918.03822657},{"name":"Antilles Company","bankrupt":false,"ships":150,"assets":32290751.705638062},{"name":"Ligurian Company","bankrupt":false,"ships":150,"assets":26701209.886305872}]}
+✔ three seeds run 50 years with industry, wars, automation, losses and annual deterministic recovery (698797.5257ms)
+✔ asset lead continues, bankruptcy stops time, and a good save restores the company without overwriting corrupt slots (34.44ms)
+✔ city selection prioritizes ports and inland hubs without a country quota (2394.2029ms)
+✔ v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners (1002.0132ms)
+✔ v7 source saves remain untouched and compensation cannot repeat on v8 reload (429.5104ms)
+✔ refund can clear a stopped rival debt without leaving its clock behind the world (140.425ms)
+✔ 16x advances daily throughout the second rather than in a 16-day burst (1.8467ms)
+✔ pause, resume and speed changes preserve fractional time without catch-up (0.3843ms)
+✔ game over stops pending daily updates (0.2558ms)
+✔ ship positions interpolate between days without changing voyage state (1.1112ms)
+✔ continuous clock gives identical trading, cargo and accounting at every speed (4154.1821ms)
+✔ research charges the base fee plus the five explicit monetary budgets once, independent of construction (1315.2506ms)
+✔ each budget has diminishing gains and huge research spending leaves construction and upkeep bounded (32.995ms)
+✔ range research unlocks a route and remains usable after an in-transit save (1766.9894ms)
+✔ upkeep research reduces recurring cost without worsening other performance and stacks with seafaring technology (8.9316ms)
+✔ pre-budget v6 designs retain exact historic costs and performance alongside new designs (116.3238ms)
+✔ insufficient or invalid budgets do not mutate state; saved formula and efficiency are validated (52.5574ms)
+✔ Japanese and English forms expose five budgets, research breakdown, remaining funds and insufficient-funds state (6.4302ms)
+✔ integrated prices: split and bulk trades agree including tax and cash (1052.9899ms)
+✔ short stock and cash result in partial fills, no negative inventory (1.5062ms)
+✔ same-market buy and sell cannot create money; invalid trades are rejected (2.096ms)
+✔ optimizer agrees with exhaustive enumeration under constrained cash (54.5543ms)
+✔ loading honors allowed goods, margin, stock, capacity and operating reserve (15.3038ms)
+✔ licenses, range and duplicate assignment are enforced without ship location (2.4232ms)
+✔ pause finishes voyage, sells cargo once, permits release and reassignment (83.2357ms)
+✔ empty return and no-opportunity waiting rules (104.6581ms)
+✔ in-transit save restoration gives identical future, no lost or duplicated cargo (1969.9046ms)
+✔ save rejects incompatible, malformed and inconsistent states without modifying live game (87.675ms)
+✔ cash exhaustion ends game immediately, even with valuable assets (9.3579ms)
+✔ cashflow, asset value and purchases are not double counted (446.0315ms)
+✔ multiple ships remain distinct through simultaneous trades and save restoration (2261.5957ms)
+✔ markets respond to repeated trading and demand reacts to price (508.3018ms)
+✔ tutorial earns the price of a second ship from trading profits (62.5894ms)
+ℹ {"firstProfitDay":7,"secondShipDay":14,"cashAfterPurchase":3179.1194538248365,"earned":2029.1194538248365}
+✔ short and Atlantic routes run with reserves and measurable real versus forecast returns (2662.9544ms)
+ℹ {"type":"sloop","oneWayDays":6,"deliveries":52,"profit":30120.50816882689,"cash":32705.50816882688,"ms":1433.9638000000004}
+ℹ {"type":"brig","oneWayDays":35,"deliveries":10,"profit":74055.6781322332,"cash":81240.67813223317,"ms":1214.3246999999992}
+✔ ten-year runs stay valid and deterministic across multiple seeds (115869.8743ms)
+ℹ seed 1: cash=320038.03, voyages=521
+ℹ seed 42: cash=263067.68, voyages=521
+ℹ seed 1700: cash=305021.06, voyages=521
+ℹ 10-year × 6 runs: 115869ms
+✔ type replacement includes idle and assigned ships, pays only the net price and leaves rivals and automation unchanged (1324.9681ms)
+✔ route replacement keeps at-sea cargo, cursor, remaining time and names even when the new hold is smaller (1400.4519ms)
+✔ bulk automation edits only matching settings, including stopped routes, without trading ships or touching budgets (69.5634ms)
+✔ range, funding and empty-selection failures are atomic, while net funding can be lower than gross purchases (132.9956ms)
+✔ repeated replacement in one voyage retains departure limits; losses claim the purchased type (201.4508ms)
+✔ company, design and ship names persist without changing fixed specifications, accounts or random streams (81.8437ms)
+✔ automatic names are deterministic, allow pool reuse and survive acquisition, including old unnamed ships (208.0841ms)
+✔ names are rendered as text in controls, maps, rankings and designs in both languages (62.7957ms)
+✔ invalid saved names and voyage departure types are rejected without breaking pre-feature saves (122.748ms)
+{"passiveAssets":19124.366666355476,"activeAssets":256808.60197146755,"passiveIncome":16861.86666635546}
+✔ technology starts at zero, accepts uncapped finite investments and provides diminishing affordable progress (1257.508ms)
+✔ design research has hull gates, continuous soft caps and competing capacity, speed, guns and operating cost (29.1298ms)
+✔ researched ships open and run a circuit, freeze their specifications and survive in-transit saves (1415.7509ms)
+✔ automation and lost-ship replacement use the researched design and shared budget (76.7691ms)
+✔ seafaring technology lowers actual upkeep without changing existing ship speed or asset value (5.3969ms)
+✔ rights acquired from state and prior owners use distinct prices and conserve intercompany cash (49.8967ms)
+✔ city investment grows without supplies and changes demand and local-specialty production with smaller European effects (3.1783ms)
+✔ city tax income is small plus a share of real transaction tax, with no duplicate collection after restore (32.8756ms)
+✔ revocation confiscates rights and development without paying compensation or losing shipyard assets (31.4137ms)
+✔ acquisition transfers rights, investments, shipyard and designs with in-flight ships and unique design ids (90.2933ms)
+✔ v5 migration preserves voyages, random streams, diplomacy and legacy slots without resetting the world (586.1282ms)
+✔ invalid industry saves and unaffordable research/right acquisition leave live state intact (76.094ms)
+✔ P5 renders localized technology, design, city and custom-fleet controls without changing state (41.8406ms)
+✔ P5 investment, custom ships and development run for ten years across seeds with yearly deterministic restoration (127295.765ms)
+✔ ten-year city-only income and investment do not outperform active trading from equal starting capital (52278.7082ms)
+✔ two inland hubs and eight roads support land-only, sea-only and connected market trade (2702.5278ms)
+✔ opening reuses the exact idle wagon or buys it, rejects no road, wrong mode, missing license and insufficient funds atomically (67.0624ms)
+✔ multi-stop land service revisits towns and preserves even slots and its cursor across restore (2537.285ms)
+✔ road improvement is diminishing, terrain remains material and in-transit arrival times stay fixed (92.3898ms)
+✔ tolls affect actual cash, route results and transport margin once; own roads cannot mint toll income (106.088ms)
+✔ rights transfer pays the actual owner, rival traffic shares tolls, investments skip without funds, acquisition transfers road assets (106.0581ms)
+✔ land technology reduces wagon upkeep only, safety and escorts reduce bandits, lost wagons use normal replacement budgets (105.2636ms)
+✔ land auto-expansion buys only wagons, observes capital, shrinks into inventory and leaves ships untouched (2.716ms)
+✔ revocation removes a cross-border land circuit and confiscates rights and cargo without compensation (30.4995ms)
+✔ v6 migration preserves existing markets, capital, ships, designs, voyages and random state, and keeps original save slots (1325.6238ms)
+✔ corrupt road owners, amounts, modes, inland sea routes and departure conditions are rejected (192.9048ms)
+✔ land panels and service details render in six languages without changing simulation state (106.8274ms)
+✔ three seeds run ten years with sea/land networks, roads, bandits, AI and deterministic annual recovery (130861.6149ms)
+✔ all UI source messages, decision reasons, error messages and names have four additional translations (89.6277ms)
+✔ all six locales render controls and preserve saves, names, cities and deterministic simulation (2022.5427ms)
+✔ transport margin includes taxes and ship costs, excludes incomplete cargo and company overhead (1224.3458ms)
+✔ automation prioritizes higher margins, shares the monthly budget and observes one-cycle cooldown (27.8448ms)
+✔ reserve, calendar rollover, idle reuse and settings changes never bypass spending limits (34.5252ms)
+✔ contraction waits for ships at sea, releases cargo-free ships and never removes the last ship (47.2122ms)
+✔ paused and opted-out routes do not auto-expand and zero-expense samples are skipped (3.8226ms)
+✔ acquisition conserves market, cargo, travel and assets while merging rotated services (1893.0356ms)
+✔ buyout adds missing licenses, handles debt, and cannot partially mutate an unaffordable company (52.2824ms)
+✔ ranking records the first sole lead once, survives restore and continues simulation (285.2158ms)
+✔ monthly competitor decisions are deterministic, spend their own cash and expand services (7.515ms)
+✔ v3 repeated-stop saves migrate without rewriting capital, voyages or old slots (425.7684ms)
+✔ corrupt management data is rejected and new UI is localized in both languages (144.8568ms)
+✔ ten years with automation stays within budgets and resumes deterministically (24992.8176ms)
+✔ all companies can be acquired once without ghost routes or duplicate assets (69.8351ms)
+✔ expansion ignores other idle types and buys only the route-selected type (49.6425ms)
+✔ selected idle type is reused without spending or stealing assigned ships (1.9294ms)
+✔ selected-type purchase respects budget and reserve even with other idle ships (3.1871ms)
+✔ contraction prefers the designated type and otherwise the lowest capacity (2.4894ms)
+✔ contraction waits for the preferred or smallest ship to arrive without dropping cargo (85.1985ms)
+✔ ship type updates validate range and preserve observation, cooldown and spending (76.3013ms)
+✔ old v4 saves infer fleet type without resetting existing management state (81.2772ms)
+✔ acquisition preserves selected types on new services and the player policy on merges (74.0348ms)
+✔ all cities use the same projection as land and lie on land or its generalized coast (563.9586ms)
+✔ city labels keep configured script in Japanese and English, including future kanji names (1.5554ms)
+✔ map renders all circuit preview legs and selectable rival routes without changing the game (1017.1131ms)
+✔ 200 routes share visual legs while all 200 ships remain selectable and the selected route stays on top (1917.2059ms)
+✔ road polylines and wagon interpolation stay on land, including the Biscay crossing (2066.0036ms)
+✔ regional data is complete: 66 ports, 22 nations, 20 goods, 4 ships and symmetric distances (2337.6364ms)
+✔ circuits deduplicate rotations, distinguish reverse direction and validate closing leg atomically (34.2293ms)
+✔ each intermediate port sells once, clears cargo, then buys separately for the next leg (195.5851ms)
+✔ multiport fleets have evenly rounded recurring slots at every port and preserve cargo on addition (539.9963ms)
+✔ competitors share stock, pay normal integrated prices and survive restore deterministically (855.0607ms)
+✔ v2 migration preserves balances, five original markets, cargo and arrival timing (217.8392ms)
+✔ bankruptcy and corrupt circuit/rival saves are handled without accepting invalid state (87464.5285ms)
+✔ ten years of multiport trading across seeds remains live, finite and reproducible after restore (50935.0944ms)
+✔ save slots preserve legacy data, rotate valid backup and expose corrupt saves for recovery (309.9396ms)
+✔ failed storage write and invalid import never destroy the previous save (39.3878ms)
+✔ import validation rejects unexpected markets and unsafe ledger labels (68.0232ms)
+✔ English catalog covers all keys and circuit details localize commodity and port names (31.6551ms)
+✔ P6 pins the furthest valid old save as original JSON before rotating current slots (1588.0208ms)
+✔ corrupt pinned slots are visible but never overwritten and failed preservation leaves live slots intact (129.7782ms)
+P8 regional {"seed":1,"day":3650,"cash":464656.34448851773,"assets":518799.92851233645,"deliveries":[1336,1126]}
+P8 regional {"seed":42,"day":3650,"cash":604424.2769041351,"assets":660735.2587707449,"deliveries":[1369,1148]}
+P8 regional {"seed":1700,"day":3650,"cash":569109.7746045844,"assets":619754.9018150397,"deliveries":[1369,1130]}
+✔ P8 ports have distinct markets and licenses, while every old sea distance is unchanged (807.9889ms)
+✔ v9 migration preserves every existing company field, goods, diplomacy pair and voyage, adds content once (5237.3831ms)
+✔ v9 migration rejects corruption and preserves old slots; P8 bankruptcy and acquired rivals cannot respawn on reload (273.3358ms)
+✔ regional buyout conserves assets and transfers rights and cargo; revocation confiscates only its nation (102.4226ms)
+✔ new nations participate in bounded diplomatic updates and reject missing or duplicate pairs (54.8033ms)
+✔ regional markets, map, cargo policies and diplomatic names work in all six languages (246.4796ms)
+✔ normal funds sustain regional and connected routes for ten years across three seeds with yearly recovery (127212.4704ms)
+✔ requested round trip revisits each port in order for two cycles and restores at every step (4572.3332ms)
+✔ revisited calls have distinct timetable slots and rotated circuits share one fleet (41.8879ms)
+✔ invalid repeated-stop inputs and corrupt or ambiguous saved cursors are rejected (209.5128ms)
+✔ old v3 unique-port saves need no cursor and map labels show all visit numbers (255.8899ms)
+✔ opening without an inventory buys the selected ship once and preserves accounting (2075.7752ms)
+✔ opening reuses exactly the selected idle type and leaves other vessels untouched (4.0161ms)
+✔ insufficient funds and invalid opening conditions cause no partial purchase or mutation (54.8015ms)
+✔ opening accepts exact funds, zero-cost reuse, and rechecks cash at submission (11.3511ms)
+✔ player can purchase beyond 200 ships and still reuse an idle ship (21.0548ms)
+✔ existing circuits open their details without buying, adding ships or changing policy (4.6113ms)
+✔ multiport opening supports repeated stops and validates every leg before buying (20.0649ms)
+✔ opening quote shows cost, cash, shortage and reuse in Japanese and English (2.5954ms)
+✔ same pair in either direction is one route with shared policy and accounting (534.0147ms)
+✔ unused ownership has no port; purchase needs no license; reassignment needs no transfer (5.8741ms)
+✔ two ships depart at half-cycle intervals using navigable sailing days (914.3327ms)
+✔ non-divisible slots are evenly rounded; high fleets respect daily resolution (429.5947ms)
+✔ mixed speed fleet uses a shared cycle and preserves actual voyage durations (404.0817ms)
+✔ adding a ship preserves in-flight cargo and redistributes subsequent sailings (240.9386ms)
+✔ pause affects all ships, safe individual release works, resume reschedules (326.2313ms)
+✔ no-opportunity departures skip slots instead of bunching on a later day (98.2512ms)
+✔ v1 migration merges reversed routes without changing cash, cargo or voyages (2950.0071ms)
+✔ migration does not reactivate a partially paused legacy route (105.3924ms)
+✔ a fleet waiting at the far end can resume tomorrow with evenly spaced slots (30.1972ms)
+✔ save validation rejects duplicate pairs, orphan vessels and corrupt schedules (76.7528ms)
+✖ all sea pairs avoid land offshore, have symmetric route-derived distances and exact port endpoints (407.847ms)
+✔ Marseille–Nantes goes through Gibraltar and is much longer than Lisbon–Nantes; Cuba and Britain also require detours (308.2657ms)
+✔ v8 migration preserves cargo, cash and arrival dates, pauses insufficient range and resumes after deliberate replacement (177.1701ms)
+✔ pending replacements and acquisition of a paused legacy service stay safe without buying incompatible ships (124.6483ms)
+✔ old slots are preserved, v9 reload is idempotent, invalid legacy timing and active range-review routes are rejected (1324.5576ms)
+✔ friendship affects fees and taxes, while same-day split trades remain equivalent (773.4047ms)
+✔ war warns through events without instantly revoking licenses and boosts weapons demand (474.7192ms)
+✔ warning precedes revocation and funded continuous investment can offset wartime trade damage (6.8216ms)
+✔ wartime weapons demand raises prices through stock consumption without changing base production (38.344ms)
+✔ license revocation at sea forfeits cargo once and returns surviving ships to inventory (47.4949ms)
+✔ escort, merchant speed and guns mitigate raids; escort cost is outside transport margin (13.6793ms)
+✔ cargo loss preserves remaining cost, cash and saved voyage, without duplicate sale or expense (182.8591ms)
+✔ last ship loss keeps a valid empty route and replacement runs before profitable expansion (40.8608ms)
+✔ replacement respects reserve and monthly budget and reuses only the lost type (5.8213ms)
+✔ raid grace does not consume random numbers or damage ships (13.4552ms)
+✔ v4 migration preserves voyages, budgets and existing markets, and leaves v4 slots untouched (176.925ms)
+✔ corrupt security saves and invalid settings are rejected (190.2535ms)
+✔ buyout keeps shared diplomacy world and merged replacement claims without duplicating assets (73.0259ms)
+✔ P4 UI is localized and exposes risk, mitigation, safety margins and event details (49.3228ms)
+✔ full P4 survives ten years across seeds and yearly restores reproduce wars, losses and accounts (120426.4492ms)
+World campaign {"seed":1,"day":1095,"cash":272575.56194009195,"deliveries":[13,273]}
+World campaign {"seed":42,"day":1095,"cash":272712.7290667701,"deliveries":[13,273]}
+World campaign {"seed":1700,"day":1095,"cash":270802.3657067136,"deliveries":[13,273]}
+✔ all 2,145 world port pairs connect over water with symmetric finite distances and precise endpoints (2689.3474ms)
+✔ Pacific wraps at the dateline; absent Panama and Suez canals force historic detours (1.1183ms)
+✔ v10 migration preserves finances, RNG, cargo, voyages, old markets and policies; new slots preserve the original (279.3011ms)
+✔ each rival accepts 50 routes but rejects route 51 before buying; players have no route cap (136.187ms)
+✔ camera zoom anchors, limits and pans remain bounded; city jump exposes every city (1.2583ms)
+✔ twenty-commodity loading has bounded work, profitable feasible cargo and deterministic results (48.9957ms)
+✔ Pacific galleon and Asian regional services trade and recover deterministically for three years (16668.8152ms)
+ℹ tests 172
+ℹ suites 0
+ℹ pass 171
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 699396.7538
+
+✖ failing tests:
+
+test at tests\sea-routing.test.js:20:1
+✖ all sea pairs avoid land offshore, have symmetric route-derived distances and exact port endpoints (407.847ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    {
+  +   x: 472.3349999999999,
+  -   x: 472.335,
+      y: 113.9775
+    }
+
+      at TestContext.<anonymous> (file:///C:/Users/YamamotoItaru/Workspace/Sails-and-Flags/tests/sea-routing.test.js:24:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { x: 472.3349999999999, y: 113.9775 },
+    expected: { x: 472.335, y: 113.9775 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

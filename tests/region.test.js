@@ -1,3 +1,6 @@
+import {CROSSING_PORTS,CROSSING_ROADS} from '../src/crossing-data.js';
+import {CONTINENTAL_CITIES,CONTINENTAL_ROADS,CONTINENTAL_NATIONS} from '../src/continental-data.js';
+import {WORLD_PORTS,WORLD_NATIONS} from '../src/world-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as old from '../src/legacy/engine-v9.js';
@@ -18,9 +21,9 @@ const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-5,`${a} != ${b}`);
 const fmt={cash:String,decimal:String,signed:String,tone:()=>''};
 
 test('P8 ports have distinct markets and licenses, while every old sea distance is unchanged',()=>{
-  assert.equal(Object.keys(CITIES).length,19);assert.equal(GOODS.length,10);
+  assert.equal(Object.keys(CITIES).length,114);assert.equal(GOODS.length,20);
   assert.equal(CITIES.genoa.nation,'genoa');assert.equal(CITIES.livorno.nation,'tuscany');
-  assert.equal(new Set(Object.values(NATIONS).map(n=>n.color)).size,7);
+  assert.equal(new Set(Object.values(NATIONS).map(n=>n.color)).size,23);
   for(const n of Object.values(NATIONS))assert.ok(CITIES[n.tradePort]&&!CITIES[n.tradePort].inland);
   for(const a of Object.keys(OLD_CITIES))for(const b of Object.keys(OLD_CITIES))assert.equal(distance(a,b),oldDistance(a,b));
   const s=game.createGame(42,{events:false});
@@ -36,15 +39,15 @@ test('v9 migration preserves every existing company field, goods, diplomacy pair
   const before=old.createGame(42,{events:false});old.buyLicense(before,'spain');old.openCircuit(before,'sloop',['kingston','havana']);
   for(let i=0;i<100;i++)old.tick(before);
   const raw=old.serialize(before),s=game.deserialize(raw);
-  assert.equal(old.serialize(before),raw);assert.equal(s.version,10);
+  assert.equal(old.serialize(before),raw);assert.equal(s.version,13);
   for(const [i,c] of [before,...before.competitors].entries()){
     const after=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
-    for(const n of Object.keys(REGION_NATIONS))for(const values of Object.values(after.diplomacy))delete values[n];
+    for(const n of Object.keys({...REGION_NATIONS,...WORLD_NATIONS,...CONTINENTAL_NATIONS}))for(const values of Object.values(after.diplomacy))delete values[n];
     for(const x of [after,expected]){delete x.world;delete x.markets;delete x.competitors;delete x.version;}
     assert.deepEqual(after,expected);
   }
   for(const id of Object.keys(before.markets))for(const g of OLD_GOODS)assert.deepEqual(s.markets[id][g.id],before.markets[id][g.id]);
-  const world=structuredClone(s.world);world.pairs=world.pairs.filter(p=>OLD_NATIONS[p.a]&&OLD_NATIONS[p.b]);for(const id of Object.keys(REGION_CITIES))delete world.development[id];assert.deepEqual(world,before.world);
+  const world=structuredClone(s.world);for(const id of Object.keys(CROSSING_PORTS))delete world.development[id];for(const id of Object.keys(CROSSING_ROADS))delete world.roads[id];world.pairs=world.pairs.filter(p=>OLD_NATIONS[p.a]&&OLD_NATIONS[p.b]);for(const id of Object.keys({...REGION_CITIES,...WORLD_PORTS,...CONTINENTAL_CITIES}))delete world.development[id];for(const id of Object.keys(CONTINENTAL_ROADS))delete world.roads[id];assert.deepEqual(world,before.world);
   const rival=s.competitors.at(-1);assert.equal(rival.day,s.day);assert.equal(rival.industry.id,'company-3');assert.equal(rival.routes[0].scheduleEpoch,s.day+1);
   assert.deepEqual(game.deserialize(game.serialize(s)),s);
   const copy=game.deserialize(game.serialize(s));for(let i=0;i<365;i++){game.tick(s);game.tick(copy);}assert.deepEqual(copy,s);
@@ -71,7 +74,7 @@ test('regional buyout conserves assets and transfers rights and cargo; revocatio
 });
 
 test('new nations participate in bounded diplomatic updates and reject missing or duplicate pairs',()=>{
-  const s=game.createGame(1);assert.equal(s.world.pairs.length,21);
+  const s=game.createGame(1);assert.equal(s.world.pairs.length,253);
   for(const p of s.world.pairs){p.relation=0;p.cooldownUntil=0;}
   s.day=366;advanceWorld(s);assert.ok(s.world.pairs.every(p=>Number.isFinite(p.relation)));
   for(const mutate of [x=>x.world.pairs.pop(),x=>x.world.pairs[0]={...x.world.pairs[1]},x=>delete x.diplomacy.friendship.genoa]){const x=game.createGame();mutate(x);assert.throws(()=>game.deserialize(game.serialize(x)));}

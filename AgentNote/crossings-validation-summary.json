@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0-alpha.4",
+  "saveVersion": 13,
+  "date": "2026-10-03",
+  "counts": {
+    "cities": 114,
+    "ports": 68,
+    "inland": 46,
+    "roads": 69,
+    "nations": 23,
+    "goods": 20
+  },
+  "regression": {
+    "tests": 185,
+    "passed": 185,
+    "failed": 0,
+    "excluded": "tests/campaign.test.js (50-year campaigns)",
+    "durationMs": 154702.3712
+  },
+  "afterSeaGatewayOptimization": {
+    "tests": 23,
+    "passed": 23,
+    "failed": 0
+  },
+  "newFeatureTests": 8,
+  "browser": {
+    "port": 4184,
+    "day": 244,
+    "routes": 2,
+    "vehicles": 2,
+    "cash": 92090.8,
+    "saveReloadRestore": true,
+    "panamaDragAndCircuit": true,
+    "consoleErrors": 0
+  },
+  "unresolvedFailures": [],
+  "afterCameraAdjustment": {
+    "tests": 18,
+    "passed": 18,
+    "failed": 0
+  }
+}

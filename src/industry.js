@@ -8,7 +8,7 @@ import {entry} from './engine.js';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
 export const HULLS={...SHIPS,corvette:{name:'コルベット',nameEn:'Corvette',mode:'sea',price:11000,capacity:50,speed:170,range:5500,daily:11,guns:20}};
-export const HULL_LEVELS={sloop:5,brig:10,fluyt:15,corvette:30};
+export const HULL_LEVELS={galleon:25,sloop:5,brig:10,fluyt:15,corvette:30};
 export const YARD_COST=4000;
 export function initializeIndustry(s,id){s.industry={id,technology:{shipbuilding:0,seafaring:0,land:0},investment:{shipbuilding:0,seafaring:0,land:0},shipyard:false,yardValue:0,designIds:[],log:[]};}
 export function initializeDevelopment(w){w.designs={};w.nextDesign=1;w.development=Object.fromEntries(Object.keys(CITIES).map(id=>[id,{owner:['havana','nantes'].includes(id)?'private':'state',basis:0,size:0,production:0,invested:0,dailySize:0,dailyProduction:0,taxPool:0}]));}

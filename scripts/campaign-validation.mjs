@@ -35,7 +35,7 @@ export function validateCampaign(seed,days=365*50) {
       for(const c of [s,...s.competitors]) {
         const balance=c.initialCash+Object.values(c.totals).reduce((a,b)=>a+b,0);
         assert.ok(Math.abs(balance-c.cash)<Math.max(1e-5,Math.abs(c.cash)*1e-10),`accounting: ${seed}/${day}`);
-        assert.ok(Number.isFinite(assets(c)));assert.ok(c.ships.length<=200);
+        assert.ok(Number.isFinite(assets(c)));if(c.strategy)assert.ok(c.routes.length<=50);
       }
       for(const city of Object.values(s.markets))for(const market of Object.values(city))assert.ok(Number.isFinite(market.stock)&&market.stock>=0);
     }

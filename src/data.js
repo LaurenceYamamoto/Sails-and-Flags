@@ -1,3 +1,6 @@
+import {CROSSING_PORTS} from './crossing-data.js';
+import {WORLD_PORTS,WORLD_NATIONS,WORLD_GOODS,worldMarket} from './world-data.js';
+import {CONTINENTAL_CITIES,CONTINENTAL_NATIONS} from './continental-data.js';
 import {REGION_NATIONS,REGION_CITIES,REGION_GOODS,oilMarket} from './region-data.js';
 import {seaRoute} from './sea-routing.js';
 import {INLAND} from './land-data.js';
@@ -67,7 +70,21 @@ Object.assign(CITIES,structuredClone(REGION_CITIES));
 for(const id of Object.keys(REGION_CITIES))Object.assign(CITIES[id],PORT_GEOGRAPHY[id],project(PORT_GEOGRAPHY[id].lon,PORT_GEOGRAPHY[id].lat));
 GOODS.push(...REGION_GOODS);
 for(const [id,c] of Object.entries(CITIES)){const m=oilMarket(id,c);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
+Object.assign(NATIONS,WORLD_NATIONS);
+Object.assign(NATIONS,CONTINENTAL_NATIONS);
+GOODS.push(...WORLD_GOODS);
+for(const [id,c] of Object.entries(CITIES))for(const g of WORLD_GOODS){const m=worldMarket(id,c,g);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
+for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS})){
+ const markets=GOODS.map(g=>worldMarket(id,c,g));
+ CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)};
+}
+// New inland economies use their own regional export profiles for every good.
+for(const id of Object.keys(CONTINENTAL_CITIES)){
+ const c=CITIES[id],markets=GOODS.map(g=>worldMarket(id,c,g));
+ Object.assign(c,{stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)});
+}
 export const SHIPS = {
+  galleon:{name:'ガレオン',nameEn:'Galleon',mode:'sea',price:14500,capacity:100,speed:105,range:10000,daily:10,guns:24},
   sloop: { name: 'スループ', mode: 'sea', price: 1800, capacity: 30, speed: 150, range: 1800, daily: 3, guns:6 },
   brig: { name: 'ブリッグ', mode: 'sea', price: 5200, capacity: 70, speed: 125, range: 5000, daily: 6, guns:12 },
   fluyt: { name: 'フリュート', mode: 'sea', price: 8500, capacity: 110, speed: 100, range: 5500, daily: 8, guns:4 },

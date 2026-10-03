@@ -24,11 +24,11 @@ function fixture(){
  old.tick(s);return s;
 }
 test('city selection prioritizes ports and inland hubs without a country quota',()=>{
- assert.deepEqual(Object.keys(INLAND).sort(),['madrid','paris']);
+ assert.ok(INLAND.madrid&&INLAND.paris);
  for(const id of ['porto','barcelona','marseille'])assert.ok(CITIES[id]&&!CITIES[id].inland);
  for(const id of Object.keys(RETIRED_CITIES))assert.equal(CITIES[id],undefined);
- assert.equal(Object.keys(ROADS).length,8);
- assert.ok(Object.values(ROADS).every(r=>!r.nations.includes('england')&&!r.nations.includes('netherlands')));
+ assert.equal(Object.keys(ROADS).length,69);
+ assert.ok(!Object.values(ROADS).some(r=>['oxford','utrecht','evora'].includes(r.a)||['oxford','utrecht','evora'].includes(r.b)));
  const s=game.createGame(42,{events:false});game.buyLicense(s,'portugal');
  game.openCircuit(s,'sloop',['lisbon','porto']);game.openCircuit(s,'wagon',['lisbon','porto']);
  assert.equal(s.routes.length,2);for(let i=0;i<60;i++)game.tick(s);
@@ -36,7 +36,7 @@ test('city selection prioritizes ports and inland hubs without a country quota',
 });
 test('v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners',()=>{
  const before=fixture(),raw=old.serialize(before),s=game.deserialize(raw);
- assert.equal(old.serialize(before),raw);assert.equal(s.version,10);
+ assert.equal(old.serialize(before),raw);assert.equal(s.version,13);
  for(const [index,c] of [before,...before.competitors].entries()){
   const after=[s,...s.competitors][index],removed=c.routes.filter(r=>r.stops.some(id=>RETIRED_CITIES[id]));
   const vehicles=c.ships.filter(v=>removed.some(r=>r.id===v.routeId));

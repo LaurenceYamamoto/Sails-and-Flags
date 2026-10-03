@@ -1,0 +1,38 @@
+{
+  "node": "v24.15.0",
+  "days": 365,
+  "playerRoutes": 201,
+  "playerShips": 201,
+  "initialRivals": [
+    {
+      "routes": 50,
+      "ships": 150
+    },
+    {
+      "routes": 50,
+      "ships": 150
+    },
+    {
+      "routes": 50,
+      "ships": 150
+    }
+  ],
+  "rivals": [
+    {
+      "routes": 45,
+      "ships": 150
+    },
+    {
+      "routes": 41,
+      "ships": 150
+    },
+    {
+      "routes": 41,
+      "ships": 150
+    }
+  ],
+  "p95TickMs": 8.154700000000048,
+  "maxTickMs": 82.53340000000003,
+  "serializeAndValidateMs": 29.32490000000007,
+  "saveBytes": 954374
+}

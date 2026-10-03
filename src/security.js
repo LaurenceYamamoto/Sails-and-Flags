@@ -66,7 +66,8 @@ export function revokeLicense(s,n){
 }
 export function advanceDiplomacy(s){
   if(!s.world.enabled)return;
-  const d=s.diplomacy,trade=d.tradeToday;
+  const d=s.diplomacy,trade=d.tradeToday,enemyTrade=Object.fromEntries(nations.map(n=>[n,0]));
+  for(const p of s.world.pairs)if(p.until!==null){enemyTrade[p.a]+=trade[p.b];enemyTrade[p.b]+=trade[p.a];}
   for(const n of nations){
     const before=d.friendship[n],investment=d.investment[n];
     let gain=0;
@@ -74,7 +75,7 @@ export function advanceDiplomacy(s){
       if(s.cash>=investment){entry(s,'diplomacyInvestment',-investment,null,{nation:n});gain=Math.sqrt(investment)/50;}
       else if(s.day%30===1)incident(s,'investmentSkipped',{nation:n});
     }
-    const own=trade[n]/100000,enemies=nations.filter(other=>atWar(s,n,other)).reduce((sum,other)=>sum+trade[other]/100000*1.5,0);
+    const own=trade[n]/100000,enemies=enemyTrade[n]/100000*1.5;
     d.lastChange[n]={trade:own,enemies:enemies?-enemies:0,investment:gain};d.friendship[n]=cap(before+own-enemies+gain);
     if(s.licenses.includes(n)&&before>RULES.warn&&d.friendship[n]<=RULES.warn)incident(s,'warning',{nation:n});
     if(d.friendship[n]<=RULES.revoke)revokeLicense(s,n);
@@ -86,7 +87,7 @@ export function setEscort(s,id,count){
 }
 export function riskFor(s,r,type,from=r.a,to=r.b){
   if(shipSpec(s,type).mode==='land')return roadRisk(s,r,from,to);
-  const ship=shipSpec(s,type),caribbean=CITIES[from].lon<-20||CITIES[to].lon<-20;
+  const ship=shipSpec(s,type),caribbean=[from,to].some(id=>CITIES[id].lon<-55&&CITIES[id].lon>-90&&CITIES[id].lat>5&&CITIES[id].lat<25);
   // Nearby hostile ports can intercept services even after their license is revoked.
   const hostile=Object.entries(CITIES).some(([id,c])=>!c.inland&&s.diplomacy.friendship[c.nation]<=RULES.hostile&&(id===from||id===to||Math.min(distance(id,from),distance(id,to))<=400));
   const base=(caribbean?.002:.0008)+(hostile?.004:0),defense=1+ship.guns/10+Math.max(0,ship.speed-90)/100+r.escorts*.8;
@@ -122,7 +123,7 @@ export function runReplacements(s){
   for(const r of s.routes){
     if(!r.active||!r.autoManage||!r.pendingReplacements.length)continue;
     const type=r.pendingReplacements[0],idle=s.ships.find(v=>!v.routeId&&!v.voyage&&v.type===type),cost=idle?0:shipSpec(s,type).price;
-    const reason=!idle&&!canProduce(s,type)?'noOpportunity':!idle&&s.ships.length>=200?'limit':a.spent+cost>a.monthlyBudget?'budget':s.cash-cost<a.minCash?'reserve':null;
+    const reason=!idle&&!canProduce(s,type)?'noOpportunity':a.spent+cost>a.monthlyBudget?'budget':s.cash-cost<a.minCash?'reserve':null;
     if(reason){managementLog(s,reason,r.id);continue;}
     const ship=idle??buyShip(s,type);assignShip(s,r.id,ship.id);a.spent+=cost;
     r.cooldownUntil=s.day+routeSchedule(s,r).cycle;r.transport={since:s.day,sales:0,costs:0,upkeep:0,deliveries:0};

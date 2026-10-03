@@ -1,5 +1,5 @@
 import {COMPANY_STARTS} from './region-data.js';
-import {migrateRegion} from './region-migration.js';
+import {migrateCrossings} from './crossing-migration.js';
 import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
 import {ROADS,roadBetween,WAGONS} from './land-data.js';
 import {distance as oldSeaDistance} from './legacy/data-v8.js';
@@ -7,10 +7,10 @@ import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
 import {shipName,validName} from './identity.js';
 import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
 import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v9.js';
+import { deserialize as readLegacy } from './legacy/engine-v12.js';
 import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
 import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 13;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -63,7 +63,6 @@ export function buyLicense(s, nation) {
 }
 export function buyShip(s, type) {
   playing(s);
-  check(s.ships.length < 200, '試作版の保有船上限（200隻）に達しました。');
   check(Boolean(shipSpec(s,type)), '船種を確認してください。');
   check(canProduce(s,type),'研究済み設計と造船設備が必要です。');
   check(s.cash >= shipSpec(s,type).price, '船の購入資金が不足しています。');
@@ -95,7 +94,7 @@ export function quoteCircuitOpening(s,type,stops,allowed=GOODS.map(g=>g.id),minM
     if(existing)return {...result,shipId:null,cost:0,remaining:s.cash,existingRouteId:existing.id};
     validateCircuit(s,type,stops,allowed,minMargin);
     check(idle||canProduce(s,type),'研究済み設計と造船設備が必要です。');
-    check(idle||s.ships.length<200,'試作版の保有船上限（200隻）に達しました。');
+    check(!s.strategy||s.routes.length<50,'競合会社の航路上限（50航路）に達しました。');
     check(s.cash>=cost,'船の購入資金が不足しています。');
   } catch(error) {result.error=error.message;}
   return result;
@@ -117,6 +116,7 @@ export function setCircuit(s, shipId, stops, allowed = GOODS.map(g => g.id), min
   // Rotations share a service; reversing a circuit with 3+ ports changes its direction.
   let route = s.routes.find(r => (r.mode??'sea')===shipSpec(s,ship.type).mode && circuitKey(r.stops) === circuitKey(stops));
   if (!route) {
+    check(!s.strategy||s.routes.length<50,'競合会社の航路上限（50航路）に達しました。');
     route = { id: `route-${s.nextId++}`, a, b, mode:shipSpec(s,ship.type).mode, stops:[...stops], allowed: [...allowed], minMargin, active: true, started: s.day, profit: 0, expenses: 0, revenue: 0, deliveries: 0, lastForecast: 0, lastActual: null, scheduleEpoch: s.day + 1 };
     initializeRoute(route,s.day,ship.type);initializeRouteSecurity(route);
     s.routes.push(route);
@@ -214,8 +214,10 @@ export function trade(s, city, good, requested, side, routeId = null) {
   recordTrade(s,CITIES[city].nation,q.value);recordCityTax(s,city,q.value*rate);
   return { quantity: q.quantity, total: q.value * (side === 'buy' ? 1 + rate : 1 - rate) };
 }
-// Exact integer-load search. Suffix DP bounds prune the search; cash remains a hard constraint.
+// Integer loading with admissible bounds and a deterministic 2,000-node work
+// budget. Concave greedy seeds guarantee a feasible result even on large markets.
 export function optimizeLoad(s, from, to, capacity, budget, allowed, minMargin = 0) {
+  if(capacity<=0||budget<=0||!allowed.length)return {profit:0,cost:0,cargo:[]};
   const buyTax = 1 + licenseTerms(s,CITIES[from].nation).tax, sellTax = 1 - licenseTerms(s,CITIES[to].nation).tax;
   const options = allowed.map(good => {
     const source = s.markets[from][good].stock, target = s.markets[to][good].stock;
@@ -229,10 +231,13 @@ export function optimizeLoad(s, from, to, capacity, budget, allowed, minMargin =
       values.push({ quantity: q, cost, profit: sale - cost });
     }
     return { good, values };
-  });
-  const bounds = Array.from({ length: options.length + 1 }, () => Array(capacity + 1).fill(0));
-  for (let i = options.length - 1; i >= 0; i--) for (let room = 0; room <= capacity; room++) {
-    bounds[i][room] = Math.max(...options[i].values.filter(o => o.quantity <= room).map(o => o.profit + bounds[i + 1][room - o.quantity]));
+  }).filter(o=>o.values.length>1);
+  const bounds=Array.from({length:options.length+1},()=>Array(capacity+1).fill(0));
+  // Marginal profits are decreasing within each good. Sorting those units is
+  // the exact capacity-only bound, without the previous cubic convolution.
+  for(let i=0;i<options.length;i++){
+    const units=options.slice(i).flatMap(({values})=>values.slice(1).map((v,j)=>v.profit-values[j].profit)).sort((a,b)=>b-a);
+    for(let room=1;room<=capacity;room++)bounds[i][room]=bounds[i][room-1]+(units[room-1]??0);
   }
   // A fractional cash-only knapsack is another admissible upper bound. This
   // prevents expensive enumeration when all goods are profitable but cash is low.
@@ -250,12 +255,24 @@ export function optimizeLoad(s, from, to, capacity, budget, allowed, minMargin =
     return prefix[low].profit + (low < units.length ? (available - prefix[low].cost) * units[low].profit / units[low].cost : 0);
   }
   let best = { profit: 0, cost: 0, cargo: [] };
+  for(const exponent of [0,.5,1]){
+    const quantities=options.map(()=>0);let cost=0,profit=0;
+    for(let room=0;room<capacity;room++){
+      let chosen=-1,score=-Infinity;
+      options.forEach(({values},i)=>{const q=quantities[i];if(q+1>=values.length)return;const dc=values[q+1].cost-values[q].cost,dp=values[q+1].profit-values[q].profit;if(cost+dc<=budget&&dp/Math.pow(dc,exponent)>score){chosen=i;score=dp/Math.pow(dc,exponent);}});
+      if(chosen<0)break;const values=options[chosen].values,q=quantities[chosen]++;
+      cost+=values[q+1].cost-values[q].cost;profit+=values[q+1].profit-values[q].profit;
+    }
+    if(profit>best.profit)best={profit,cost,cargo:options.flatMap((o,i)=>quantities[i]?[{good:o.good,quantity:quantities[i]}]:[])};
+  }
+  let nodes=0;
   function search(i, room, cost, profit, cargo) {
+    if(++nodes>2000)return;
     if (profit + Math.min(bounds[i][room], cashBound(i, budget - cost)) <= best.profit + 1e-9) return;
     if (i === options.length) { best = { profit, cost, cargo }; return; }
     const { good, values } = options[i];
     const candidates = values.filter(o => o.quantity <= room && cost + o.cost <= budget).sort((a, b) => b.profit + bounds[i + 1][room - b.quantity] - a.profit - bounds[i + 1][room - a.quantity]);
-    for (const o of candidates) search(i + 1, room - o.quantity, cost + o.cost, profit + o.profit, o.quantity ? [...cargo, { good, quantity: o.quantity }] : cargo);
+    for (const o of candidates) {if(nodes>=2000)break;search(i + 1, room - o.quantity, cost + o.cost, profit + o.profit, o.quantity ? [...cargo, { good, quantity: o.quantity }] : cargo);}
   }
   search(0, capacity, 0, 0, []); return best;
 }
@@ -342,9 +359,9 @@ export function createCompetitor({name,stops,kind,id},markets,world){
 }
 export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='competitors' ? value.map(({markets,world,...company})=>company) : value); }
 export function deserialize(raw, nested = false) {
-  check(typeof raw === 'string' && raw.length <= 5_000_000, 'セーブデータが大きすぎます。');
+  check(typeof raw === 'string' && raw.length <= 50_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7,8,9].includes(s.version) && !nested) return deserialize(serialize(migrateRegion(readLegacy(raw))));
+  if (s && [1,2,3,4,5,6,7,8,9,10,11,12].includes(s.version) && !nested) return deserialize(serialize(migrateCrossings(readLegacy(raw))));
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
   check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');
@@ -358,7 +375,7 @@ export function deserialize(raw, nested = false) {
   for (const id of Object.keys(CITIES)) for (const g of GOODS) {
     const m = s.markets?.[id]?.[g.id]; check(m && ['stock', 'production', 'demand'].every(k => finite(m[k]) && m[k] >= 0), '市場データが不正です。');
   }
-  check(Array.isArray(s.ships) && Array.isArray(s.routes) && s.ships.length <= 200 && s.routes.length <= 200, '船・航路の数が不正です。');
+  check(Array.isArray(s.ships) && Array.isArray(s.routes) && (!nested || s.routes.length <= 50), '船・航路の数が不正です。');
   const ids = [...s.ships, ...s.routes].map(v => v.id);
   check(ids.every(id => /^(ship|route)-[1-9]\d*$/.test(id) && Number(id.split('-')[1]) < s.nextId) && new Set(ids).size === ids.length, '識別子が重複または不正です。');
   for (const r of s.routes) {
@@ -393,7 +410,11 @@ export function deserialize(raw, nested = false) {
   }
   const categories = ['purchase', 'sale', 'tax', 'upkeep', 'licenseDaily', 'licensePurchase', 'shipPurchase', 'shipSale', 'acquisition', 'acquiredCash','escort','diplomacyInvestment','technologyInvestment','shipyardPurchase','designResearch','shipConstruction','developmentPurchase','developmentSale','cityInvestment','developmentIncome','roadPurchase','roadSale','roadInvestment','roadToll','roadIncome','networkCompensation'];
   check(s.totals && Object.entries(s.totals).every(([k, v]) => categories.includes(k) && finite(v)), '会計集計が不正です。');
-  check(Math.abs(s.initialCash + Object.values(s.totals).reduce((a, b) => a + b, 0) - s.cash) < 0.001, '会計残高が一致しません。');
+  // Cash and category totals accumulate in different orders. At large balances,
+  // ordinary IEEE-754 rounding can exceed a fixed thousandth after many trades.
+  // Use the same relative tolerance as the long-running accounting invariant;
+  // never rewrite the saved cash or the ledger to make an import pass.
+  check(Math.abs(s.initialCash + Object.values(s.totals).reduce((a, b) => a + b, 0) - s.cash) < Math.max(0.001,Math.abs(s.cash)*1e-10), '会計残高が一致しません。');
   check(Array.isArray(s.ledger) && s.ledger.length <= 600 && s.ledger.every(e => categories.includes(e.category) && finite(e.amount) && Number.isInteger(e.day) && e.day >= 0 && e.day <= s.day && (e.routeId === null || /^route-[1-9]\d*$/.test(e.routeId)) && (e.road===undefined||(Object.hasOwn(ROADS,e.road)||Object.hasOwn(RETIRED_ROADS,e.road))) && (!e.city || (Object.hasOwn(CITIES, e.city)||Object.hasOwn(RETIRED_CITIES,e.city))) && (!e.good || GOODS.some(g => g.id === e.good)) && (e.quantity === undefined || finite(e.quantity) && e.quantity >= 0)), '取引履歴が不正です。');
   check(s.ledger.every(e => (e.shipId===undefined || typeof e.shipId==='string' && /^ship-[1-9]\d*$/.test(e.shipId)) && (e.nation===undefined || Object.hasOwn(NATIONS,e.nation))), '取引履歴が不正です。');
   check(Array.isArray(s.history) && s.history.length <= 365 && s.history.every(h => finite(h.cash) && finite(h.assets) && Number.isInteger(h.day) && h.day >= 0 && h.day <= s.day), '資産履歴が不正です。');

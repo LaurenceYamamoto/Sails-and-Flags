@@ -18,8 +18,8 @@ function funded(seed=42,events=false){const s=game.createGame(seed,{events});gam
 function enabled(s){setAutomation(s,{enabled:true,replaceLost:true,monthlyBudget:6000,minCash:1000,expandThreshold:25,shrinkThreshold:0});}
 const advance=(s,n)=>{for(let i=0;i<n;i++)game.tick(s);};
 
-test('two inland hubs and eight roads support land-only, sea-only and connected market trade',()=>{
- assert.equal(Object.keys(INLAND).length,2);assert.equal(Object.keys(ROADS).length,8);
+test('inland hubs and roads support land-only, sea-only and connected market trade',()=>{
+ assert.equal(Object.keys(INLAND).length,46);assert.equal(Object.keys(ROADS).length,69);
  const s=funded(),sea=game.openCircuit(s,'sloop',['lisbon','cadiz']),land=game.openCircuit(s,'wagon',['lisbon','porto']);
  assert.equal(sea.mode,'sea');assert.equal(land.mode,'land');assert.equal(game.openCircuit(s,'wagon',['porto','lisbon']),land);
  const before=s.markets.lisbon.food.stock;advance(s,120);assert.ok(sea.deliveries>0&&land.deliveries>0);assert.notEqual(s.markets.lisbon.food.stock,before);
@@ -68,7 +68,7 @@ test('revocation removes a cross-border land circuit and confiscates rights and 
  const s=funded(),r=game.openCircuit(s,'wagon',['lisbon','porto','madrid','porto']);buyRoadRight(s,'porto_madrid');setRoadInvestment(s,'porto_madrid',10,10);game.tick(s);assert.ok(s.ships[0].voyage);const cash=s.cash;revokeLicense(s,'spain');assert.equal(s.routes.length,0);assert.equal(s.ships[0].routeId,null);assert.deepEqual(s.ships[0].cargo,[]);assert.equal(s.ships[0].voyage,null);assert.equal(s.world.roads.porto_madrid.owner,'state');assert.equal(s.world.roads.porto_madrid.invested,0);assert.equal(s.cash,cash);assert.deepEqual(game.deserialize(game.serialize(s)),s);
 });
 test('v6 migration preserves existing markets, capital, ships, designs, voyages and random state, and keeps original save slots',()=>{
- const v6=old.createGame(42);old.buyLicense(v6,'spain');old.openCircuit(v6,'sloop',['kingston','havana']);old.tick(v6);const raw=old.serialize(v6),s=game.deserialize(raw);assert.equal(s.version,10);assert.equal(s.cash,v6.cash);assert.deepEqual(withoutSeaVersion(s.ships),v6.ships);assert.equal(s.rng,v6.rng);assert.deepEqual(s.world.designs,v6.world.designs);for(const id of Object.keys(v6.markets))assert.deepEqual(Object.fromEntries(Object.keys(v6.markets[id]).map(g=>[g,s.markets[id][g]])),v6.markets[id]);assert.equal(s.industry.technology.land,0);
+ const v6=old.createGame(42);old.buyLicense(v6,'spain');old.openCircuit(v6,'sloop',['kingston','havana']);old.tick(v6);const raw=old.serialize(v6),s=game.deserialize(raw);assert.equal(s.version,13);assert.equal(s.cash,v6.cash);assert.deepEqual(withoutSeaVersion(s.ships),v6.ships);assert.equal(s.rng,v6.rng);assert.deepEqual(s.world.designs,v6.world.designs);for(const id of Object.keys(v6.markets))assert.deepEqual(Object.fromEntries(Object.keys(v6.markets[id]).map(g=>[g,s.markets[id][g]])),v6.markets[id]);assert.equal(s.industry.technology.land,0);
  const map=new Map([[SAVE_KEYS.v6,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(v=>v.slot==='v6').valid);saveGame(storage,s);assert.equal(map.get(SAVE_KEYS.v6),raw);assert.equal(map.get(SAVE_KEYS.preserved),raw);const restored=game.deserialize(game.serialize(s));advance(s,60);advance(restored,60);assert.deepEqual(s,restored);
 });
 test('corrupt road owners, amounts, modes, inland sea routes and departure conditions are rejected',()=>{

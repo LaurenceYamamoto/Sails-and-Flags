@@ -5,6 +5,7 @@ import {stressFixture} from './stress-fixture.js';
 import {tick,serialize,deserialize} from '../src/engine.js';
 import {renderMap} from '../src/map-view.js';
 import {renderRoutes} from '../src/routes-view.js';
+import {seaPosition} from '../src/sea-routing.js';
 import {CITIES} from '../src/data.js';
 import {createClock,voyageProgress} from '../src/clock.js';
 import {setLanguage} from '../src/i18n.js';
@@ -13,7 +14,7 @@ const startButton=document.querySelector('#start'),result=document.querySelector
 const stats=values=>{values.sort((a,b)=>a-b);return {p95:values[Math.floor(values.length*.95)],max:values.at(-1)};};
 startButton.onclick=()=>{
  startButton.disabled=true;result.textContent='Running';const s=stressFixture(),clock=createClock(),frames=[],updates=[];
- const transform=v=>{const w=v.voyage,p=voyageProgress(w,clock.fraction),a=CITIES[w?.from??v.nextFrom],b=CITIES[w?.to??v.nextFrom];return `translate(${a.x+(b.x-a.x)*p},${a.y+(b.y-a.y)*p+23})`;};
+ const transform=v=>{const w=v.voyage,p=voyageProgress(w,clock.fraction),a=CITIES[w?.from??v.nextFrom],b=CITIES[w?.to??v.nextFrom];const pos=w?seaPosition(w.from,w.to,p):a;return `translate(${pos.x},${pos.y})`;};
  const draw=()=>{map.innerHTML=renderMap(s,'kingston',s.routes[0].id,transform);routes.innerHTML=renderRoutes({...s,routes:[s.routes[0]]},{cash:String,decimal:String,signed:String,tone:()=>''});};
  draw();let first=null,previous=null,paused=false;
  const visibility=()=>{if(document.hidden)paused=true;};document.addEventListener('visibilitychange',visibility);

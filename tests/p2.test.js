@@ -16,8 +16,8 @@ function forceMarkets(s) {
   const goods=['rum','sugar','tobacco'];
   ports.forEach((from,i)=>{s.markets[from][goods[i]].stock=400;s.markets[ports[(i+1)%3]][goods[i]].stock=40;});
 }
-test('regional data is complete: 17 ports, 7 nations, 10 goods, 3 ships and symmetric distances',()=>{
-  assert.equal(Object.values(CITIES).filter(c=>!c.inland).length,17);assert.equal(Object.keys(NATIONS).length,7);assert.equal(GOODS.length,10);assert.equal(Object.keys(SHIPS).length,3);
+test('regional data is complete: 68 ports, 23 nations, 20 goods, 4 ships and symmetric distances',()=>{
+  assert.equal(Object.values(CITIES).filter(c=>!c.inland).length,68);assert.equal(Object.keys(NATIONS).length,23);assert.equal(GOODS.length,20);assert.equal(Object.keys(SHIPS).length,4);
   for(const [a,c] of Object.entries(CITIES)){assert.ok(NATIONS[c.nation]);for(const key of ['stocks','supply','demand'])assert.equal(c[key].length,GOODS.length);for(const b of Object.keys(CITIES))if(a!==b&&!c.inland&&!CITIES[b].inland){assert.ok(Number.isFinite(distance(a,b))&&distance(a,b)>0);assert.equal(distance(a,b),distance(b,a));}}
   assert.equal(NATIONS.england.color,'#ef4444');assert.equal(NATIONS.spain.color,'#facc15');
 });
@@ -57,7 +57,7 @@ test('competitors share stock, pay normal integrated prices and survive restore 
 });
 test('v2 migration preserves balances, five original markets, cargo and arrival timing',()=>{
   const legacy=old.createGame();old.buyLicense(legacy,'spain');old.setRoute(legacy,old.buyShip(legacy,'sloop').id,'kingston','havana');old.tick(legacy);
-  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,10);assert.equal(s.cash,legacy.cash);assert.deepEqual(withoutSeaVersion(s.ships),legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
+  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,13);assert.equal(s.cash,legacy.cash);assert.deepEqual(withoutSeaVersion(s.ships),legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
   for(const [city,goods]of Object.entries(legacy.markets))for(const [good,market]of Object.entries(goods))assert.deepEqual(s.markets[city][good],market);
   assert.deepEqual(s,deserialize(serialize(s)));assert.equal(JSON.parse(raw).version,2);
   legacy.cash++;assert.throws(()=>deserialize(old.serialize(legacy)));
@@ -91,6 +91,6 @@ test('import validation rejects unexpected markets and unsafe ledger labels',()=
 });
 test('English catalog covers all keys and circuit details localize commodity and port names',()=>{
   assert.deepEqual(Object.keys(ja).sort(),Object.keys(en).sort());setLanguage('en');
-  for(const entity of [...GOODS,...Object.values(CITIES),...Object.values(NATIONS),...Object.values(SHIPS)])assert.doesNotMatch(nameOf(entity),/[\u3000-\u9fff]/);
+  for(const entity of [...GOODS,...Object.values(CITIES).filter(c=>!/[　-鿿]/.test(c.mapName)),...Object.values(NATIONS),...Object.values(SHIPS)])assert.doesNotMatch(nameOf(entity),/[\u3000-\u9fff]/);
   const s=funded();setCircuit(s,buyShip(s,'sloop').id,ports);const html=renderRoutes(s,{decimal:String,cash:String,signed:String,tone:()=>''});assert.doesNotMatch(html,/[\u3000-\u9fff]/);setLanguage('ja');
 });

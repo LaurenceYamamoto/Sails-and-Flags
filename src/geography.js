@@ -1,6 +1,8 @@
+import {CROSSING_PORTS} from './crossing-data.js';
+import {WORLD_PORTS} from './world-data.js';
 import {REGION_PORTS} from './region-data.js';
 // Display geography is independent of gameplay distance and save data.
-export function project(lon,lat) { return {x:30+(lon+90)*840/102,y:30+(58-lat)*460/50}; }
+export function project(lon,lat) { return {x:(lon+180)*2.5,y:(90-lat)*2.5}; }
 export const PORT_GEOGRAPHY = {
   porto:{lon:-8.611,lat:41.149,mapName:'Porto',label:[-17,-5]},
   barcelona:{lon:2.173,lat:41.385,mapName:'Barcelona',label:[18,18]},
@@ -20,3 +22,7 @@ export const PORT_GEOGRAPHY = {
 };
 
 Object.assign(PORT_GEOGRAPHY,REGION_PORTS);
+
+Object.assign(PORT_GEOGRAPHY,WORLD_PORTS);
+
+Object.assign(PORT_GEOGRAPHY,CROSSING_PORTS);

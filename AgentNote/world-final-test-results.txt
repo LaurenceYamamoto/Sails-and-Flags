@@ -1,0 +1,31 @@
+✔ all UI source messages, decision reasons, error messages and names have four additional translations (22.3755ms)
+✔ all six locales render controls and preserve saves, names, cities and deterministic simulation (1259.2181ms)
+✔ all cities use the same projection as land and lie on land or its generalized coast (235.1307ms)
+✔ city labels keep configured script in Japanese and English, including future kanji names (0.3713ms)
+✔ map renders all circuit preview legs and selectable rival routes without changing the game (663.6708ms)
+✔ 200 routes share visual legs while all 200 ships remain selectable and the selected route stays on top (619.3626ms)
+✔ road polylines and wagon interpolation stay on land, including the Biscay crossing (481.6006ms)
+✔ all sea pairs avoid land offshore, have symmetric route-derived distances and exact port endpoints (2517.0795ms)
+✔ Marseille–Nantes goes through Gibraltar and is much longer than Lisbon–Nantes; Cuba and Britain also require detours (6.6613ms)
+✔ v8 migration preserves cargo, cash and arrival dates, pauses insufficient range and resumes after deliberate replacement (68.2813ms)
+✔ pending replacements and acquisition of a paused legacy service stay safe without buying incompatible ships (44.8387ms)
+✔ old slots are preserved, v9 reload is idempotent, invalid legacy timing and active range-review routes are rejected (587.1698ms)
+World campaign {"seed":1,"day":1095,"cash":272575.56194009195,"deliveries":[13,273]}
+World campaign {"seed":42,"day":1095,"cash":272712.7290667701,"deliveries":[13,273]}
+World campaign {"seed":1700,"day":1095,"cash":270802.3657067136,"deliveries":[13,273]}
+✔ all 2,145 world port pairs connect over water with symmetric finite distances and precise endpoints (1739.2515ms)
+✔ Pacific wraps at the dateline; absent Panama and Suez canals force historic detours (0.3967ms)
+✔ v10 migration preserves finances, RNG, cargo, voyages, old markets and policies; new slots preserve the original (77.4758ms)
+✔ each rival accepts 50 routes but rejects route 51 before buying; players have no route cap (40.1914ms)
+✔ camera zoom anchors, limits and pans remain bounded; city jump exposes every city (0.7434ms)
+✔ buyouts remain available in the UI and preserve saves above 200 player ships (31.3774ms)
+✔ twenty-commodity loading has bounded work, profitable feasible cargo and deterministic results (19.2952ms)
+✔ Pacific galleon and Asian regional services trade and recover deterministically for three years (5432.9583ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7872.3594

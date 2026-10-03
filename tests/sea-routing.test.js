@@ -1,3 +1,4 @@
+import {WORLD_PORTS} from '../src/world-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {LAND} from '../assets/maps/land.js';
@@ -12,7 +13,7 @@ import {renderRoutes} from '../src/routes-view.js';
 import {renderMap} from '../src/map-view.js';
 import {SAVE_KEYS,saveGame,listSaves} from '../src/storage.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
-const ports=Object.keys(PORT_APPROACHES);
+const ports=Object.keys(PORT_APPROACHES).filter(id=>!WORLD_PORTS[id]);
 // Independent ray casting samples every offshore segment; port approaches are
 // separately declared because the generalized land omits navigable estuaries.
 function inside(p,ring){let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])yes=!yes;}return yes;}

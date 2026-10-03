@@ -1,0 +1,94 @@
+{
+  "version": "2.0.0-alpha.3",
+  "saveVersion": 12,
+  "cities": 112,
+  "ports": 66,
+  "inland": 46,
+  "nations": 23,
+  "roads": 67,
+  "goods": 20,
+  "fullSuite": {
+    "tests": 178,
+    "passed": 177,
+    "failed": 1,
+    "note": "Initial long campaign failed on accumulated fractional accounting drift. Seed 1 completed; the failing seed 42 and unrun seed 1700 passed after the fix."
+  },
+  "finalTargeted": {
+    "tests": 8,
+    "passed": 8,
+    "log": "continental-recovery-final.log"
+  },
+  "campaigns": [
+    {
+      "seed": 1,
+      "days": 18250,
+      "restores": 50,
+      "cash": 1157986.0068361266,
+      "assets": 1235608.4168015835,
+      "p95TickMs": 26.75769999998738
+    },
+    {
+      "seed": 42,
+      "days": 18250,
+      "restores": 50,
+      "cash": 937681.6033234384,
+      "assets": 1007753.5456314792,
+      "p95TickMs": 25.967900000003283
+    },
+    {
+      "seed": 1700,
+      "days": 18250,
+      "restores": 50,
+      "cash": 1129586.068338583,
+      "assets": 1204033.031474335,
+      "p95TickMs": 24.179100000008475
+    }
+  ],
+  "unresolvedFailures": [],
+  "benchmark": {
+    "node": "v24.15.0",
+    "days": 365,
+    "playerRoutes": 201,
+    "playerShips": 201,
+    "initialRivals": [
+      {
+        "routes": 50,
+        "ships": 150
+      },
+      {
+        "routes": 50,
+        "ships": 150
+      },
+      {
+        "routes": 50,
+        "ships": 150
+      }
+    ],
+    "rivals": [
+      {
+        "routes": 47,
+        "ships": 150
+      },
+      {
+        "routes": 41,
+        "ships": 150
+      },
+      {
+        "routes": 42,
+        "ships": 150
+      }
+    ],
+    "p95TickMs": 21.8779999999997,
+    "maxTickMs": 184.5589,
+    "serializeAndValidateMs": 77.9390000000003,
+    "saveBytes": 1025278
+  },
+  "browser": {
+    "days": 1114,
+    "deliveries": 111,
+    "saveRestore": true,
+    "dragSelection": true,
+    "circuitPlanning": true,
+    "consoleErrors": 0
+  }
+}

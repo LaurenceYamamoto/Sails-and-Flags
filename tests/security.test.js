@@ -80,7 +80,7 @@ test('raid grace does not consume random numbers or damage ships',()=>{
 });
 test('v4 migration preserves voyages, budgets and existing markets, and leaves v4 slots untouched',()=>{
   const old=legacy.createGame();legacy.buyLicense(old,'spain');legacy.openCircuit(old,'sloop',['kingston','havana']);legacy.tick(old);const raw=legacy.serialize(old),s=deserialize(raw);
-  assert.equal(s.version,10);assert.equal(s.cash,old.cash);assert.deepEqual(withoutSeaVersion(s.ships),old.ships);assert.equal(s.automation.spent,old.automation.spent);assert.equal(s.world.graceUntil,old.day+60);
+  assert.equal(s.version,13);assert.equal(s.cash,old.cash);assert.deepEqual(withoutSeaVersion(s.ships),old.ships);assert.equal(s.automation.spent,old.automation.spent);assert.equal(s.world.graceUntil,old.day+60);
   for(const [id,m]of Object.entries(old.markets))for(const [good,value]of Object.entries(m))assert.deepEqual(s.markets[id][good],value);
   const map=new Map([[SAVE_KEYS.autoV4,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};assert.ok(listSaves(storage).find(x=>x.slot==='autoV4').valid);saveGame(storage,s);assert.equal(map.get(SAVE_KEYS.autoV4),raw);assert.deepEqual(deserialize(serialize(s)),s);
 });
