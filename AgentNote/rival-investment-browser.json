@@ -1,0 +1,32 @@
+{
+  "day": 701,
+  "playerCash": 4649.5,
+  "localeChecks": [
+    {
+      "language": "en",
+      "text": "Competitor investment · ¤ 18 / day\n\nInvestments use realized trading profits. Spending is reduced or paused when operating reserves are low and reviewed monthly.\n\nCash reserve for investment: ¤ 107,398.5\n\nSeafaring technology\n9.81 · ¤ 2.3 / day\nLand transport technology\n4.92 · ¤ 2.3 / day\n\nDevelopment rights and daily investment\n\nSanto Domingo · City size ¤ 0.8 / Production ¤ 1.5\nCartagena · City size ¤ 0.8 / Production ¤ 1.5\nPortobelo · City size ¤ 0.8 / Production ¤ 1.5\nIsfahan — Shiraz · Road improvements ¤ 1.5 / Security ¤ 0.8\nAgra — Delhi · Road improvements ¤ 1.5 / Security ¤ 0.8\nCairo — Suez · Road improvements ¤ 1.5 / Security ¤ 0.8"
+    },
+    {
+      "language": "zh-CN",
+      "text": "竞争对手投资 · ¤ 18 / 天\n\n使用已实现的贸易利润投资。营运储备不足时减少或暂停支出，每月重新评估。\n\n投资所需现金储备: ¤ 107,398.5\n\n航海技术\n9.81 · ¤ 2.3 / 天\n陆运技术\n4.92 · ¤ 2.3 / 天\n\n开发权及每日投资\n\nSanto Domingo · 城市规模 ¤ 0.8 / 生产力 ¤ 1.5\nCartagena · 城市规模 ¤ 0.8 / 生产力 ¤ 1.5\nPortobelo · 城市规模 ¤ 0.8 / 生产力 ¤ 1.5\nIsfahan — Shiraz · 道路建设 ¤ 1.5 / 治安 ¤ 0.8\nAgra — Delhi · 道路建设 ¤ 1.5 / 治安 ¤ 0.8\nCairo — Suez · 道路建设 ¤ 1.5 / 治安 ¤ 0.8"
+    },
+    {
+      "language": "ko",
+      "text": "경쟁사 투자 · ¤ 18 / 일\n\n실현된 무역 이익으로 투자합니다. 운영 자금이 부족하면 지출을 줄이거나 중단하며 매월 재검토합니다.\n\n투자에 필요한 현금 유보액: ¤ 107,398.5\n\n항해 기술\n9.81 · ¤ 2.3 / 일\n육상 운송 기술\n4.92 · ¤ 2.3 / 일\n\n개발권 및 일일 투자\n\nSanto Domingo · 도시 규모 ¤ 0.8 / 생산력 ¤ 1.5\nCartagena · 도시 규모 ¤ 0.8 / 생산력 ¤ 1.5\nPortobelo · 도시 규모 ¤ 0.8 / 생산력 ¤ 1.5\nIsfahan — Shiraz · 도로 정비 ¤ 1.5 / 치안 ¤ 0.8\nAgra — Delhi · 도로 정비 ¤ 1.5 / 치안 ¤ 0.8\nCairo — Suez · 도로 정비 ¤ 1.5 / 치안 ¤ 0.8"
+    },
+    {
+      "language": "fr",
+      "text": "Investissements du concurrent · ¤ 18 / jour\n\nLes investissements utilisent les bénéfices commerciaux réalisés. Les dépenses sont réduites ou suspendues si les réserves sont faibles, puis réévaluées chaque mois.\n\nRéserve de trésorerie pour investir: ¤ 107 398,5\n\nTechnologie de navigation\n9,81 · ¤ 2,3 / jour\nTechnologie de transport terrestre\n4,92 · ¤ 2,3 / jour\n\nDroits de développement et investissement quotidien\n\nSanto Domingo · Taille de la ville ¤ 0,8 / Production ¤ 1,5\nCartagena · Taille de la ville ¤ 0,8 / Production ¤ 1,5\nPortobelo · Taille de la ville ¤ 0,8 / Production ¤ 1,5\nIsfahan — Shiraz · Aménagement routier ¤ 1,5 / Sécurité ¤ 0,8\nAgra — Delhi · Aménagement routier ¤ 1,5 / Sécurité ¤ 0,8\nCairo — Suez · Aménagement routier ¤ 1,5 / Sécurité ¤ 0,8"
+    },
+    {
+      "language": "es",
+      "text": "Inversiones del competidor · ¤ 18 / día\n\nSe invierten los beneficios comerciales realizados. El gasto se reduce o se suspende si las reservas son bajas y se revisa cada mes.\n\nReserva de efectivo para invertir: ¤ 107.398,5\n\nTecnología de navegación\n9,81 · ¤ 2,3 / día\nTecnología de transporte terrestre\n4,92 · ¤ 2,3 / día\n\nDerechos de desarrollo e inversión diaria\n\nSanto Domingo · Tamaño urbano ¤ 0,8 / Producción ¤ 1,5\nCartagena · Tamaño urbano ¤ 0,8 / Producción ¤ 1,5\nPortobelo · Tamaño urbano ¤ 0,8 / Producción ¤ 1,5\nIsfahan — Shiraz · Mejoras viales ¤ 1,5 / Seguridad ¤ 0,8\nAgra — Delhi · Mejoras viales ¤ 1,5 / Seguridad ¤ 0,8\nCairo — Suez · Mejoras viales ¤ 1,5 / Seguridad ¤ 0,8"
+    },
+    {
+      "language": "ja",
+      "text": "競合の投資 · ¤ 18 / 日\n\n交易の実績利益から投資します。運転資金が不足すると投資を縮小・停止し、毎月見直します。\n\n投資判断の保有資金目安: ¤ 107,398.5\n\n航海技術\n9.81 · ¤ 2.3 / 日\n陸上輸送技術\n4.92 · ¤ 2.3 / 日\n\n開発権と日額投資\n\nSanto Domingo · 都市規模 ¤ 0.8 / 生産力 ¤ 1.5\nCartagena · 都市規模 ¤ 0.8 / 生産力 ¤ 1.5\nPortobelo · 都市規模 ¤ 0.8 / 生産力 ¤ 1.5\nIsfahan — Shiraz · 道路整備 ¤ 1.5 / 治安 ¤ 0.8\nAgra — Delhi · 道路整備 ¤ 1.5 / 治安 ¤ 0.8\nCairo — Suez · 道路整備 ¤ 1.5 / 治安 ¤ 0.8"
+    }
+  ],
+  "investmentRestoredExactly": true,
+  "console": []
+}

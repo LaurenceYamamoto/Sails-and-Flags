@@ -1,3 +1,4 @@
+import {planRivalInvestment} from './rival-investment.js';
 import {canServe,travelDistance,roadToll,routeNations} from './land.js';
 import {shipName} from './identity.js';
 import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
@@ -106,6 +107,7 @@ export function runCompetitor(s) {
   for(const old of [...s.routes])if(s.routes.length>1&&s.day-old.transport.since>90&&transportMargin(old)<0&&routeShips(s,old).every(v=>!v.voyage&&v.status==='waiting')) {
     removeRoute(s,old.id);managementLog(s,'rivalReassigned',old.id);break;
   }
+  planRivalInvestment(s);
   const p=PROFILES[s.strategy.kind],candidates=[];
   const ids=Object.keys(CITIES),pairs=ids.flatMap((a,i)=>ids.slice(i+1).map(b=>[a,b]));
   // Rotate a bounded planning window; always consider reinforcing current routes.

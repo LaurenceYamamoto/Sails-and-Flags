@@ -1,0 +1,14 @@
+{
+  "node": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+  "logicalCpus": 12,
+  "memoryGiB": 28,
+  "ships": 200,
+  "routes": 200,
+  "days": 365,
+  "p95TickMs": 21.678899999999885,
+  "maxTickMs": 210.1814999999997,
+  "saveBytes": 828413,
+  "serializeAndValidateMs": 64.89120000000003
+}

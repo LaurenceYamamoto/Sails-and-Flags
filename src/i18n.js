@@ -1,3 +1,4 @@
+import {rivalInvestmentTranslations} from './translation-rival-investment.js';
 import {demandTranslations} from './translation-demand.js';
 import {worldTranslations} from './world-translations.js';
 import {regionTranslations} from './translation-region.js';
@@ -65,7 +66,7 @@ ja.developmentIncome="都市の税収分配";en.developmentIncome="City tax shar
 Object.assign(ja,{map:'世界の交易網',prototype:'P8 世界への拡張',footer:'1700年ごろの主要交易拠点を結ぶ世界交易。海上交易と各地の陸上交易。',ships:'船・車両',ports:'都市',market:'都市市場',departure:'起点都市',destination:'都市2',shipPurchase:'船・車両の購入',roadPurchase:'道路開発権取得',roadSale:'道路開発権売却',roadInvestment:'道路・治安投資',roadToll:'道路通行料',roadIncome:'通行料分配',networkCompensation:'都市再編による返還'});
 Object.assign(en,{map:'World trade network',prototype:'P8 World expansion',footer:'Global trade inspired by the major trading centres around 1700, with maritime and inland trade routes.',ships:'Ships / vehicles',ports:'Cities',market:'City market',departure:'Starting city',destination:'City 2',shipPurchase:'Transport purchase',roadPurchase:'Road right purchase',roadSale:'Road right sale',roadInvestment:'Road and safety investment',roadToll:'Road toll',roadIncome:'Toll income',networkCompensation:'City revision refund'});
 export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
-export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations,...regionTranslations,...worldTranslations,...demandTranslations});
+export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations,...regionTranslations,...worldTranslations,...demandTranslations,...rivalInvestmentTranslations});
 const languageIndex={'zh-CN':0,ko:1,fr:2,es:3};
 export const locale = () => LANGUAGES[language].locale;
 export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'ja'; }

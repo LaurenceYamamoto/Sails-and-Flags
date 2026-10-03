@@ -1,3 +1,4 @@
+import {guardRivalInvestment} from './rival-investment.js';
 import {marketFlow} from './market-demand.js';
 import {COMPANY_STARTS} from './region-data.js';
 
@@ -303,7 +304,7 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
   if (s.gameOver) return;
   s.day++;
   if(s.automation.month!==monthFor(s.day)){s.automation.month=monthFor(s.day);s.automation.spent=0;}
-  if(updateMarkets)advanceWorld(s);advanceDiplomacy(s);advanceIndustry(s);
+  if(updateMarkets)advanceWorld(s);advanceDiplomacy(s);guardRivalInvestment(s);advanceIndustry(s);
   if (updateMarkets) for (const [cityId,city] of Object.entries(s.markets)) for (const [good, m] of Object.entries(city)) {
     m.stock=marketFlow(s,cityId,good).stock;
   }
