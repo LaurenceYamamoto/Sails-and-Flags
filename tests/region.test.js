@@ -39,7 +39,7 @@ test('v9 migration preserves every existing company field, goods, diplomacy pair
   const before=old.createGame(42,{events:false});old.buyLicense(before,'spain');old.openCircuit(before,'sloop',['kingston','havana']);
   for(let i=0;i<100;i++)old.tick(before);
   const raw=old.serialize(before),s=game.deserialize(raw);
-  assert.equal(old.serialize(before),raw);assert.equal(s.version,13);
+  assert.equal(old.serialize(before),raw);assert.equal(s.version,14);
   for(const [i,c] of [before,...before.competitors].entries()){
     const after=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
     for(const n of Object.keys({...REGION_NATIONS,...WORLD_NATIONS,...CONTINENTAL_NATIONS}))for(const values of Object.values(after.diplomacy))delete values[n];

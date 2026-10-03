@@ -33,7 +33,7 @@ test('Pacific wraps at the dateline; absent Panama and Suez canals force histori
 });
 test('v10 migration preserves finances, RNG, cargo, voyages, old markets and policies; new slots preserve the original',()=>{
  const before=old.createGame(42);old.buyLicense(before,'spain');old.openCircuit(before,'sloop',['kingston','havana']);old.tick(before);
- const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,13);
+ const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,14);
  for(const [i,c] of [before,...before.competitors].entries()){
   const actual=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
   for(const n of Object.keys({...WORLD_NATIONS,...CONTINENTAL_NATIONS}))for(const values of Object.values(actual.diplomacy))delete values[n];

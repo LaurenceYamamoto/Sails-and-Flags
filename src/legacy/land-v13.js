@@ -1,16 +1,15 @@
-import {LAND_PROFILES} from './caravan-data.js';
-import {COMPANY_IDS} from './region-data.js';
-import {CITIES,distance} from './data.js';
-import {ROADS,roadBetween} from './land-data.js';
-import {shipSpec} from './industry.js';
-import {entry,routeLegs} from './engine.js';
+import {COMPANY_IDS} from './region-data-v13.js';
+import {CITIES,distance} from './data-v13.js';
+import {ROADS,roadBetween} from './land-data-v13.js';
+import {shipSpec} from './industry-v13.js';
+import {entry,routeLegs} from './engine-v13.js';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1e12;
 export function initializeRoads(w){w.roads=Object.fromEntries(Object.keys(ROADS).map(id=>[id,{owner:id==='nantes_paris'?'private':'state',basis:0,quality:0,security:0,invested:0,dailyRoad:0,dailySecurity:0,tollPool:0}]));}
 export function travelDistance(s,type,a,b){return shipSpec(s,type)?.mode==='land'?(roadBetween(a,b)?.[1].km??Infinity):distance(a,b);}
 export function canServe(s,type,r){const spec=shipSpec(s,type);return Boolean(spec)&&spec.mode===(r.mode??'sea')&&routeLegs(r).every(([a,b])=>travelDistance(s,type,a,b)<=spec.range);}
 export function routeNations(r){return [...new Set([...r.stops.map(id=>CITIES[id].nation),...(r.mode==='land'?routeLegs(r).flatMap(([a,b])=>roadBetween(a,b)?.[1].nations??[]):[])])];}
-export function roadDays(s,type,a,b,quality){const link=roadBetween(a,b);if(!link)return Infinity;const [id,r]=link,q=quality??s.world.roads[id].quality,improvement=q/(5+q),profile=LAND_PROFILES[type],penalty=profile?(profile.terrain[r.climate??r.terrain]):r.penalty,benefit=profile?.roadBenefit??1;return Math.ceil(r.km/(shipSpec(s,type).speed*(penalty+Math.max(0,1-penalty)*.6*improvement)*(1+benefit*improvement)));}
+export function roadDays(s,type,a,b,quality){const link=roadBetween(a,b);if(!link)return Infinity;const [id,r]=link,q=quality??s.world.roads[id].quality,improvement=q/(5+q);return Math.ceil(r.km/(shipSpec(s,type).speed*(r.penalty+(1-r.penalty)*.6*improvement)*(1+improvement)));}
 export function roadToll(s,a,b){const link=roadBetween(a,b);if(!link)return 0;const [id,r]=link,d=s.world.roads[id];if(d.owner===s.industry.id)return 0;const factor=r.nations.reduce((sum,n)=>sum+1+(60-(s.world.enabled?s.diplomacy.friendship[n]:60))/100,0)/r.nations.length;return r.km*.02*factor;}
 export function payRoadToll(s,r,a,b){if(r.mode!=='land')return 0;const cost=roadToll(s,a,b),[id]=roadBetween(a,b),d=s.world.roads[id];if(cost){entry(s,'roadToll',-cost,r.id,{road:id});r.transport.costs+=cost;if(!['state','private'].includes(d.owner))d.tollPool+=cost*.2;}return cost;}
 export function roadSafety(s,a,b){const [id,r]=roadBetween(a,b),d=s.world.roads[id];return r.safety+(1-r.safety)*.9*d.security/(5+d.security);}

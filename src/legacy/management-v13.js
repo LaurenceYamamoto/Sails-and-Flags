@@ -1,15 +1,15 @@
-import {canServe,travelDistance,roadToll,routeNations} from './land.js';
-import {shipName} from './identity.js';
-import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
-import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
-import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import {canServe,travelDistance,roadToll,routeNations} from './land-v13.js';
+import {shipName} from './identity-v13.js';
+import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry-v13.js';
+import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data-v13.js';
+import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine-v13.js';
+import {licenseTerms} from './security-v13.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
 const amount=n=>finite(n)&&n>=0&&n<=1e12;
 export const monthFor=day=>new Date(Date.UTC(1700,0,1)+day*86400000).toISOString().slice(0,7);
-export const PROFILES={small:{cash:5000,reserve:1000,maxShips:150,maxRoutes:50,types:['sloop','wagon','camel','mule']},large:{cash:25000,reserve:6000,maxShips:150,maxRoutes:50,types:['sloop','brig','fluyt','wagon','camel','mule']}};
+export const PROFILES={small:{cash:5000,reserve:1000,maxShips:150,maxRoutes:50,types:['sloop','wagon']},large:{cash:25000,reserve:6000,maxShips:150,maxRoutes:50,types:['sloop','brig','fluyt','wagon']}};
 export function initializeManagement(s, kind=null) {
   s.automation={enabled:false,monthlyBudget:0,minCash:1000,expandThreshold:25,shrinkThreshold:0,month:monthFor(s.day),spent:0};
   s.managementLog=[];s.firstRankDay=null;

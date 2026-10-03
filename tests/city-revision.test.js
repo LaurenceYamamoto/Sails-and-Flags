@@ -36,7 +36,7 @@ test('city selection prioritizes ports and inland hubs without a country quota',
 });
 test('v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners',()=>{
  const before=fixture(),raw=old.serialize(before),s=game.deserialize(raw);
- assert.equal(old.serialize(before),raw);assert.equal(s.version,13);
+ assert.equal(old.serialize(before),raw);assert.equal(s.version,14);
  for(const [index,c] of [before,...before.competitors].entries()){
   const after=[s,...s.competitors][index],removed=c.routes.filter(r=>r.stops.some(id=>RETIRED_CITIES[id]));
   const vehicles=c.ships.filter(v=>removed.some(r=>r.id===v.routeId));

@@ -1,16 +1,16 @@
-import {COMPANY_STARTS} from './region-data.js';
-
-import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
-import {ROADS,roadBetween,WAGONS} from './land-data.js';
-import {distance as oldSeaDistance} from './legacy/data-v8.js';
-import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
-import {shipName,validName} from './identity.js';
-import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
-import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v13.js';
-import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 14;
+import {COMPANY_STARTS} from './region-data-v13.js';
+import {migrateCrossings} from './crossing-migration-v13.js';
+import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land-v13.js';
+import {ROADS,roadBetween,WAGONS} from './land-data-v13.js';
+import {distance as oldSeaDistance} from './data-v8.js';
+import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network-v13.js';
+import {shipName,validName} from './identity-v13.js';
+import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry-v13.js';
+import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data-v13.js';
+import { deserialize as readLegacy } from './engine-v12.js';
+import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management-v13.js';
+import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security-v13.js';
+export const SAVE_VERSION = 13;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -361,7 +361,7 @@ export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='comp
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 50_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7,8,9,10,11,12,13].includes(s.version) && !nested) {const old=readLegacy(raw);for(const c of [old,...old.competitors])c.version=SAVE_VERSION;return deserialize(serialize(old));}
+  if (s && [1,2,3,4,5,6,7,8,9,10,11,12].includes(s.version) && !nested) return deserialize(serialize(migrateCrossings(readLegacy(raw))));
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
   check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');

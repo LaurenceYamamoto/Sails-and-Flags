@@ -1,0 +1,45 @@
+{
+  "version": "2.1.0-alpha.1",
+  "saveVersion": 14,
+  "date": "2026-10-03",
+  "featureTests": {
+    "passed": 9,
+    "total": 9,
+    "threeYearSeeds": [
+      1,
+      42,
+      1700
+    ]
+  },
+  "regression": {
+    "total": 194,
+    "passedInitially": 193,
+    "failedInitially": 1,
+    "correctedAndPassed": 1,
+    "unresolved": 0,
+    "excluded": [
+      "campaign.test.js (50-year)"
+    ]
+  },
+  "browser": {
+    "origin": "http://127.0.0.1:4186",
+    "days": 319,
+    "routes": 2,
+    "cash": 125456.9,
+    "camelDeliveries": 79,
+    "muleDeliveries": 63,
+    "restored": true,
+    "consoleErrors": 0,
+    "consoleWarnings": 0
+  },
+  "wagonCompatibility": {
+    "roads": 69,
+    "qualities": [
+      0,
+      5,
+      20,
+      100
+    ],
+    "allIdentical": true
+  }
+}

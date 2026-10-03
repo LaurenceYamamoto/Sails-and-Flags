@@ -38,7 +38,7 @@ test('44 distinct inland hubs connect to existing ports through 59 realistic-len
 test('v11 migration preserves all existing accounts, live journeys, markets and road investments exactly',()=>{
  const before=old.createGame(42,{events:false});old.entry(before,'sale',10000);old.buyLicense(before,'portugal');old.buyLicense(before,'spain');
  old.openCircuit(before,'wagon',['lisbon','porto']);old.openCircuit(before,'sloop',['kingston','havana']);buyRoadRight(before,'lisbon_porto');setRoadInvestment(before,'lisbon_porto',3,2);old.tick(before);
- const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,13);
+ const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,14);
  for(const [i,c] of [before,...before.competitors].entries()){
   const actual=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
   for(const n of Object.keys(CONTINENTAL_NATIONS))for(const x of Object.values(actual.diplomacy))delete x[n];

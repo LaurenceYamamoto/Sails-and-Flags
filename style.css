@@ -50,3 +50,5 @@ dialog textarea{width:100%;height:160px;resize:vertical;font:11px monospace;marg
 .map :is(.port,.ship-marker,.rival-ship,.rival-route):focus{outline:none}
 .map .port:focus-visible .halo{fill:#f2cc8e25;stroke:#fff1c4;stroke-width:3;stroke-opacity:1}
 .map .rival-ship:focus-visible .ship-hit{stroke:#e2faff;stroke-width:3}
+
+.transport-comparison caption{text-align:left;font-size:12px;padding:12px 0}.transport-comparison .chosen-transport{background:#f2edcf}

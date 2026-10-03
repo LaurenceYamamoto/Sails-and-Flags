@@ -1,14 +1,13 @@
-import {CARAVANS,ARID_ROADS} from './caravan-data.js';
-import {CROSSING_ROADS} from './crossing-data.js';
-import {PORT_GEOGRAPHY,project} from './geography.js';
-import {CONTINENTAL_CITIES,CONTINENTAL_ROADS} from './continental-data.js';
+import {CROSSING_ROADS} from './crossing-data-v13.js';
+import {PORT_GEOGRAPHY,project} from './geography-v13.js';
+import {CONTINENTAL_CITIES,CONTINENTAL_ROADS} from './continental-data-v13.js';
 // Stylized links and market profiles for gameplay, not reconstructed historic roads.
 export const INLAND = {
   madrid:{nation:'spain',lon:-3.70,lat:40.42,mapName:'Madrid',label:[20,-4]},
   paris:{nation:'france',lon:2.35,lat:48.86,mapName:'Paris',label:[18,9]},
   ...CONTINENTAL_CITIES,
 };
-export const WAGONS={wagon:{name:'馬車',nameEn:'Wagon',mode:'land',price:600,capacity:15,speed:40,range:2000,daily:1.2,guns:0},...CARAVANS};
+export const WAGONS={wagon:{name:'馬車',nameEn:'Wagon',mode:'land',price:600,capacity:15,speed:40,range:2000,daily:1.2,guns:0}};
 export const ROADS={
   ...CONTINENTAL_ROADS,...CROSSING_ROADS,
   lisbon_porto:{a:'lisbon',b:'porto',km:310,terrain:'hill',penalty:.8,safety:.95,nations:['portugal']},
@@ -20,7 +19,6 @@ export const ROADS={
   nantes_paris:{a:'nantes',b:'paris',km:385,terrain:'plain',penalty:1,safety:.96,nations:['france']},
   madrid_paris:{a:'madrid',b:'paris',km:1280,via:[[-1.64,42.81],[-1.47,43.49],[-.58,44.84]],terrain:'mountain',penalty:.5,safety:.92,nations:['spain','france']},
 };
-for(const id of ARID_ROADS)ROADS[id]={...ROADS[id],climate:'arid'};
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();
 for(const entry of Object.entries(ROADS)){
