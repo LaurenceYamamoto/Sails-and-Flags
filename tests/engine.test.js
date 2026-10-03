@@ -43,7 +43,7 @@ test('optimizer agrees with exhaustive enumeration under constrained cash', () =
     let best = 0;
     for (let a = 0; a <= capacity; a++) for (let b = 0; b <= capacity - a; b++) for (let c = 0; c <= capacity - a - b; c++) {
       let cost = 0, value = 0;
-      for (const [i, q] of [a, b, c].entries()) { const g = allowed[i]; cost += quote(g, s.markets.kingston[g].stock, q, 'buy').value * 1.025; value += quote(g, s.markets.havana[g].stock, q, 'sell').value * .975; }
+      for (const [i, q] of [a, b, c].entries()) { const g = allowed[i]; cost += quote(g, s.markets.kingston[g].stock, q, 'buy').value * 1.05; value += quote(g, s.markets.havana[g].stock, q, 'sell').value * .91; }
       if (cost <= budget) best = Math.max(best, value - cost);
     }
     close(plan.profit, best); assert.ok(plan.cost <= budget);
@@ -99,10 +99,10 @@ test('cash exhaustion ends game immediately, even with valuable assets', () => {
   const frozen = serialize(s); tick(s); assert.equal(serialize(s), frozen); assert.throws(() => buyShip(s, 'sloop'));
 });
 test('cashflow, asset value and purchases are not double counted', () => {
-  const { s } = scenario(); close(assets(s), 4750); close(operatingProfit(s), 0);
+  const { s } = scenario(); close(assets(s), 4000); close(operatingProfit(s), 0);
   for (let i = 0; i < 100; i++) tick(s);
   close(s.cash, s.initialCash + Object.values(s.totals).reduce((sum, n) => sum + n, 0));
-  close(operatingProfit(s), s.cash - 5000 + 1800 + 250);
+  close(operatingProfit(s), s.cash - 5000 + 1800 + 1000);
   assert.ok(s.routes[0].lastActual !== null);
 });
 test('multiple ships remain distinct through simultaneous trades and save restoration', () => {

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {CITIES,GOODS} from '../src/data.js';
 import {DEMAND_REGIONS,DEMAND_CLIMATES,demandProfile} from '../src/demand-data.js';
 import {cityDemandProfile,demandModifiers,marketFlow,winterStrength} from '../src/market-demand.js';
-import {createGame,tick,serialize,deserialize,buyLicense,openCircuit,trade} from '../src/engine.js';
+import {createGame,tick,serialize,deserialize,buyLicense,openCircuit,trade} from './licensed-game.js';
 import {renderMarketDemand} from '../src/market-view.js';
 import {LANGUAGES,setLanguage} from '../src/i18n.js';
 

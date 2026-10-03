@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createGame,buyLicense,buyShip,openCircuit,assignShip,tick,serialize,deserialize,trade,assets,operatingProfit,entry} from '../src/engine.js';
+import {createGame,buyLicense,buyShip,openCircuit,assignShip,tick,serialize,deserialize,trade,assets,operatingProfit,entry} from './licensed-game.js';
 import {shipSpec,designQuote,researchDesign,buyShipyard} from '../src/industry.js';
 import {quoteFleetReplacement,replaceFleet,renameCompany,renameDesign,renameShip} from '../src/fleet.js';
 import {shipName,SHIP_NAMES} from '../src/identity.js';

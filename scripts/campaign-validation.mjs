@@ -7,7 +7,7 @@ import {setTechnologyInvestment,buyShipyard,researchDesign,buyDevelopmentRight,s
 
 // Normal starting money, decisions made through the same public actions as the UI.
 export function validateCampaign(seed,days=365*50) {
-  let s=createGame(seed);buyLicense(s,'spain');openCircuit(s,'sloop',['kingston','havana']);
+  let s=createGame(seed);buyLicense(s,'england');buyLicense(s,'spain');openCircuit(s,'sloop',['kingston','havana']);
   setTechnologyInvestment(s,'shipbuilding',6);setTechnologyInvestment(s,'seafaring',2);
   const times=[],events={},decisions={},seenEvents=new Set(),seenDecisions=new Set();
   let built=false,developed=false,automated=false,restores=0,maxShips=1,maxRoutes=1;

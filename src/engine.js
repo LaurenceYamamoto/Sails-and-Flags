@@ -38,8 +38,9 @@ export function createGame(seed = 1700, {events=true}={}) {
   let rng = seed >>> 0;
   const random = () => { rng = (Math.imul(rng, 1664525) + 1013904223) >>> 0; return rng / 4294967296; };
   const markets = Object.fromEntries(Object.entries(CITIES).map(([id, c]) => [id, Object.fromEntries(GOODS.map((g, i) => [g.id, { stock: c.stocks[i] * (0.98 + random() * 0.04), production: c.supply[i], demand: c.demand[i] }]))]));
-  const state = { version: SAVE_VERSION, seed: seed >>> 0, rng, day: 0, cash: 5000, initialCash: 5000, licenses: ['england'], ships: [], routes: [], markets, ledger: [], totals: {}, history: [{ day: 0, cash: 5000, assets: 5000 }], nextId: 1, gameOver: false, competitors: [] };
+  const state = { version: SAVE_VERSION, seed: seed >>> 0, rng, day: 0, cash: 5000, initialCash: 5000, licenses: [], ships: [], routes: [], markets, ledger: [], totals: {}, history: [{ day: 0, cash: 5000, assets: 5000 }], nextId: 1, gameOver: false, competitors: [] };
   initializeManagement(state);initializeSecurity(state,createWorld(0,seed,events));
+  state.diplomacy.firstLicensePending=true;
   initializeDevelopment(state.world);initializeRoads(state.world);initializeIndustry(state,'player');
   state.competitors = createCompetitors(markets,state.world);
   return state;
@@ -61,9 +62,13 @@ function playing(s) { check(!s.gameOver, '破産後は操作できません。�
 export function buyLicense(s, nation) {
   playing(s);
   check(NATIONS[nation] && !s.licenses.includes(nation), '取得済み、または無効な免許です。');
-  check(licenseTerms(s,nation).canBuy,'友好度30以上で交易免許を取得できます。');
-  check(s.cash >= licenseTerms(s,nation).fee, '免許の取得資金が不足しています。');
-  s.licenses.push(nation); entry(s, 'licensePurchase', -licenseTerms(s,nation).fee, null, { nation });
+  const terms=licenseTerms(s,nation);
+  check(terms.canBuy,'友好度30以上で交易免許を取得できます。');
+  check(s.cash >= terms.fee, '免許の取得資金が不足しています。');
+  s.licenses.push(nation); entry(s, 'licensePurchase', -terms.fee, null, { nation });
+  if(s.diplomacy.firstLicensePending){
+    s.diplomacy.friendship[nation]=100;s.diplomacy.firstLicensePending=false;
+  }
 }
 export function buyShip(s, type) {
   playing(s);

@@ -1,4 +1,4 @@
-import {createGame as current} from '../src/engine.js';
+import {createGame as current} from './licensed-game.js';
 export function createGame(seed=1700){return current(seed,{events:false});}
 
 // Saved voyages retain their old timing; only migration provenance is additive.

@@ -9,8 +9,8 @@ function company(){const s=createGame();buyLicense(s,'spain');return s;}
 function funded(){const s=company();trade(s,'kingston','food',30000,'sell');return s;}
 test('opening without an inventory buys the selected ship once and preserves accounting',()=>{
   const s=company(),before=serialize(s),q=quoteCircuitOpening(s,'sloop',ports);
-  assert.equal(serialize(s),before);assert.equal(q.cost,1800);assert.equal(q.remaining,2950);assert.equal(q.error,null);
-  const r=openCircuit(s,'sloop',ports);assert.equal(s.cash,2950);assert.equal(s.ships.length,1);assert.equal(s.ships[0].routeId,r.id);
+  assert.equal(serialize(s),before);assert.equal(q.cost,1800);assert.equal(q.remaining,2200);assert.equal(q.error,null);
+  const r=openCircuit(s,'sloop',ports);assert.equal(s.cash,2200);assert.equal(s.ships.length,1);assert.equal(s.ships[0].routeId,r.id);
   assert.equal(r.autoShipType,'sloop');assert.equal(s.ledger.filter(e=>e.category==='shipPurchase').length,1);assert.equal(s.automation.spent,0);
   assert.deepEqual(deserialize(serialize(s)),s);const restored=deserialize(serialize(s));for(let i=0;i<60;i++){tick(s);tick(restored);}assert.deepEqual(restored,s);
 });
@@ -32,7 +32,7 @@ test('insufficient funds and invalid opening conditions cause no partial purchas
     [company(),'sloop',ports,undefined,-1],
   ];
   for(const [s,type,stops,allowed,margin] of cases){const before=serialize(s);assert.ok(quoteCircuitOpening(s,type,stops,allowed,margin).error);assert.throws(()=>openCircuit(s,type,stops,allowed,margin));assert.equal(serialize(s),before);}
-  const s=company();const q=quoteCircuitOpening(s,'brig',ports);assert.equal(q.cost,5200);assert.equal(q.remaining,-450);
+  const s=company();const q=quoteCircuitOpening(s,'brig',ports);assert.equal(q.cost,5200);assert.equal(q.remaining,-1200);
   const bankrupt=company();entry(bankrupt,'upkeep',-5000);const before=serialize(bankrupt);assert.throws(()=>openCircuit(bankrupt,'sloop',ports));assert.equal(serialize(bankrupt),before);
 });
 test('opening accepts exact funds, zero-cost reuse, and rechecks cash at submission',()=>{
@@ -58,7 +58,7 @@ test('multiport opening supports repeated stops and validates every leg before b
 });
 test('opening quote shows cost, cash, shortage and reuse in Japanese and English',()=>{
   const s=company();setLanguage('ja');let html=renderOpeningQuote(s,'brig',quoteCircuitOpening(s,'brig',ports),String);
-  assert.match(html,/開設時の必要資金/);assert.match(html,/5200/);assert.match(html,/4750/);assert.match(html,/資金不足: 450/);
-  setLanguage('en');html=renderOpeningQuote(s,'brig',quoteCircuitOpening(s,'brig',ports),String);assert.doesNotMatch(html,/[\u3000-\u9fff]/);assert.match(html,/Insufficient cash: 450/);
+  assert.match(html,/開設時の必要資金/);assert.match(html,/5200/);assert.match(html,/4000/);assert.match(html,/資金不足: 1200/);
+  setLanguage('en');html=renderOpeningQuote(s,'brig',quoteCircuitOpening(s,'brig',ports),String);assert.doesNotMatch(html,/[\u3000-\u9fff]/);assert.match(html,/Insufficient cash: 1200/);
   const ship=buyShip(s,'sloop');html=renderOpeningQuote(s,'sloop',quoteCircuitOpening(s,'sloop',ports),String);assert.match(html,new RegExp(`Use idle Sloop #${ship.id.split('-')[1]}`));assert.match(html,/<b>0<\/b>/);setLanguage('ja');
 });

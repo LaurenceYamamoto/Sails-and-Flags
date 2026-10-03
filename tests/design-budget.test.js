@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createGame,buyLicense,openCircuit,tick,serialize,deserialize,trade,assets} from '../src/engine.js';
+import {createGame,buyLicense,openCircuit,tick,serialize,deserialize,trade,assets} from './licensed-game.js';
 import {HULLS,DESIGN_BUDGET_KEYS,designQuote,designCosts,researchDesign,buyShipyard,shipSpec,shipDaily} from '../src/industry.js';
 import {initialDesign,renderDesignEstimate,renderIndustry} from '../src/industry-view.js';
 import {setLanguage} from '../src/i18n.js';

@@ -92,13 +92,15 @@ test('regional markets, map, cargo policies and diplomatic names work in all six
 
 test('normal funds sustain regional and connected routes for ten years across three seeds with yearly recovery',()=>{
   for(const seed of [1,42,1700]){
-    const s=game.createGame(seed);for(const n of ['genoa','tuscany','france'])game.buyLicense(s,n);
-    game.openCircuit(s,'sloop',['genoa','livorno','marseille']);let joined=false,oilSold=false;
+    const s=game.createGame(seed);for(const n of ['genoa','tuscany'])game.buyLicense(s,n);
+    // Start within the normal budget; earn the next licenses through trade.
+    game.openCircuit(s,'sloop',['genoa','livorno']);let expanded=false,joined=false,oilSold=false;
     for(let day=1;day<=3650;day++){
       const restored=day%365===0?game.deserialize(game.serialize(s)):null;
       game.tick(s);if(restored){game.tick(restored);assert.deepEqual(restored,s);}
       assert.equal(s.gameOver,false,`seed ${seed}, day ${day}`);
-      if(!joined&&s.cash>15000){game.openCircuit(s,'brig',['livorno','london']);setAutomation(s,{enabled:true,replaceLost:true,monthlyBudget:5200,minCash:9000,expandThreshold:25,shrinkThreshold:0});joined=true;}
+      if(!expanded&&s.cash>12000){game.buyLicense(s,'france');game.openCircuit(s,'sloop',['genoa','livorno','marseille']);expanded=true;}
+      if(expanded&&!joined&&s.cash>22000){game.buyLicense(s,'england');game.openCircuit(s,'brig',['livorno','london']);setAutomation(s,{enabled:true,replaceLost:true,monthlyBudget:5200,minCash:9000,expandThreshold:25,shrinkThreshold:0});joined=true;}
       for(const n of s.licenses)setDiplomacyInvestment(s,n,s.diplomacy.friendship[n]<55?.25:0);
       oilSold ||= s.ledger.some(e=>e.category==='sale'&&e.good==='oliveOil');
       if(day%365===0){near(s.cash,s.initialCash+Object.values(s.totals).reduce((a,b)=>a+b,0));}

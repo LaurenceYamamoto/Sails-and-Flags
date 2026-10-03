@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks';
 import { createGame, buyLicense, buyShip, setRoute, tick, operatingProfit } from '../src/engine.js';
-const s = createGame(); buyLicense(s, 'spain'); const ship = buyShip(s, 'sloop'); setRoute(s, ship.id, 'kingston', 'havana');
+const s = createGame(); buyLicense(s, 'england'); buyLicense(s, 'spain'); const ship = buyShip(s, 'sloop'); setRoute(s, ship.id, 'kingston', 'havana');
 let firstProfit = null, reinvestment = null;
 const times = [], start = performance.now();
 for (let i = 0; i < 3650; i++) {

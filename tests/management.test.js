@@ -58,6 +58,8 @@ test('paused and opted-out routes do not auto-expand and zero-expense samples ar
 });
 test('acquisition conserves market, cargo, travel and assets while merging rotated services',()=>{
   const s=funded();buyLicense(s,'france');buyLicense(s,'netherlands');
+  // Guarantee a profitable departure for the in-transit acquisition assertion under the higher tax.
+  s.markets.nantes.food.stock=2000;s.markets.amsterdam.food.stock=5;
   const r=service(s,['amsterdam','nantes']);tick(s);
   const target=s.competitors[0],q=acquisitionQuote(s,0),beforeAssets=assets(s),beforeCash=s.cash,markets=structuredClone(s.markets),voyages=target.ships.map(v=>structuredClone(v.voyage)),cargo=target.ships.map(v=>structuredClone(v.cargo));
   assert.ok(voyages[0]);const count=s.ships.length;acquireCompany(s,0);

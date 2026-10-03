@@ -2,7 +2,7 @@ import {productionExpected} from './production-migration-expected.js';
 import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as game from '../src/engine.js';
+import * as game from './licensed-game.js';
 import * as old from '../src/legacy/engine-v6.js';
 import {ROADS,WAGONS,INLAND} from '../src/land-data.js';
 import {CITIES,NATIONS} from '../src/data.js';
@@ -15,7 +15,7 @@ import {saveGame,listSaves,SAVE_KEYS} from '../src/storage.js';
 import {renderLand,renderLandRoute} from '../src/land-view.js';
 import {LANGUAGES,setLanguage} from '../src/i18n.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
-function funded(seed=42,events=false){const s=game.createGame(seed,{events});game.entry(s,'sale',100000);for(const n of Object.keys(NATIONS))if(!s.licenses.includes(n))game.buyLicense(s,n);return s;}
+function funded(seed=42,events=false){const s=game.createGame(seed,{events});game.entry(s,'sale',100000);for(const n of ['england','spain','france','netherlands','portugal'])if(!s.licenses.includes(n))game.buyLicense(s,n);return s;}
 function enabled(s){setAutomation(s,{enabled:true,replaceLost:true,monthlyBudget:6000,minCash:1000,expandThreshold:25,shrinkThreshold:0});}
 const advance=(s,n)=>{for(let i=0;i<n;i++)game.tick(s);};
 
@@ -54,7 +54,8 @@ test('rights transfer pays the actual owner, rival traffic shares tolls, investm
  const r=game.openCircuit(s,'wagon',['nantes','paris']);game.tick(s);assert.ok(c.totals.roadIncome>0);assert.ok(s.totals.roadToll<0);assert.ok(c.totals.roadIncome<=-s.totals.roadToll*.2+1e-8);
  const sum=s.cash+c.cash,pool=s.world.roads[id].tollPool;buyRoadRight(s,id);near(s.cash+c.cash,sum+pool);assert.equal(s.world.roads[id].dailyRoad,0);assert.equal(s.world.roads[id].owner,'player');
  buyRoadRight(s,'paris_marseille',c);setRoadInvestment(c,'paris_marseille',5e11,5e11);const before=c.cash;advanceRoads(c);assert.equal(c.cash,before);
- const assets=game.assets(s),target=game.assets(c),q=acquisitionQuote(s,0);acquireCompany(s,0);near(game.assets(s),assets-q.price-q.licenseCost+target);assert.equal(s.world.roads.paris_marseille.owner,'player');assert.equal(s.world.roads.paris_marseille.dailyRoad,0);assert.ok(roadAssets(s)>0);assert.deepEqual(game.deserialize(game.serialize(s)),s);
+ const q=acquisitionQuote(s,0);if(s.cash<q.required)game.entry(s,'sale',q.required-s.cash);
+ const assets=game.assets(s),target=game.assets(c);acquireCompany(s,0);near(game.assets(s),assets-q.price-q.licenseCost+target);assert.equal(s.world.roads.paris_marseille.owner,'player');assert.equal(s.world.roads.paris_marseille.dailyRoad,0);assert.ok(roadAssets(s)>0);assert.deepEqual(game.deserialize(game.serialize(s)),s);
 });
 test('land technology reduces wagon upkeep only, safety and escorts reduce bandits, lost wagons use normal replacement budgets',()=>{
  const s=funded(42,true),r=game.openCircuit(s,'wagon',['lisbon','porto']),daily=shipDaily(s,'wagon'),sea=shipDaily(s,'sloop');setTechnologyInvestment(s,'land',100);advanceIndustry(s);assert.ok(shipDaily(s,'wagon')<daily);assert.equal(shipDaily(s,'sloop'),sea);

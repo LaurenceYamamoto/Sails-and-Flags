@@ -4,7 +4,7 @@ import {shipName} from './identity.js';
 import {shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,transferIndustry} from './industry.js';
 import { CITIES, NATIONS, SHIPS, GOODS, distance, daysFor } from './data.js';
 import { assets, buyLicense, buyShip, assignShip, releaseShip, setCircuit, removeRoute, routeShips, routeLegs, routeSchedule, circuitKey, optimizeLoad, price, entry, reschedule, serialize, deserialize } from './engine.js';
-import {licenseTerms} from './security.js';
+import {licenseTerms,licensePurchaseCost} from './security.js';
 
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const finite=n=>typeof n==='number'&&Number.isFinite(n);
@@ -122,7 +122,7 @@ export function runCompetitor(s) {
     const missing=routeNations({stops:[a,b],mode:ship.mode}).filter(n=>!s.licenses.includes(n));
     if(missing.some(n=>!licenseTerms(s,n).canBuy))continue;
     const idle=s.ships.find(v=>!v.routeId&&v.type===type);
-    const cost=(idle?0:ship.price)+missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
+    const cost=(idle?0:ship.price)+licensePurchaseCost(s,missing);
     if(s.cash-cost<p.reserve || (!idle&&s.ships.length>=p.maxShips))continue;
     if(!existing&&s.routes.length>=p.maxRoutes)continue;
     const cycle=2*(sailingDays(s,type,a,b)+1),toll=ship.mode==='land'?roadToll(s,a,b)*2:0;
@@ -144,7 +144,7 @@ export function acquisitionQuote(s,index) {
   const c=s.competitors[index];check(c,'買収対象が存在しません。');
   const price=Math.ceil(Math.max(0,assets(c))*1.15);
   const missing=c.licenses.filter(n=>!s.licenses.includes(n));
-  const licenseCost=missing.reduce((n,id)=>n+licenseTerms(s,id).fee,0);
+  const licenseCost=licensePurchaseCost(s,missing);
   return {price,licenseCost,missing,eligible:missing.every(n=>licenseTerms(s,n).canBuy),cash:c.cash,assets:assets(c),ships:c.ships.length,routes:c.routes.length,required:price+licenseCost+Math.max(0,-c.cash)};
 }
 export function acquireCompany(s,index) {
@@ -180,7 +180,7 @@ export function validateManagement(s,nested) {
   const a=s.automation;
   check(a&&typeof a.enabled==='boolean'&&amount(a.monthlyBudget)&&amount(a.minCash)&&amount(a.spent)&&a.spent<=a.monthlyBudget&&/^\d{4}-\d{2}$/.test(a.month)&&a.month<=monthFor(s.day)&&finite(a.expandThreshold)&&finite(a.shrinkThreshold)&&a.shrinkThreshold>=-100&&a.expandThreshold<=10000&&a.expandThreshold>=a.shrinkThreshold,'自動化設定が不正です。');
   check(s.firstRankDay===null||Number.isInteger(s.firstRankDay)&&s.firstRankDay>=0&&s.firstRankDay<=s.day,'達成記録が不正です。');
-  check(Array.isArray(s.managementLog)&&s.managementLog.length<=100&&s.managementLog.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&REASONS.includes(e.reason)&&(e.routeId===null||/^route-[1-9]\d*$/.test(e.routeId))&&amount(e.cost)),'経営履歴が不正です。');
+  check(Array.isArray(s.managementLog)&&s.managementLog.length<=100&&s.managementLog.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&REASONS.includes(e.reason)&&(e.routeId===null||/^route-[1-9]\d*$/.test(e.routeId))&&finite(e.cost)&&e.cost>=0),'経営履歴が不正です。');
   check(!nested||s.strategy&&Object.hasOwn(PROFILES,s.strategy.kind)&&/^\d{4}-\d{2}$/.test(s.strategy.lastMonth)&&s.strategy.lastMonth<=monthFor(s.day),'競合の戦略が不正です。');
   for(const r of s.routes){
     // Additive v4 migration: only an absent field gets a default. Preserve all

@@ -1,7 +1,7 @@
 import {productionExpected} from './production-migration-expected.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as game from '../src/engine.js';
+import * as game from './licensed-game.js';
 import * as old from '../src/legacy/engine-v12.js';
 import {PORT_APPROACHES as OLD_PORTS,seaRoute as oldSeaRoute} from '../src/legacy/sea-routing-v12.js';
 import {seaRoute} from '../src/sea-routing.js';

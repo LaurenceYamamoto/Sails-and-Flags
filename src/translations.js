@@ -408,11 +408,11 @@ export const translations = {
     "Commencer votre premier voyage",
     "Inicia tu primer viaje"
   ],
-  "1. Buy a Spanish license": [
-    "① 购买西班牙许可证",
-    "① 스페인 면허 구매",
-    "1. Achetez une licence espagnole",
-    "1. Compra una licencia española"
+  "1. Buy English and Spanish licenses": [
+    "① 购买英格兰和西班牙许可证",
+    "① 잉글랜드와 스페인 면허 구매",
+    "1. Achetez les licences anglaise et espagnole",
+    "1. Compra las licencias inglesa y española"
   ],
   "2. Drag Kingston to Havana and open with a sloop": [
     "② 从Kingston拖至Havana，选择单桅帆船开设",

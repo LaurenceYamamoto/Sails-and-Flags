@@ -23,9 +23,14 @@ export function initializeSecurity(s,world=createWorld(s.day,s.seed)){
   for(const r of s.routes)initializeRouteSecurity(r);
 }
 export function initializeRouteSecurity(r){r.escorts=0;r.pendingReplacements=[];r.losses={cargo:0,ships:0,count:0};}
-export function licenseTerms(s,n){
-  const f=s.world?.enabled? s.diplomacy.friendship[n]:RULES.initial,factor=1+(RULES.initial-f)/100;
-  return {fee:NATIONS[n].fee*factor,daily:NATIONS[n].daily*factor,tax:NATIONS[n].tax*factor,canBuy:f>=RULES.buy};
+export function licenseTerms(s,n,ownedCount=s.licenses.length){
+  const f=s.diplomacy.friendship[n],factor=1+(RULES.initial-f)/100;
+  return {fee:NATIONS[n].fee*3**ownedCount*factor,daily:NATIONS[n].daily*10*factor,tax:(15-f*.1)/100,canBuy:f>=RULES.buy};
+}
+export function licensePurchaseCost(s,nations){
+  // Match sequential purchases: each newly acquired license raises the next fee.
+  const missing=[...new Set(nations)].filter(n=>!s.licenses.includes(n));
+  return missing.reduce((total,n,i)=>total+licenseTerms(s,n,s.licenses.length+i).fee,0);
 }
 export const atWar=(s,a,b)=>s.world.pairs.some(p=>p.until!==null&&[p.a,p.b].includes(a)&&[p.a,p.b].includes(b)&&a!==b);
 export const demandMultiplier=(s,n,good)=>s.world.enabled&&good==='weapons'&&s.world.pairs.some(p=>p.until!==null&&(p.a===n||p.b===n))?1.8:1;
@@ -140,6 +145,8 @@ export function validateSecurity(s,nested=false){
   check(nested||w.events.every(e=>e.day<=s.day),'戦争履歴の時刻が不正です。');
   check(d&&keys(d.friendship)&&keys(d.investment)&&keys(d.tradeToday)&&keys(d.lastChange)&&nations.every(n=>amount(d.friendship[n])&&d.friendship[n]<=100&&amount(d.investment[n])&&amount(d.tradeToday[n])&&d.tradeToday[n]<=5000&&['trade','enemies','investment'].every(k=>Number.isFinite(d.lastChange[n]?.[k]))),'外交設定が不正です。');
   check(typeof s.automation.replaceLost==='boolean','補充設定が不正です。');
+  // Older saves have no first-license bonus; never infer it from an empty fleet or revoked rights.
+  check(!Object.hasOwn(d,'firstLicensePending')||typeof d.firstLicensePending==='boolean'&&(!d.firstLicensePending||!nested&&s.licenses.length===0&&!s.totals.licensePurchase),'外交設定が不正です。');
   check(Array.isArray(s.incidents)&&s.incidents.length<=100&&s.incidents.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['raided','shipLost','warning','revoked','donation','investmentSkipped'].includes(e.kind)&&(e.nation===undefined||country(e.nation))&&(e.routeId===undefined||/^route-[1-9]\d*$/.test(e.routeId))&&(e.type===undefined||Boolean(shipSpec(s,e.type)))&&['cargoCost','shipValue','cost','ships'].every(k=>e[k]===undefined||amount(e[k]))),'被害・外交履歴が不正です。');
   for(const r of s.routes)check(Number.isInteger(r.escorts)&&r.escorts>=0&&r.escorts<=3&&Array.isArray(r.pendingReplacements)&&r.pendingReplacements.length<=200&&r.pendingReplacements.every(type=>canServe(s,type,r)||r.rangeReview&&shipSpec(s,type)?.mode==='sea')&&r.losses&&['cargo','ships','count'].every(k=>amount(r.losses[k])),'航路の保護設定が不正です。');
 }

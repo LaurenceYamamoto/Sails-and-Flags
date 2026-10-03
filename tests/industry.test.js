@@ -1,7 +1,7 @@
 import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createGame,buyLicense,buyShip,openCircuit,tick,serialize,deserialize,assets,trade,routeSchedule,assignShip} from '../src/engine.js';
+import {createGame,buyLicense,buyShip,openCircuit,tick,serialize,deserialize,assets,trade,routeSchedule,assignShip} from './licensed-game.js';
 import {setAutomation,runAutomation,setRouteAutomationShip,acquireCompany,acquisitionQuote} from '../src/management.js';
 import {resolveAttack,runReplacements,advanceDiplomacy} from '../src/security.js';
 import {initializeIndustry,shipSpec,shipDaily,sailingDays,designQuote,researchDesign,buyShipyard,setTechnologyInvestment,advanceIndustry,developmentQuote,buyDevelopmentRight,setCityInvestment,marketFactors,recordCityTax,rightsAssets} from '../src/industry.js';
@@ -83,5 +83,6 @@ test('P5 investment, custom ships and development run for ten years across seeds
 });
 test('ten-year city-only income and investment do not outperform active trading from equal starting capital',()=>{
  const passive=createGame(42),active=createGame(42);buyDevelopmentRight(passive,'kingston');setCityInvestment(passive,'kingston',.25,{});buyLicense(active,'spain');openCircuit(active,'sloop',['kingston','havana']);
- for(let i=0;i<3650;i++){tick(passive);tick(active);}assert.ok(!passive.gameOver&&!active.gameOver);assert.ok(assets(active)>assets(passive)*2);assert.ok(passive.totals.developmentIncome<active.totals.sale+active.totals.purchase);console.log(JSON.stringify({passiveAssets:assets(passive),activeAssets:assets(active),passiveIncome:passive.totals.developmentIncome}));
+ // City income is supplementary; higher license upkeep may bankrupt an idle company.
+ for(let i=0;i<3650;i++){tick(passive);tick(active);}assert.ok(!active.gameOver);assert.equal(passive.gameOver,passive.cash<0);assert.ok(assets(active)>assets(passive)*2);assert.ok(passive.totals.developmentIncome<active.totals.sale+active.totals.purchase);console.log(JSON.stringify({passiveAssets:assets(passive),activeAssets:assets(active),passiveIncome:passive.totals.developmentIncome,passiveBankrupt:passive.gameOver,passiveDay:passive.day}));
 });

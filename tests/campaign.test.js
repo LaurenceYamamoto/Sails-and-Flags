@@ -12,7 +12,7 @@ test('three seeds run 50 years with industry, wars, automation, losses and annua
 test('asset lead continues, bankruptcy stops time, and a good save restores the company without overwriting corrupt slots',()=>{
   const s=createGame(1700),map=new Map(),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
   // Accelerated balance fixture for the lifecycle boundaries, not a growth/balance claim.
-  entry(s,'sale',50000);recordRank(s);assert.equal(s.firstRankDay,0);buyLicense(s,'spain');openCircuit(s,'sloop',['kingston','havana']);
+  entry(s,'sale',50000);recordRank(s);assert.equal(s.firstRankDay,0);buyLicense(s,'england');buyLicense(s,'spain');openCircuit(s,'sloop',['kingston','havana']);
   tick(s);assert.equal(s.day,1);assert.equal(s.gameOver,false);saveGame(storage,s);const good=serialize(s);
   entry(s,'purchase',-s.cash-1);tick(s);assert.equal(s.gameOver,true);const day=s.day;tick(s);assert.equal(s.day,day);
   map.set(SAVE_KEYS.auto,'{"version":6');const before=map.get(SAVE_KEYS.manual);assert.equal(listSaves(storage).find(v=>v.slot==='auto').valid,false);assert.equal(map.get(SAVE_KEYS.manual),before);

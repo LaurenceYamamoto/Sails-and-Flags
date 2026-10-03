@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CITIES,GOODS,distance} from '../src/data.js';
-import * as game from '../src/engine.js';
+import * as game from './licensed-game.js';
 import * as old from '../src/legacy/engine-v14.js';
 import {buyDevelopmentRight as oldRight,setCityInvestment as oldInvestment} from '../src/legacy/industry-v14.js';
 import {buyDevelopmentRight,setCityInvestment,advanceIndustry,marketFactors,shipSpec} from '../src/industry.js';

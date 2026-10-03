@@ -10,7 +10,7 @@ import { saveGame,listSaves,SAVE_KEYS } from '../src/storage.js';
 import { ja,en,setLanguage,nameOf } from '../src/i18n.js';
 import { renderRoutes } from '../src/routes-view.js';
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
-function funded(seed=1700) {const s=createGame(seed);trade(s,'kingston','food',30000,'sell');for(const id of Object.keys(NATIONS))if(!s.licenses.includes(id))buyLicense(s,id);return s;}
+function funded(seed=1700) {const s=createGame(seed);trade(s,'kingston','food',30000,'sell');for(const id of ['england','spain','france','netherlands','portugal'])if(!s.licenses.includes(id))buyLicense(s,id);return s;}
 const ports=['kingston','havana','santiago'];
 function forceMarkets(s) {
   // Three independent profitable legs, so timetable tests cannot hide skipped slots.
@@ -51,7 +51,10 @@ test('multiport fleets have evenly rounded recurring slots at every port and pre
   assert.deepEqual(deserialize(serialize(s)),s);
 });
 test('competitors share stock, pay normal integrated prices and survive restore deterministically',()=>{
-  const s=createGame(),control=createGame();control.competitors=[];tick(s);tick(control);
+  const s=createGame(),control=createGame();
+  // This test measures shared-market payments, so provide profitable cargo explicitly.
+  for(const c of s.competitors){const [a,b]=c.routes[0].stops;for(const x of [s,control]){x.markets[a].food.stock=2000;x.markets[b].food.stock=5;}}
+  control.competitors=[];tick(s);tick(control);
   assert.ok(s.competitors.every(c=>c.markets===s.markets));assert.notDeepEqual(s.markets,control.markets);
   for(const c of s.competitors){const purchase=c.ledger.find(e=>e.category==='purchase');assert.ok(purchase);const quantity=purchase.quantity,prior=control.markets[purchase.city][purchase.good].stock;close(-purchase.amount,quote(purchase.good,prior,quantity,'buy').value);close(c.initialCash+Object.values(c.totals).reduce((a,b)=>a+b,0),c.cash);}
   const copy=deserialize(serialize(s));for(let i=0;i<100;i++){tick(s);tick(copy);}assert.deepEqual(copy,s);assert.ok(copy.competitors.every(c=>c.markets===copy.markets));

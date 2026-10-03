@@ -31,7 +31,7 @@ test('Marseille–Nantes goes through Gibraltar and is much longer than Lisbon�
  const r=seaRoute('marseille','nantes');assert.ok(r.coordinates.some(([lon,lat])=>lon<-5&&lon>-6&&lat>35&&lat<36.5));assert.ok(r.coordinates.some(([lon,lat])=>lon<-9&&lat>40));
  assert.ok(distance('kingston','havana')>nauticalDistance([-76.793,17.971],[-82.366,23.113])*1.5);
  assert.ok(seaRoute('london','lisbon').coordinates.some(([lon,lat])=>lon<-5&&lat>48));
- const s=game.createGame(42,{events:false});game.buyLicense(s,'france');const raw=game.serialize(s);
+ const s=game.createGame(42,{events:false});game.buyLicense(s,'england');game.buyLicense(s,'france');const raw=game.serialize(s);
  assert.match(game.quoteCircuitOpening(s,'sloop',['marseille','london']).error,/航続/);assert.equal(game.serialize(s),raw);
 });
 function legacy(){const s=old.createGame(42,{events:false});old.entry(s,'sale',100000);old.buyLicense(s,'france');old.openCircuit(s,'sloop',['marseille','london']);old.tick(s);return s;}

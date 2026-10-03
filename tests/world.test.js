@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
 import {CITIES,NATIONS,GOODS,distance} from '../src/data.js';
-import * as game from '../src/engine.js';
+import * as game from './licensed-game.js';
 import * as old from '../src/legacy/engine-v10.js';
 import {WORLD_PORTS,WORLD_NATIONS,WORLD_GOODS} from '../src/world-data.js';
 import {PORT_APPROACHES,seaRoute,seaLines,seaPosition,waterSegment} from '../src/sea-routing.js';
@@ -51,7 +51,7 @@ test('v10 migration preserves finances, RNG, cargo, voyages, old markets and pol
 });
 test('each rival accepts 50 routes but rejects route 51 before buying; players have no route cap',()=>{
  assert.ok(Object.values(PROFILES).every(p=>p.maxRoutes===50));
- const s=game.createGame(42,{events:false}),c=s.competitors[0];game.entry(c,'sale',10000000);game.entry(s,'sale',10000000);
+ const s=game.createGame(42,{events:false}),c=s.competitors[0];game.entry(c,'sale',1e14);game.entry(s,'sale',1e14);
  for(const company of [s,c])for(const id of Object.keys(NATIONS))if(!company.licenses.includes(id))game.buyLicense(company,id);
  const ids=Object.keys(PORT_APPROACHES);let next;
  outer:for(const [i,a] of ids.entries())for(const b of ids.slice(i+1))if(distance(a,b)<=10000){

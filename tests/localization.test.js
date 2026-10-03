@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {LANGUAGES,catalog,ja,en,setLanguage,getLanguage,locale,tx,t,nameOf,errorMessage} from '../src/i18n.js';
 import {sourceMessages} from '../scripts/localization-source.mjs';
 import {CITIES,NATIONS,GOODS,SHIPS} from '../src/data.js';
-import {createGame,openCircuit,buyLicense,serialize,deserialize,quoteCircuitOpening,tick} from '../src/engine.js';
+import {createGame,openCircuit,buyLicense,serialize,deserialize,quoteCircuitOpening,tick} from './licensed-game.js';
 import {renderOpeningQuote} from '../src/route-setup-view.js';
 import {renderIndustry,renderDevelopment} from '../src/industry-view.js';
 import {renderFleet} from '../src/fleet-view.js';
