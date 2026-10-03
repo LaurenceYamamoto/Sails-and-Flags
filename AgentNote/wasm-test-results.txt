@@ -1,0 +1,35 @@
+
+> sails-and-flags@3.0.0 test
+> node --test tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js
+
+✔ five manual slots overwrite independently; autos retain only five generations (10.0912ms)
+✔ quota retry evicts oldest autos, never manual slots; final failure preserves all saves (2.3969ms)
+✔ unavailable IndexedDB reports failure instead of false success (0.1586ms)
+✔ browser entry points do not import the JavaScript reference engine or localStorage saves (3.5085ms)
+✔ shipped WebAssembly matches the checked-in Rust sources and build manifest (16.956ms)
+✔ Wasm executes without imported JavaScript game callbacks (4.4367ms)
+✔ Wasm owns initial state, license escalation and symmetric tax formula (229.5978ms)
+✔ fractional clock, pause and deterministic save/restore (235.3758ms)
+✔ shared routes, inventory reuse and automatic purchase; ordered revisits (220.7014ms)
+✔ sea detours, Pacific crossing and land connections remain available (216.6478ms)
+✔ production suitability, nonzero demand and commodity-specific investment (253.939ms)
+✔ design budgets, names, fleet replacement and automation kind (263.6992ms)
+✔ invalid and legacy saves roll back without damaging live state (251.3254ms)
+✔ long campaign preserves accounting, finite markets, bounded rivals and history (540.8398ms)
+✔ automation buys the designated type, ignores unrelated inventory and shrinks preferred type (223.2947ms)
+✔ acquisition merges routes and transfers ships without breaking restore validation (317.4867ms)
+✔ unprofitable return legs can reposition empty towards a profitable leg (327.1112ms)
+✔ calendar uses real month boundaries, and malformed routes cannot trap Wasm (288.1103ms)
+✔ rival land operations reinvest in roads within the shared investment policy (238.0678ms)
+✔ sea route rejects land vehicles even where a road also joins the two ports (221.9028ms)
+✔ the starting company can run the tutorial route for a year without artificial funds (295.0062ms)
+✔ transport observations include gross sale revenue and transaction taxes in costs (265.9613ms)
+✔ fifty-year multi-company run remains serializable and bounded (16877.2525ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21379.829

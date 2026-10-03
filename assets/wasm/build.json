@@ -1,0 +1,17 @@
+{
+  "version": "3.0.0",
+  "binary": "bec00cd68488b873f029e89d8a84b9709676caf0828379b905e3caa796a60616",
+  "sources": {
+    "wasm-core/Cargo.lock": "312f02a14606cff4878bf38b691aa1bf077e38a4e1c3989de2d2de4dee44c31c",
+    "wasm-core/Cargo.toml": "20f9ba3b7cad79a494e929286aa50056ec9eb992f655d0972a4d14bf49d60a29",
+    "wasm-core/data/world.json": "e8e03545755882d9b9d3918e8e6c58d67c64f2f62d5585aba402181b3a00fa27",
+    "wasm-core/src/commands.rs": "708a08582319b900bb861ea4091977e2de2a896be5407800429afcb3d0a4fab5",
+    "wasm-core/src/lib.rs": "c53492e1d83fda386ea8d64053b58bb32b91f970895b66ce109c90ed45bd657d",
+    "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
+    "wasm-core/src/model.rs": "73ea1cf62d29c72404b5c0e7673b749e0b070e21a7d717fdddbb847040e3812f",
+    "wasm-core/src/rivals.rs": "dacb399ce64e8f96199c6f93f95010eb9cfdf508d69f3912e2ec6914a3cb9076",
+    "wasm-core/src/simulation.rs": "7dd3f5de45b3db0e7fb2a04dadc37351a42b25dde600861b69a9aa446532ffdf",
+    "wasm-core/src/trade.rs": "da92cc97d2b25a1182419cc8dd938d6218091cc7183a8e5868947a2b4fe334bf",
+    "wasm-core/src/view.rs": "8ad13732fec83de4f1ff622621331d02e859c2f3a2e8110f9ff8f566450c89bb"
+  }
+}

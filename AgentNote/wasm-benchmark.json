@@ -1,0 +1,25 @@
+{
+  "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+  "node": "v24.15.0",
+  "ships": 200,
+  "routes": 200,
+  "days": 365,
+  "legacyTickMs": {
+    "mean": 2.9881769863013687,
+    "p95": 4.454200000000128,
+    "max": 88.59069999999997
+  },
+  "wasmTickWithAbiMs": {
+    "mean": 0.560564383561647,
+    "p95": 0.9401000000002568,
+    "max": 12.795700000000124
+  },
+  "wasmViewWithAbiMs": {
+    "mean": 8.494470000000002,
+    "p95": 10.884700000000066,
+    "max": 12.415899999999965
+  },
+  "legacySerializeValidateMs": 29.664299999999912,
+  "wasmSaveLoadWithAbiMs": 7.974700000000212,
+  "saveBytes": 562113
+}
