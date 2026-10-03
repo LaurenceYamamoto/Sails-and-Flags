@@ -1,4 +1,4 @@
-import {CITIES} from './data.js';
+import {CITIES,GOODS} from './data.js';
 import {ROADS,roadBetween} from './land-data.js';
 import {routeShips,routeLegs} from './engine.js';
 import {PROFILES} from './management.js';
@@ -17,7 +17,7 @@ export function rivalInvestmentBudget(s){
  return {reserve,daily:Math.floor(Math.max(0,Math.min(policy.daily,earned*.15,(s.cash-reserve)/180))*100)/100};
 }
 function commitments(s){
- return [...Object.keys(s.industry.investment).map(key=>[s.industry.investment,key]),...Object.values(s.world.development).filter(d=>d.owner===s.industry.id).flatMap(d=>[[d,'dailySize'],[d,'dailyProduction']]),...Object.values(s.world.roads).filter(d=>d.owner===s.industry.id).flatMap(d=>[[d,'dailyRoad'],[d,'dailySecurity']])];
+ return [...Object.keys(s.industry.investment).map(key=>[s.industry.investment,key]),...Object.values(s.world.development).filter(d=>d.owner===s.industry.id).flatMap(d=>[[d,'dailySize'],...Object.keys(d.dailyProduction).map(key=>[d.dailyProduction,key])]),...Object.values(s.world.roads).filter(d=>d.owner===s.industry.id).flatMap(d=>[[d,'dailyRoad'],[d,'dailySecurity']])];
 }
 export function guardRivalInvestment(s){
  if(!s.strategy||s.gameOver)return;
@@ -55,7 +55,7 @@ export function planRivalInvestment(s){
  const allocations=[],active=s.routes.filter(r=>r.active&&routeShips(s,r).length);
  if(active.some(r=>r.mode==='sea'))allocations.push({weight:3,apply:v=>setTechnologyInvestment(s,'seafaring',v)});
  if(active.some(r=>r.mode==='land'))allocations.push({weight:3,apply:v=>setTechnologyInvestment(s,'land',v)});
- for(const id of used.cities.keys())if(s.world.development[id].owner===s.industry.id&&s.licenses.includes(CITIES[id].nation))allocations.push({weight:3,apply:v=>setCityInvestment(s,id,v/3,2*v/3)});
+ for(const id of used.cities.keys())if(s.world.development[id].owner===s.industry.id&&s.licenses.includes(CITIES[id].nation))allocations.push({weight:3,apply:v=>setCityInvestment(s,id,v/3,{[GOODS[CITIES[id].supply.indexOf(Math.max(...CITIES[id].supply))].id]:2*v/3})});
  for(const id of used.roads.keys())if(s.world.roads[id].owner===s.industry.id&&ROADS[id].nations.every(n=>s.licenses.includes(n)))allocations.push({weight:3,apply:v=>setRoadInvestment(s,id,2*v/3,v/3)});
  const total=allocations.reduce((n,a)=>n+a.weight,0);
  for(const a of allocations)a.apply(Math.floor(budget.daily*a.weight/total*100)/100);

@@ -1,0 +1,52 @@
+{
+  "version": "2.4.0-alpha.1",
+  "saveVersion": 15,
+  "fullSuite": {
+    "tests": 216,
+    "passed": 212,
+    "failed": 4
+  },
+  "correctedExpectationsRerun": {
+    "tests": 45,
+    "passed": 45,
+    "failed": 0
+  },
+  "finalUIAndProductionRerun": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "campaign": {
+    "seeds": [
+      1,
+      42,
+      1700
+    ],
+    "daysEach": 18250,
+    "annualRestoresEach": 50
+  },
+  "remainingFailures": [],
+  "browser": {
+    "origin": "http://127.0.0.1:4189",
+    "languages": [
+      "ja",
+      "en",
+      "zh-CN",
+      "ko",
+      "fr",
+      "es"
+    ],
+    "pacificRoute": [
+      "manila",
+      "acapulco"
+    ],
+    "shipType": "galleon",
+    "legacySaveVersion": 14,
+    "consoleErrors": 0
+  },
+  "notes": [
+    "No engine or production-data changes after the full suite started.",
+    "Only outdated expectations changed in the four failing tests; their complete files were rerun.",
+    "The final UI and production tests were rerun after display changes."
+  ]
+}

@@ -26,5 +26,5 @@ export function marketFlow(s,city,good,day=s.day){
  const war=demandMultiplier(s,CITIES[city].nation,good),priceFactor=Math.max(.25,Math.min(3,1/priceRatio(available)));
  const demand=m.demand*development.demand*modifiers.regional*modifiers.climate*modifiers.season*war;
  const requested=demand*priceFactor,consumption=Math.min(available,requested);
- return {...modifiers,base:m.demand,development:development.demand,war,priceFactor,production,demand,consumption,stock:available-consumption};
+ return {...modifiers,base:m.demand,development:development.demand,war,priceFactor,production,demand,requested,unmet:Math.max(0,requested-consumption),consumption,stock:available-consumption};
 }

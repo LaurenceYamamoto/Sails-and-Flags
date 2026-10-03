@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import {NATIONS as OLD_NATIONS} from '../src/legacy/data-v7.js';
 import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
@@ -36,7 +37,7 @@ test('city selection prioritizes ports and inland hubs without a country quota',
 });
 test('v7 migration returns vehicles and refunds remaining cargo and removed investments to their actual owners',()=>{
  const before=fixture(),raw=old.serialize(before),s=game.deserialize(raw);
- assert.equal(old.serialize(before),raw);assert.equal(s.version,14);
+ assert.equal(old.serialize(before),raw);assert.equal(s.version,15);
  for(const [index,c] of [before,...before.competitors].entries()){
   const after=[s,...s.competitors][index],removed=c.routes.filter(r=>r.stops.some(id=>RETIRED_CITIES[id]));
   const vehicles=c.ships.filter(v=>removed.some(r=>r.id===v.routeId));
@@ -49,7 +50,7 @@ test('v7 migration returns vehicles and refunds remaining cargo and removed inve
   assert.equal(after.rng,c.rng);near(game.operatingProfit(after),old.operatingProfit(c));
  }
  assert.deepEqual(s.world.roads.nantes_paris,before.world.roads.nantes_paris);
- for(const id of Object.keys(CITIES).filter(id=>before.markets[id]))assert.deepEqual(Object.fromEntries(Object.keys(before.markets[id]).map(g=>[g,s.markets[id][g]])),before.markets[id]);
+ for(const id of Object.keys(CITIES).filter(id=>before.markets[id]))assert.deepEqual(Object.fromEntries(Object.keys(before.markets[id]).map(g=>[g,s.markets[id][g]])),productionExpected(before).markets[id]);
  assert.deepEqual(s.world.designs,before.world.designs);assert.equal(s.world.rng,before.world.rng);
  assert.equal(s.networkMigration.removedRoutes,2);
  assert.ok(s.ledger.some(e=>e.city==='oxford'));assert.match(roadTitle('london_oxford'),/Oxford/);
@@ -60,8 +61,8 @@ test('v7 migration returns vehicles and refunds remaining cargo and removed inve
 test('v7 source saves remain untouched and compensation cannot repeat on v8 reload',()=>{
  const raw=old.serialize(fixture()),map=new Map([[SAVE_KEYS.v7,raw],[SAVE_KEYS.preservedP7,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
  const s=listSaves(storage).find(x=>x.slot==='v7').state;saveGame(storage,s);
- assert.equal(map.get(SAVE_KEYS.v7),raw);assert.equal(map.get(SAVE_KEYS.preservedP7),raw);assert.equal(map.get(SAVE_KEYS.preserved),raw);
- const loaded=game.deserialize(map.get(SAVE_KEYS.manual));assert.equal(loaded.cash,s.cash);assert.deepEqual(loaded.totals,s.totals);
+ assert.equal(map.get(SAVE_KEYS.v7),raw);assert.equal(map.get(SAVE_KEYS.preservedP7),raw);assert.equal(map.get(SAVE_KEYS.preserved),undefined);
+ const loaded=listSaves(storage).find(v=>v.slot==='manual').state;assert.equal(loaded.cash,s.cash);assert.deepEqual(loaded.totals,s.totals);
  for(const corrupt of [c=>c.world.roads.london_oxford.owner='unknown',c=>c.ships[0].cargo[0].total=-1,c=>c.markets.oxford.food.stock=-1]){const copy=JSON.parse(raw);corrupt(copy);assert.throws(()=>game.deserialize(JSON.stringify(copy)));}
 });
 test('refund can clear a stopped rival debt without leaving its clock behind the world',()=>{

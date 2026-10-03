@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import {CROSSING_PORTS,CROSSING_ROADS} from '../src/crossing-data.js';
 import {CONTINENTAL_CITIES,CONTINENTAL_ROADS,CONTINENTAL_NATIONS} from '../src/continental-data.js';
 import test from 'node:test';
@@ -33,19 +34,19 @@ test('Pacific wraps at the dateline; absent Panama and Suez canals force histori
 });
 test('v10 migration preserves finances, RNG, cargo, voyages, old markets and policies; new slots preserve the original',()=>{
  const before=old.createGame(42);old.buyLicense(before,'spain');old.openCircuit(before,'sloop',['kingston','havana']);old.tick(before);
- const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,14);
+ const raw=old.serialize(before),s=game.deserialize(raw);assert.equal(s.version,15);
  for(const [i,c] of [before,...before.competitors].entries()){
   const actual=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
   for(const n of Object.keys({...WORLD_NATIONS,...CONTINENTAL_NATIONS}))for(const values of Object.values(actual.diplomacy))delete values[n];
   for(const x of [actual,expected]){delete x.markets;delete x.world;delete x.competitors;delete x.version;}
   assert.deepEqual(actual,expected);
  }
- for(const id of Object.keys(before.markets))for(const g of Object.keys(before.markets[id]))assert.deepEqual(s.markets[id][g],before.markets[id][g]);
- const w=structuredClone(s.world);for(const id of Object.keys(CROSSING_PORTS))delete w.development[id];for(const id of Object.keys(CROSSING_ROADS))delete w.roads[id];w.pairs=w.pairs.filter(p=>!WORLD_NATIONS[p.a]&&!WORLD_NATIONS[p.b]&&!CONTINENTAL_NATIONS[p.a]&&!CONTINENTAL_NATIONS[p.b]);for(const id of Object.keys({...WORLD_PORTS,...CONTINENTAL_CITIES}))delete w.development[id];for(const id of Object.keys(CONTINENTAL_ROADS))delete w.roads[id];assert.deepEqual(w,before.world);
+ for(const id of Object.keys(before.markets))for(const g of Object.keys(before.markets[id]))assert.deepEqual(s.markets[id][g],productionExpected(before).markets[id][g]);
+ const w=structuredClone(s.world);for(const id of Object.keys(CROSSING_PORTS))delete w.development[id];for(const id of Object.keys(CROSSING_ROADS))delete w.roads[id];w.pairs=w.pairs.filter(p=>!WORLD_NATIONS[p.a]&&!WORLD_NATIONS[p.b]&&!CONTINENTAL_NATIONS[p.a]&&!CONTINENTAL_NATIONS[p.b]);for(const id of Object.keys({...WORLD_PORTS,...CONTINENTAL_CITIES}))delete w.development[id];for(const id of Object.keys(CONTINENTAL_ROADS))delete w.roads[id];assert.deepEqual(w,productionExpected(before).world);
  assert.ok(WORLD_GOODS.every(g=>!s.routes[0].allowed.includes(g.id)));
  assert.deepEqual(game.deserialize(game.serialize(s)),s);
  const values=new Map([[SAVE_KEYS.v10,raw]]),storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
- saveGame(storage,s);assert.equal(values.get(SAVE_KEYS.v10),raw);assert.equal(values.get(SAVE_KEYS.preserved),raw);assert.ok(listSaves(storage).every(x=>x.valid));
+ saveGame(storage,s);assert.equal(values.get(SAVE_KEYS.v10),raw);assert.equal(values.get(SAVE_KEYS.preserved),undefined);assert.ok(listSaves(storage).every(x=>x.valid));
  const invalid=JSON.parse(raw);invalid.world.pairs.pop();assert.throws(()=>game.deserialize(JSON.stringify(invalid)));
 });
 test('each rival accepts 50 routes but rejects route 51 before buying; players have no route cap',()=>{

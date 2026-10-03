@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import {withoutSeaVersion} from './baseline.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -57,8 +58,8 @@ test('competitors share stock, pay normal integrated prices and survive restore 
 });
 test('v2 migration preserves balances, five original markets, cargo and arrival timing',()=>{
   const legacy=old.createGame();old.buyLicense(legacy,'spain');old.setRoute(legacy,old.buyShip(legacy,'sloop').id,'kingston','havana');old.tick(legacy);
-  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,14);assert.equal(s.cash,legacy.cash);assert.deepEqual(withoutSeaVersion(s.ships),legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
-  for(const [city,goods]of Object.entries(legacy.markets))for(const [good,market]of Object.entries(goods))assert.deepEqual(s.markets[city][good],market);
+  const raw=old.serialize(legacy),s=deserialize(raw);assert.equal(s.version,15);assert.equal(s.cash,legacy.cash);assert.deepEqual(withoutSeaVersion(s.ships),legacy.ships);assert.deepEqual(s.routes[0].stops,['kingston','havana']);
+  for(const [city,goods]of Object.entries(legacy.markets))for(const [good,market]of Object.entries(goods))assert.deepEqual(s.markets[city][good],productionExpected(legacy).markets[city][good]);
   assert.deepEqual(s,deserialize(serialize(s)));assert.equal(JSON.parse(raw).version,2);
   legacy.cash++;assert.throws(()=>deserialize(old.serialize(legacy)));
 });
@@ -75,10 +76,10 @@ test('ten years of multiport trading across seeds remains live, finite and repro
   }
 });
 function memoryStore(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),map};}
-test('save slots preserve legacy data, rotate valid backup and expose corrupt saves for recovery',()=>{
+test('save slots preserve legacy data, retain valid autosave history and expose corrupt saves for recovery',()=>{
   const storage=memoryStore(),s=createGame();storage.setItem(SAVE_KEYS.v2,old.serialize(old.createGame()));saveGame(storage,s);tick(s);saveGame(storage,s,'auto');tick(s);saveGame(storage,s,'auto');
-  const saves=listSaves(storage);assert.equal(saves.find(v=>v.slot==='manual').day,0);assert.equal(saves.find(v=>v.slot==='backup').day,1);assert.equal(saves.find(v=>v.slot==='auto').day,2);assert.equal(JSON.parse(storage.getItem(SAVE_KEYS.v2)).version,2);
-  storage.setItem(SAVE_KEYS.auto,'corrupt');assert.equal(listSaves(storage).find(v=>v.slot==='auto').valid,false);saveGame(storage,s,'auto');assert.equal(deserialize(storage.getItem(SAVE_KEYS.backup)).day,1);
+  const saves=listSaves(storage);assert.equal(saves.find(v=>v.slot==='manual').day,0);assert.equal(saves.find(v=>v.slot==='auto1').day,1);assert.equal(saves.find(v=>v.slot==='auto').day,2);assert.equal(JSON.parse(storage.getItem(SAVE_KEYS.v2)).version,2);
+  storage.setItem(SAVE_KEYS.auto,'corrupt');assert.equal(listSaves(storage).find(v=>v.slot==='auto').valid,false);saveGame(storage,s,'auto');assert.equal(listSaves(storage).find(v=>v.slot==='auto1').day,1);
 });
 test('failed storage write and invalid import never destroy the previous save',()=>{
   const storage=memoryStore(),s=createGame();saveGame(storage,s);const before=storage.getItem(SAVE_KEYS.manual);storage.setItem=()=>{throw new Error('Quota exceeded');};tick(s);assert.throws(()=>saveGame(storage,s));assert.equal(storage.getItem(SAVE_KEYS.manual),before);assert.throws(()=>deserialize('invalid'));assert.equal(storage.getItem(SAVE_KEYS.manual),before);

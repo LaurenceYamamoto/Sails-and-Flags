@@ -1,3 +1,4 @@
+import {localProduction} from './production-data.js';
 import {CROSSING_PORTS} from './crossing-data.js';
 import {WORLD_PORTS,WORLD_NATIONS,WORLD_GOODS,worldMarket} from './world-data.js';
 import {CONTINENTAL_CITIES,CONTINENTAL_NATIONS} from './continental-data.js';
@@ -83,6 +84,7 @@ for(const id of Object.keys(CONTINENTAL_CITIES)){
  const c=CITIES[id],markets=GOODS.map(g=>worldMarket(id,c,g));
  Object.assign(c,{stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)});
 }
+for(const [id,c]of Object.entries(CITIES))c.supply=c.supply.map((n,i)=>localProduction(id,c,GOODS[i].id,n));
 export const SHIPS = {
   galleon:{name:'ガレオン',nameEn:'Galleon',mode:'sea',price:14500,capacity:100,speed:105,range:10000,daily:10,guns:24},
   sloop: { name: 'スループ', mode: 'sea', price: 1800, capacity: 30, speed: 150, range: 1800, daily: 3, guns:6 },

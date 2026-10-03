@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as game from '../src/engine.js';
@@ -44,8 +45,8 @@ test('opening uses the selected caravan, reuses idle inventory and rejects inval
 test('v13 migration preserves the complete company including existing land voyages and investments',()=>{
  const before=old.createGame(42,{events:false});old.buyLicense(before,'ottoman');old.openCircuit(before,'wagon',['cairo','suez']);old.tick(before);
  assert.ok(before.ships[0].voyage);const raw=old.serialize(before),s=game.deserialize(raw),actual=JSON.parse(game.serialize(s));
- for(const c of [actual,...actual.competitors])c.version=13;assert.deepEqual(actual,JSON.parse(raw));
- const m=new Map([[SAVE_KEYS.v13,raw]]),storage={getItem:k=>m.get(k)??null,setItem:(k,v)=>m.set(k,v)};saveGame(storage,s);assert.equal(m.get(SAVE_KEYS.v13),raw);assert.equal(m.get(SAVE_KEYS.preserved),raw);assert.ok(listSaves(storage).every(v=>v.valid));
+ for(const c of [actual,...actual.competitors])c.version=13;assert.deepEqual(actual,productionExpected(JSON.parse(raw)));
+ const m=new Map([[SAVE_KEYS.v13,raw]]),storage={getItem:k=>m.get(k)??null,setItem:(k,v)=>m.set(k,v)};saveGame(storage,s);assert.equal(m.get(SAVE_KEYS.v13),raw);assert.equal(m.get(SAVE_KEYS.preserved),undefined);assert.ok(listSaves(storage).every(v=>v.valid));
  const invalid=JSON.parse(raw);invalid.ships[0].type='camel';assert.throws(()=>game.deserialize(JSON.stringify(invalid)),'old format must not accept new types');
 });
 

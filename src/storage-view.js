@@ -1,0 +1,7 @@
+import {MANUAL_SLOTS} from './storage.js';
+import {tx,t,locale} from './i18n.js';
+export const manualSaveLabel=index=>tx('手動セーブ {slot}','Manual save {slot}',{slot:index+1});
+export const savedTime=save=>save?.savedAt?new Intl.DateTimeFormat(locale(),{dateStyle:'short',timeStyle:'medium'}).format(save.savedAt):'';
+export function renderManualSaves(saves,{cash,error=null}){
+ return `<dialog aria-labelledby="saves-title"><h2 id="saves-title">${tx('保存先を選択','Choose a save slot')}</h2><p>${tx('手動セーブは5枠です。使用中の枠を選ぶと、その枠だけを上書きします。','There are five manual slots. Choosing an occupied slot overwrites only that slot.')}</p>${error?`<p class="warning" role="alert">${error}</p>`:''}<div class="manual-save-slots">${MANUAL_SLOTS.map((slot,index)=>{const save=saves.find(s=>s.slot===slot);return `<button data-action="save-slot" data-id="${slot}"><strong>${manualSaveLabel(index)}</strong><br>${save?(save.valid?`${save.day} ${t('dayUnit')} · ${cash(save.state.cash)}${savedTime(save)?'<br>'+savedTime(save):''}`:tx('破損データ','Invalid data')):tx('空き枠','Empty slot')}<br>${save?tx('この枠を上書き','Overwrite this slot'):tx('この枠に保存','Save in this slot')}</button>`;}).join('')}</div><p class="small muted">${tx('容量不足時は古い自動保存を整理します。手動枠と移行前の保全保存は自動削除しません。','When space is low, old autosaves are removed. Manual slots and preserved migration saves are never automatically deleted.')}</p><button data-action="cancel">${t('cancel')}</button></dialog>`;
+}

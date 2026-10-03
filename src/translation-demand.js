@@ -1,4 +1,8 @@
 export const demandTranslations={
+ 'Consumption demand / day':['每日消费需求','일일 소비 수요','Demande de consommation / jour','Demanda de consumo / día'],
+ 'Available consumption / day':['每日可实现消费','일일 소비 가능량','Consommation possible / jour','Consumo posible / día'],
+ 'Unmet demand / day':['每日未满足需求','일일 공급 부족량','Demande non satisfaite / jour','Demanda no satisfecha / día'],
+ 'Consumption demand is the quantity wanted at the current price, including unmet demand. Non-producing and out-of-stock markets still have demand. See Demand breakdown for available consumption and unmet demand. Tomorrow’s season, development, wars and trades can change these estimates.':['消费需求是在当前价格下的需求量，包含未满足部分。非产地和缺货市场仍有需求。可实现消费量和供应缺口可在需求明细中查看。次日的季节、开发、战争和交易可能改变这些估计。','소비 수요는 현재 가격에서 원하는 수량이며 미충족 수요를 포함합니다. 비생산지나 품절 시장에도 수요가 있습니다. 수요 내역에서 소비 가능량과 공급 부족을 확인하세요. 다음 날의 계절, 개발, 전쟁 및 거래에 따라 예상치가 달라질 수 있습니다.','La demande de consommation est la quantité souhaitée au prix actuel, y compris la demande non satisfaite. Les marchés sans production ou en rupture de stock ont toujours une demande. Le détail indique la consommation possible et la demande non satisfaite. La saison, le développement, les guerres et les échanges du lendemain peuvent modifier ces estimations.','La demanda de consumo es la cantidad deseada al precio actual, incluida la demanda no satisfecha. Los mercados sin producción o sin existencias siguen teniendo demanda. El desglose muestra el consumo posible y la demanda no satisfecha. La estación, el desarrollo, las guerras y el comercio del día siguiente pueden cambiar estas estimaciones.'],
   "Northern Europe": [
     "北欧与西北欧",
     "북유럽·북서유럽",

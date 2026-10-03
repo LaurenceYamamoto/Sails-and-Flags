@@ -9,10 +9,11 @@ import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
 import {shipName,validName} from './identity.js';
 import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
 import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
-import { deserialize as readLegacy } from './legacy/engine-v13.js';
+import {productionMap,splitProductionBudget} from './production-investment.js';
+import { deserialize as readLegacy } from './legacy/engine-v14.js';
 import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
 import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
 export function normalizeStops(stops) {
@@ -360,7 +361,10 @@ export function serialize(s) { return JSON.stringify(s, (key,value)=>key==='comp
 export function deserialize(raw, nested = false) {
   check(typeof raw === 'string' && raw.length <= 50_000_000, 'セーブデータが大きすぎます。');
   const s = JSON.parse(raw);
-  if (s && [1,2,3,4,5,6,7,8,9,10,11,12,13].includes(s.version) && !nested) {const old=readLegacy(raw);for(const c of [old,...old.competitors])c.version=SAVE_VERSION;return deserialize(serialize(old));}
+  if (s && [1,2,3,4,5,6,7,8,9,10,11,12,13,14].includes(s.version) && !nested) {const old=readLegacy(raw);
+    for(const [id,d]of Object.entries(old.world.development)){d.production=productionMap(d.production);d.dailyProduction=splitProductionBudget(id,d.dailyProduction);}
+    for(const [id,market]of Object.entries(old.markets))for(const [i,g]of GOODS.entries())market[g.id].production=CITIES[id].supply[i];
+    for(const c of [old,...old.competitors])c.version=SAVE_VERSION;return deserialize(serialize(old));}
   check(s && s.version === SAVE_VERSION, '対応していないセーブ形式です。');
   validateIndustry(s,true);
   check(s.networkMigration===undefined||s.networkMigration&&Number.isInteger(s.networkMigration.removedRoutes)&&s.networkMigration.removedRoutes>=0&&s.networkMigration.removedRoutes<=200&&finite(s.networkMigration.refund)&&s.networkMigration.refund>=0,'都市再編の移行記録が不正です。');

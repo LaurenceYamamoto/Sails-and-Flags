@@ -1,0 +1,24 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><title>Storage quota regression fixture</title>
+<style>body{font:16px system-ui;max-width:760px;margin:24px}button{padding:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>保存容量の回帰テスト</h1><p>検証専用ポート4190の保存領域で実行します。</p>
+<button id="run">容量上限と自動回復を検証</button><pre id="result">未実行</pre><a href="/">ゲームの保存枠を確認</a>
+<script type="module">
+import {createGame,serialize} from '../src/engine.js';
+import {saveGame,readSave,SAVE_KEYS} from '../src/storage.js';
+document.querySelector('#run').onclick=()=>{
+ const out=document.querySelector('#result');
+ if(location.hostname!=='127.0.0.1'||location.port!=='4190'){out.textContent='検証専用ポート以外では実行しません。';return;}
+ try{
+  localStorage.removeItem(SAVE_KEYS.auto); // Reset only the test origin’s latest autosave for a repeatable full-quota insertion.
+  const s=createGame(42),raw=serialize(s);saveGame(localStorage,s,'manual');localStorage.setItem(SAVE_KEYS.preserved,raw);
+  const manual=localStorage.getItem(SAVE_KEYS.manual),preserved=localStorage.getItem(SAVE_KEYS.preserved);
+  // Fill only an eligible legacy autosave. Trailing JSON whitespace keeps it valid.
+  let low=raw.length,high=32*1024*1024,quotaSeen=false;
+  while(low<high){const middle=Math.ceil((low+high)/2);try{localStorage.setItem(SAVE_KEYS.autoV3,raw+' '.repeat(middle-raw.length));low=middle;}catch(error){if(error.name!=='QuotaExceededError')throw error;quotaSeen=true;high=middle-1;}}
+  const result=saveGame(localStorage,s,'auto');
+  const report={quotaSeen,filledCharacters:low,removed:result.removed,latestReadable:readSave(localStorage.getItem(SAVE_KEYS.auto)).version===15,manualUnchanged:localStorage.getItem(SAVE_KEYS.manual)===manual,preservedUnchanged:localStorage.getItem(SAVE_KEYS.preserved)===preserved};
+  report.passed=report.quotaSeen&&report.removed.includes('autoV3')&&report.latestReadable&&report.manualUnchanged&&report.preservedUnchanged;
+  out.textContent=JSON.stringify(report,null,2);
+ }catch(error){out.textContent='FAIL: '+error.stack;}
+};
+</script></html>

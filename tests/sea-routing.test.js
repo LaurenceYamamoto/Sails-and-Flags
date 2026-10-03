@@ -58,7 +58,7 @@ test('pending replacements and acquisition of a paused legacy service stay safe 
 });
 test('old slots are preserved, v9 reload is idempotent, invalid legacy timing and active range-review routes are rejected',()=>{
  const raw=old.serialize(legacy()),map=new Map([[SAVE_KEYS.v8,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)},s=listSaves(storage)[0].state;
- saveGame(storage,s);assert.equal(map.get(SAVE_KEYS.v8),raw);assert.equal(map.get(SAVE_KEYS.preserved),raw);assert.deepEqual(game.deserialize(map.get(SAVE_KEYS.manual)),s);
+ saveGame(storage,s);assert.equal(map.get(SAVE_KEYS.v8),raw);assert.equal(map.get(SAVE_KEYS.preserved),undefined);assert.deepEqual(listSaves(storage).find(v=>v.slot==='manual').state,s);
  for(const mutate of [v=>v.ships[0].voyage.total++,v=>v.ships[0].voyage.seaDistanceVersion=7,v=>v.routes[0].active=true]){const copy=JSON.parse(game.serialize(s));mutate(copy);assert.throws(()=>game.deserialize(JSON.stringify(copy)));}
  const copy=game.deserialize(game.serialize(s));for(let i=0;i<90;i++){game.tick(s);game.tick(copy);}assert.deepEqual(s,copy);
  const rendered=renderMap(s,'marseille',s.routes[0].id,()=> 'translate(0,0)');assert.match(rendered,/<polyline[^>]*class="route-line/);assert.doesNotMatch(rendered,/<line[^>]*class="route-line/);

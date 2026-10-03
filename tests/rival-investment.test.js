@@ -109,7 +109,7 @@ test('rights acquired by AI transfer with budgets stopped and survive confiscati
  assert.equal(confiscated.world.roads.nantes_paris.owner,'state');assert.equal(confiscated.world.roads.nantes_paris.dailyRoad,0);
  assert.doesNotThrow(()=>deserialize(serialize(confiscated)));
  entry(s,'sale',3e6);acquireCompany(s,0);
- for(const id of cities){assert.equal(s.world.development[id].owner,'player');assert.equal(s.world.development[id].dailySize+s.world.development[id].dailyProduction,0);}
+ for(const id of cities){assert.equal(s.world.development[id].owner,'player');assert.equal(s.world.development[id].dailySize+Object.values(s.world.development[id].dailyProduction).reduce((a,b)=>a+b,0),0);}
  for(const id of roads){assert.equal(s.world.roads[id].owner,'player');assert.equal(s.world.roads[id].dailyRoad+s.world.roads[id].dailySecurity,0);}
  assert.deepEqual(deserialize(serialize(s)),s);
 });

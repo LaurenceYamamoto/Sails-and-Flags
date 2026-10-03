@@ -1,3 +1,4 @@
+import {productionMap,totalProductionBudget,productionDevelopment,productionSuitability} from './production-investment.js';
 import {COMPANY_IDS} from './region-data.js';
 import {RETIRED_CITIES} from './retired-network.js';
 import {WAGONS} from './land-data.js';
@@ -11,7 +12,7 @@ export const HULLS={...SHIPS,corvette:{name:'コルベット',nameEn:'Corvette',
 export const HULL_LEVELS={galleon:25,sloop:5,brig:10,fluyt:15,corvette:30};
 export const YARD_COST=4000;
 export function initializeIndustry(s,id){s.industry={id,technology:{shipbuilding:0,seafaring:0,land:0},investment:{shipbuilding:0,seafaring:0,land:0},shipyard:false,yardValue:0,designIds:[],log:[]};}
-export function initializeDevelopment(w){w.designs={};w.nextDesign=1;w.development=Object.fromEntries(Object.keys(CITIES).map(id=>[id,{owner:['havana','nantes'].includes(id)?'private':'state',basis:0,size:0,production:0,invested:0,dailySize:0,dailyProduction:0,taxPool:0}]));}
+export function initializeDevelopment(w){w.designs={};w.nextDesign=1;w.development=Object.fromEntries(Object.keys(CITIES).map(id=>[id,{owner:['havana','nantes'].includes(id)?'private':'state',basis:0,size:0,production:productionMap(),invested:0,dailySize:0,dailyProduction:productionMap(),taxPool:0}]));}
 export function shipSpec(s,type){return SHIPS[type]??WAGONS[type]??s?.world?.designs?.[type]?.spec;}
 export function shipCatalog(s){return {...SHIPS,...WAGONS,...Object.fromEntries((s?.industry?.designIds??[]).map(id=>[id,shipSpec(s,id)]))};}
 export function sailingDays(s,type,a,b){return shipSpec(s,type).mode==='land'?roadDays(s,type,a,b):Math.ceil(distance(a,b)/shipSpec(s,type).speed);}
@@ -54,29 +55,36 @@ export function researchDesign(s,hull,settings){
   const id=`design-${s.world.nextDesign++}`;entry(s,'designResearch',-q.researchCost);q.spec.name+=` #${id.split('-')[1]}`;q.spec.nameEn+=` #${id.split('-')[1]}`;
   s.world.designs[id]={formulaVersion:q.formulaVersion,hull,settings:q.settings,level:q.level,spec:q.spec};s.industry.designIds.push(id);log(s,'research',null,q.researchCost);return id;
 }
-export function developmentQuote(s,city){const d=s.world.development[city];check(d,'都市を確認してください。');const base=CITIES[city].lon<-20?2000:6000;return {cost:Math.ceil(base*(1+.15*(d.size+d.production))*(d.owner==='state'?1:1.5)),owner:d.owner,eligible:s.licenses.includes(CITIES[city].nation)&&d.owner!==s.industry.id};}
+export function developmentQuote(s,city){const d=s.world.development[city];check(d,'都市を確認してください。');const base=CITIES[city].lon<-20?2000:6000;return {cost:Math.ceil(base*(1+.15*(d.size+productionDevelopment(d)))*(d.owner==='state'?1:1.5)),owner:d.owner,eligible:s.licenses.includes(CITIES[city].nation)&&d.owner!==s.industry.id};}
 export function buyDevelopmentRight(root,city,buyer=root){
   playable(buyer);const q=developmentQuote(buyer,city),d=buyer.world.development[city];check(q.eligible,'交易免許と未取得の都市開発権が必要です。');check(buyer.cash>=q.cost,'都市開発権の資金が不足しています。');
   const seller=[root,...root.competitors].find(c=>c.industry.id===d.owner);check(['state','private'].includes(d.owner)||seller,'開発権の所有者を確認してください。');
   entry(buyer,'developmentPurchase',-q.cost,null,{city});if(seller){entry(seller,'developmentSale',q.cost,null,{city});seller.gameOver=seller.cash<0;log(seller,'sold',city,q.cost);}
-  Object.assign(d,{owner:buyer.industry.id,basis:q.cost,dailySize:0,dailyProduction:0});log(buyer,'right',city,q.cost);
+  Object.assign(d,{owner:buyer.industry.id,basis:q.cost,dailySize:0,dailyProduction:productionMap()});log(buyer,'right',city,q.cost);
 }
-export function setCityInvestment(s,city,size,production){playable(s);const d=s.world.development[city];check(d?.owner===s.industry.id&&amount(size)&&amount(production)&&Number.isFinite(size+production),'都市の権利・投資額を確認してください。');d.dailySize=size;d.dailyProduction=production;}
-export function industryDaily(s){return roadDaily(s)+Object.values(s.industry.investment).reduce((a,b)=>a+b,0)+Object.values(s.world.development).filter(d=>d.owner===s.industry.id).reduce((n,d)=>n+d.dailySize+d.dailyProduction,0);}
+export function setCityInvestment(s,city,size,production){
+ playable(s);const d=s.world.development[city];
+ check(d?.owner===s.industry.id&&amount(size)&&production&&typeof production==='object'&&!Array.isArray(production)&&Object.entries(production).every(([id,n])=>GOODS.some(g=>g.id===id)&&amount(n)),'都市の権利・投資額を確認してください。');
+ const budgets={...productionMap(),...production};
+ check(Number.isFinite(size+Object.values(budgets).reduce((a,b)=>a+b,0)),'都市の権利・投資額を確認してください。');
+ check(GOODS.every((g,i)=>!budgets[g.id]||CITIES[city].supply[i]>0),'基礎生産量がゼロの品目には投資できません。');
+ d.dailySize=size;d.dailyProduction=budgets;
+}
+export function industryDaily(s){return roadDaily(s)+Object.values(s.industry.investment).reduce((a,b)=>a+b,0)+Object.values(s.world.development).filter(d=>d.owner===s.industry.id).reduce((n,d)=>n+d.dailySize+totalProductionBudget(d),0);}
 export function rightsAssets(s){if(!s.industry||!s.world?.development)return 0;return roadAssets(s)+Object.values(s.world.development).filter(d=>d.owner===s.industry.id).reduce((n,d)=>n+d.basis,0)+s.industry.yardValue;}
 export function marketFactors(s,city,good){
-  const d=s.world.development[city],c=CITIES[city],scale=c.lon<-20?1:.35,i=GOODS.findIndex(g=>g.id===good),specialty=c.supply[i]/Math.max(...c.supply);
-  return {demand:1+scale*1.5*(d.size/(5+d.size)),production:1+scale*2*(d.production/(5+d.production))*specialty};
+  const d=s.world.development[city],c=CITIES[city],scale=c.lon<-20?1:.35,level=d.production[good],specialty=productionSuitability(city,good);
+  return {demand:1+scale*1.5*(d.size/(5+d.size)),production:1+4*(level/(5+level))*specialty};
 }
 export function recordCityTax(s,city,tax){const d=s.world.development[city];if(!['state','private'].includes(d.owner))d.taxPool+=tax*.15;}
-export function confiscateDevelopment(s,nation){for(const [city,d]of Object.entries(s.world.development))if(d.owner===s.industry.id&&CITIES[city].nation===nation){log(s,'confiscated',city,d.basis+d.invested);Object.assign(d,{owner:'state',basis:0,size:0,production:0,invested:0,dailySize:0,dailyProduction:0,taxPool:0});}}
+export function confiscateDevelopment(s,nation){for(const [city,d]of Object.entries(s.world.development))if(d.owner===s.industry.id&&CITIES[city].nation===nation){log(s,'confiscated',city,d.basis+d.invested);Object.assign(d,{owner:'state',basis:0,size:0,production:productionMap(),invested:0,dailySize:0,dailyProduction:productionMap(),taxPool:0});}}
 export function advanceIndustry(s){
   advanceRoads(s);
   for(const [city,d]of Object.entries(s.world.development))if(d.owner===s.industry.id){const income=.15+.35*d.size/(5+d.size)+d.taxPool;d.taxPool=0;entry(s,'developmentIncome',income,null,{city});}
   for(const [kind,value]of Object.entries(s.industry.investment))if(value>0){if(s.cash>=value){entry(s,'technologyInvestment',-value);s.industry.technology[kind]+=Math.sqrt(value)/100/(1+s.industry.technology[kind]/50);}else if(s.day%30===1)log(s,'skipped');}
-  for(const [city,d]of Object.entries(s.world.development))if(d.owner===s.industry.id)for(const [kind,key]of [['size','dailySize'],['production','dailyProduction']]){const value=d[key];if(value>0){if(s.cash>=value){entry(s,'cityInvestment',-value,null,{city});d.invested+=value;d[kind]+=Math.sqrt(value)/200/(1+d[kind]/5);}else if(s.day%30===1)log(s,'skipped',city);}}
+  for(const [city,d]of Object.entries(s.world.development))if(d.owner===s.industry.id)for(const [target,key,value,aptitude,good]of [[d,'size',d.dailySize,1,null],...GOODS.map(g=>[d.production,g.id,d.dailyProduction[g.id],productionSuitability(city,g.id),g.id])]){if(value>0){if(s.cash>=value){entry(s,'cityInvestment',-value,null,good?{city,good}:{city});d.invested+=value;target[key]+=Math.sqrt(value)*aptitude/200/(1+target[key]/5);}else if(s.day%30===1)log(s,'skipped',city);}}
 }
-export function transferIndustry(buyer,seller){transferRoads(buyer,seller);for(const d of Object.values(buyer.world.development))if(d.owner===seller.industry.id){d.owner=buyer.industry.id;d.dailySize=0;d.dailyProduction=0;}buyer.industry.designIds=[...new Set([...buyer.industry.designIds,...seller.industry.designIds])];buyer.industry.shipyard||=seller.industry.shipyard;buyer.industry.yardValue+=seller.industry.yardValue;}
+export function transferIndustry(buyer,seller){transferRoads(buyer,seller);for(const d of Object.values(buyer.world.development))if(d.owner===seller.industry.id){d.owner=buyer.industry.id;d.dailySize=0;d.dailyProduction=productionMap();}buyer.industry.designIds=[...new Set([...buyer.industry.designIds,...seller.industry.designIds])];buyer.industry.shipyard||=seller.industry.shipyard;buyer.industry.yardValue+=seller.industry.yardValue;}
 export function validateIndustry(s,nested=false){
   const i=s.industry,w=s.world,hasKeys=(o,keys)=>o&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
   check(i&&['player',...COMPANY_IDS].includes(i.id)&&hasKeys(i.technology,['shipbuilding','seafaring','land'])&&hasKeys(i.investment,['shipbuilding','seafaring','land'])&&[...Object.values(i.technology),...Object.values(i.investment)].every(amount)&&typeof i.shipyard==='boolean'&&amount(i.yardValue)&&(i.shipyard?i.yardValue>=YARD_COST:i.yardValue===0),'技術・設備が不正です。');
@@ -84,7 +92,7 @@ export function validateIndustry(s,nested=false){
   for(const [id,d]of Object.entries(w.designs)){check(/^design-[1-9]\d*$/.test(id)&&Number(id.slice(7))<w.nextDesign&&amount(d.level),'設計データが不正です。');check(d.spec?.customName===undefined||validName(d.spec.customName),'設計名が不正です。');check(d.formulaVersion===undefined||d.formulaVersion===1||d.formulaVersion===2,'設計データが不正です。');const temp={industry:{technology:{shipbuilding:d.level},shipyard:true}},q=(d.formulaVersion===2?designQuote:legacyDesignQuote)(temp,d.hull,d.settings);check(d.formulaVersion!==2||d.spec?.maintenanceEfficiency===q.spec.maintenanceEfficiency,'設計性能が不正です。');check(d.level>=HULL_LEVELS[d.hull]&&d.spec&&['price','capacity','speed','range','daily','guns'].every(k=>d.spec[k]===q.spec[k])&&d.spec.mode==='sea'&&d.spec.name===q.spec.name+` #${id.slice(7)}`&&d.spec.nameEn===q.spec.nameEn+` #${id.slice(7)}`,'設計性能が不正です。');}
   check(Array.isArray(i.designIds)&&new Set(i.designIds).size===i.designIds.length&&i.designIds.every(id=>Object.hasOwn(w.designs,id)),'設計の所有が不正です。');
   check(hasKeys(w.development,Object.keys(CITIES)),'都市開発が不正です。');
-  for(const [city,d]of Object.entries(w.development)){check(['state','private','player',...COMPANY_IDS].includes(d.owner)&&['basis','size','production','invested','dailySize','dailyProduction','taxPool'].every(k=>amount(d[k])),'都市開発が不正です。');if(d.owner===i.id)check(s.licenses.includes(CITIES[city].nation),'都市開発の免許が不正です。');}
+  for(const [city,d]of Object.entries(w.development)){check(['state','private','player',...COMPANY_IDS].includes(d.owner)&&['basis','size','invested','dailySize','taxPool'].every(k=>amount(d[k]))&&['production','dailyProduction'].every(k=>hasKeys(d[k],GOODS.map(g=>g.id))&&Object.values(d[k]).every(amount))&&GOODS.every((g,j)=>CITIES[city].supply[j]>0||d.dailyProduction[g.id]===0),'都市開発が不正です。');if(d.owner===i.id)check(s.licenses.includes(CITIES[city].nation),'都市開発の免許が不正です。');}
   check(Array.isArray(i.log)&&i.log.length<=60&&i.log.every(e=>Number.isInteger(e.day)&&e.day>=0&&e.day<=s.day&&['shipyard','research','sold','right','confiscated','skipped'].includes(e.kind)&&(e.city===null||(Object.hasOwn(CITIES,e.city)||Object.hasOwn(RETIRED_CITIES,e.city)))&&amount(e.cost)),'投資履歴が不正です。');
   if(!nested){const companies=[s,...s.competitors],ids=companies.map(c=>c.industry.id);check(s.industry.id==='player'&&new Set(ids).size===ids.length&&Object.values(w.development).every(d=>['state','private',...ids].includes(d.owner)),'開発権の所有者が不正です。');}
 }

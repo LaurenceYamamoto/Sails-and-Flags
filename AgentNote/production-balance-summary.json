@@ -1,0 +1,84 @@
+{
+  "before": {
+    "zero": 0,
+    "nearZero": 0,
+    "total": 2280
+  },
+  "after": {
+    "zero": 1153,
+    "nearZero": 720,
+    "total": 2280
+  },
+  "examples": [
+    {
+      "city": "london",
+      "production": {
+        "spices": 0,
+        "coffee": 0,
+        "tea": 0,
+        "sugar": 0,
+        "rum": 0
+      }
+    },
+    {
+      "city": "amsterdam",
+      "production": {
+        "spices": 0,
+        "coffee": 0,
+        "tea": 0,
+        "sugar": 0,
+        "rum": 0
+      }
+    },
+    {
+      "city": "cadiz",
+      "production": {
+        "spices": 0,
+        "coffee": 0,
+        "tea": 0,
+        "sugar": 0.03,
+        "rum": 0
+      }
+    },
+    {
+      "city": "havana",
+      "production": {
+        "spices": 0,
+        "coffee": 0,
+        "tea": 0,
+        "sugar": 3.6,
+        "rum": 0.08
+      }
+    },
+    {
+      "city": "kingston",
+      "production": {
+        "spices": 0,
+        "coffee": 0,
+        "tea": 0,
+        "sugar": 0.12,
+        "rum": 3.4
+      }
+    },
+    {
+      "city": "batavia",
+      "production": {
+        "spices": 3.22,
+        "coffee": 0.03,
+        "tea": 0,
+        "sugar": 3.6,
+        "rum": 0
+      }
+    },
+    {
+      "city": "mocha",
+      "production": {
+        "spices": 0,
+        "coffee": 4,
+        "tea": 0,
+        "sugar": 0,
+        "rum": 0
+      }
+    }
+  ]
+}

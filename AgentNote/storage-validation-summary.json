@@ -1,0 +1,31 @@
+{
+  "version": "2.4.0-alpha.1",
+  "gameSaveVersion": 15,
+  "storageVersion": 1,
+  "manualSlots": 5,
+  "autosavesMaximum": 5,
+  "focused": {
+    "tests": 15,
+    "passed": 15
+  },
+  "compatibility": {
+    "tests": 17,
+    "passed": 17
+  },
+  "finalStorageAndLocalization": {
+    "tests": 10,
+    "passed": 10
+  },
+  "realQuotaTest": {
+    "quotaSeen": true,
+    "filledCharacters": 3877747,
+    "removed": [
+      "autoV3"
+    ],
+    "latestReadable": true,
+    "manualUnchanged": true,
+    "preservedUnchanged": true,
+    "passed": true
+  },
+  "simulationChanged": false
+}

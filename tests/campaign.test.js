@@ -17,5 +17,5 @@ test('asset lead continues, bankruptcy stops time, and a good save restores the 
   entry(s,'purchase',-s.cash-1);tick(s);assert.equal(s.gameOver,true);const day=s.day;tick(s);assert.equal(s.day,day);
   map.set(SAVE_KEYS.auto,'{"version":6');const before=map.get(SAVE_KEYS.manual);assert.equal(listSaves(storage).find(v=>v.slot==='auto').valid,false);assert.equal(map.get(SAVE_KEYS.manual),before);
   const restored=deserialize(good);assert.equal(restored.gameOver,false);tick(restored);assert.equal(restored.day,2);assert.equal(restored.firstRankDay,0);
-  saveGame(storage,restored);assert.equal(map.get(SAVE_KEYS.backup),good);assert.equal(map.get(SAVE_KEYS.auto),'{"version":6');
+  saveGame(storage,restored);assert.equal(map.get(SAVE_KEYS.backup),undefined);assert.deepEqual(listSaves(storage).find(v=>v.slot==='manual').state,restored);assert.equal(map.get(SAVE_KEYS.auto),'{"version":6');
 });

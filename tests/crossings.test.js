@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as game from '../src/engine.js';
@@ -39,13 +40,13 @@ test('v12 migration adds only crossing markets and rights while preserving voyag
  for(const n of ['spain','portugal'])old.buyLicense(before,n);
  old.openCircuit(before,'sloop',['kingston','havana']);old.openCircuit(before,'wagon',['lisbon','porto']);
  buyRoadRight(before,'lisbon_porto');setRoadInvestment(before,'lisbon_porto',2,3);old.tick(before);
- const raw=old.serialize(before),s=game.deserialize(raw),expected=JSON.parse(raw),actual=JSON.parse(game.serialize(s));
+ const raw=old.serialize(before),s=game.deserialize(raw),expected=productionExpected(JSON.parse(raw)),actual=JSON.parse(game.serialize(s));
  for(const id of Object.keys(CROSSING_PORTS)){delete actual.markets[id];delete actual.world.development[id];}
  for(const id of Object.keys(CROSSING_ROADS))delete actual.world.roads[id];
  for(const c of [actual,...actual.competitors])c.version=12;
  assert.deepEqual(actual,expected);assert.deepEqual(game.deserialize(game.serialize(s)),s);
  const values=new Map([[SAVE_KEYS.autoV12,raw],[SAVE_KEYS.preservedContinents,raw]]),storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
- saveGame(storage,s);assert.equal(values.get(SAVE_KEYS.autoV12),raw);assert.equal(values.get(SAVE_KEYS.preservedContinents),raw);assert.equal(values.get(SAVE_KEYS.preserved),raw);assert.ok(listSaves(storage).every(x=>x.valid));
+ saveGame(storage,s);assert.equal(values.get(SAVE_KEYS.autoV12),raw);assert.equal(values.get(SAVE_KEYS.preservedContinents),raw);assert.equal(values.get(SAVE_KEYS.preserved),undefined);assert.ok(listSaves(storage).every(x=>x.valid));
  for(const corrupt of [v=>delete v.world.roads.cairo_suez,v=>delete v.markets.suez,v=>v.cash++]){const v=JSON.parse(game.serialize(s));corrupt(v);assert.throws(()=>game.deserialize(JSON.stringify(v)));}
 });
 

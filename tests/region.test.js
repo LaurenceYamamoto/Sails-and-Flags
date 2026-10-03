@@ -1,3 +1,4 @@
+import {productionExpected} from './production-migration-expected.js';
 import {CROSSING_PORTS,CROSSING_ROADS} from '../src/crossing-data.js';
 import {CONTINENTAL_CITIES,CONTINENTAL_ROADS,CONTINENTAL_NATIONS} from '../src/continental-data.js';
 import {WORLD_PORTS,WORLD_NATIONS} from '../src/world-data.js';
@@ -39,15 +40,15 @@ test('v9 migration preserves every existing company field, goods, diplomacy pair
   const before=old.createGame(42,{events:false});old.buyLicense(before,'spain');old.openCircuit(before,'sloop',['kingston','havana']);
   for(let i=0;i<100;i++)old.tick(before);
   const raw=old.serialize(before),s=game.deserialize(raw);
-  assert.equal(old.serialize(before),raw);assert.equal(s.version,14);
+  assert.equal(old.serialize(before),raw);assert.equal(s.version,15);
   for(const [i,c] of [before,...before.competitors].entries()){
     const after=structuredClone([s,...s.competitors][i]),expected=structuredClone(c);
     for(const n of Object.keys({...REGION_NATIONS,...WORLD_NATIONS,...CONTINENTAL_NATIONS}))for(const values of Object.values(after.diplomacy))delete values[n];
     for(const x of [after,expected]){delete x.world;delete x.markets;delete x.competitors;delete x.version;}
     assert.deepEqual(after,expected);
   }
-  for(const id of Object.keys(before.markets))for(const g of OLD_GOODS)assert.deepEqual(s.markets[id][g.id],before.markets[id][g.id]);
-  const world=structuredClone(s.world);for(const id of Object.keys(CROSSING_PORTS))delete world.development[id];for(const id of Object.keys(CROSSING_ROADS))delete world.roads[id];world.pairs=world.pairs.filter(p=>OLD_NATIONS[p.a]&&OLD_NATIONS[p.b]);for(const id of Object.keys({...REGION_CITIES,...WORLD_PORTS,...CONTINENTAL_CITIES}))delete world.development[id];for(const id of Object.keys(CONTINENTAL_ROADS))delete world.roads[id];assert.deepEqual(world,before.world);
+  for(const id of Object.keys(before.markets))for(const g of OLD_GOODS)assert.deepEqual(s.markets[id][g.id],productionExpected(before).markets[id][g.id]);
+  const world=structuredClone(s.world);for(const id of Object.keys(CROSSING_PORTS))delete world.development[id];for(const id of Object.keys(CROSSING_ROADS))delete world.roads[id];world.pairs=world.pairs.filter(p=>OLD_NATIONS[p.a]&&OLD_NATIONS[p.b]);for(const id of Object.keys({...REGION_CITIES,...WORLD_PORTS,...CONTINENTAL_CITIES}))delete world.development[id];for(const id of Object.keys(CONTINENTAL_ROADS))delete world.roads[id];assert.deepEqual(world,productionExpected(before).world);
   const rival=s.competitors.at(-1);assert.equal(rival.day,s.day);assert.equal(rival.industry.id,'company-3');assert.equal(rival.routes[0].scheduleEpoch,s.day+1);
   assert.deepEqual(game.deserialize(game.serialize(s)),s);
   const copy=game.deserialize(game.serialize(s));for(let i=0;i<365;i++){game.tick(s);game.tick(copy);}assert.deepEqual(copy,s);
@@ -56,7 +57,7 @@ test('v9 migration preserves every existing company field, goods, diplomacy pair
 test('v9 migration rejects corruption and preserves old slots; P8 bankruptcy and acquired rivals cannot respawn on reload',()=>{
   const before=old.createGame(42),raw=old.serialize(before),map=new Map([[SAVE_KEYS.v9,raw],[SAVE_KEYS.preservedSea,raw]]),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
   const s=listSaves(storage).find(x=>x.slot==='v9').state;saveGame(storage,s);
-  assert.equal(map.get(SAVE_KEYS.v9),raw);assert.equal(map.get(SAVE_KEYS.preservedSea),raw);assert.equal(map.get(SAVE_KEYS.preserved),raw);
+  assert.equal(map.get(SAVE_KEYS.v9),raw);assert.equal(map.get(SAVE_KEYS.preservedSea),raw);assert.equal(map.get(SAVE_KEYS.preserved),undefined);
   for(const mutate of [s=>s.cash++,s=>s.markets.kingston.food.stock=-1,s=>s.world.pairs.pop()]){const x=JSON.parse(raw);mutate(x);assert.throws(()=>game.deserialize(JSON.stringify(x)));}
   game.entry(s,'sale',100000);acquireCompany(s,2);const count=s.competitors.length;game.entry(s,'purchase',-s.cash-1);
   const loaded=game.deserialize(game.serialize(s));assert.equal(loaded.competitors.length,count);assert.equal(loaded.gameOver,true);assert.equal(loaded.cash,-1);
@@ -68,7 +69,7 @@ test('regional buyout conserves assets and transfers rights and cargo; revocatio
   const q=acquisitionQuote(s,2),expected=game.assets(s)+game.assets(rival)-q.price-q.licenseCost;
   acquireCompany(s,2);near(game.assets(s),expected);assert.equal(s.world.development.genoa.owner,'player');
   assert.ok(s.ships.some(v=>v.voyage?.from==='genoa'));assert.deepEqual(game.deserialize(game.serialize(s)),s);
-  buyDevelopmentRight(s,'livorno');setCityInvestment(s,'livorno',1,1);revokeLicense(s,'genoa');
+  buyDevelopmentRight(s,'livorno');setCityInvestment(s,'livorno',1,{oliveOil:1});revokeLicense(s,'genoa');
   assert.equal(s.world.development.genoa.owner,'state');assert.equal(s.world.development.livorno.owner,'player');
   assert.ok(s.ships.every(v=>!v.routeId&&v.cargo.length===0));assert.deepEqual(game.deserialize(game.serialize(s)),s);
 });
