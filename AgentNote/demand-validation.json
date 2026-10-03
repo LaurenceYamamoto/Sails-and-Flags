@@ -1,0 +1,207 @@
+{
+  "version": "2.2.0-alpha.1",
+  "saveVersion": 14,
+  "date": "2026-10-03",
+  "tests": {
+    "passed": 201,
+    "failed": 0,
+    "total": 201
+  },
+  "finalUiTests": {
+    "passed": 7,
+    "total": 7
+  },
+  "campaigns": [
+    {
+      "seed": 1,
+      "days": 18250,
+      "elapsedMs": 254104.4744,
+      "p95TickMs": 24.204799999999523,
+      "maxTickMs": 1113.2957,
+      "cash": 949779.9753727235,
+      "assets": 1040919.1564381715,
+      "ships": 41,
+      "maxShips": 41,
+      "maxRoutes": 1,
+      "firstRankDay": null,
+      "restores": 50,
+      "saveBytes": 952758,
+      "events": {
+        "raided": 612,
+        "war": 23,
+        "peace": 20,
+        "shipLost": 4
+      },
+      "decisions": {
+        "expanded": 39,
+        "cooldown": 55,
+        "reserve": 9,
+        "threshold": 21,
+        "shrunk": 6,
+        "reused": 6,
+        "replaced": 4
+      },
+      "competitors": [
+        {
+          "name": "Channel Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 96970304.18347526
+        },
+        {
+          "name": "Antilles Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 72732431.87866923
+        },
+        {
+          "name": "Ligurian Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 63033815.20657492
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "days": 18250,
+      "elapsedMs": 171548.56420000002,
+      "p95TickMs": 12.605400000000373,
+      "maxTickMs": 34.85420000000158,
+      "cash": 896200.9817697697,
+      "assets": 985239.2382141037,
+      "ships": 38,
+      "maxShips": 38,
+      "maxRoutes": 1,
+      "firstRankDay": null,
+      "restores": 50,
+      "saveBytes": 945061,
+      "events": {
+        "raided": 583,
+        "war": 21,
+        "peace": 18,
+        "shipLost": 6
+      },
+      "decisions": {
+        "expanded": 36,
+        "cooldown": 63,
+        "reserve": 13,
+        "threshold": 31,
+        "shrunk": 11,
+        "reused": 10,
+        "replaced": 6
+      },
+      "competitors": [
+        {
+          "name": "Channel Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 98947641.41628185
+        },
+        {
+          "name": "Antilles Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 62074391.52745733
+        },
+        {
+          "name": "Ligurian Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 53343761.62018833
+        }
+      ]
+    },
+    {
+      "seed": 1700,
+      "days": 18250,
+      "elapsedMs": 164568.40120000002,
+      "p95TickMs": 12.20409999997355,
+      "maxTickMs": 98.13560000003781,
+      "cash": 841897.4049167465,
+      "assets": 923901.6656097879,
+      "ships": 35,
+      "maxShips": 35,
+      "maxRoutes": 1,
+      "firstRankDay": null,
+      "restores": 50,
+      "saveBytes": 944030,
+      "events": {
+        "war": 23,
+        "raided": 583,
+        "peace": 21,
+        "shipLost": 6
+      },
+      "decisions": {
+        "expanded": 33,
+        "cooldown": 59,
+        "reserve": 4,
+        "shrunk": 10,
+        "reused": 10,
+        "threshold": 23,
+        "replaced": 6,
+        "budget": 2
+      },
+      "competitors": [
+        {
+          "name": "Channel Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 96920912.0402569
+        },
+        {
+          "name": "Antilles Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 72350597.39049903
+        },
+        {
+          "name": "Ligurian Company",
+          "bankrupt": false,
+          "ships": 150,
+          "assets": 61131597.61919212
+        }
+      ]
+    }
+  ],
+  "compatibility": {
+    "baseline": "2.1.0",
+    "saveVersion": 14,
+    "loadedDay": 123,
+    "fieldsPreservedExactly": true,
+    "continuedDay": 124,
+    "gameOver": false
+  },
+  "benchmark": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+    "logicalCpus": 12,
+    "memoryGiB": 28,
+    "ships": 200,
+    "routes": 200,
+    "days": 365,
+    "p95TickMs": 5.953600000000279,
+    "maxTickMs": 98.22849999999994,
+    "saveBytes": 816036,
+    "serializeAndValidateMs": 31.86600000000044
+  },
+  "browser": {
+    "origin": "http://127.0.0.1:4187",
+    "days": 1215,
+    "cash": 4392.5,
+    "restored": true,
+    "locales": [
+      "ja",
+      "en",
+      "zh-CN",
+      "ko",
+      "fr",
+      "es"
+    ],
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "frDocumentWidth": 1265,
+    "frContentWidth": 1265
+  }
+}

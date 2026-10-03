@@ -1,3 +1,4 @@
+import {marketFlow} from './market-demand.js';
 import {COMPANY_STARTS} from './region-data.js';
 
 import {initializeRoads,travelDistance,canServe,routeNations,roadDays,roadToll,payRoadToll,validateLand} from './land.js';
@@ -5,11 +6,11 @@ import {ROADS,roadBetween,WAGONS} from './land-data.js';
 import {distance as oldSeaDistance} from './legacy/data-v8.js';
 import {RETIRED_CITIES,RETIRED_ROADS} from './retired-network.js';
 import {shipName,validName} from './identity.js';
-import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,marketFactors,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
+import {initializeIndustry,initializeDevelopment,shipSpec,shipCatalog,shipDaily,sailingDays,canProduce,advanceIndustry,industryDaily,recordCityTax,rightsAssets,validateIndustry} from './industry.js';
 import { GOODS, CITIES, NATIONS, SHIPS, distance, daysFor } from './data.js';
 import { deserialize as readLegacy } from './legacy/engine-v13.js';
 import { initializeManagement, initializeRoute, runAutomation, runCompetitor, recordRank, validateManagement, PROFILES, monthFor } from './management.js';
-import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,demandMultiplier,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
+import {createWorld,initializeSecurity,initializeRouteSecurity,licenseTerms,recordTrade,advanceWorld,advanceDiplomacy,checkAttack,runReplacements,validateSecurity,RULES} from './security.js';
 export const SAVE_VERSION = 14;
 export const MAX_STOPS = 12;
 // The closing return is implicit; accept it explicitly in route input as well.
@@ -19,7 +20,8 @@ export function normalizeStops(stops) {
 const stopIndex = (route, ship) => ship.nextStop ?? route.stops.indexOf(ship.nextFrom);
 const finite = n => typeof n === 'number' && Number.isFinite(n);
 const check = (ok, message) => { if (!ok) throw new Error(message); };
-export function price(good, stock) { return GOODS.find(g => g.id === good).base * (0.35 + 180 / (stock + 60)); }
+export const priceRatio = stock => 0.35 + 180 / (stock + 60);
+export function price(good, stock) { return GOODS.find(g => g.id === good).base * priceRatio(stock); }
 // Antiderivative of the price curve: additive over adjacent inventory intervals.
 function integral(good, low, high) {
   return GOODS.find(g => g.id === good).base * (0.35 * (high - low) + 180 * Math.log((high + 60) / (low + 60)));
@@ -303,11 +305,7 @@ export function tick(s, { updateMarkets = true, runCompetitors = true } = {}) {
   if(s.automation.month!==monthFor(s.day)){s.automation.month=monthFor(s.day);s.automation.spent=0;}
   if(updateMarkets)advanceWorld(s);advanceDiplomacy(s);advanceIndustry(s);
   if (updateMarkets) for (const [cityId,city] of Object.entries(s.markets)) for (const [good, m] of Object.entries(city)) {
-    const factors=marketFactors(s,cityId,good);
-    m.stock += m.production*factors.production;
-    const base = GOODS.find(g => g.id === good).base;
-    const consumption = m.demand * factors.demand * demandMultiplier(s,CITIES[cityId].nation,good) * Math.max(0.25, Math.min(3, base / price(good, m.stock)));
-    m.stock = Math.max(0, m.stock - consumption);
+    m.stock=marketFlow(s,cityId,good).stock;
   }
   for (const n of s.licenses) { entry(s, 'licenseDaily', -licenseTerms(s,n).daily, null, { nation: n }); if (s.gameOver) return; }
   for (const ship of s.ships) {
