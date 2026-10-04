@@ -216,6 +216,21 @@ pub struct Automation {
     pub month: u32,
 }
 #[derive(Clone, Serialize, Deserialize)]
+pub struct FriendshipChange {
+    pub day: u32,
+    pub nation: usize,
+    pub before: f64,
+    pub after: f64,
+    pub delta: f64,
+    pub trade: f64,
+    pub enemy_trade: f64,
+    pub investment: f64,
+    pub initial: f64,
+    pub limit: f64,
+    pub spent: f64,
+    pub unfunded: bool,
+}
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Company {
     pub id: String,
     pub name: String,
@@ -224,6 +239,8 @@ pub struct Company {
     pub initial_cash: f64,
     pub licenses: Vec<usize>,
     pub friendship: Vec<f64>,
+    #[serde(default)]
+    pub friendship_history: Vec<FriendshipChange>,
     pub diplomacy_budget: Vec<f64>,
     pub trade: Vec<f64>,
     pub first_license: bool,
@@ -639,6 +656,7 @@ impl Company {
             initial_cash: cash,
             licenses: vec![],
             friendship: vec![60.0; n],
+            friendship_history: vec![],
             diplomacy_budget: vec![0.0; n],
             trade: vec![0.0; n],
             first_license,

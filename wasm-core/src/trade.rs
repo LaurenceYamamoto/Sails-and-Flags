@@ -66,6 +66,22 @@ impl Engine {
         let co = &mut self.game.companies[c];
         co.licenses.push(n);
         if co.first_license {
+            if c == 0 {
+                co.friendship_history.push(FriendshipChange {
+                    day: self.game.day,
+                    nation: n,
+                    before: co.friendship[n],
+                    after: 100.0,
+                    delta: 100.0 - co.friendship[n],
+                    initial: 100.0 - co.friendship[n],
+                    trade: 0.0,
+                    enemy_trade: 0.0,
+                    investment: 0.0,
+                    limit: 0.0,
+                    spent: 0.0,
+                    unfunded: false,
+                });
+            }
             co.friendship[n] = 100.0;
             co.first_license = false;
         }

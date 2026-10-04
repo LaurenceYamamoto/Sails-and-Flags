@@ -1,0 +1,23 @@
+// Simplified Chinese, Korean, French, Spanish.
+export const uiRefinementTranslations={
+ '1. Acquire a license from at least one nation':['① 获取至少一个国家的贸易许可','① 하나 이상의 국가에서 무역 면허 취득','① Obtenir une licence auprès d’au moins un pays','① Obtener una licencia de al menos un país'],
+ '2. Drag from city to city to open a sea or land trade route':['② 从一个城市拖到另一个城市，开设海上或陆上贸易路线','② 도시에서 다른 도시로 드래그하여 해상 또는 육상 무역로 개설','② Faire glisser d’une ville à une autre pour ouvrir une route commerciale maritime ou terrestre','② Arrastrar de una ciudad a otra para abrir una ruta comercial marítima o terrestre'],
+ 'Nations':['国家','국가','Pays','Países'],
+ 'State':['国家','국가','État','Estado'],
+ 'Private ownership':['私人','민간','Propriété privée','Propiedad privada'],
+ 'Friendship changes and causes':['友好度变化及原因','우호도 변화와 원인','Évolution de l’amitié et causes','Cambios de amistad y causas'],
+ 'Last 30 days. Changes are recorded at the daily calculation.':['最近30天。在每日结算时记录变化。','최근 30일. 일일 계산 시 변화를 기록합니다.','30 derniers jours. Les variations sont enregistrées lors du calcul quotidien.','Últimos 30 días. Los cambios se registran en el cálculo diario.'],
+ 'Trade with this nation':['与该国的贸易','해당 국가와의 무역','Commerce avec ce pays','Comercio con este país'],
+ 'Trade with its wartime enemies':['与该国交战敌国的贸易','해당 국가의 교전 상대국과의 무역','Commerce avec ses ennemis en guerre','Comercio con sus enemigos en guerra'],
+ 'Daily diplomatic investment':['每日外交投资','일일 외교 투자','Investissement diplomatique quotidien','Inversión diplomática diaria'],
+ 'First license acquired':['首次取得贸易许可','첫 무역 면허 취득','Première licence obtenue','Primera licencia adquirida'],
+ 'Upper / lower limit adjustment':['上下限调整','상한·하한 조정','Ajustement aux limites','Ajuste a los límites'],
+ 'No change':['无变化','변화 없음','Aucun changement','Sin cambios'],
+ 'Diplomatic spending':['外交支出','외교 지출','Dépenses diplomatiques','Gasto diplomático'],
+ 'Daily investment could not be paid due to insufficient cash.':['资金不足，未能进行每日投资。','자금 부족으로 일일 투자를 집행하지 못했습니다.','L’investissement quotidien n’a pas pu être payé faute de liquidités.','No se pudo pagar la inversión diaria por falta de efectivo.'],
+ 'No records yet. Advance time to record changes.':['暂无记录。推进时间后将记录变化。','아직 기록이 없습니다. 시간을 진행하면 변화가 기록됩니다.','Aucun historique. Faites avancer le temps pour enregistrer les variations.','Aún no hay registros. Avanza el tiempo para registrar los cambios.'],
+ 'Friendship / Tax':['友好度 / 税率','우호도 / 세율','Amitié / Taxe','Amistad / Impuesto'],
+ 'Purchase / Daily':['取得费用 / 每日维护费','취득 비용 / 일일 유지비','Acquisition / Entretien quotidien','Adquisición / Mantenimiento diario'],
+ 'Daily budget':['每日预算','일일 예산','Budget quotidien','Presupuesto diario'],
+ 'Locate':['在地图上显示','지도에서 보기','Afficher sur la carte','Mostrar en el mapa'],
+};

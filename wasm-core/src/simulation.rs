@@ -189,6 +189,10 @@ impl Engine {
         }
     }
     fn advance_diplomacy(&mut self, c: usize) {
+        let day = self.game.day;
+        self.game.companies[c]
+            .friendship_history
+            .retain(|h| day.saturating_sub(h.day) < 30);
         if !self.game.events_enabled {
             return;
         }
@@ -197,6 +201,7 @@ impl Engine {
             let before = self.game.companies[c].friendship[n];
             let budget = self.game.companies[c].diplomacy_budget[n];
             let mut gain = 0.0;
+            let mut spent = 0.0;
             if budget > 0.0 && self.game.companies[c].cash >= budget {
                 self.entry(
                     c,
@@ -206,6 +211,7 @@ impl Engine {
                     self.data.nations[n].id.clone(),
                 );
                 gain = budget.sqrt() / 50.0;
+                spent = budget;
             }
             let enemy = self
                 .game
@@ -225,6 +231,30 @@ impl Engine {
             let f =
                 (before + trade[n] / 100000.0 - enemy / 100000.0 * 1.5 + gain).clamp(0.0, 100.0);
             self.game.companies[c].friendship[n] = f;
+            if c == 0 {
+                let trade_gain = trade[n] / 100000.0;
+                let enemy_loss = if enemy > 0.0 {
+                    -enemy / 100000.0 * 1.5
+                } else {
+                    0.0
+                };
+                self.game.companies[c]
+                    .friendship_history
+                    .push(FriendshipChange {
+                        day,
+                        nation: n,
+                        before,
+                        after: f,
+                        delta: f - before,
+                        trade: trade_gain,
+                        enemy_trade: enemy_loss,
+                        investment: gain,
+                        initial: 0.0,
+                        limit: f - before - trade_gain - enemy_loss - gain,
+                        spent,
+                        unfunded: budget > 0.0 && spent == 0.0,
+                    });
+            }
             if self.game.companies[c].licenses.contains(&n) {
                 if before > 35.0 && f <= 35.0 {
                     self.event(

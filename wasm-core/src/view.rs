@@ -94,7 +94,7 @@ impl Engine {
             .collect::<Vec<_>>();
         catalog.sort_by(|a, b| a.price.total_cmp(&b.price));
         let companies=self.game.companies.iter().enumerate().filter(|(_,c)|!c.acquired).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["cycle"]=json!(cycle);v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships,"routes":routes.collect::<Vec<_>>(),"fixed":c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
-        let licenses=self.data.nations.iter().enumerate().map(|(n,_)|{let(fee,daily,tax)=self.terms(0,n,co.licenses.len());json!({"nation":n,"friendship":co.friendship[n],"fee":fee,"daily":daily,"tax":tax*100.0,"owned":co.licenses.contains(&n),"eligible":co.friendship[n]>=30.0&&co.cash>=fee,"budget":co.diplomacy_budget[n]})}).collect::<Vec<_>>();
+        let licenses=self.data.nations.iter().enumerate().map(|(n,_)|{let(fee,daily,tax)=self.terms(0,n,co.licenses.len());json!({"nation":n,"friendship":co.friendship[n],"fee":fee,"daily":daily,"tax":tax*100.0,"owned":co.licenses.contains(&n),"eligible":co.friendship[n]>=30.0&&co.cash>=fee,"budget":co.diplomacy_budget[n],"changes":co.friendship_history.iter().rev().filter(|h|h.nation==n).collect::<Vec<_>>()})}).collect::<Vec<_>>();
         let market=self.data.goods.iter().enumerate().map(|(g,good)|{let(production,demand,consumption,_)=self.market_flow(city,g);let stock=self.game.markets[city*self.data.goods.len()+g].stock;json!({"good":g,"stock":stock,"price":good.base*ratio(stock),"production":production,"demand":demand,"consumption":consumption,"unmet":(demand-consumption).max(0.0),"details":self.demand_details(city,g),"baseProduction":self.data.cities[city].supply[g],"budget":self.game.development[city].production_budget[g],"level":self.game.development[city].production[g]})}).collect::<Vec<_>>();
         let roads = self
             .game
@@ -157,6 +157,38 @@ impl Engine {
         };
         let mut ids = BTreeSet::new();
         for (ci, c) in g.companies.iter().enumerate() {
+            ensure(
+                c.friendship_history.len() <= 30 * d.nations.len() + 1
+                    && c.friendship_history.iter().all(|h| {
+                        h.day <= g.day
+                            && h.nation < d.nations.len()
+                            && [h.before, h.after]
+                                .iter()
+                                .all(|v| v.is_finite() && (0.0..=100.0).contains(v))
+                            && [
+                                h.delta,
+                                h.trade,
+                                h.enemy_trade,
+                                h.investment,
+                                h.initial,
+                                h.limit,
+                                h.spent,
+                            ]
+                            .iter()
+                            .all(|v| v.is_finite())
+                            && h.trade >= 0.0
+                            && h.enemy_trade <= 0.0
+                            && h.investment >= 0.0
+                            && h.initial >= 0.0
+                            && h.spent >= 0.0
+                            && (h.after - h.before - h.delta).abs() < 1e-8
+                            && (h.trade + h.enemy_trade + h.investment + h.initial + h.limit
+                                - h.delta)
+                                .abs()
+                                < 1e-8
+                    }),
+                "保存データの友好度履歴が不正です。",
+            )?;
             ensure(
                 c.id == if ci == 0 {
                     "player"

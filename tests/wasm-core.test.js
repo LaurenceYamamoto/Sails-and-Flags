@@ -8,6 +8,33 @@ function fund(e,value=1e9){const g=e.save();g.companies[0].cash+=value;g.compani
 function city(e,id){return e.data.cities.findIndex(c=>c.id===id);}
 function nation(e,id){return e.data.nations.findIndex(n=>n.id===id);}
 function open(e,ids,kind='sloop'){const stops=ids.map(id=>city(e,id));for(const n of e.query({query:'opening',kind,stops}).missing)e.cmd({action:'license',nation:n});return e.cmd({action:'openRoute',kind,stops,allowed:e.data.goods.map((_,i)=>i),margin:10});}
+
+test('daily diplomacy records actual causes, limits and first-license changes; donations are rejected',async()=>{
+ const e=await engine();e.cmd({action:'license',nation:0});
+ assert.equal(e.view().licenses[0].changes[0].initial,40);
+ let g=e.save();g.companies[0].trade[0]=100000;g.companies[0].trade[1]=200000;
+ g.pairs.find(p=>p.a===0&&p.b===1).until=100;e.load(g);
+ const cash=e.view().companies[0].cash;e.cmd({action:'diplomacy',nation:0,value:100});
+ assert.equal(e.view().companies[0].cash,cash);assert.equal(e.view().licenses[0].friendship,100);
+ const before=e.save();assert.throws(()=>e.cmd({action:'diplomacy',nation:0,value:100,donate:true}));assert.deepEqual(e.save(),before);
+ e.cmd({action:'tick',days:1});let h=e.view().licenses[0].changes[0];
+ assert.equal(h.trade,1);assert.equal(h.enemy_trade,-3);assert.equal(h.investment,.2);assert.equal(h.spent,100);assert.ok(Math.abs(h.after-98.2)<1e-10);
+ assert.ok(Math.abs(h.trade+h.enemy_trade+h.investment+h.limit-h.delta)<1e-10);
+ g=e.save();g.companies[0].friendship[0]=100;g.companies[0].trade.fill(0);e.load(g);e.cmd({action:'tick',days:1});
+ h=e.view().licenses[0].changes[0];assert.equal(h.delta,0);assert.equal(h.limit,-.2);
+ const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
+ const malformed=structuredClone(saved);malformed.companies[0].friendship_history[0].delta=999;
+ assert.throws(()=>e.load(malformed));assert.deepEqual(e.save(),saved);
+ e.cmd({action:'diplomacy',nation:0,value:0});fund(e);e.cmd({action:'tick',days:40});
+ g=e.save();assert.ok(g.companies[0].friendship_history.length<=30*e.data.nations.length+1);
+ assert.ok(g.companies[0].friendship_history.every(h=>g.day-h.day<30));
+ for(const c of g.companies)delete c.friendship_history;e.load(g);assert.equal(e.view().licenses[0].changes.length,0);
+});
+test('unfunded diplomacy records no payment or friendship gain',async()=>{
+ const e=await engine();e.cmd({action:'diplomacy',nation:0,value:1000000});const cash=e.view().companies[0].cash;
+ e.cmd({action:'tick',days:1});const h=e.view().licenses[0].changes[0];
+ assert.equal(h.unfunded,true);assert.equal(h.spent,0);assert.equal(h.investment,0);assert.equal(h.delta,0);assert.equal(e.view().companies[0].cash,cash);
+});
 test('Wasm owns initial state, license escalation and symmetric tax formula',async()=>{
  const e=await engine();assert.equal(e.data.cities.length,114);assert.equal(e.data.roads.length,69);assert.equal(e.view().licenses.filter(l=>l.owned).length,0);
  e.cmd({action:'license',nation:0});let v=e.view();assert.equal(v.licenses[0].friendship,100);assert.equal(v.licenses[0].tax,5);assert.equal(v.licenses[1].tax,9);assert.equal(v.licenses[1].fee,e.data.nations[1].fee*3);assert.equal(v.licenses[0].daily,e.data.nations[0].daily*10*.6);

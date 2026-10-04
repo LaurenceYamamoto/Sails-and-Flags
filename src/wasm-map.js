@@ -12,14 +12,17 @@ export class WorldMap {
   const roads=node('g',{class:'world-roads'});for(const r of catalog.roads)roads.append(node('path',{d:path([r.points])}));this.svg.append(roads);
   this.routeLayer=node('g',{class:'world-routes'});this.svg.append(this.routeLayer);
   this.cityLayer=node('g');this.svg.append(this.cityLayer);
+  // Keep names above vessels so an occupied port remains selectable by its label.
+  this.labelLayer=node('g',{class:'world-city-labels','aria-hidden':'true'});
   catalog.cities.forEach((c,i)=>{
    const g=node('g',{'data-city':i,transform:`translate(${c.x} ${c.y})`,tabindex:0,role:'button','aria-label':c.mapName??c.nameEn??c.id});
    g.append(node('circle',{class:'city-hit',r:10,fill:'transparent'}));
    g.append(node(c.inland?'rect':'circle',c.inland?{x:-2,y:-2,width:4,height:4,fill:catalog.nations[c.nation].color}:{r:2.5,fill:catalog.nations[c.nation].color}));
    const title=node('title');title.textContent=(c.mapName??c.nameEn??c.id)+' · '+catalog.nations[c.nation].name;g.append(title);
-   const label=node('text',{x:4,y:-3,class:'city-label'});label.textContent=c.mapName??c.nameEn??c.id;g.append(label);this.cityLayer.append(g);
+   const labelGroup=node('g',{'data-city':i,transform:`translate(${c.x} ${c.y})`});
+   const label=node('text',{x:4,y:-3,class:'city-label'});label.textContent=c.mapName??c.nameEn??c.id;labelGroup.append(label);this.labelLayer.append(labelGroup);this.cityLayer.append(g);
   });
-  this.ships=node('g',{class:'world-ships'});this.svg.append(this.ships);host.append(this.svg);
+  this.ships=node('g',{class:'world-ships'});this.svg.append(this.ships,this.labelLayer);host.append(this.svg);
   installMapNavigation(host.closest('.map-panel'),{get:()=>this.camera,set:c=>this.setCamera(c),pause:handlers.pause,cancelRoute:()=>{}});
   let drag=null;
   this.svg.addEventListener('pointerdown',e=>{const n=e.target.closest('[data-city]');if(!n||e.button!==0)return;handlers.pause();drag={city:+n.dataset.city,x:e.clientX,y:e.clientY};e.preventDefault();});
@@ -30,8 +33,8 @@ export class WorldMap {
   this.svg.addEventListener('click',e=>{const r=e.target.closest('[data-route]');if(r)handlers.route(+r.dataset.company,+r.dataset.route);});
  }
  destroy(){window.removeEventListener('pointerup',this.pointerUp);}
- setCamera(c){this.camera=c;const u=c[2]/900;for(const g of this.cityLayer.children){const label=g.querySelector('text');label.setAttribute('x',5*u);label.setAttribute('y',-5*u);}}
- select(city){for(const n of this.cityLayer.children)n.classList.toggle('selected',+n.dataset.city===city);}
+ setCamera(c){this.camera=c;const u=c[2]/900;for(const g of this.labelLayer.children){const label=g.querySelector('text');label.setAttribute('x',5*u);label.setAttribute('y',-5*u);}}
+ select(city){for(const layer of [this.cityLayer,this.labelLayer])for(const n of layer.children)n.classList.toggle('selected',+n.dataset.city===city);}
  focus(city){this.setCamera(cityCamera(this.catalog.cities[city]));updateCameraElement(this.svg,this.camera);}
  update(view,selected){
   this.view=view;this.sampled=performance.now();this.paths=view.paths??this.paths;

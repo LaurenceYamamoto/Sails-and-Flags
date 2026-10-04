@@ -436,22 +436,13 @@ impl Engine {
                 a.replace_lost = v["replaceLost"].as_bool().unwrap_or(false);
             }
             "diplomacy" => {
+                ensure(
+                    v.get("donate").is_none_or(|value| value == false),
+                    "外交の臨時投資は廃止されました。日額投資を設定してください。",
+                )?;
                 let n = index(v, "nation", self.data.nations.len())?;
                 let value = number(v, "value")?;
-                if v["donate"] == true {
-                    self.affordable(0, value)?;
-                    self.entry(
-                        0,
-                        "diplomacyInvestment",
-                        -value,
-                        None,
-                        self.data.nations[n].id.clone(),
-                    );
-                    self.game.companies[0].friendship[n] =
-                        (self.game.companies[0].friendship[n] + value / 100.0).min(100.0);
-                } else {
-                    self.game.companies[0].diplomacy_budget[n] = value;
-                }
+                self.game.companies[0].diplomacy_budget[n] = value;
             }
             "technology" => {
                 let k = index(v, "kind", 3)?;
