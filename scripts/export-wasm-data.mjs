@@ -13,7 +13,7 @@ fs.mkdirSync('wasm-core/data',{recursive:true});
 const nations=Object.entries(NATIONS).map(([id,n])=>({id,...n}));
 const cities=Object.entries(CITIES).map(([id,c])=>{
  const p=demandProfile(id,c),cl=DEMAND_CLIMATES[p.climate];
- return {id,...c,nation:nations.findIndex(n=>n.id===c.nation),inland:!!c.inland,
+ return {id,...c,region:p.region,nation:nations.findIndex(n=>n.id===c.nation),inland:!!c.inland,
   modifiers:GOODS.map(g=>(DEMAND_REGIONS[p.region].goods[g.id]??1)*(cl.goods[g.id]??1)),
   seasons:GOODS.map(g=>(cl.winter[g.id]??0)*(p.south?-1:1))};
 });
@@ -25,5 +25,5 @@ const roads=Object.entries(ROADS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r
 const specs=Object.entries({...SHIPS,...WAGONS,corvette:HULLS.corvette}).map(([id,s])=>({id,...s,level:HULL_LEVELS[id]??0}));
 const starts=COMPANY_STARTS.map(c=>({...c,stops:c.stops.map(index)}));
 const land=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');
-fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,nations,goods:GOODS,roads,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
+fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
 console.log(`Exported ${cities.length} cities, ${nations.length} nations, ${roads.length} roads`);

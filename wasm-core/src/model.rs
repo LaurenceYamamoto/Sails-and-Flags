@@ -134,6 +134,30 @@ pub struct Ledger {
     pub route: Option<u32>,
     pub detail: String,
 }
+pub fn default_ship() -> String {
+    "sloop".into()
+}
+pub fn default_vehicle() -> String {
+    "wagon".into()
+}
+#[derive(Clone, Serialize, Deserialize, Default)]
+pub struct AccountPeriod {
+    pub income: BTreeMap<String, f64>,
+    pub expense: BTreeMap<String, f64>,
+    pub assets: f64,
+    pub as_of: u32,
+}
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Accounts {
+    pub since: u32,
+    pub months: BTreeMap<u32, AccountPeriod>,
+    // Missing in older saves: build years from their complete monthly history once.
+    #[serde(default)]
+    pub years: Option<BTreeMap<u32, AccountPeriod>>,
+}
+pub const MONTHS_RETAINED: u32 = 120;
+pub const YEARS_RETAINED: u32 = 300;
+pub const LEDGER_RETAINED: usize = 200;
 #[derive(Clone, Serialize, Deserialize, Default)]
 pub struct Transport {
     pub since: u32,
@@ -245,6 +269,12 @@ pub struct Company {
     pub trade: Vec<f64>,
     pub first_license: bool,
     pub ships: Vec<Ship>,
+    #[serde(default = "default_ship")]
+    pub default_ship: String,
+    #[serde(default = "default_vehicle")]
+    pub default_vehicle: String,
+    #[serde(default)]
+    pub accounts: Option<Accounts>,
     pub routes: Vec<Route>,
     pub technology: [f64; 3],
     pub tech_budget: [f64; 3],
@@ -281,12 +311,15 @@ pub struct Game {
 
 impl Engine {
     pub fn calendar(&self) -> (u32, u32, u32, u32) {
+        Self::calendar_at(self.game.day)
+    }
+    pub fn calendar_at(day: u32) -> (u32, u32, u32, u32) {
         fn before(y: u32) -> u32 {
             let n = y - 1;
             365 * n + n / 4 - n / 100 + n / 400
         }
-        let absolute = before(1700) + self.game.day;
-        let mut year = 1700 + (self.game.day as f64 / 365.2425) as u32;
+        let absolute = before(1700) + day;
+        let mut year = 1700 + (day as f64 / 365.2425) as u32;
         while before(year + 1) <= absolute {
             year += 1;
         }
@@ -442,6 +475,9 @@ impl Engine {
         route: Option<u32>,
         detail: String,
     ) {
+        if c == 0 {
+            self.record_account(category, value);
+        }
         let co = &mut self.game.companies[c];
         co.cash += value;
         *co.totals.entry(category.into()).or_default() += value;
@@ -452,7 +488,7 @@ impl Engine {
             route,
             detail,
         });
-        if co.ledger.len() > 600 {
+        if co.ledger.len() > LEDGER_RETAINED {
             co.ledger.remove(0);
         }
         if let Some(r) = co.routes.iter_mut().find(|r| Some(r.id) == route) {
@@ -661,6 +697,9 @@ impl Company {
             trade: vec![0.0; n],
             first_license,
             ships: vec![],
+            default_ship: default_ship(),
+            default_vehicle: default_vehicle(),
+            accounts: None,
             routes: vec![],
             technology: [0.0; 3],
             tech_budget: [0.0; 3],

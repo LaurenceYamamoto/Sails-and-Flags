@@ -43,6 +43,7 @@ impl Engine {
             )
             .unwrap();
         }
+        self.capture_accounts();
     }
     pub fn buy_license(&mut self, c: usize, n: usize) -> Result<()> {
         self.playable(c)?;

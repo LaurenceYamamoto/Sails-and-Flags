@@ -18,3 +18,14 @@
 .nations-table tr:not(.friendship-row) td{border-bottom:0;padding-bottom:2px}
 .nations-table .friendship-row td{padding-top:0}
 .friendship-details[open]{max-height:360px;overflow:auto;padding:8px;background:#f0f3e9;border-radius:4px}
+
+.list-controls{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:14px 0}
+.list-controls label{display:flex;flex-direction:column;gap:5px;flex:1 1 100%;margin-top:8px}
+button[aria-pressed="true"]{background:#244c50;color:#fff}
+#panel>label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0}
+.account-chart{margin:20px 0;padding:12px 6px;background:#f1f4eb;border:1px solid #d0dace;border-radius:6px}
+.account-chart figcaption{font-weight:600;margin:0 8px 8px}
+.account-chart svg{width:100%;display:block}
+.account-chart text{font:11px "Segoe UI",sans-serif;fill:#49605c}
+.chart-key{display:flex;flex-wrap:wrap;gap:12px;margin:0 8px;font-size:12px}
+.chart-key i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:5px}

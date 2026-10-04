@@ -1,12 +1,12 @@
 {
   "name": "sails-and-flags",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js",
+    "test": "node --test tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js tests/wasm-lists.test.js",
     "build:wasm": "node scripts/build-wasm.mjs",
     "licenses:wasm": "node scripts/collect-rust-licenses.mjs",
     "benchmark:wasm": "node scripts/benchmark-wasm.mjs",

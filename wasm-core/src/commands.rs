@@ -361,6 +361,36 @@ impl Engine {
             "buyShip" => {
                 return Ok(json!(self.buy_ship(0, string(v, "kind")?)?));
             }
+            "defaults" => {
+                let sea = string(v, "ship")?;
+                let land = string(v, "vehicle")?;
+                ensure(
+                    self.producible(0, sea)
+                        && self.spec(sea)?.mode == "sea"
+                        && self.producible(0, land)
+                        && self.spec(land)?.mode == "land",
+                    "船と車両の種別を確認してください。",
+                )?;
+                self.game.companies[0].default_ship = sea.into();
+                self.game.companies[0].default_vehicle = land.into();
+            }
+            "sellShip" => {
+                let id = identifier(v, "ship")?;
+                let i = self.game.companies[0]
+                    .ships
+                    .iter()
+                    .position(|s| s.id == id)
+                    .ok_or("船・車両がありません。")?;
+                let ship = &self.game.companies[0].ships[i];
+                ensure(
+                    ship.route.is_none() && ship.voyage.is_none() && ship.cargo.is_empty(),
+                    "未使用の船・車両のみ売却できます。",
+                )?;
+                let price = self.spec(&ship.kind)?.price;
+                let detail = ship.name.clone();
+                self.game.companies[0].ships.remove(i);
+                self.entry(0, "shipSale", price, None, detail);
+            }
             "openRoute" => {
                 return Ok(json!(self.open(
                     0,
@@ -526,15 +556,6 @@ impl Engine {
                 let text = name(string(v, "name")?)?;
                 match string(v, "kind")? {
                     "company" => self.game.companies[0].name = text,
-                    "ship" => {
-                        let id = identifier(v, "id")?;
-                        self.game.companies[0]
-                            .ships
-                            .iter_mut()
-                            .find(|s| s.id == id)
-                            .ok_or("船がありません。")?
-                            .name = text;
-                    }
                     "design" => {
                         let id = string(v, "id")?;
                         ensure(
@@ -598,7 +619,10 @@ impl Engine {
     pub fn transact(&mut self, v: &Value) -> Result<Value> {
         let old = self.game.clone();
         match self.command(v) {
-            Ok(r) => Ok(r),
+            Ok(r) => {
+                self.capture_accounts();
+                Ok(r)
+            }
             Err(e) => {
                 self.game = old;
                 Err(e)
@@ -607,6 +631,7 @@ impl Engine {
     }
     pub fn query(&self, v: &Value) -> Result<Value> {
         match string(v, "query")? {
+            "accounts" => Ok(self.account_report(v["annual"] == true)),
             "connection" => {
                 let stops = normalize(list(v, "stops", self.data.cities.len())?);
                 let routes = self.game.companies[0]
@@ -625,7 +650,36 @@ impl Engine {
                     })
                     .map(|s| s.id.clone())
                     .collect::<Vec<_>>();
-                Ok(json!({"routes":routes,"types":types,"stops":stops}))
+                let co = &self.game.companies[0];
+                // Prefer the sea mode whenever it has an eligible type, then the
+                // configured type within that mode, otherwise the cheapest hull.
+                let preferred_mode = if types.iter().any(|id| self.spec(id).unwrap().mode == "sea")
+                {
+                    "sea"
+                } else {
+                    "land"
+                };
+                let configured = if preferred_mode == "sea" {
+                    &co.default_ship
+                } else {
+                    &co.default_vehicle
+                };
+                let default = if types.contains(configured) {
+                    Some(configured.clone())
+                } else {
+                    types
+                        .iter()
+                        .filter(|id| self.spec(id).unwrap().mode == preferred_mode)
+                        .min_by(|a, b| {
+                            self.spec(a)
+                                .unwrap()
+                                .price
+                                .total_cmp(&self.spec(b).unwrap().price)
+                                .then_with(|| a.cmp(b))
+                        })
+                        .cloned()
+                };
+                Ok(json!({"routes":routes,"types":types,"stops":stops,"default":default}))
             }
             "opening" => self.opening(
                 0,

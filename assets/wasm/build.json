@@ -1,17 +1,18 @@
 {
-  "version": "3.0.1",
-  "binary": "0034d0d750b42b82deee739a86b51072ec0caedbb9f4a386151d57237be0a824",
+  "version": "3.0.2",
+  "binary": "5491daea6d2355a45f5debcb9cc87c45fd599dc4b3f13f642a736cea10c0b9f1",
   "sources": {
-    "wasm-core/Cargo.lock": "5afa54c1122f3de4221a06c24c79fca74de62dc82b2b454d0a83d32a831e8835",
-    "wasm-core/Cargo.toml": "4362bc01c80f772d9a0b4c9e2b72c7fe423a87c1cbb681e09e6855b712beb105",
-    "wasm-core/data/world.json": "e8e03545755882d9b9d3918e8e6c58d67c64f2f62d5585aba402181b3a00fa27",
-    "wasm-core/src/commands.rs": "f4322f3d39bf2ddc82139c40575fc79316228ced5bd2f77d4858ed71492db1c4",
-    "wasm-core/src/lib.rs": "c53492e1d83fda386ea8d64053b58bb32b91f970895b66ce109c90ed45bd657d",
+    "wasm-core/Cargo.lock": "47649c9f5f7354d4a59ae7c99d0a51baf3f0a513eaa6439fcd9018bd60ab1d6f",
+    "wasm-core/Cargo.toml": "587bb6ed17871d76632d2d1563304be2a92dbb68b65158d85389495be914a8b6",
+    "wasm-core/data/world.json": "784eae1344a9a51fb727420be14ae83580561e22727b706987fad8aca7f83882",
+    "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
+    "wasm-core/src/commands.rs": "8ce93939997620f81c7070d9d8e035391b609d4d9cac770ac8a89ef72c4ca459",
+    "wasm-core/src/lib.rs": "57bd8910d98020a21e5274039e9e078420abdfdb99d737e178c89bcf7312e8f1",
     "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
-    "wasm-core/src/model.rs": "4a128907119948aea8226e9a3552c5ee79f2f6f99e283bde44b196191813356d",
+    "wasm-core/src/model.rs": "bc42472eb8040ebf9a0f93a4881f75520fea76e823c17cf0195c91debbe44e11",
     "wasm-core/src/rivals.rs": "dacb399ce64e8f96199c6f93f95010eb9cfdf508d69f3912e2ec6914a3cb9076",
-    "wasm-core/src/simulation.rs": "3169092169eb5028f4ddfbc32fe787468ad9ce454bca98e6aeab4184303c7b2e",
-    "wasm-core/src/trade.rs": "2afac3537750dbfe545d504970fbe383dcd9ade313438542bbb7c238387472d9",
-    "wasm-core/src/view.rs": "2344a134635241e7442ba2c7df0e173fac5fe4df7b2aaea4774e309d36282091"
+    "wasm-core/src/simulation.rs": "6d3827ab1b6175e6b7423d64547041238253531f92329ff31637e682f884e2fa",
+    "wasm-core/src/trade.rs": "b3ac525ca7d5286f0d6a579f1ffb0a3a161acfc05fb1cb3e28a1f7b59aa2f52d",
+    "wasm-core/src/view.rs": "02ac8c90b6eb71af7f0a908305f858f5dc744a227ade0569f74d8f3130555fea"
   }
 }

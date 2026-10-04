@@ -75,7 +75,7 @@ test('invalid and legacy saves roll back without damaging live state',async()=>{
  assert.throws(()=>e.call({op:'load',text:'{"version":7}'}));assert.deepEqual(e.save(),before);
 });
 test('long campaign preserves accounting, finite markets, bounded rivals and history',async()=>{
- const e=await engine();fund(e);open(e,['kingston','havana']);for(let i=0;i<40;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.day,1240);assert.ok(g.markets.every(m=>Number.isFinite(m.stock)&&m.stock>=0));assert.ok(g.companies.every(c=>c.ledger.length<=600&&c.history.length<=365));assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));assert.ok(g.companies[0].routes[0].deliveries>0);assert.equal(e.view().wars.some(w=>Object.hasOwn(w,'until')),false);e.load(g);
+ const e=await engine();fund(e);open(e,['kingston','havana']);for(let i=0;i<40;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.day,1240);assert.ok(g.markets.every(m=>Number.isFinite(m.stock)&&m.stock>=0));assert.ok(g.companies.every(c=>c.ledger.length<=200&&c.history.length<=365));assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));assert.ok(g.companies[0].routes[0].deliveries>0);assert.equal(e.view().wars.some(w=>Object.hasOwn(w,'until')),false);e.load(g);
 });
 test('automation buys the designated type, ignores unrelated inventory and shrinks preferred type',async()=>{
  const e=await engine();fund(e);e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);e.cmd({action:'buyShip',kind:'galleon'});e.cmd({action:'route',route:id,kind:'brig',auto:true});
@@ -108,4 +108,106 @@ test('transport observations include gross sale revenue and transaction taxes in
 });
 test('fifty-year multi-company run remains serializable and bounded',async()=>{
  const e=await engine();fund(e);open(e,['kingston','havana']);for(let days=0;days<18250;){const n=Math.min(31,18250-days);e.cmd({action:'tick',days:n});days+=n;}const g=e.save();assert.equal(g.day,18250);assert.ok(g.events.length<=100);assert.ok(g.companies.every(c=>c.history.length<=365));assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50&&c.ships.length<=150));e.load(g);assert.equal(e.view().day,18250);
+});
+
+test('default sea and land types persist and opening selects eligible sea first, with cheapest fallback',async()=>{
+ const e=await engine();e.cmd({action:'defaults',ship:'brig',vehicle:'camel'});
+ assert.equal(e.view().defaultShip,'brig');assert.equal(e.view().defaultVehicle,'camel');
+ const land=e.query({query:'connection',stops:[city(e,'cairo'),city(e,'suez')]});assert.equal(land.default,'camel');
+ const road=e.data.roads.find(r=>!e.data.cities[r.a].inland&&!e.data.cities[r.b].inland);
+ const both=e.query({query:'connection',stops:[road.a,road.b]});assert.ok(both.types.includes('camel'));assert.equal(both.default,'brig');
+ e.cmd({action:'defaults',ship:'sloop',vehicle:'wagon'});
+ const long=e.query({query:'connection',stops:[city(e,'kingston'),city(e,'london')]});assert.ok(!long.types.includes('sloop'));
+ const cheapest=e.data.specs.filter(s=>long.types.includes(s.id)&&s.mode==='sea').sort((a,b)=>a.price-b.price)[0];assert.equal(long.default,cheapest.id);
+ const g=e.save();e.load(g);assert.equal(e.view().defaultShip,'sloop');assert.equal(e.view().defaultVehicle,'wagon');
+ assert.throws(()=>e.cmd({action:'defaults',ship:'wagon',vehicle:'sloop'}));assert.deepEqual(e.save(),g);
+ for(const c of g.companies){delete c.default_ship;delete c.default_vehicle;}e.load(g);assert.equal(e.view().defaultVehicle,'wagon');
+});
+
+test('only idle empty ships can be sold; automatic names and grouped usage remain, manual rename is rejected',async()=>{
+ const e=await engine();fund(e);const id=open(e,['kingston','havana']);const inUse=e.view().companies[0].ships[0];const before=e.save();
+ assert.throws(()=>e.cmd({action:'sellShip',ship:inUse.id}));assert.throws(()=>e.cmd({action:'rename',kind:'ship',id:inUse.id,name:'Renamed'}));assert.deepEqual(e.save(),before);
+ const idle=e.cmd({action:'buyShip',kind:'sloop'});let v=e.view();assert.ok(v.companies[0].ships.find(s=>s.id===idle).name.length>0);
+ assert.deepEqual(v.fleetGroups.find(g=>g.kind==='sloop'),{kind:'sloop',used:1,idle:1});
+ const cash=v.companies[0].cash,assets=v.companies[0].assets;e.cmd({action:'sellShip',ship:idle});v=e.view();
+ assert.equal(v.companies[0].cash,cash+1800);assert.equal(v.companies[0].assets,assets);assert.equal(v.companies[0].routes[0].id,id);assert.equal(v.fleetGroups[0].idle,0);
+ const sold=e.save();assert.throws(()=>e.cmd({action:'sellShip',ship:idle}));assert.deepEqual(e.save(),sold);
+});
+
+test('period accounts retain transactions beyond the ledger cap and restore exactly',async()=>{
+ const e=await engine();for(let i=0;i<305;i++){const ship=e.cmd({action:'buyShip',kind:'wagon'});e.cmd({action:'sellShip',ship});}
+ const g=e.save();assert.equal(g.companies[0].ledger.length,200);
+ const month=e.query({query:'accounts'}).periods[0];assert.equal(month.expense.shipPurchase,305*600);assert.equal(month.income.shipSale,305*600);assert.equal(month.sales,0);assert.equal(month.net,0);assert.equal(month.assets,5000);
+ e.load(g);assert.deepEqual(e.save(),g);assert.deepEqual(e.query({query:'accounts'}).periods[0],month);
+ const bad=structuredClone(g);bad.companies[0].accounts.months[0].expense.shipPurchase=-1;assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),g);
+ const old=structuredClone(g);delete old.companies[0].accounts;old.day=60;e.load(old);let report=e.query({query:'accounts'});assert.equal(report.since,60);assert.equal(report.periods.length,1);assert.equal(report.periods[0].totalIncome,0);
+ const ship=e.cmd({action:'buyShip',kind:'wagon'});report=e.query({query:'accounts'});assert.equal(report.periods[0].expense.shipPurchase,600);e.cmd({action:'sellShip',ship});
+});
+
+test('monthly and annual accounting follows calendar boundaries and period-end assets',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['kingston','havana']);
+ for(let day=0;day<366;){const n=Math.min(31,366-day);e.cmd({action:'tick',days:n});day+=n;}
+ const m=e.query({query:'accounts'}),y=e.query({query:'accounts',annual:true});assert.equal(m.periods.length,13);assert.equal(y.periods.length,2);assert.equal(y.periods[0].year,1700);assert.equal(m.periods[0].asOf,30);assert.equal(m.periods[1].asOf,58);assert.equal(m.periods[11].asOf,364);
+ const sum=(key)=>m.periods.slice(0,12).reduce((n,p)=>n+p[key],0);for(const key of ['totalIncome','totalExpense','sales'])assert.ok(Math.abs(y.periods[0][key]-sum(key))<1e-6);
+ assert.equal(y.periods[0].assets,m.periods[11].assets);assert.equal(y.periods[1].assets,e.view().companies[0].assets);
+ const totals=e.save().companies[0].totals;for(const [category,value]of Object.entries(totals)){const actual=m.periods.reduce((n,p)=>n+(p.income[category]??0)-(p.expense[category]??0),0);assert.ok(Math.abs(value-actual)<1e-5,category);}
+});
+
+const calendarDay=(year,month,date)=>Math.round((Date.UTC(year,month-1,date)-Date.UTC(1700,0,1))/86400000);
+function legacyAccounts(e,year=2000,month=1,date=31){
+ const g=e.save();g.day=calendarDay(year,month,date);g.events_enabled=false;
+ const months={};
+ for(let m=0;m<=(year-1700)*12+month-1;m++){
+  const y=1700+Math.floor(m/12),n=m%12+1;
+  months[m]={income:{sale:100},expense:{purchase:60},assets:5000+m,as_of:Math.min(g.day,calendarDay(y,n+1,0))};
+ }
+ g.companies[0].accounts={since:0,months};
+ g.companies[0].ledger=Array.from({length:600},(_,i)=>({day:0,category:'sale',amount:1,route:null,detail:String(i)}));
+ return g;
+}
+
+test('legacy history migrates to independent 120-month and 300-year windows and 200 visible entries',async()=>{
+ const e=await engine(),old=legacyAccounts(e);
+ e.load(old);let g=e.save(),a=g.companies[0].accounts;
+ assert.equal(Object.keys(a.months).length,120);assert.equal(Object.keys(a.months)[0],'3481');
+ assert.equal(Object.keys(a.years).length,300);assert.equal(Object.keys(a.years)[0],'1');
+ assert.equal(a.years[1].income.sale,1200);assert.equal(a.years[1].expense.purchase,720);assert.equal(a.years[1].assets,5023);
+ assert.equal(g.companies[0].ledger.length,200);assert.equal(g.companies[0].ledger[0].detail,'400');
+ assert.equal(e.view().ledger.length,200);assert.equal(e.view().ledger[0].detail,'599');
+ const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved); // Never re-add retained months to years.
+ const originalAnnual=e.query({query:'accounts',annual:true}).periods;
+ assert.equal(originalAnnual.length,300);assert.equal(originalAnnual[0].year,1701);
+ const ship=e.cmd({action:'buyShip',kind:'wagon'});e.cmd({action:'sellShip',ship});
+ assert.equal(e.save().companies[0].accounts.years[300].expense.shipPurchase,600);
+ e.cmd({action:'tick',days:1});g=e.save();a=g.companies[0].accounts;
+ assert.equal(Object.keys(a.months).length,120);assert.equal(Object.keys(a.months)[0],'3482');
+ assert.equal(a.years[290].income.sale,1200); // A deleted month is still included in its annual total.
+ assert.equal(Object.keys(a.years).length,300);assert.equal(e.view().ledger.length,200);
+ assert.deepEqual(e.view().ledger,g.companies[0].ledger.toReversed());
+});
+
+test('year boundary evicts only expired annual data and keeps correct previous year-end assets',async()=>{
+ const e=await engine();e.load(legacyAccounts(e,2000,12,31));
+ const yearEnd=e.view().companies[0].assets;
+ e.cmd({action:'tick',days:1});const g=e.save(),a=g.companies[0].accounts;
+ assert.equal(Object.keys(a.months).length,120);assert.equal(Object.keys(a.months)[0],'3493');
+ assert.equal(Object.keys(a.years).length,300);assert.equal(Object.keys(a.years)[0],'2');
+ assert.equal(a.years[300].assets,yearEnd);assert.equal(a.years[300].income.sale,1200);
+ assert.equal(a.years[301].assets,e.view().companies[0].assets);
+ assert.equal(e.query({query:'accounts'}).periods[0].year,1991);
+ assert.equal(e.query({query:'accounts',annual:true}).periods[0].year,1702);
+ const restored=e.save();e.load(restored);assert.deepEqual(e.save(),restored);
+ for(const change of [x=>x.years[300].expense.purchase=-1,x=>x.years[300].as_of=4294967295]){
+  const bad=structuredClone(restored);change(bad.companies[0].accounts);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),restored);
+ }
+});
+
+test('migration validates discarded records and does not invent missing monthly history',async()=>{
+ const e=await engine(),before=e.save(),bad=legacyAccounts(e);
+ bad.companies[0].accounts.months[0].income.sale=-1;
+ assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),before);
+ const sparse=legacyAccounts(e);sparse.companies[0].accounts.months={3600:sparse.companies[0].accounts.months[3600]};
+ e.load(sparse);assert.equal(e.query({query:'accounts'}).periods.length,1);assert.equal(e.query({query:'accounts',annual:true}).periods.length,1);
+ const fresh=e.save();delete fresh.companies[0].accounts;e.load(fresh);
+ assert.equal(e.query({query:'accounts'}).periods.length,1);assert.equal(e.query({query:'accounts',annual:true}).periods[0].totalIncome,0);
 });

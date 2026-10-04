@@ -36,6 +36,10 @@ impl Engine {
         (production, requested, consumed, stock - consumed)
     }
     pub fn tick(&mut self) {
+        self.tick_day();
+        self.capture_accounts();
+    }
+    fn tick_day(&mut self) {
         if self.game.companies[0].bankrupt {
             return;
         }

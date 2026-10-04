@@ -1,3 +1,4 @@
+mod accounts;
 mod commands;
 mod loading;
 mod model;
@@ -41,18 +42,21 @@ impl Engine {
             }
             "query" => self.query(&v["request"]),
             "save" => {
-                self.validate(&self.game)?;
+                self.validate(&self.game, false)?;
                 serde_json::to_string(&self.game)
                     .map(Value::String)
                     .map_err(|e| e.to_string())
             }
             "load" => {
                 let text = v["text"].as_str().ok_or("保存データがありません。")?;
-                let g: Game = serde_json::from_str(text).map_err(
+                let mut g: Game = serde_json::from_str(text).map_err(
                     |_| "この保存形式は読み込めません。旧版セーブには対応していません。",
                 )?;
-                self.validate(&g)?;
+                self.validate(&g, true)?;
+                Self::normalize_account_history(&mut g);
+                self.validate(&g, false)?;
                 self.game = g;
+                self.capture_accounts();
 
                 Ok(json!(true))
             }
