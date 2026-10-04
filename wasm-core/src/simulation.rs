@@ -1,12 +1,26 @@
 use crate::model::*;
 use crate::trade::ratio;
+
+// Same initial slope as level / (5 + level), but no finite growth ceiling.
+fn development_effect(level: f64) -> f64 {
+    (level / 5.0).ln_1p()
+}
+
 impl Engine {
+    pub fn city_demand_multiplier(&self, city: usize) -> f64 {
+        let scale = if self.data.cities[city].lon < -20.0 {
+            1.0
+        } else {
+            0.35
+        };
+        1.0 + scale * 1.5 * development_effect(self.game.development[city].size)
+    }
+
     pub fn market_flow(&self, city: usize, g: usize) -> (f64, f64, f64, f64) {
         let c = &self.data.cities[city];
         let d = &self.game.development[city];
         let apt = c.supply[g] / c.supply.iter().copied().fold(1.0, f64::max);
-        let production =
-            c.supply[g] * (1.0 + 4.0 * apt * d.production[g] / (5.0 + d.production[g]));
+        let production = c.supply[g] * (1.0 + 4.0 * apt * development_effect(d.production[g]));
         let stock = self.game.markets[city * self.data.goods.len() + g].stock + production;
         let war = if self.game.events_enabled
             && self.data.goods[g].id == "weapons"
@@ -20,9 +34,8 @@ impl Engine {
         } else {
             1.0
         };
-        let scale = if c.lon < -20.0 { 1.0 } else { 0.35 };
         let requested = c.demand[g]
-            * (1.0 + scale * 1.5 * d.size / (5.0 + d.size))
+            * self.city_demand_multiplier(city)
             * c.modifiers[g]
             * (1.0
                 + c.seasons[g] * {

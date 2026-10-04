@@ -11,7 +11,6 @@ impl Engine {
     }
     pub fn demand_details(&self, city: usize, g: usize) -> Value {
         let c = &self.data.cities[city];
-        let d = &self.game.development[city];
         let (production, _, _, _) = self.market_flow(city, g);
         let (_, _, ordinal, length) = self.calendar();
         let war = if self.game.events_enabled
@@ -26,7 +25,7 @@ impl Engine {
         } else {
             1.0
         };
-        json!({"base":c.demand[g],"location":c.modifiers[g],"season":1.0+c.seasons[g]*(std::f64::consts::TAU*ordinal as f64/length as f64).cos(),"city":1.0+if c.lon< -20.0{1.0}else{0.35}*1.5*d.size/(5.0+d.size),"war":war,"price":(1.0/ratio(self.game.markets[city*self.data.goods.len()+g].stock+production)).clamp(0.25,3.0)})
+        json!({"base":c.demand[g],"location":c.modifiers[g],"season":1.0+c.seasons[g]*(std::f64::consts::TAU*ordinal as f64/length as f64).cos(),"city":self.city_demand_multiplier(city),"war":war,"price":(1.0/ratio(self.game.markets[city*self.data.goods.len()+g].stock+production)).clamp(0.25,3.0)})
     }
     pub fn catalog(&self) -> Value {
         let mut v = self.graphics.clone();

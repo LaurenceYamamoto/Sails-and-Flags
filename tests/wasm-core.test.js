@@ -9,6 +9,40 @@ function city(e,id){return e.data.cities.findIndex(c=>c.id===id);}
 function nation(e,id){return e.data.nations.findIndex(n=>n.id===id);}
 function open(e,ids,kind='sloop'){const stops=ids.map(id=>city(e,id));for(const n of e.query({query:'opening',kind,stops}).missing)e.cmd({action:'license',nation:n});return e.cmd({action:'openRoute',kind,stops,allowed:e.data.goods.map((_,i)=>i),margin:10});}
 
+test('city demand and production keep growing beyond former ceilings with diminishing gains',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});const baseline=e.save();
+ for(const id of ['london','kingston']){
+  const i=city(e,id),initial=e.view(i).market,best=initial.reduce((a,b)=>a.baseProduction>b.baseProduction?a:b).good;
+  const series=[];
+  for(const level of [0,5,10,15,100,1000000]){
+   const g=structuredClone(baseline);g.development[i].size=level;g.development[i].production[best]=level;e.load(g);
+   const m=e.view(i).market[best],d=m.details;series.push([d.city,m.production/m.baseProduction]);
+   assert.ok(Math.abs(m.demand-d.base*d.location*d.season*d.city*d.war*d.price)<1e-9);
+   assert.ok(Number.isFinite(m.demand)&&Number.isFinite(m.production));
+   const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
+  }
+  assert.deepEqual(series[0],[1,1]);
+  for(let k=0;k<2;k++){
+   for(let j=1;j<series.length;j++)assert.ok(series[j][k]>series[j-1][k]);
+   assert.ok(series[2][k]-series[1][k]<series[1][k]-series[0][k]);assert.ok(series[3][k]-series[2][k]<series[2][k]-series[1][k]);
+  }
+  assert.ok(series[4][0]>(id==='london'?1.525:2.5));assert.ok(series[4][1]>5);
+ }
+ // Compare a displayed next-day flow with the actual stock update at the same date.
+ const g=structuredClone(baseline),i=city(e,'london');g.development[i].size=100;g.development[i].production.fill(100);g.day=1;e.load(g);const market=e.view(i).market;
+ g.day=0;e.load(g);e.cmd({action:'tick',days:1});const after=e.save();for(const m of market)assert.ok(Math.abs(after.markets[i*e.data.goods.length+m.good].stock-(m.stock+m.production-m.consumption))<1e-9);
+});
+
+test('continued city investment grows mature cities while retaining commodity suitability and saved levels',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const i=city(e,'london');e.cmd({action:'license',nation:nation(e,'england')});e.cmd({action:'buyDevelopment',city:i});
+ const market=e.view(i).market,positive=market.filter(m=>m.baseProduction>0).sort((a,b)=>a.baseProduction-b.baseProduction),weak=positive[0].good,strong=positive.at(-1).good,zero=market.find(m=>m.baseProduction===0).good;
+ const g=e.save();g.development[i].size=100;g.development[i].production[strong]=100;g.development[i].production[weak]=100;g.development[i].production[zero]=1000000;e.load(g);const before=e.view(i);
+ e.cmd({action:'cityInvestment',city:i,size:1000000});for(const good of [weak,strong])e.cmd({action:'cityInvestment',city:i,good,value:1000000});
+ e.cmd({action:'tick',days:1});const first=e.save().development[i],v=e.view(i);assert.ok(first.size>100);assert.ok(v.market[strong].production>before.market[strong].production);assert.ok(v.market[strong].details.city>before.market[strong].details.city);assert.equal(v.market[zero].production,0);assert.ok(first.production[strong]-100>first.production[weak]-100);
+ assert.ok(v.market[weak].production-before.market[weak].production<v.market[strong].production-before.market[strong].production);
+ const saved=e.save();e.cmd({action:'tick',days:1});const second=e.save();assert.ok(second.development[i].size-first.size<first.size-100);assert.ok(second.development[i].production[strong]-first.production[strong]<first.production[strong]-100);e.load(saved);e.cmd({action:'tick',days:1});assert.deepEqual(e.save(),second);
+});
+
 test('sea and land cargo operations consume fractional days in order and sell only after unloading',async()=>{
  for(const [ids,kind] of [[['kingston','havana'],'sloop'],[['cairo','suez'],'camel']]){
   const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,ids,kind);

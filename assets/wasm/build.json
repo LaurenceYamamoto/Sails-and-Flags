@@ -1,9 +1,9 @@
 {
-  "version": "3.1.0",
-  "binary": "50b7f5263aea902116b21bb961b97a3331aac8ac24e4b8ca59e5d2b194eb3795",
+  "version": "3.1.1",
+  "binary": "3321f6c69685fad872844100bf28eead85659acef2d615a2f03f375f8a9bb1d8",
   "sources": {
-    "wasm-core/Cargo.lock": "1b7224ab572e0f1580a7533004d65ace77fc60f7310ec3ed5686ce57fe53f16f",
-    "wasm-core/Cargo.toml": "f7ce7d64c2af8723088fc98c637f9ad70c3cb04bf78ec8b17f99ce8526fdf22d",
+    "wasm-core/Cargo.lock": "c524fe230db032b93a70d74ab47a7b00347399c42937f2c9c655104de11b087e",
+    "wasm-core/Cargo.toml": "692726218a81951921e9f8349bb89539ed7ef2bb398298dec83a2fd6a636fcd2",
     "wasm-core/data/world.json": "784eae1344a9a51fb727420be14ae83580561e22727b706987fad8aca7f83882",
     "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
     "wasm-core/src/commands.rs": "7995268fada4e5bc173a4e97f85c64b8dd294a3376e692093729802bd362be76",
@@ -12,8 +12,8 @@
     "wasm-core/src/model.rs": "1caf3300583ff48bdb843845a8ebcd812da37f4072652af7afd459f768bd6d5f",
     "wasm-core/src/movement.rs": "f3fdde75f94c15eba8042966ba1f646efd0ad1be0dcf85fb42a799676adcd0a6",
     "wasm-core/src/rivals.rs": "85c1f33bd84d0f4c9aa7486ddf7f4def870ac7b72f178486e18ecc7e162e6409",
-    "wasm-core/src/simulation.rs": "41da30ea204af26d11e90649e7e9d0a1d01793473373cec28c1bfa14c6532374",
+    "wasm-core/src/simulation.rs": "0815fd72191a56b365f1d044260fdeda556cfe21ca2d9982ee9a66d3682fe08c",
     "wasm-core/src/trade.rs": "c546dafa217a6e117f166b833c908f3356b7d22f69e8667254c2c6c6be372698",
-    "wasm-core/src/view.rs": "428b81af95dc741049b60d5b7ea96c7cefbf644445ff3b0f15e2435e433b7d9d"
+    "wasm-core/src/view.rs": "f3f438b24fca326d19de4aa4f185210480d8a1c68237012abf22fee5f56e9b6e"
   }
 }
