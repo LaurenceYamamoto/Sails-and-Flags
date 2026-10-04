@@ -9,6 +9,61 @@ function city(e,id){return e.data.cities.findIndex(c=>c.id===id);}
 function nation(e,id){return e.data.nations.findIndex(n=>n.id===id);}
 function open(e,ids,kind='sloop'){const stops=ids.map(id=>city(e,id));for(const n of e.query({query:'opening',kind,stops}).missing)e.cmd({action:'license',nation:n});return e.cmd({action:'openRoute',kind,stops,allowed:e.data.goods.map((_,i)=>i),margin:10});}
 
+test('six technologies independently improve handling, upkeep, disaster risk and mode-specific designs without facilities',async()=>{
+ const e=await engine();fund(e);assert.equal(e.view().technology.length,6);assert.deepEqual(e.view().handlingRates,[5,5]);assert.ok(!Object.hasOwn(e.view(),'shipyard'));assert.throws(()=>e.cmd({action:'shipyard'}));
+ const quote=kind=>e.query({query:'opening',kind,stops:(kind==='sloop'?['kingston','havana']:['cairo','suez']).map(id=>city(e,id))});const sea=quote('sloop'),land=quote('wagon'),before=e.save();
+ for(let i=0;i<6;i++){
+  const g=structuredClone(before);g.companies[0].technology[i]=50;e.load(g);const s=quote('sloop'),l=quote('wagon');
+  assert.equal(s.handlingRate>sea.handlingRate,i===2);assert.equal(l.handlingRate>land.handlingRate,i===5);
+  assert.equal(s.daily<sea.daily,i===1);assert.equal(l.daily<land.daily,i===4);assert.equal(s.disasterRates[0]<sea.disasterRates[0],i===1);assert.equal(l.disasterRates[0]<land.disasterRates[0],i===4);
+ }
+ e.load(before);for(let i=0;i<6;i++)e.cmd({action:'technology',kind:i,value:100});e.cmd({action:'tick',days:1});assert.ok(e.view().technology.every(x=>x>0));
+ const q=(kind,budgets)=>e.query({query:'design',kind,budgets});for(const kind of ['wagon','caravan']){
+  const base=e.data.specs.find(s=>s.id===kind);for(let axis=0;axis<5;axis++){const budgets=Array(5).fill(0);budgets[axis]=10000;const spec=q(kind,budgets).spec;assert.ok([spec.capacity>base.capacity,spec.speed>base.speed,spec.roughness>base.roughness,spec.range>base.range,spec.daily<base.daily][axis]);assert.ok(Number.isFinite(spec.price)&&spec.price>0);}
+ }
+ let g=e.save();g.companies[0].technology=[30,0,0,0,0,0];e.load(g);const low=q('wagon',[10000,0,0,0,0]).spec.capacity;g.companies[0].technology[3]=100;e.load(g);assert.ok(q('wagon',[10000,0,0,0,0]).spec.capacity>low);assert.ok(e.view().catalog.some(s=>s.id==='corvette'));
+ e.cmd({action:'research',kind:'wagon',budgets:[10000,0,10000,0,0]});const kind=e.view().catalog.find(s=>s.id.startsWith('design-')).id;e.cmd({action:'buyShip',kind});assert.ok(e.save().companies[0].ships.some(s=>s.kind===kind));e.load(e.save());
+});
+
+test('road passability rewards wagons on good roads and caravans or rough-road designs on poor roads',async()=>{
+ const e=await engine();fund(e);const road=e.data.roads.find(r=>r.penalty<.6&&r.km>300),index=e.data.roads.indexOf(road),stops=[road.a,road.b];assert.ok(road);
+ const q=kind=>e.query({query:'opening',kind,stops});const w=q('wagon'),c=q('caravan');assert.ok(c.travelDays[0]<w.travelDays[0]);assert.ok(c.disasterRates[0]<w.disasterRates[0]);
+ const g=e.save(),pass=e.view().roads[index].passability;g.roads[index].quality=100;e.load(g);assert.ok(e.view().roads[index].passability>pass);assert.ok(q('wagon').travelDays[0]<w.travelDays[0]);assert.ok(q('wagon').travelDays[0]<=q('caravan').travelDays[0]);
+ for(const n of road.nations)e.cmd({action:'license',nation:n});e.cmd({action:'buyRoad',road:index});e.cmd({action:'roadInvestment',road:index,roadBudget:10000,securityBudget:0});const p=e.view().roads[index].passability;e.cmd({action:'tick',days:1});assert.ok(e.view().roads[index].passability>p);
+ assert.ok(!e.data.specs.some(s=>['camel','mule'].includes(s.id)));assert.ok(e.data.specs.some(s=>s.id==='caravan'));const saved=e.save();assert.throws(()=>e.cmd({action:'buyShip',kind:'camel'}));assert.deepEqual(e.save(),saved);
+});
+
+test('handling technology sets actual operation durations and preserves an operation already in progress',async()=>{
+ for(const [ids,kind,tech] of [[['kingston','havana'],'sloop',2],[['cairo','suez'],'caravan',5]]){
+  const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,ids,kind);let g=e.save(),s=g.companies[0].ships[0],r=g.companies[0].routes[0];g.companies[0].technology[tech]=50;g.markets[r.stops[0]*e.data.goods.length].stock=2000;g.markets[r.stops[1]*e.data.goods.length].stock=0;e.load(g);e.cmd({action:'tick',days:1});g=e.save();s=g.companies[0].ships[0];assert.ok(s.handling&&!s.handling.unloading);assert.ok(s.handling.rate>5);assert.ok(Math.abs(s.handling.total-s.cargo.reduce((n,x)=>n+x.quantity,0)/s.handling.rate)<1e-9);
+  const rate=s.handling.rate,total=s.handling.total;g.companies[0].technology[tech]=1000;e.load(g);assert.equal(e.save().companies[0].ships[0].handling.total,total);assert.equal(e.save().companies[0].ships[0].handling.rate,rate);
+  s.handling=null;s.cargo=[{good:0,quantity:30,cost:300}];s.voyage={from:r.stops[0],to:r.stops[1],total:2,remaining:.2,original_cost:300,upkeep:0};e.load(g);e.cmd({action:'tick',days:1});const h=e.save().companies[0].ships[0].handling;assert.ok(h.unloading);assert.ok(h.rate>rate);assert.ok(Math.abs(h.total-30/h.rate)<1e-9);e.load(e.save());
+ }
+});
+
+test('handling upgrades rebuild the timetable using the new rate at an intermediate stop',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['kingston','havana']);const g=e.save(),p=g.companies[0],r=p.routes[0],ship=p.ships[0];g.day=100;p.technology[2]=50;r.cooldown=0;ship.next=1;ship.ready=1000;ship.voyage=null;ship.handling=null;ship.cargo=[];e.load(g);e.cmd({action:'tick',days:1});const saved=e.save().companies[0].routes[0],v=e.view().companies[0].routes[0];assert.ok(saved.handling_rate>5);assert.equal(saved.epoch,101-v.offsets[1]);assert.equal(saved.cooldown,101+Math.ceil(v.cycle));e.load(e.save());
+});
+
+test('legacy transport saves migrate three technologies, caravans, shipyards and in-progress handling exactly once',async()=>{
+ const e=await engine();fund(e);const id=open(e,['cairo','suez'],'caravan');e.cmd({action:'buyShip',kind:'caravan'});const g=e.save(),p=g.companies[0],r=p.routes[0],s=p.ships[0];delete g.transport_version;
+ for(const c of g.companies){c.technology=[12,34,56];c.tech_budget=[1,2,3];c.shipyard=false;c.yard_value=0;}p.shipyard=true;p.yard_value=4000;p.default_vehicle='mule';p.ships[0].kind='camel';p.ships[1].kind='mule';r.auto_type='camel';r.replacements=['mule'];delete r.handling_rate;
+ s.cargo=[{good:0,quantity:15,cost:150}];s.handling={unloading:true,total:1.5,remaining:.5,trip:{from:r.stops[0],to:r.stops[1],total:2,remaining:0,original_cost:150,upkeep:0}};s.next=1;
+ const cash=p.cash;e.load(g);const migrated=e.save(),co=migrated.companies[0];assert.equal(migrated.transport_version,1);assert.deepEqual(co.technology,[12,34,0,0,56,0]);assert.deepEqual(co.tech_budget,[1,2,0,0,3,0]);assert.equal(co.cash,cash+4000);assert.equal(co.totals.shipyardRefund,4000);assert.ok(!Object.hasOwn(co,'yard_value'));assert.equal(co.default_vehicle,'caravan');assert.ok(co.ships.every(s=>s.kind==='caravan'));assert.equal(co.routes[0].auto_type,'caravan');assert.deepEqual(co.routes[0].replacements,['caravan']);assert.equal(co.ships[0].handling.rate,10);assert.equal(co.ships[0].handling.remaining,.5);e.load(migrated);assert.deepEqual(e.save(),migrated);
+ const injected=structuredClone(migrated);injected.companies[0].yard_value=4000;assert.throws(()=>e.load(injected));assert.deepEqual(e.save(),migrated);
+ const bad=structuredClone(g);bad.companies[0].technology.pop();assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),migrated);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].routes[0].deliveries,1);
+});
+
+test('sea and land disasters lose hull and cargo, reduce assets, respect technology and queue replacement',async()=>{
+ let seed=0;for(;seed<1000000;seed++){const a=(Math.imul(seed,1664525)+1013904223)>>>0,b=(Math.imul(a,1664525)+1013904223)>>>0;if(a/2**32>.00015&&a/2**32<.00019&&b/2**32>.02)break;}assert.ok(seed<1000000);
+ for(const [kind,ids,tech,event] of [['sloop',['kingston','havana'],1,'seaDisaster'],['wagon',['cairo','suez'],4,'landDisaster']]){
+  const e=await engine();e.cmd({action:'new',seed:1700,events:true});fund(e);const id=open(e,ids,kind);const g=e.save(),p=g.companies[0],r=p.routes[0],s=p.ships[0];g.day=100;g.rng=seed;s.cargo=[{good:0,quantity:10,cost:100}];s.handling=null;s.voyage={from:r.stops[0],to:r.stops[1],total:3,remaining:3,original_cost:100,upkeep:0};e.load(g);const assets=e.view().companies[0].assets;e.cmd({action:'tick',days:1});let after=e.save();assert.equal(after.companies[0].ships.length,0);assert.equal(after.companies[0].routes[0].cargo_loss,100);assert.equal(after.companies[0].routes[0].ship_loss,e.data.specs.find(s=>s.id===kind).price);assert.deepEqual(after.companies[0].routes[0].replacements,[kind]);assert.ok(e.view().companies[0].assets<assets-100);assert.ok(after.events.some(x=>x.kind===event));const once=after;e.load(g);e.cmd({action:'tick',days:1});assert.deepEqual(e.save(),once);
+  e.cmd({action:'automation',enabled:true,replaceLost:true,budget:10000,reserve:0,expand:10,shrink:30});e.cmd({action:'tick',days:1});after=e.save();assert.equal(after.companies[0].ships[0].kind,kind);assert.equal(after.companies[0].routes[0].replacements.length,0);
+  p.technology[tech]=1000;e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.length,1);
+  p.technology[tech]=0;g.events_enabled=false;e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.length,1);
+ }
+});
+
 test('city demand and production keep growing beyond former ceilings with diminishing gains',async()=>{
  const e=await engine();e.cmd({action:'new',seed:1700,events:false});const baseline=e.save();
  for(const id of ['london','kingston']){
@@ -44,7 +99,7 @@ test('continued city investment grows mature cities while retaining commodity su
 });
 
 test('sea and land cargo operations consume fractional days in order and sell only after unloading',async()=>{
- for(const [ids,kind] of [[['kingston','havana'],'sloop'],[['cairo','suez'],'camel']]){
+ for(const [ids,kind] of [[['kingston','havana'],'sloop'],[['cairo','suez'],'caravan']]){
   const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,ids,kind);
   const g=e.save(),r=g.companies[0].routes[0],s=g.companies[0].ships[0];r.active=false;
   s.cargo=[{good:0,quantity:15,cost:150}];s.voyage=null;
@@ -56,10 +111,10 @@ test('sea and land cargo operations consume fractional days in order and sell on
   }
   e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships[0].handling.remaining,.5);
   e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships[0].voyage.remaining,1.5);
-  e.cmd({action:'tick',days:2});let p=e.save().companies[0];assert.equal(p.ships[0].handling.unloading,true);assert.equal(p.ships[0].handling.remaining,1);assert.equal(p.routes[0].transport.sales,0);assert.equal(p.routes[0].deliveries,0);
-  const checkpoint=e.save();e.cmd({action:'tick',days:2});const result=e.save();e.load(checkpoint);e.cmd({action:'tick',days:2});assert.deepEqual(e.save(),result);
+  e.cmd({action:'tick',days:2});let p=e.save().companies[0];assert.equal(p.ships[0].handling.unloading,true);assert.equal(p.ships[0].handling.remaining,2.5);assert.equal(p.routes[0].transport.sales,0);assert.equal(p.routes[0].deliveries,0);
+  const checkpoint=e.save();e.cmd({action:'tick',days:4});const result=e.save();e.load(checkpoint);e.cmd({action:'tick',days:4});assert.deepEqual(e.save(),result);
   p=result.companies[0];assert.equal(p.ships[0].handling,null);assert.equal(p.ships[0].voyage,null);assert.equal(p.ships[0].cargo.length,0);assert.equal(p.routes[0].deliveries,1);assert.ok(p.routes[0].transport.sales>0);
-  assert.deepEqual(p.routes[0].activity,{since:0,moving:2,loading:1.5,unloading:1.5,waiting:1});assert.ok(Math.abs(e.view().companies[0].routes[0].idleRatio-100/6)<1e-9);
+  assert.deepEqual(p.routes[0].activity,{since:0,moving:2,loading:1.5,unloading:3,waiting:1.5});assert.ok(Math.abs(e.view().companies[0].routes[0].idleRatio-18.75)<1e-9);
  }
 });
 
@@ -67,8 +122,8 @@ test('decimal cargo durations remain valid at every daily save boundary',async()
  const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['kingston','havana']);const original=e.save();
  for(const quantity of [1,3,7,13,29]){
   const g=structuredClone(original),p=g.companies[0],r=p.routes[0],s=p.ships[0];r.active=false;s.cargo=[{good:0,quantity,cost:quantity*10}];s.handling={unloading:false,total:quantity/10,remaining:quantity/10,trip:{from:r.stops[0],to:r.stops[1],total:2,remaining:2,original_cost:quantity*10,upkeep:0}};e.load(g);
-  const days=Math.ceil(2+quantity/5);for(let i=0;i<days;i++){e.cmd({action:'tick',days:1});e.load(e.save());}
-  const route=e.save().companies[0].routes[0];assert.equal(route.deliveries,1);assert.ok(Math.abs(route.activity.moving-2)<1e-9);assert.ok(Math.abs(route.activity.loading-quantity/10)<1e-9);assert.ok(Math.abs(route.activity.unloading-quantity/10)<1e-9);assert.ok(Math.abs(route.activity.waiting-(days-2-quantity/5))<1e-9);
+  const days=Math.ceil(2+quantity*0.3);for(let i=0;i<days;i++){e.cmd({action:'tick',days:1});e.load(e.save());}
+  const route=e.save().companies[0].routes[0];assert.equal(route.deliveries,1);assert.ok(Math.abs(route.activity.moving-2)<1e-9);assert.ok(Math.abs(route.activity.loading-quantity/10)<1e-9);assert.ok(Math.abs(route.activity.unloading-quantity/5)<1e-9);assert.ok(Math.abs(route.activity.waiting-(days-2-quantity*0.3))<1e-9);
  }
 });
 
@@ -76,7 +131,7 @@ test('loading reserves purchased cargo, timetables include handling, and fleet t
  const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);open(e,['kingston','havana']);
  e.cmd({action:'route',route:id,allowed:[0],margin:10});const g=e.save();g.markets[0].stock=2000;g.markets[e.data.goods.length].stock=0;e.load(g);
  const initial=e.view().companies[0].routes[0];assert.ok(initial.cycle>=16);assert.equal(initial.interval,initial.cycle/2);
- e.cmd({action:'tick',days:1});let p=e.save().companies[0];const h=p.ships.find(s=>s.handling);assert.ok(h);assert.equal(h.handling.unloading,false);assert.equal(h.handling.total,h.cargo.reduce((n,x)=>n+x.quantity,0)/10);assert.ok(h.cargo.reduce((n,x)=>n+x.cost,0)>0);assert.equal(p.routes[0].transport.sales,0);
+ e.cmd({action:'tick',days:1});let p=e.save().companies[0];const h=p.ships.find(s=>s.handling);assert.ok(h);assert.equal(h.handling.unloading,false);assert.equal(h.handling.total,h.cargo.reduce((n,x)=>n+x.quantity,0)/5);assert.ok(h.cargo.reduce((n,x)=>n+x.cost,0)>0);assert.equal(p.routes[0].transport.sales,0);
  assert.equal(p.ships.filter(s=>s.handling||s.voyage).length,1);assert.equal(p.routes[0].activity.waiting,1);
  e.cmd({action:'tick',days:7});p=e.save().companies[0];const a=p.routes[0].activity;assert.ok(Math.abs(a.moving+a.loading+a.unloading+a.waiting-16)<1e-9);e.load(e.save());
 });
@@ -147,14 +202,14 @@ test('sea detours, Pacific crossing and land connections remain available',async
  const e=await engine();const q=(a,b)=>e.query({query:'opening',kind:'galleon',stops:[city(e,a),city(e,b)]});
  assert.ok(q('marseille','nantes').longest>q('lisbon','nantes').longest);
  const pacific=Object.keys(e.data.cities).map(Number).filter(i=>e.data.cities[i].id==='acapulco'||e.data.cities[i].id==='manila');assert.equal(pacific.length,2);assert.ok(e.query({query:'opening',kind:'galleon',stops:pacific}).longest>0);
- for(const road of e.data.roads){assert.ok(e.query({query:'connection',stops:[road.a,road.b]}).types.some(k=>['wagon','camel','mule'].includes(k)));}
+ for(const road of e.data.roads){assert.ok(e.query({query:'connection',stops:[road.a,road.b]}).types.some(k=>['wagon','caravan'].includes(k)));}
 });
 test('production suitability, nonzero demand and commodity-specific investment',async()=>{
  const e=await engine();fund(e);const london=city(e,'london'),spice=e.data.goods.findIndex(g=>g.id==='spices');const v=e.view(london);assert.ok(v.market.every(m=>m.demand>0));assert.equal(v.market[spice].production,0);
  e.cmd({action:'license',nation:nation(e,'england')});e.cmd({action:'buyDevelopment',city:london});assert.throws(()=>e.cmd({action:'cityInvestment',city:london,good:spice,value:10}));const g=v.market.find(m=>m.production>0).good;e.cmd({action:'cityInvestment',city:london,good:g,value:10});e.cmd({action:'tick',days:31});const w=e.view(london);assert.ok(w.market[g].production>v.market[g].production);assert.equal(w.market[spice].production,0);
 });
 test('design budgets, names, fleet replacement and automation kind',async()=>{
- const e=await engine();fund(e);const id=open(e,['kingston','havana']);const g=e.save();g.companies[0].technology[0]=30;e.load(g);e.cmd({action:'shipyard'});
+ const e=await engine();fund(e);const id=open(e,['kingston','havana']);const g=e.save();g.companies[0].technology[0]=30;e.load(g);
  const q=e.query({query:'design',kind:'sloop',budgets:[1000,1000,1000,1000,1000]});assert.ok(q.spec.range>1800);assert.ok(e.query({query:'design',kind:'sloop',budgets:[1000,0,0,0,0]}).spec.capacity>30);
  e.cmd({action:'research',kind:'sloop',budgets:[1000,1000,1000,1000,1000]});const design=e.view().catalog.find(s=>s.id.startsWith('design-')).id;
  e.cmd({action:'rename',kind:'design',id:design,name:'Ocean Swift'});e.cmd({action:'rename',kind:'company',name:'Wasm Trading'});
@@ -186,7 +241,7 @@ test('calendar uses real month boundaries, and malformed routes cannot trap Wasm
  fund(e);open(e,['kingston','havana']);const before=e.save();for(const mutate of [r=>r.mode='land',r=>r.stops=[0,999],r=>r.stops=[0,0],r=>r.auto_type='unknown']){const g=structuredClone(before);mutate(g.companies[0].routes[0]);assert.throws(()=>e.load(g));assert.deepEqual(e.save(),before);}
 });
 test('rival land operations reinvest in roads within the shared investment policy',async()=>{
- const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const road=e.data.roads.find(r=>r.id==='cairo_suez');const ids=[e.data.cities[road.a].id,e.data.cities[road.b].id];open(e,ids,'camel');const g=e.save(),p=g.companies[0],r=g.companies[1];g.day=58;r.routes=p.routes;r.ships=p.ships;r.licenses=p.licenses;r.cash=1e9;r.initial_cash=r.cash-Object.values(r.totals).reduce((a,b)=>a+b,0);r.kind='large';p.routes=[];p.ships=[];r.ships.forEach(s=>s.ready=10000);r.routes[0].transport={since:0,sales:100000,costs:100,upkeep:0,deliveries:3};e.load(g);e.cmd({action:'tick',days:1});const after=e.save(),owned=after.roads.filter(d=>d.owner===r.id);assert.ok(owned.length>0);assert.ok(owned.some(d=>d.road_budget>0&&d.security_budget>0));assert.ok(after.companies[1].routes.length<=50);e.cmd({action:'tick',days:31});e.save();
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const road=e.data.roads.find(r=>r.id==='cairo_suez');const ids=[e.data.cities[road.a].id,e.data.cities[road.b].id];open(e,ids,'caravan');const g=e.save(),p=g.companies[0],r=g.companies[1];g.day=58;r.routes=p.routes;r.ships=p.ships;r.licenses=p.licenses;r.cash=1e9;r.initial_cash=r.cash-Object.values(r.totals).reduce((a,b)=>a+b,0);r.kind='large';p.routes=[];p.ships=[];r.ships.forEach(s=>s.ready=10000);r.routes[0].transport={since:0,sales:100000,costs:100,upkeep:0,deliveries:3};e.load(g);e.cmd({action:'tick',days:1});const after=e.save(),owned=after.roads.filter(d=>d.owner===r.id);assert.ok(owned.length>0);assert.ok(owned.some(d=>d.road_budget>0&&d.security_budget>0));assert.ok(after.companies[1].routes.length<=50);e.cmd({action:'tick',days:31});e.save();
 });
 test('sea route rejects land vehicles even where a road also joins the two ports',async()=>{
  const e=await engine();fund(e);const road=e.data.roads.find(r=>!e.data.cities[r.a].inland&&!e.data.cities[r.b].inland);const stops=[road.a,road.b];for(const n of e.query({query:'opening',kind:'galleon',stops}).missing)e.cmd({action:'license',nation:n});const id=e.cmd({action:'openRoute',kind:'galleon',stops,allowed:[0],margin:10});const ship=e.cmd({action:'buyShip',kind:'wagon'});const before=e.save();assert.throws(()=>e.cmd({action:'assign',route:id,ship}));assert.throws(()=>e.cmd({action:'route',route:id,kind:'wagon'}));assert.throws(()=>e.cmd({action:'assign',route:id+.5,ship}));assert.deepEqual(e.save(),before);
@@ -202,11 +257,11 @@ test('fifty-year multi-company run remains serializable and bounded',async()=>{
 });
 
 test('default sea and land types persist and opening selects eligible sea first, with cheapest fallback',async()=>{
- const e=await engine();e.cmd({action:'defaults',ship:'brig',vehicle:'camel'});
- assert.equal(e.view().defaultShip,'brig');assert.equal(e.view().defaultVehicle,'camel');
- const land=e.query({query:'connection',stops:[city(e,'cairo'),city(e,'suez')]});assert.equal(land.default,'camel');
+ const e=await engine();e.cmd({action:'defaults',ship:'brig',vehicle:'caravan'});
+ assert.equal(e.view().defaultShip,'brig');assert.equal(e.view().defaultVehicle,'caravan');
+ const land=e.query({query:'connection',stops:[city(e,'cairo'),city(e,'suez')]});assert.equal(land.default,'caravan');
  const road=e.data.roads.find(r=>!e.data.cities[r.a].inland&&!e.data.cities[r.b].inland);
- const both=e.query({query:'connection',stops:[road.a,road.b]});assert.ok(both.types.includes('camel'));assert.equal(both.default,'brig');
+ const both=e.query({query:'connection',stops:[road.a,road.b]});assert.ok(both.types.includes('caravan'));assert.equal(both.default,'brig');
  e.cmd({action:'defaults',ship:'sloop',vehicle:'wagon'});
  const long=e.query({query:'connection',stops:[city(e,'kingston'),city(e,'london')]});assert.ok(!long.types.includes('sloop'));
  const cheapest=e.data.specs.filter(s=>long.types.includes(s.id)&&s.mode==='sea').sort((a,b)=>a.price-b.price)[0];assert.equal(long.default,cheapest.id);

@@ -290,7 +290,7 @@ impl Engine {
         if c > 0 {
             self.guard_rival_budget(c);
         }
-        for t in 0..3 {
+        for t in 0..6 {
             let budget = self.game.companies[c].tech_budget[t];
             if budget > 0.0 && self.game.companies[c].cash >= budget {
                 self.entry(c, "technologyInvestment", -budget, None, t.to_string());

@@ -22,6 +22,8 @@ pub struct Spec {
     pub range: f64,
     pub daily: f64,
     pub guns: f64,
+    #[serde(default)]
+    pub roughness: f64,
     pub level: f64,
 }
 #[derive(Clone, Deserialize)]
@@ -192,7 +194,10 @@ impl Activity {
         (self.total() > 0.0).then(|| self.waiting / self.total() * 100.0)
     }
 }
-pub const HANDLING_PER_DAY: f64 = 10.0;
+pub const HANDLING_PER_DAY: f64 = 5.0;
+pub fn legacy_handling_rate() -> f64 {
+    10.0
+}
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Route {
     pub id: u32,
@@ -202,6 +207,8 @@ pub struct Route {
     pub min_margin: f64,
     pub active: bool,
     pub epoch: f64,
+    #[serde(default = "legacy_handling_rate")]
+    pub handling_rate: f64,
     pub auto_manage: bool,
     pub auto_type: String,
     pub cooldown: u32,
@@ -237,6 +244,8 @@ pub struct Voyage {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Handling {
+    #[serde(default = "legacy_handling_rate")]
+    pub rate: f64,
     pub unloading: bool,
     pub total: f64,
     pub remaining: f64,
@@ -304,9 +313,9 @@ pub struct Company {
     #[serde(default)]
     pub accounts: Option<Accounts>,
     pub routes: Vec<Route>,
-    pub technology: [f64; 3],
-    pub tech_budget: [f64; 3],
-    pub shipyard: bool,
+    pub technology: Vec<f64>,
+    pub tech_budget: Vec<f64>,
+    #[serde(default, skip_serializing)]
     pub yard_value: f64,
     pub designs: Vec<String>,
     pub automation: Automation,
@@ -322,6 +331,8 @@ pub struct Game {
     pub version: u32,
     #[serde(default)]
     pub cargo_time_version: u32,
+    #[serde(default)]
+    pub transport_version: u32,
     pub seed: u32,
     pub rng: u32,
     pub day: u32,
@@ -436,8 +447,17 @@ impl Engine {
     }
     pub fn daily(&self, c: usize, kind: &str) -> f64 {
         let s = self.spec(kind).unwrap();
-        let level = self.game.companies[c].technology[if s.mode == "land" { 2 } else { 1 }];
+        let level = self.game.companies[c].technology[if s.mode == "land" { 4 } else { 1 }];
         s.daily * (1.0 - if s.mode == "land" { 0.35 } else { 0.25 } * level / (50.0 + level))
+    }
+    pub fn handling_rate(&self, c: usize, mode: &str) -> f64 {
+        let level = self.game.companies[c].technology[if mode == "land" { 5 } else { 2 }];
+        HANDLING_PER_DAY * (1.0 + (level / 25.0).ln_1p())
+    }
+    pub fn road_passability(&self, i: usize) -> f64 {
+        let base = self.data.roads[i].penalty.clamp(0.1, 1.0);
+        let quality = self.game.roads[i].quality;
+        base + (1.0 - base) * quality / (5.0 + quality)
     }
     pub fn days(&self, kind: &str, a: usize, b: usize) -> u32 {
         let s = self.spec(kind).unwrap();
@@ -446,32 +466,7 @@ impl Engine {
             let Some(i) = self.road(a, b) else {
                 return u32::MAX;
             };
-            let r = &self.data.roads[i];
-            let q = self.game.roads[i].quality;
-            let u = q / (5.0 + q);
-            let terrain = r.climate.as_deref().unwrap_or(&r.terrain);
-            let (p, benefit) = match s.id.as_str() {
-                "camel" => (
-                    match terrain {
-                        "plain" => 0.8,
-                        "hill" => 0.65,
-                        "mountain" => 0.4,
-                        _ => 1.8,
-                    },
-                    0.25,
-                ),
-                "mule" => (
-                    match terrain {
-                        "plain" => 0.95,
-                        "hill" => 1.0,
-                        "mountain" => 1.0,
-                        _ => 0.65,
-                    },
-                    0.35,
-                ),
-                _ => (r.penalty, 1.0),
-            };
-            speed *= (p + (1.0 - p).max(0.0) * 0.6 * u) * (1.0 + benefit * u);
+            speed *= self.road_passability(i) + (1.0 - self.road_passability(i)) * s.roughness;
         }
         (self.distance(kind, a, b) / speed).ceil().max(1.0) as u32
     }
@@ -662,6 +657,7 @@ impl Game {
             format: "sails-flags-wasm".into(),
             version: 1,
             cargo_time_version: 1,
+            transport_version: 1,
             seed,
             rng,
             day: 0,
@@ -732,9 +728,8 @@ impl Company {
             default_vehicle: default_vehicle(),
             accounts: None,
             routes: vec![],
-            technology: [0.0; 3],
-            tech_budget: [0.0; 3],
-            shipyard: false,
+            technology: vec![0.0; 6],
+            tech_budget: vec![0.0; 6],
             yard_value: 0.0,
             designs: vec![],
             automation: Automation {

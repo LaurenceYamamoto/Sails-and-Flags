@@ -53,6 +53,52 @@ impl Engine {
                 let mut g: Game = serde_json::from_str(text).map_err(
                     |_| "この保存形式は読み込めません。旧版セーブには対応していません。",
                 )?;
+                if g.transport_version == 0 {
+                    for c in &mut g.companies {
+                        model::ensure(
+                            c.technology.len() == 3 && c.tech_budget.len() == 3,
+                            "旧技術データが不正です。",
+                        )?;
+                        c.technology = vec![
+                            c.technology[0],
+                            c.technology[1],
+                            0.0,
+                            0.0,
+                            c.technology[2],
+                            0.0,
+                        ];
+                        c.tech_budget = vec![
+                            c.tech_budget[0],
+                            c.tech_budget[1],
+                            0.0,
+                            0.0,
+                            c.tech_budget[2],
+                            0.0,
+                        ];
+                        let convert = |s: &mut String| {
+                            if ["camel", "mule"].contains(&s.as_str()) {
+                                *s = "caravan".into();
+                            }
+                        };
+                        convert(&mut c.default_vehicle);
+                        for s in &mut c.ships {
+                            convert(&mut s.kind);
+                        }
+                        for r in &mut c.routes {
+                            convert(&mut r.auto_type);
+                            for k in &mut r.replacements {
+                                convert(k);
+                            }
+                            // Both new handling technologies start at zero.
+                            r.handling_rate = 5.0;
+                            r.activity = model::Activity {
+                                since: g.day,
+                                ..Default::default()
+                            };
+                            r.epoch = g.day as f64;
+                        }
+                    }
+                }
                 self.validate(&g, true)?;
                 Self::normalize_account_history(&mut g);
                 if g.cargo_time_version == 0 {
@@ -69,8 +115,26 @@ impl Engine {
                     }
                     g.cargo_time_version = 1;
                 }
+                let refunds: Vec<_> = g
+                    .companies
+                    .iter()
+                    .map(|c| if c.acquired { 0.0 } else { c.yard_value })
+                    .collect();
+                for c in &mut g.companies {
+                    model::ensure(
+                        model::amount(c.cash.max(0.0) + c.yard_value),
+                        "旧造船所の資産が不正です。",
+                    )?;
+                    c.yard_value = 0.0;
+                }
+                g.transport_version = 1;
                 self.validate(&g, false)?;
                 self.game = g;
+                for (c, refund) in refunds.into_iter().enumerate() {
+                    if refund > 0.0 {
+                        self.entry(c, "shipyardRefund", refund, None, String::new());
+                    }
+                }
                 self.capture_accounts();
 
                 Ok(json!(true))
