@@ -115,6 +115,7 @@ impl Engine {
             next: 0,
             ready: self.game.day,
             voyage: None,
+            handling: None,
             cargo: vec![],
             voyages: 0,
         });
@@ -146,10 +147,13 @@ impl Engine {
             .into_iter()
             .filter(|n| !self.game.companies[c].licenses.contains(n))
             .collect();
-        let idle = self.game.companies[c]
-            .ships
-            .iter()
-            .find(|s| s.route.is_none() && s.voyage.is_none() && s.kind == kind);
+        let idle = self.game.companies[c].ships.iter().find(|s| {
+            s.route.is_none()
+                && s.voyage.is_none()
+                && s.handling.is_none()
+                && s.cargo.is_empty()
+                && s.kind == kind
+        });
         let cost = if idle.is_some() {
             0.0
         } else {
@@ -203,7 +207,7 @@ impl Engine {
                 allowed,
                 min_margin: margin,
                 active: true,
-                epoch: self.game.day as i64 + 1,
+                epoch: self.game.day as f64,
                 auto_manage: true,
                 auto_type: kind.into(),
                 cooldown: self.game.day,
@@ -214,6 +218,10 @@ impl Engine {
                 started: self.game.day,
                 deliveries: 0,
                 transport: Transport {
+                    since: self.game.day,
+                    ..Default::default()
+                },
+                activity: Activity {
                     since: self.game.day,
                     ..Default::default()
                 },
@@ -233,7 +241,7 @@ impl Engine {
         self.assign(c, id, ship)?;
         Ok(id)
     }
-    pub fn schedule(&self, c: usize, r: &Route) -> (u32, Vec<u32>, Vec<usize>) {
+    pub fn schedule(&self, c: usize, r: &Route) -> (f64, Vec<f64>, Vec<usize>) {
         let fleet: Vec<usize> = self.game.companies[c]
             .ships
             .iter()
@@ -241,19 +249,23 @@ impl Engine {
             .filter(|(_, s)| s.route == Some(r.id))
             .map(|(i, _)| i)
             .collect();
-        let mut cycle = 0u32;
+        let mut cycle = 0.0;
         let mut offsets = vec![];
         for (i, &a) in r.stops.iter().enumerate() {
             offsets.push(cycle);
             let b = r.stops[(i + 1) % r.stops.len()];
+            let leg = |kind: &str| {
+                self.days(kind, a, b) as f64
+                    + 2.0 * self.spec(kind).unwrap().capacity as f64 / HANDLING_PER_DAY
+            };
             let days = fleet
                 .iter()
-                .map(|&j| self.days(&self.game.companies[c].ships[j].kind, a, b))
-                .max()
-                .unwrap_or_else(|| self.days(&r.auto_type, a, b));
-            cycle = cycle.saturating_add(days.saturating_add(1));
+                .map(|&j| leg(&self.game.companies[c].ships[j].kind))
+                .reduce(f64::max)
+                .unwrap_or_else(|| leg(&r.auto_type));
+            cycle += days;
         }
-        (cycle.max(1), offsets, fleet)
+        (cycle.max(1.0), offsets, fleet)
     }
     pub fn reschedule(&mut self, c: usize, id: u32) {
         let Some(i) = self.game.companies[c]
@@ -263,12 +275,18 @@ impl Engine {
         else {
             return;
         };
-        let (_, offsets, fleet) = self.schedule(c, &self.game.companies[c].routes[i]);
+        let (cycle, offsets, fleet) = self.schedule(c, &self.game.companies[c].routes[i]);
         let offset = fleet
             .first()
             .map(|&j| offsets[self.game.companies[c].ships[j].next])
-            .unwrap_or(0);
-        self.game.companies[c].routes[i].epoch = self.game.day as i64 + 1 - offset as i64;
+            .unwrap_or(0.0);
+        let r = &mut self.game.companies[c].routes[i];
+        r.epoch = self.game.day as f64 - offset;
+        r.activity = Activity {
+            since: self.game.day,
+            ..Default::default()
+        };
+        r.cooldown = self.game.day + cycle.ceil() as u32;
     }
     pub fn assign(&mut self, c: usize, id: u32, ship: u32) -> Result<()> {
         self.playable(c)?;
@@ -286,6 +304,8 @@ impl Engine {
         ensure(
             s.route.is_none()
                 && s.voyage.is_none()
+                && s.handling.is_none()
+                && s.cargo.is_empty()
                 && self.spec(&s.kind)?.mode == r.mode
                 && self.can_serve(&s.kind, &r.stops),
             "対応する未使用船を選択してください。",
@@ -293,7 +313,7 @@ impl Engine {
         let s = &mut self.game.companies[c].ships[i];
         s.route = Some(id);
         s.next = 0;
-        s.ready = self.game.day + 1;
+        s.ready = self.game.day;
         self.reschedule(c, id);
         Ok(())
     }
@@ -304,7 +324,10 @@ impl Engine {
             .position(|s| s.id == ship)
             .ok_or("船がありません。")?;
         let s = &mut self.game.companies[c].ships[i];
-        ensure(s.voyage.is_none(), "航行中の船は解除できません。")?;
+        ensure(
+            s.voyage.is_none() && s.handling.is_none() && s.cargo.is_empty(),
+            "移動・荷役中の船は解除できません。",
+        )?;
         let old = s.route;
         s.route = None;
         s.cargo.clear();
@@ -324,13 +347,14 @@ impl Engine {
                     .ships
                     .iter()
                     .filter(|s| s.route == Some(id))
-                    .all(|s| s.voyage.is_none()),
-            "航行中の船があります。",
+                    .all(|s| s.voyage.is_none() && s.handling.is_none() && s.cargo.is_empty()),
+            "移動・荷役中の船があります。",
         )?;
         for s in &mut self.game.companies[c].ships {
             if s.route == Some(id) {
                 s.route = None;
                 s.voyage = None;
+                s.handling = None;
                 s.cargo.clear();
             }
         }

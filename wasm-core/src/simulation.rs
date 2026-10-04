@@ -1,6 +1,5 @@
 use crate::model::*;
 use crate::trade::ratio;
-use std::collections::BTreeMap;
 impl Engine {
     pub fn market_flow(&self, city: usize, g: usize) -> (f64, f64, f64, f64) {
         let c = &self.data.cities[city];
@@ -82,9 +81,6 @@ impl Engine {
                 let daily = self.daily(c, &s.kind);
                 let route = s.route;
                 self.entry(c, "upkeep", -daily, route, String::new());
-                if let Some(v) = &mut self.game.companies[c].ships[i].voyage {
-                    v.upkeep += daily;
-                }
                 if let Some(r) = self.game.companies[c]
                     .routes
                     .iter_mut()
@@ -402,241 +398,6 @@ impl Engine {
             0.025 / defense,
         )
     }
-    fn sail(&mut self, c: usize) {
-        let schedules: BTreeMap<_, _> = self.game.companies[c]
-            .routes
-            .iter()
-            .map(|r| {
-                let (cycle, offsets, fleet) = self.schedule(c, r);
-                (
-                    r.id,
-                    (
-                        cycle,
-                        offsets,
-                        fleet
-                            .iter()
-                            .map(|&i| self.game.companies[c].ships[i].id)
-                            .collect::<Vec<_>>(),
-                    ),
-                )
-            })
-            .collect();
-        let ids: Vec<_> = self.game.companies[c].ships.iter().map(|s| s.id).collect();
-        for id in ids {
-            if self.game.companies[c].bankrupt {
-                break;
-            }
-            let i = self.game.companies[c]
-                .ships
-                .iter()
-                .position(|s| s.id == id)
-                .unwrap();
-            let daily = self.daily(c, &self.game.companies[c].ships[i].kind);
-            let route_id = self.game.companies[c].ships[i].route;
-            let mut ship = self.game.companies[c].ships.remove(i);
-            let Some(ri) = self.game.companies[c]
-                .routes
-                .iter()
-                .position(|r| Some(r.id) == route_id)
-            else {
-                self.game.companies[c].ships.push(ship);
-                continue;
-            };
-            let route = self.game.companies[c].routes[ri].clone();
-            if let Some(mut v) = ship.voyage.take() {
-                let (chance, fraction, sink) = self.risk(c, &route, &ship.kind, v.from, v.to);
-                if chance > 0.0 && self.random() < chance {
-                    let severity = self.random();
-                    let lost = self.random() < sink;
-                    let mut cost = 0.0;
-                    for item in &mut ship.cargo {
-                        let q = if lost {
-                            item.quantity
-                        } else {
-                            ((item.quantity as f64 * fraction * (0.5 + severity / 2.0)).ceil()
-                                as usize)
-                                .min(item.quantity)
-                        };
-                        let x = if item.quantity > 0 {
-                            item.cost * q as f64 / item.quantity as f64
-                        } else {
-                            0.0
-                        };
-                        item.quantity -= q;
-                        item.cost -= x;
-                        cost += x;
-                    }
-                    ship.cargo.retain(|x| x.quantity > 0);
-                    self.game.companies[c].routes[ri].transport.costs += cost;
-                    self.game.companies[c].routes[ri].cargo_loss += cost;
-                    self.event(
-                        "raided",
-                        format!(
-                            "{}: {} が襲撃を受けました",
-                            self.game.companies[c].name, ship.name
-                        ),
-                    );
-                    if lost {
-                        let value = self.spec(&ship.kind).unwrap().price;
-                        let r = &mut self.game.companies[c].routes[ri];
-                        r.ship_loss += value;
-                        r.transport.costs += value;
-                        if r.replacements.len() < 200 {
-                            r.replacements.push(ship.kind.clone());
-                        }
-                        let rid = r.id;
-                        self.reschedule(c, rid);
-                        continue;
-                    }
-                }
-                v.remaining = v.remaining.saturating_sub(1);
-                if v.remaining == 0 {
-                    let mut revenue = 0.0;
-                    let remaining_cost = ship.cargo.iter().map(|x| x.cost).sum::<f64>();
-                    for cargo in &ship.cargo {
-                        revenue += self
-                            .trade(c, v.to, cargo.good, cargo.quantity, false, route_id)
-                            .1;
-                    }
-                    ship.cargo.clear();
-                    ship.next = (ship.next + 1) % route.stops.len();
-                    ship.ready = self.game.day + 1;
-                    ship.voyages += 1;
-                    let sale_tax = revenue
-                        / (1.0 - self.terms(c, self.data.cities[v.to].nation, 0).2)
-                        - revenue;
-                    let r = &mut self.game.companies[c].routes[ri];
-                    r.deliveries += 1;
-                    r.transport.deliveries += 1;
-                    r.transport.sales += revenue + sale_tax;
-                    r.transport.costs += remaining_cost + sale_tax;
-                    r.actual = Some(revenue - v.original_cost - v.upkeep);
-                } else {
-                    ship.voyage = Some(v);
-                }
-            } else if route.active && ship.ready <= self.game.day {
-                let (cycle, offsets, fleet) = &schedules[&route.id];
-                let phase = fleet.iter().position(|&x| x == ship.id).unwrap() as i64
-                    * (*cycle as i64)
-                    / fleet.len() as i64;
-                let first = route.epoch + phase + offsets[ship.next] as i64;
-                if (self.game.day as i64 - first).rem_euclid(*cycle as i64) == 0 {
-                    let a = route.stops[ship.next];
-                    let b = route.stops[(ship.next + 1) % route.stops.len()];
-                    let days = self.days(&ship.kind, a, b);
-                    let toll = if route.mode == "land" {
-                        self.toll(c, a, b)
-                    } else {
-                        0.0
-                    };
-                    let co = &self.game.companies[c];
-                    // The current ship is temporarily detached while processing.
-                    let mandatory = daily
-                        + co.ships.iter().map(|s| self.daily(c, &s.kind)).sum::<f64>()
-                        + co.licenses
-                            .iter()
-                            .map(|&n| self.terms(c, n, 0).1)
-                            .sum::<f64>()
-                        + co.routes
-                            .iter()
-                            .map(|r| r.escorts as f64 * 4.0)
-                            .sum::<f64>()
-                        + co.diplomacy_budget.iter().sum::<f64>()
-                        + co.tech_budget.iter().sum::<f64>()
-                        + self
-                            .game
-                            .development
-                            .iter()
-                            .filter(|d| d.owner == co.id)
-                            .map(|d| d.size_budget + d.production_budget.iter().sum::<f64>())
-                            .sum::<f64>()
-                        + self
-                            .game
-                            .roads
-                            .iter()
-                            .filter(|d| d.owner == co.id)
-                            .map(|d| d.road_budget + d.security_budget)
-                            .sum::<f64>();
-                    let reserve = mandatory * (days + 1) as f64;
-                    let spec = self.spec(&ship.kind).unwrap().clone();
-                    let (mut plan, cost, sale) = self.load_plan(
-                        c,
-                        a,
-                        b,
-                        spec.capacity,
-                        (self.game.companies[c].cash - reserve - toll).max(0.0),
-                        &route.allowed,
-                        route.min_margin,
-                    );
-                    let forecast = sale - cost - days as f64 * daily - toll;
-                    self.game.companies[c].routes[ri].forecast = forecast;
-                    let profitable = !plan.is_empty() && forecast > 0.0;
-                    let reposition = !profitable
-                        && self.game.companies[c].cash >= toll
-                        && route.stops.iter().enumerate().any(|(j, &from)| {
-                            if j == ship.next {
-                                return false;
-                            }
-                            let to = route.stops[(j + 1) % route.stops.len()];
-                            let (_, cost, sales) = self.load_plan(
-                                c,
-                                from,
-                                to,
-                                spec.capacity,
-                                (self.game.companies[c].cash - reserve * 2.0).max(0.0),
-                                &route.allowed,
-                                route.min_margin,
-                            );
-                            let next_toll = if route.mode == "land" {
-                                self.toll(c, from, to)
-                            } else {
-                                0.0
-                            };
-                            sales - cost
-                                > daily * (days + self.days(&ship.kind, from, to)) as f64
-                                    + toll
-                                    + next_toll
-                        });
-                    if !profitable {
-                        plan.clear();
-                    }
-                    if profitable || reposition {
-                        if reposition {
-                            self.game.companies[c].routes[ri].forecast =
-                                -daily * days as f64 - toll;
-                        }
-                        if toll > 0.0 {
-                            self.entry(c, "roadToll", -toll, route_id, String::new());
-                            self.game.companies[c].routes[ri].transport.costs += toll;
-                            let j = self.road(a, b).unwrap();
-                            if !["state", "private"].contains(&self.game.roads[j].owner.as_str()) {
-                                self.game.roads[j].pool += toll * 0.2;
-                            }
-                        }
-                        let mut original_cost = toll;
-                        for (g, q) in plan {
-                            let (quantity, cost) = self.trade(c, a, g, q, true, route_id);
-                            ship.cargo.push(Cargo {
-                                good: g,
-                                quantity,
-                                cost,
-                            });
-                            original_cost += cost;
-                        }
-                        ship.voyage = Some(Voyage {
-                            from: a,
-                            to: b,
-                            total: days,
-                            remaining: days,
-                            original_cost,
-                            upkeep: 0.0,
-                        });
-                    }
-                }
-            }
-            self.game.companies[c].ships.push(ship);
-        }
-    }
     fn automate(&mut self, c: usize) {
         let month = self.calendar().0;
         if self.game.companies[c].automation.month != month {
@@ -664,18 +425,24 @@ impl Engine {
                 None
             };
             let (cycle, _, fleet) = self.schedule(c, &r);
-            let margin = r.transport.margin();
+            let idle = r.activity.idle_ratio();
             let expand = replacement.is_some()
                 || (self.game.day >= r.cooldown
-                    && self.game.day - r.transport.since >= cycle
-                    && r.transport.deliveries > 0
-                    && margin.is_some_and(|m| m > a.expand));
+                    && (self.game.day - r.activity.since) as f64 >= cycle
+                    && r.activity.total() >= cycle
+                    && idle.is_some_and(|p| p < a.expand));
             if expand {
                 let kind = replacement.clone().unwrap_or(r.auto_type.clone());
                 let idle = self.game.companies[c]
                     .ships
                     .iter()
-                    .find(|s| s.route.is_none() && s.kind == kind)
+                    .find(|s| {
+                        s.route.is_none()
+                            && s.voyage.is_none()
+                            && s.handling.is_none()
+                            && s.cargo.is_empty()
+                            && s.kind == kind
+                    })
                     .map(|s| s.id);
                 let cost = if idle.is_some() {
                     0.0
@@ -700,9 +467,9 @@ impl Engine {
                     }
                 }
             } else if self.game.day >= r.cooldown
-                && self.game.day - r.transport.since >= cycle
+                && (self.game.day - r.activity.since) as f64 >= cycle
                 && fleet.len() > 1
-                && margin.is_some_and(|m| m < a.shrink)
+                && idle.is_some_and(|p| p > a.shrink)
             {
                 let mut candidates = fleet
                     .iter()
@@ -714,7 +481,7 @@ impl Engine {
                     ak.cmp(&bk)
                 });
                 if let Some(s) = candidates.first() {
-                    if s.voyage.is_none() {
+                    if s.voyage.is_none() && s.handling.is_none() && s.cargo.is_empty() {
                         let ship = s.id;
                         let _ = self.release(c, ship);
                         self.reset_observation(c, ri, cycle);
@@ -723,8 +490,12 @@ impl Engine {
             }
         }
     }
-    fn reset_observation(&mut self, c: usize, r: usize, cycle: u32) {
-        self.game.companies[c].routes[r].cooldown = self.game.day + cycle;
+    fn reset_observation(&mut self, c: usize, r: usize, cycle: f64) {
+        self.game.companies[c].routes[r].cooldown = self.game.day + cycle.ceil() as u32;
+        self.game.companies[c].routes[r].activity = Activity {
+            since: self.game.day,
+            ..Default::default()
+        };
         self.game.companies[c].routes[r].transport = Transport {
             since: self.game.day,
             ..Default::default()

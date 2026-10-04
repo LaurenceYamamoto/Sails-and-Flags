@@ -1,18 +1,19 @@
 {
-  "version": "3.0.2",
-  "binary": "5491daea6d2355a45f5debcb9cc87c45fd599dc4b3f13f642a736cea10c0b9f1",
+  "version": "3.1.0",
+  "binary": "50b7f5263aea902116b21bb961b97a3331aac8ac24e4b8ca59e5d2b194eb3795",
   "sources": {
-    "wasm-core/Cargo.lock": "47649c9f5f7354d4a59ae7c99d0a51baf3f0a513eaa6439fcd9018bd60ab1d6f",
-    "wasm-core/Cargo.toml": "587bb6ed17871d76632d2d1563304be2a92dbb68b65158d85389495be914a8b6",
+    "wasm-core/Cargo.lock": "1b7224ab572e0f1580a7533004d65ace77fc60f7310ec3ed5686ce57fe53f16f",
+    "wasm-core/Cargo.toml": "f7ce7d64c2af8723088fc98c637f9ad70c3cb04bf78ec8b17f99ce8526fdf22d",
     "wasm-core/data/world.json": "784eae1344a9a51fb727420be14ae83580561e22727b706987fad8aca7f83882",
     "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
-    "wasm-core/src/commands.rs": "8ce93939997620f81c7070d9d8e035391b609d4d9cac770ac8a89ef72c4ca459",
-    "wasm-core/src/lib.rs": "57bd8910d98020a21e5274039e9e078420abdfdb99d737e178c89bcf7312e8f1",
+    "wasm-core/src/commands.rs": "7995268fada4e5bc173a4e97f85c64b8dd294a3376e692093729802bd362be76",
+    "wasm-core/src/lib.rs": "f525bb13ef5efff95a77c48945d99130e0840a3194e19aa48a8525b02cb24b0c",
     "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
-    "wasm-core/src/model.rs": "bc42472eb8040ebf9a0f93a4881f75520fea76e823c17cf0195c91debbe44e11",
-    "wasm-core/src/rivals.rs": "dacb399ce64e8f96199c6f93f95010eb9cfdf508d69f3912e2ec6914a3cb9076",
-    "wasm-core/src/simulation.rs": "6d3827ab1b6175e6b7423d64547041238253531f92329ff31637e682f884e2fa",
-    "wasm-core/src/trade.rs": "b3ac525ca7d5286f0d6a579f1ffb0a3a161acfc05fb1cb3e28a1f7b59aa2f52d",
-    "wasm-core/src/view.rs": "02ac8c90b6eb71af7f0a908305f858f5dc744a227ade0569f74d8f3130555fea"
+    "wasm-core/src/model.rs": "1caf3300583ff48bdb843845a8ebcd812da37f4072652af7afd459f768bd6d5f",
+    "wasm-core/src/movement.rs": "f3fdde75f94c15eba8042966ba1f646efd0ad1be0dcf85fb42a799676adcd0a6",
+    "wasm-core/src/rivals.rs": "85c1f33bd84d0f4c9aa7486ddf7f4def870ac7b72f178486e18ecc7e162e6409",
+    "wasm-core/src/simulation.rs": "41da30ea204af26d11e90649e7e9d0a1d01793473373cec28c1bfa14c6532374",
+    "wasm-core/src/trade.rs": "c546dafa217a6e117f166b833c908f3356b7d22f69e8667254c2c6c6be372698",
+    "wasm-core/src/view.rs": "428b81af95dc741049b60d5b7ea96c7cefbf644445ff3b0f15e2435e433b7d9d"
   }
 }

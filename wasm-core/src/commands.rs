@@ -383,7 +383,10 @@ impl Engine {
                     .ok_or("船・車両がありません。")?;
                 let ship = &self.game.companies[0].ships[i];
                 ensure(
-                    ship.route.is_none() && ship.voyage.is_none() && ship.cargo.is_empty(),
+                    ship.route.is_none()
+                        && ship.voyage.is_none()
+                        && ship.handling.is_none()
+                        && ship.cargo.is_empty(),
                     "未使用の船・車両のみ売却できます。",
                 )?;
                 let price = self.spec(&ship.kind)?.price;
@@ -446,15 +449,19 @@ impl Engine {
             "automation" => {
                 let budget = number(v, "budget")?;
                 let reserve = number(v, "reserve")?;
-                let expand = v["expand"].as_f64().ok_or("利益率を指定してください。")?;
-                let shrink = v["shrink"].as_f64().ok_or("利益率を指定してください。")?;
+                let expand = v["expand"]
+                    .as_f64()
+                    .ok_or("待機時間割合を指定してください。")?;
+                let shrink = v["shrink"]
+                    .as_f64()
+                    .ok_or("待機時間割合を指定してください。")?;
                 ensure(
                     expand.is_finite()
                         && shrink.is_finite()
-                        && shrink >= -100.0
-                        && expand <= 10000.0
-                        && expand >= shrink,
-                    "利益率が不正です。",
+                        && expand >= 0.0
+                        && shrink <= 100.0
+                        && expand <= shrink,
+                    "待機時間割合は0～100%で、拡大の基準を縮小の基準以下にしてください。",
                 )?;
                 let a = &mut self.game.companies[0].automation;
                 ensure(budget >= a.spent, "使用済み予算より小さくできません。")?;

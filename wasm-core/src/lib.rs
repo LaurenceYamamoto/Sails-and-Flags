@@ -2,6 +2,7 @@ mod accounts;
 mod commands;
 mod loading;
 mod model;
+mod movement;
 mod rivals;
 mod simulation;
 mod trade;
@@ -54,6 +55,20 @@ impl Engine {
                 )?;
                 self.validate(&g, true)?;
                 Self::normalize_account_history(&mut g);
+                if g.cargo_time_version == 0 {
+                    for c in &mut g.companies {
+                        c.automation.expand = 10.0;
+                        c.automation.shrink = 30.0;
+                        for r in &mut c.routes {
+                            r.activity = model::Activity {
+                                since: g.day,
+                                ..Default::default()
+                            };
+                            r.epoch = g.day as f64;
+                        }
+                    }
+                    g.cargo_time_version = 1;
+                }
                 self.validate(&g, false)?;
                 self.game = g;
                 self.capture_accounts();

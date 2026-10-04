@@ -93,7 +93,7 @@ impl Engine {
             .chain(co.designs.iter().filter_map(|id| self.game.designs.get(id)))
             .collect::<Vec<_>>();
         catalog.sort_by(|a, b| a.price.total_cmp(&b.price));
-        let companies=self.game.companies.iter().enumerate().filter(|(_,c)|!c.acquired).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["cycle"]=json!(cycle);v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.route.is_none()&&s.voyage.is_none()&&s.cargo.is_empty());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"fixed":c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
+        let companies=self.game.companies.iter().enumerate().filter(|(_,c)|!c.acquired).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["cycle"]=json!(cycle);v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["idleRatio"]=json!(r.activity.idle_ratio());v["observing"]=json!(((self.game.day-r.activity.since) as f64)<cycle);v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"fixed":c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
         let licenses=self.data.nations.iter().enumerate().map(|(n,_)|{let(fee,daily,tax)=self.terms(0,n,co.licenses.len());json!({"nation":n,"friendship":co.friendship[n],"fee":fee,"daily":daily,"tax":tax*100.0,"owned":co.licenses.contains(&n),"eligible":co.friendship[n]>=30.0&&co.cash>=fee,"budget":co.diplomacy_budget[n],"changes":co.friendship_history.iter().rev().filter(|h|h.nation==n).collect::<Vec<_>>()})}).collect::<Vec<_>>();
         let market=self.data.goods.iter().enumerate().map(|(g,good)|{let(production,demand,consumption,_)=self.market_flow(city,g);let stock=self.game.markets[city*self.data.goods.len()+g].stock;json!({"good":g,"stock":stock,"price":good.base*ratio(stock),"production":production,"demand":demand,"consumption":consumption,"unmet":(demand-consumption).max(0.0),"details":self.demand_details(city,g),"baseProduction":self.data.cities[city].supply[g],"budget":self.game.development[city].production_budget[g],"level":self.game.development[city].production[g]})}).collect::<Vec<_>>();
         let roads = self
@@ -123,11 +123,14 @@ impl Engine {
             .filter(|p| p.until.is_some())
             .map(|p| json!({"a":p.a,"b":p.b}))
             .collect::<Vec<_>>();
-        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"shipyard":co.shipyard,"canBuyShipyard":!co.shipyard&&co.technology[0]>=5.0&&co.cash>=4000.0,"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
+        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"shipyard":co.shipyard,"canBuyShipyard":!co.shipyard&&co.technology[0]>=5.0&&co.cash>=4000.0,"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
     }
     pub fn validate(&self, g: &Game, loading: bool) -> Result<()> {
         ensure(
-            g.format == "sails-flags-wasm" && g.version == 1,
+            g.format == "sails-flags-wasm"
+                && g.version == 1
+                && g.cargo_time_version <= 1
+                && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
         )?;
         let d = &self.data;
@@ -262,9 +265,17 @@ impl Engine {
                     .iter()
                     .all(|&x| amount(x))
                     && c.automation.spent <= c.automation.budget
-                    && c.automation.shrink >= -100.0
-                    && c.automation.expand <= 10000.0
-                    && c.automation.shrink <= c.automation.expand,
+                    && c.automation.expand.is_finite()
+                    && c.automation.shrink.is_finite()
+                    && if g.cargo_time_version == 0 {
+                        c.automation.shrink >= -100.0
+                            && c.automation.expand <= 10000.0
+                            && c.automation.shrink <= c.automation.expand
+                    } else {
+                        c.automation.expand >= 0.0
+                            && c.automation.shrink <= 100.0
+                            && c.automation.expand <= c.automation.shrink
+                    },
                 "保存データの会社設定が不正です。",
             )?;
             ensure(
@@ -325,6 +336,17 @@ impl Engine {
                                 }
                         })
                         && r.transport.since <= g.day
+                        && r.activity.since <= g.day
+                        && r.epoch.is_finite()
+                        && [
+                            r.activity.moving,
+                            r.activity.loading,
+                            r.activity.unloading,
+                            r.activity.waiting,
+                            r.activity.total(),
+                        ]
+                        .iter()
+                        .all(|&x| amount(x))
                         && r.started <= g.day
                         && r.replacements.len() <= 200
                         && r.replacements.iter().all(|k| spec(k).is_some())
@@ -381,9 +403,40 @@ impl Engine {
                             "船の航行区間が不正です。",
                         )?;
                     }
+                    if let Some(h) = &s.handling {
+                        ensure(
+                            s.voyage.is_none()
+                                && !s.cargo.is_empty()
+                                && h.total.is_finite()
+                                && h.remaining.is_finite()
+                                && h.total > 0.0
+                                && h.remaining > 0.0
+                                && h.remaining <= h.total
+                                && (h.total
+                                    - s.cargo.iter().map(|x| x.quantity as f64).sum::<f64>()
+                                        / HANDLING_PER_DAY)
+                                    .abs()
+                                    < 1e-7
+                                && h.trip.total.is_finite()
+                                && h.trip.total > 0.0
+                                && amount(h.trip.original_cost)
+                                && amount(h.trip.upkeep)
+                                && if h.unloading {
+                                    h.trip.remaining == 0.0
+                                        && h.trip.to == r.stops[s.next]
+                                        && h.trip.from
+                                            == r.stops[(s.next + r.stops.len() - 1) % r.stops.len()]
+                                } else {
+                                    h.trip.remaining == h.trip.total
+                                        && h.trip.from == r.stops[s.next]
+                                        && h.trip.to == r.stops[(s.next + 1) % r.stops.len()]
+                                },
+                            "保存データの荷役状態が不正です。",
+                        )?;
+                    }
                 } else {
                     ensure(
-                        s.cargo.is_empty() && s.voyage.is_none(),
+                        s.cargo.is_empty() && s.voyage.is_none() && s.handling.is_none(),
                         "未配置の船の状態が不正です。",
                     )?;
                 }
@@ -392,8 +445,10 @@ impl Engine {
                         s.route.is_some()
                             && v.from < d.cities.len()
                             && v.to < d.cities.len()
-                            && v.total > 0
-                            && v.remaining > 0
+                            && v.total.is_finite()
+                            && v.remaining.is_finite()
+                            && v.total > 0.0
+                            && v.remaining > 0.0
                             && v.remaining <= v.total
                             && amount(v.original_cost)
                             && amount(v.upkeep),

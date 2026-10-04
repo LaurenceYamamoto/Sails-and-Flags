@@ -9,6 +9,63 @@ function city(e,id){return e.data.cities.findIndex(c=>c.id===id);}
 function nation(e,id){return e.data.nations.findIndex(n=>n.id===id);}
 function open(e,ids,kind='sloop'){const stops=ids.map(id=>city(e,id));for(const n of e.query({query:'opening',kind,stops}).missing)e.cmd({action:'license',nation:n});return e.cmd({action:'openRoute',kind,stops,allowed:e.data.goods.map((_,i)=>i),margin:10});}
 
+test('sea and land cargo operations consume fractional days in order and sell only after unloading',async()=>{
+ for(const [ids,kind] of [[['kingston','havana'],'sloop'],[['cairo','suez'],'camel']]){
+  const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,ids,kind);
+  const g=e.save(),r=g.companies[0].routes[0],s=g.companies[0].ships[0];r.active=false;
+  s.cargo=[{good:0,quantity:15,cost:150}];s.voyage=null;
+  s.handling={unloading:false,total:1.5,remaining:1.5,trip:{from:r.stops[0],to:r.stops[1],total:2,remaining:2,original_cost:150,upkeep:0}};
+  e.load(g);const before=e.save();
+  for(const command of [{action:'release',ship:s.id},{action:'sellShip',ship:s.id},{action:'removeRoute',route:id}]){assert.throws(()=>e.cmd(command));assert.deepEqual(e.save(),before);}
+  for(const mutate of [s=>s.handling.remaining=-1,s=>s.handling.total=2,s=>s.handling.trip.from=999,s=>s.voyage={...s.handling.trip}]){
+   const bad=structuredClone(before);mutate(bad.companies[0].ships[0]);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),before);
+  }
+  e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships[0].handling.remaining,.5);
+  e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships[0].voyage.remaining,1.5);
+  e.cmd({action:'tick',days:2});let p=e.save().companies[0];assert.equal(p.ships[0].handling.unloading,true);assert.equal(p.ships[0].handling.remaining,1);assert.equal(p.routes[0].transport.sales,0);assert.equal(p.routes[0].deliveries,0);
+  const checkpoint=e.save();e.cmd({action:'tick',days:2});const result=e.save();e.load(checkpoint);e.cmd({action:'tick',days:2});assert.deepEqual(e.save(),result);
+  p=result.companies[0];assert.equal(p.ships[0].handling,null);assert.equal(p.ships[0].voyage,null);assert.equal(p.ships[0].cargo.length,0);assert.equal(p.routes[0].deliveries,1);assert.ok(p.routes[0].transport.sales>0);
+  assert.deepEqual(p.routes[0].activity,{since:0,moving:2,loading:1.5,unloading:1.5,waiting:1});assert.ok(Math.abs(e.view().companies[0].routes[0].idleRatio-100/6)<1e-9);
+ }
+});
+
+test('decimal cargo durations remain valid at every daily save boundary',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['kingston','havana']);const original=e.save();
+ for(const quantity of [1,3,7,13,29]){
+  const g=structuredClone(original),p=g.companies[0],r=p.routes[0],s=p.ships[0];r.active=false;s.cargo=[{good:0,quantity,cost:quantity*10}];s.handling={unloading:false,total:quantity/10,remaining:quantity/10,trip:{from:r.stops[0],to:r.stops[1],total:2,remaining:2,original_cost:quantity*10,upkeep:0}};e.load(g);
+  const days=Math.ceil(2+quantity/5);for(let i=0;i<days;i++){e.cmd({action:'tick',days:1});e.load(e.save());}
+  const route=e.save().companies[0].routes[0];assert.equal(route.deliveries,1);assert.ok(Math.abs(route.activity.moving-2)<1e-9);assert.ok(Math.abs(route.activity.loading-quantity/10)<1e-9);assert.ok(Math.abs(route.activity.unloading-quantity/10)<1e-9);assert.ok(Math.abs(route.activity.waiting-(days-2-quantity/5))<1e-9);
+ }
+});
+
+test('loading reserves purchased cargo, timetables include handling, and fleet time accounts for spacing',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);open(e,['kingston','havana']);
+ e.cmd({action:'route',route:id,allowed:[0],margin:10});const g=e.save();g.markets[0].stock=2000;g.markets[e.data.goods.length].stock=0;e.load(g);
+ const initial=e.view().companies[0].routes[0];assert.ok(initial.cycle>=16);assert.equal(initial.interval,initial.cycle/2);
+ e.cmd({action:'tick',days:1});let p=e.save().companies[0];const h=p.ships.find(s=>s.handling);assert.ok(h);assert.equal(h.handling.unloading,false);assert.equal(h.handling.total,h.cargo.reduce((n,x)=>n+x.quantity,0)/10);assert.ok(h.cargo.reduce((n,x)=>n+x.cost,0)>0);assert.equal(p.routes[0].transport.sales,0);
+ assert.equal(p.ships.filter(s=>s.handling||s.voyage).length,1);assert.equal(p.routes[0].activity.waiting,1);
+ e.cmd({action:'tick',days:7});p=e.save().companies[0];const a=p.routes[0].activity;assert.ok(Math.abs(a.moving+a.loading+a.unloading+a.waiting-16)<1e-9);e.load(e.save());
+});
+
+test('idle scaling validates percentages, waits for observation and migrates old profit thresholds',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);e.cmd({action:'route',route:id,auto:true});
+ const command={action:'automation',enabled:true,replaceLost:true,budget:20000,reserve:1000,expand:10,shrink:30};e.cmd(command);
+ for(const limits of [{expand:-1},{shrink:101},{expand:31}]){const before=e.save();assert.throws(()=>e.cmd({...command,...limits}));assert.deepEqual(e.save(),before);}
+ let g=e.save();g.companies[0].routes[0].cooldown=0;g.companies[0].routes[0].transport={since:0,sales:1e6,costs:1,upkeep:0,deliveries:100};e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.length,1);
+ g=e.save();delete g.cargo_time_version;for(const c of g.companies){c.automation.expand=25;c.automation.shrink=-10;for(const r of c.routes)delete r.activity;}const ship=g.companies[0].ships[0];e.load(g);const migrated=e.save();assert.equal(migrated.cargo_time_version,1);assert.deepEqual(migrated.companies[0].ships[0],ship);assert.equal(migrated.companies[0].automation.expand,10);assert.equal(migrated.companies[0].automation.shrink,30);assert.equal(e.view().companies[0].routes[0].idleRatio,null);e.load(migrated);assert.deepEqual(e.save(),migrated);
+});
+
+test('automatic contraction waits for unloading and otherwise removes the smallest fallback type',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);open(e,['kingston','havana'],'brig');
+ e.cmd({action:'route',route:id,kind:'sloop',auto:true});e.cmd({action:'automation',enabled:true,replaceLost:false,budget:0,reserve:0,expand:10,shrink:30});
+ const g=e.save(),p=g.companies[0],r=p.routes[0],s=p.ships.find(s=>s.kind==='sloop');g.day=100;r.cooldown=0;r.activity={since:0,moving:0,loading:0,unloading:0,waiting:200};p.ships.forEach(s=>s.ready=10000);
+ s.next=1;s.cargo=[{good:0,quantity:15,cost:150}];s.handling={unloading:true,total:1.5,remaining:1.5,trip:{from:r.stops[0],to:r.stops[1],total:2,remaining:0,original_cost:150,upkeep:0}};
+ e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.find(x=>x.id===s.id).route,id);assert.equal(e.save().companies[0].ships.find(x=>x.id===s.id).handling.remaining,.5);
+ e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.find(x=>x.id===s.id).route,null);assert.equal(e.view().companies[0].routes[0].idleRatio,null);
+ // With no designated type in the fleet, the smaller sloop is removed before the brig.
+ g.companies[0].routes[0].auto_type='galleon';s.handling=null;s.cargo=[];e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.find(x=>x.id===s.id).route,null);assert.equal(e.save().companies[0].ships.find(x=>x.kind==='brig').route,id);
+});
+
 test('daily diplomacy records actual causes, limits and first-license changes; donations are rejected',async()=>{
  const e=await engine();e.cmd({action:'license',nation:0});
  assert.equal(e.view().licenses[0].changes[0].initial,40);
@@ -79,9 +136,9 @@ test('long campaign preserves accounting, finite markets, bounded rivals and his
 });
 test('automation buys the designated type, ignores unrelated inventory and shrinks preferred type',async()=>{
  const e=await engine();fund(e);e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);e.cmd({action:'buyShip',kind:'galleon'});e.cmd({action:'route',route:id,kind:'brig',auto:true});
- e.cmd({action:'automation',enabled:true,replaceLost:true,budget:20000,reserve:1000,expand:25,shrink:0});
- let g=e.save();g.day=100;g.companies[0].ships.forEach(s=>s.ready=10000);let r=g.companies[0].routes[0];r.cooldown=0;r.transport={since:0,sales:10000,costs:100,upkeep:0,deliveries:2};e.load(g);e.cmd({action:'tick',days:1});let p=e.view().companies[0];assert.equal(p.ships.filter(s=>s.kind==='brig'&&s.route===id).length,1);assert.equal(p.ships.find(s=>s.kind==='galleon').route,null);
- g=e.save();g.day=200;g.companies[0].ships.forEach(s=>{s.ready=10000;s.voyage=null;s.cargo=[];});r=g.companies[0].routes[0];r.cooldown=0;r.transport={since:0,sales:100,costs:1000,upkeep:0,deliveries:2};e.load(g);e.cmd({action:'tick',days:1});p=e.view().companies[0];assert.equal(p.ships.find(s=>s.kind==='brig').route,null);assert.equal(p.ships.find(s=>s.kind==='sloop').route,id);
+ e.cmd({action:'automation',enabled:true,replaceLost:true,budget:20000,reserve:1000,expand:10,shrink:30});
+ let g=e.save();g.day=100;g.companies[0].ships.forEach(s=>s.ready=10000);let r=g.companies[0].routes[0];r.cooldown=0;r.transport={since:0,sales:100,costs:10000,upkeep:0,deliveries:2};r.activity={since:0,moving:100,loading:20,unloading:20,waiting:0};e.load(g);e.cmd({action:'tick',days:1});let p=e.view().companies[0];assert.equal(p.ships.filter(s=>s.kind==='brig'&&s.route===id).length,1);assert.equal(p.ships.find(s=>s.kind==='galleon').route,null);
+ g=e.save();g.day=200;g.companies[0].ships.forEach(s=>{s.ready=10000;s.voyage=null;s.handling=null;s.cargo=[];});r=g.companies[0].routes[0];r.cooldown=0;r.transport={since:0,sales:10000,costs:100,upkeep:0,deliveries:2};r.activity={since:100,moving:0,loading:0,unloading:0,waiting:100};e.load(g);e.cmd({action:'tick',days:1});p=e.view().companies[0];assert.equal(p.ships.find(s=>s.kind==='brig').route,null);assert.equal(p.ships.find(s=>s.kind==='sloop').route,id);
 });
 test('acquisition merges routes and transfers ships without breaking restore validation',async()=>{
  const e=await engine();fund(e);const target=e.save().companies[1],r=target.routes[0];assert.ok(r);for(const n of target.licenses)e.cmd({action:'license',nation:n});e.cmd({action:'openRoute',kind:'sloop',stops:r.stops,allowed:[0,1],margin:10});const count=e.view().companies[0].ships.length+target.ships.length;

@@ -176,6 +176,23 @@ impl Transport {
         }
     }
 }
+#[derive(Clone, Serialize, Deserialize, Default)]
+pub struct Activity {
+    pub since: u32,
+    pub moving: f64,
+    pub loading: f64,
+    pub unloading: f64,
+    pub waiting: f64,
+}
+impl Activity {
+    pub fn total(&self) -> f64 {
+        self.moving + self.loading + self.unloading + self.waiting
+    }
+    pub fn idle_ratio(&self) -> Option<f64> {
+        (self.total() > 0.0).then(|| self.waiting / self.total() * 100.0)
+    }
+}
+pub const HANDLING_PER_DAY: f64 = 10.0;
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Route {
     pub id: u32,
@@ -184,7 +201,7 @@ pub struct Route {
     pub allowed: Vec<usize>,
     pub min_margin: f64,
     pub active: bool,
-    pub epoch: i64,
+    pub epoch: f64,
     pub auto_manage: bool,
     pub auto_type: String,
     pub cooldown: u32,
@@ -195,6 +212,8 @@ pub struct Route {
     pub started: u32,
     pub deliveries: u32,
     pub transport: Transport,
+    #[serde(default)]
+    pub activity: Activity,
     pub forecast: f64,
     pub actual: Option<f64>,
     pub replacements: Vec<String>,
@@ -211,10 +230,17 @@ pub struct Cargo {
 pub struct Voyage {
     pub from: usize,
     pub to: usize,
-    pub total: u32,
-    pub remaining: u32,
+    pub total: f64,
+    pub remaining: f64,
     pub original_cost: f64,
     pub upkeep: f64,
+}
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Handling {
+    pub unloading: bool,
+    pub total: f64,
+    pub remaining: f64,
+    pub trip: Voyage,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Ship {
@@ -225,6 +251,8 @@ pub struct Ship {
     pub next: usize,
     pub ready: u32,
     pub voyage: Option<Voyage>,
+    #[serde(default)]
+    pub handling: Option<Handling>,
     pub cargo: Vec<Cargo>,
     pub voyages: u32,
 }
@@ -292,6 +320,8 @@ pub struct Company {
 pub struct Game {
     pub format: String,
     pub version: u32,
+    #[serde(default)]
+    pub cargo_time_version: u32,
     pub seed: u32,
     pub rng: u32,
     pub day: u32,
@@ -631,6 +661,7 @@ impl Game {
         Self {
             format: "sails-flags-wasm".into(),
             version: 1,
+            cargo_time_version: 1,
             seed,
             rng,
             day: 0,
@@ -711,8 +742,8 @@ impl Company {
                 replace_lost: false,
                 budget: 0.0,
                 reserve: 1000.0,
-                expand: 25.0,
-                shrink: 0.0,
+                expand: 10.0,
+                shrink: 30.0,
                 spent: 0.0,
                 month: 0,
             },

@@ -251,7 +251,9 @@ impl Engine {
                             .ships
                             .iter()
                             .filter(|s| s.route == Some(r.id))
-                            .all(|s| s.voyage.is_none())
+                            .all(|s| {
+                                s.voyage.is_none() && s.handling.is_none() && s.cargo.is_empty()
+                            })
                 })
                 .map(|r| r.id);
             if let Some(id) = remove {
@@ -314,7 +316,9 @@ impl Engine {
                 if co.cash - cost < self.base_reserve(c) {
                     continue;
                 }
-                let cycle = 2.0 * (self.days(kind, a, b) + 1) as f64;
+                let cycle = 2.0
+                    * (self.days(kind, a, b) as f64
+                        + 2.0 * spec.capacity as f64 / HANDLING_PER_DAY);
                 let toll = if spec.mode == "land" {
                     2.0 * self.toll(c, a, b)
                 } else {
