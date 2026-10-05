@@ -59,6 +59,7 @@ en.escort='Escort fees';en.diplomacyInvestment='Diplomatic investment';
 ja.shipSale='船の売却';en.shipSale='Ship sale';
 let language = 'ja';
 ja.technologyInvestment="技術投資";en.technologyInvestment="Technology investment";
+ja.shipyardRefund="旧造船所の返金";en.shipyardRefund="Retired shipyard refund";
 ja.shipyardPurchase="造船設備";en.shipyardPurchase="Shipyard purchase";
 ja.designResearch="設計研究";en.designResearch="Design research";
 ja.shipConstruction="船の建造";en.shipConstruction="Ship construction";
@@ -88,7 +89,7 @@ export function nameOf(entity) {
   if(entity.customName!==undefined) return escapeName(entity.customName);
   if(entity.mapName!==undefined) return entity.mapName;
   const english=entity.nameEn ?? names[entity.name] ?? entity.name;
-  const design=english.match(/^(Sloop|Brig|Fluyt|Corvette|Galleon) design( #\d+)?$/);
+  const design=english.match(/^(Sloop|Brig|Fluyt|Corvette|Galleon|Wagon|Caravan) design( #\d+)?$/);
   if(design && language!=='ja') return tx(entity.name,'{hull} design{suffix}',{hull:tx(design[1],design[1]),suffix:design[2]??''});
   return tx(entity.name,english);
 }

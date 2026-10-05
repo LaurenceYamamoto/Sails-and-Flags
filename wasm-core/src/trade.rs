@@ -95,8 +95,9 @@ impl Engine {
                 .specs
                 .iter()
                 .any(|s| s.id == kind && kind != "corvette")
-                || (self.game.companies[c].shipyard
-                    && self.game.companies[c].designs.iter().any(|s| s == kind)))
+                || (kind == "corvette"
+                    && self.game.companies[c].technology[0] >= self.spec(kind).unwrap().level)
+                || self.game.companies[c].designs.iter().any(|s| s == kind))
     }
     pub fn buy_ship(&mut self, c: usize, kind: &str) -> Result<u32> {
         self.playable(c)?;
@@ -160,7 +161,7 @@ impl Engine {
             self.spec(kind)?.price
         };
         Ok(
-            json!({"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
+            json!({"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
         )
     }
     pub fn open(
@@ -196,6 +197,7 @@ impl Engine {
             c == 0 || old.is_some() || self.game.companies[c].routes.len() < 50,
             "競合の航路上限は50です。",
         )?;
+        let handling_rate = self.handling_rate(c, &mode);
         let id = if let Some(id) = old {
             id
         } else {
@@ -208,6 +210,7 @@ impl Engine {
                 min_margin: margin,
                 active: true,
                 epoch: self.game.day as f64,
+                handling_rate,
                 auto_manage: true,
                 auto_type: kind.into(),
                 cooldown: self.game.day,
@@ -256,7 +259,7 @@ impl Engine {
             let b = r.stops[(i + 1) % r.stops.len()];
             let leg = |kind: &str| {
                 self.days(kind, a, b) as f64
-                    + 2.0 * self.spec(kind).unwrap().capacity as f64 / HANDLING_PER_DAY
+                    + 2.0 * self.spec(kind).unwrap().capacity as f64 / r.handling_rate
             };
             let days = fleet
                 .iter()
@@ -275,6 +278,8 @@ impl Engine {
         else {
             return;
         };
+        let rate = self.handling_rate(c, &self.game.companies[c].routes[i].mode);
+        self.game.companies[c].routes[i].handling_rate = rate;
         let (cycle, offsets, fleet) = self.schedule(c, &self.game.companies[c].routes[i]);
         let offset = fleet
             .first()
