@@ -43,13 +43,13 @@ impl Engine {
             .data
             .specs
             .iter()
-            .find(|s| s.id == kind)
+            .find(|s| s.id == kind && s.mode == "sea")
             .ok_or("船型が不正です。")?;
         ensure(
             budgets.len() == 5 && budgets.iter().all(|&x| amount(x)),
             "設計予算が不正です。",
         )?;
-        let level = self.game.companies[c].technology[if base.mode == "land" { 3 } else { 0 }];
+        let level = self.game.companies[c].technology[0];
         let eff = 0.5 + level / (level + 50.0);
         let p = budgets
             .iter()
@@ -63,25 +63,12 @@ impl Engine {
             .max(1.0) as usize;
         s.speed = base.speed * (1.0 + 0.5 * eff * p[1]) / (1.0 + 0.4 * p[0] + 0.2 * p[2]);
         s.range = base.range * (1.0 + 1.2 * eff * p[3]);
-        s.guns = if base.mode == "sea" {
-            base.guns + 30.0 * eff * p[2]
-        } else {
-            0.0
-        };
-        s.roughness = if base.mode == "land" {
-            base.roughness + (1.0 - base.roughness) * eff / 1.5 * p[2]
-        } else {
-            0.0
-        };
+        s.guns = base.guns + 30.0 * eff * p[2];
         let m = 0.35 * eff / 1.5 * p[4];
         let a = s.capacity as f64 / base.capacity as f64;
         let v = (s.speed / base.speed).powi(2);
         let r = s.range / base.range;
-        let g = if base.mode == "land" {
-            (1.0 + s.roughness) / (1.0 + base.roughness)
-        } else {
-            (s.guns + 10.0) / (base.guns + 10.0)
-        };
+        let g = (s.guns + 10.0) / (base.guns + 10.0);
         s.price =
             (base.price * (0.45 * a + 0.25 * v + 0.15 * r + 0.15 * g) * (1.0 + 0.25 * m)).ceil();
         s.daily = base.daily * (0.45 * a + 0.25 * v + 0.1 * r + 0.2 * g) * (1.0 - m);
@@ -265,6 +252,7 @@ impl Engine {
             }
         }
         self.game.companies[0].designs.extend(target.designs);
+        self.game.companies[0].shipyard |= target.shipyard;
         self.game.companies[0].yard_value += target.yard_value;
         self.game.companies[c].acquired = true;
         self.game.companies[c].ships.clear();
@@ -494,8 +482,18 @@ impl Engine {
                 self.game.companies[0].diplomacy_budget[n] = value;
             }
             "technology" => {
-                let k = index(v, "kind", 6)?;
+                let k = index(v, "kind", 3)?;
                 self.game.companies[0].tech_budget[k] = number(v, "value")?;
+            }
+            "shipyard" => {
+                ensure(
+                    !self.game.companies[0].shipyard && self.game.companies[0].technology[0] >= 5.0,
+                    "造船技術5が必要です。",
+                )?;
+                self.affordable(0, 4000.0)?;
+                self.entry(0, "shipyardPurchase", -4000.0, None, String::new());
+                self.game.companies[0].shipyard = true;
+                self.game.companies[0].yard_value = 4000.0;
             }
             "research" => {
                 let budgets = v["budgets"]
@@ -506,10 +504,10 @@ impl Engine {
                     .collect::<Vec<_>>();
                 let (mut spec, cost) = self.design_quote(0, string(v, "kind")?, &budgets)?;
                 ensure(
-                    self.game.companies[0].technology[if spec.mode == "land" { 3 } else { 0 }]
-                        >= spec.level
+                    self.game.companies[0].shipyard
+                        && self.game.companies[0].technology[0] >= spec.level
                         && self.game.designs.len() < 100,
-                    "設計に必要な技術と設計数を確認してください。",
+                    "造船設備と船型の必要技術を確認してください。",
                 )?;
                 self.affordable(0, cost)?;
                 let id = format!("design-{}", self.next_id());
@@ -704,7 +702,7 @@ impl Engine {
                     .collect::<Vec<_>>();
                 let (spec, cost) = self.design_quote(0, string(v, "kind")?, &budgets)?;
                 Ok(
-                    json!({"eligible":self.game.companies[0].technology[if spec.mode=="land"{3}else{0}]>=spec.level&&self.game.designs.len()<100,"spec":spec,"cost":cost,"remaining":self.game.companies[0].cash-cost,"affordable":self.game.companies[0].cash>=cost}),
+                    json!({"eligible":self.game.companies[0].shipyard&&self.game.companies[0].technology[0]>=spec.level,"spec":spec,"cost":cost,"remaining":self.game.companies[0].cash-cost,"affordable":self.game.companies[0].cash>=cost}),
                 )
             }
             "replacement" => self.replacement_quote(v),

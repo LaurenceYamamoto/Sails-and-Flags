@@ -218,13 +218,10 @@ impl Engine {
             return;
         }
         let share = (daily / count as f64 * 100.0).floor() / 100.0;
-        self.game.companies[c].tech_budget = vec![
+        self.game.companies[c].tech_budget = [
             0.0,
             if sea { share } else { 0.0 },
-            0.0,
-            0.0,
             if land { share } else { 0.0 },
-            0.0,
         ];
         for i in cities {
             let good = self.data.cities[i]
@@ -281,7 +278,7 @@ impl Engine {
         let co = &self.game.companies[c];
         let mut candidates = vec![];
         for (a, b) in sample {
-            for kind in ["sloop", "brig", "fluyt", "wagon", "caravan"] {
+            for kind in ["sloop", "brig", "fluyt", "wagon", "camel", "mule"] {
                 if co.kind == "small" && ["brig", "fluyt"].contains(&kind)
                     || !self.can_serve(kind, &[a, b])
                 {
@@ -321,7 +318,7 @@ impl Engine {
                 }
                 let cycle = 2.0
                     * (self.days(kind, a, b) as f64
-                        + 2.0 * spec.capacity as f64 / self.handling_rate(c, &spec.mode));
+                        + 2.0 * spec.capacity as f64 / HANDLING_PER_DAY);
                 let toll = if spec.mode == "land" {
                     2.0 * self.toll(c, a, b)
                 } else {

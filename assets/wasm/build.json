@@ -1,19 +1,19 @@
 {
-  "version": "3.2.0",
-  "binary": "7d9517c62cb8622ddf101ec2f39ec37390fff5c7d736126e81a1502bf9d7a013",
+  "version": "3.1.0",
+  "binary": "50b7f5263aea902116b21bb961b97a3331aac8ac24e4b8ca59e5d2b194eb3795",
   "sources": {
-    "wasm-core/Cargo.lock": "f9fe19bedb15cdb251731345af092312e0e507b542320a56cdd76decc4ead1a8",
-    "wasm-core/Cargo.toml": "c5814fd9cc29904b8be0f10173131e4f937b50f378f62465c261d480cd58ff0f",
-    "wasm-core/data/world.json": "4932ef73ac3a052d0b8238287172c2567ce7a82ad82a7c3129275a525a074829",
+    "wasm-core/Cargo.lock": "1b7224ab572e0f1580a7533004d65ace77fc60f7310ec3ed5686ce57fe53f16f",
+    "wasm-core/Cargo.toml": "f7ce7d64c2af8723088fc98c637f9ad70c3cb04bf78ec8b17f99ce8526fdf22d",
+    "wasm-core/data/world.json": "784eae1344a9a51fb727420be14ae83580561e22727b706987fad8aca7f83882",
     "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
-    "wasm-core/src/commands.rs": "1300e1031e806551f709b7aa960a0c21cacc50f52b57c2c722d6d3d592657731",
-    "wasm-core/src/lib.rs": "4d84ef18c809e781a65c5fc3d15d10c4fb398f506c5e11f72b7176830d321b92",
+    "wasm-core/src/commands.rs": "7995268fada4e5bc173a4e97f85c64b8dd294a3376e692093729802bd362be76",
+    "wasm-core/src/lib.rs": "f525bb13ef5efff95a77c48945d99130e0840a3194e19aa48a8525b02cb24b0c",
     "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
-    "wasm-core/src/model.rs": "cee96e6639f1d83e652cbb2e0d6b1ff126dcca0d01b78c91655e054c174c9426",
-    "wasm-core/src/movement.rs": "46f2e93d6bf7469ba68af6f28fd5a4a99707ca0e22278a98b4bfc48c6e775b59",
-    "wasm-core/src/rivals.rs": "b6770958624e7f18179524b5c75b61cd6f3d2c59a94c6000dacff3fb1baa9947",
-    "wasm-core/src/simulation.rs": "5f3b16c32ad4dcd0599493909313f99278aceb9f5dd7e5313f68a577bbe714b4",
-    "wasm-core/src/trade.rs": "f107bf3c26f393220af4701974e423af0d89e54f3bfe2912b4ed2a878c301d6c",
-    "wasm-core/src/view.rs": "c77050677a51c2061271c870a461dabfa9cbdf09eced460219c10ac8f5adee08"
+    "wasm-core/src/model.rs": "1caf3300583ff48bdb843845a8ebcd812da37f4072652af7afd459f768bd6d5f",
+    "wasm-core/src/movement.rs": "f3fdde75f94c15eba8042966ba1f646efd0ad1be0dcf85fb42a799676adcd0a6",
+    "wasm-core/src/rivals.rs": "85c1f33bd84d0f4c9aa7486ddf7f4def870ac7b72f178486e18ecc7e162e6409",
+    "wasm-core/src/simulation.rs": "41da30ea204af26d11e90649e7e9d0a1d01793473373cec28c1bfa14c6532374",
+    "wasm-core/src/trade.rs": "c546dafa217a6e117f166b833c908f3356b7d22f69e8667254c2c6c6be372698",
+    "wasm-core/src/view.rs": "428b81af95dc741049b60d5b7ea96c7cefbf644445ff3b0f15e2435e433b7d9d"
   }
 }

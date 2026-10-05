@@ -2,68 +2,7 @@ use crate::model::*;
 use std::collections::BTreeMap;
 
 impl Engine {
-    pub fn disaster_chance(&self, c: usize, kind: &str, a: usize, b: usize) -> f64 {
-        let spec = self.spec(kind).unwrap();
-        let land = spec.mode == "land";
-        let level = self.game.companies[c].technology[if land { 4 } else { 1 }];
-        let base = if land {
-            let pass = self
-                .road(a, b)
-                .map(|i| self.road_passability(i))
-                .unwrap_or(1.0);
-            0.0002 + 0.0008 * (1.0 - pass) * (1.0 - spec.roughness)
-        } else {
-            0.0003
-        };
-        base / (1.0 + level / 50.0)
-    }
-
-    fn disaster_in_transit(
-        &mut self,
-        c: usize,
-        ri: usize,
-        ship: &mut Ship,
-        v: &Voyage,
-        elapsed: f64,
-    ) -> bool {
-        if !self.game.events_enabled {
-            return false;
-        }
-        let chance = self.disaster_chance(c, &ship.kind, v.from, v.to);
-        if self.random() >= 1.0 - (1.0 - chance).powf(elapsed) {
-            return false;
-        }
-        let spec = self.spec(&ship.kind).unwrap();
-        let land = spec.mode == "land";
-        let hull = spec.price;
-        let cargo = ship.cargo.iter().map(|x| x.cost).sum::<f64>();
-        let r = &mut self.game.companies[c].routes[ri];
-        r.ship_loss += hull;
-        r.cargo_loss += cargo;
-        r.transport.costs += hull + cargo;
-        if r.replacements.len() < 200 {
-            r.replacements.push(ship.kind.clone());
-        }
-        self.event(
-            if land { "landDisaster" } else { "seaDisaster" },
-            format!("{} · {}", self.game.companies[c].name, ship.name),
-        );
-        true
-    }
-
     pub(crate) fn sail(&mut self, c: usize) {
-        let revise: Vec<_> = self.game.companies[c]
-            .routes
-            .iter()
-            .filter(|r| {
-                self.game.day >= r.cooldown
-                    && self.handling_rate(c, &r.mode) >= r.handling_rate * 1.1
-            })
-            .map(|r| r.id)
-            .collect();
-        for id in revise {
-            self.reschedule(c, id);
-        }
         let schedules: BTreeMap<_, _> = self.game.companies[c]
             .routes
             .iter()
@@ -131,9 +70,7 @@ impl Engine {
                     self.game.companies[c].routes[ri].activity.moving += elapsed;
                     left -= elapsed;
                     v.upkeep += daily * elapsed;
-                    if self.disaster_in_transit(c, ri, &mut ship, &v, elapsed)
-                        || self.raid_in_transit(c, ri, &route, &mut ship, &v, elapsed)
-                    {
+                    if self.raid_in_transit(c, ri, &route, &mut ship, &v, elapsed) {
                         lost = true;
                         break;
                     }
@@ -145,12 +82,10 @@ impl Engine {
                         // completed travel inside an unloading operation.
                         v.remaining = 0.0;
                         ship.next = (ship.next + 1) % route.stops.len();
-                        let rate = self.handling_rate(c, &route.mode);
-                        let duration =
-                            ship.cargo.iter().map(|x| x.quantity).sum::<usize>() as f64 / rate;
+                        let duration = ship.cargo.iter().map(|x| x.quantity).sum::<usize>() as f64
+                            / HANDLING_PER_DAY;
                         if duration > 0.0 {
                             ship.handling = Some(Handling {
-                                rate,
                                 unloading: true,
                                 total: duration,
                                 remaining: duration,
@@ -268,7 +203,6 @@ impl Engine {
     fn start_loading(&mut self, c: usize, ri: usize, route: &Route, ship: &mut Ship) -> bool {
         let a = route.stops[ship.next];
         let b = route.stops[(ship.next + 1) % route.stops.len()];
-        let rate = self.handling_rate(c, &route.mode);
         let days = self.days(&ship.kind, a, b) as f64;
         let spec = self.spec(&ship.kind).unwrap().clone();
         let daily = self.daily(c, &ship.kind);
@@ -304,7 +238,7 @@ impl Engine {
                 .filter(|d| d.owner == co.id)
                 .map(|d| d.road_budget + d.security_budget)
                 .sum::<f64>();
-        let max_handling = 2.0 * spec.capacity as f64 / rate;
+        let max_handling = 2.0 * spec.capacity as f64 / HANDLING_PER_DAY;
         let reserve = mandatory * (days + max_handling + 1.0);
         let (mut plan, cost, sale) = self.load_plan(
             c,
@@ -316,7 +250,8 @@ impl Engine {
             route.min_margin,
         );
         let quantity = plan.iter().map(|x| x.1).sum::<usize>();
-        let forecast = sale - cost - (days + 2.0 * quantity as f64 / rate) * daily - toll;
+        let forecast =
+            sale - cost - (days + 2.0 * quantity as f64 / HANDLING_PER_DAY) * daily - toll;
         self.game.companies[c].routes[ri].forecast = forecast;
         let profitable = !plan.is_empty() && forecast > 0.0;
         let reposition = !profitable
@@ -335,7 +270,8 @@ impl Engine {
                     &route.allowed,
                     route.min_margin,
                 );
-                let handling = 2.0 * next_plan.iter().map(|x| x.1).sum::<usize>() as f64 / rate;
+                let handling =
+                    2.0 * next_plan.iter().map(|x| x.1).sum::<usize>() as f64 / HANDLING_PER_DAY;
                 let next_toll = if route.mode == "land" {
                     self.toll(c, from, to)
                 } else {
@@ -385,10 +321,10 @@ impl Engine {
             original_cost,
             upkeep: 0.0,
         };
-        let duration = ship.cargo.iter().map(|x| x.quantity).sum::<usize>() as f64 / rate;
+        let duration =
+            ship.cargo.iter().map(|x| x.quantity).sum::<usize>() as f64 / HANDLING_PER_DAY;
         if duration > 0.0 {
             ship.handling = Some(Handling {
-                rate,
                 unloading: false,
                 total: duration,
                 remaining: duration,
