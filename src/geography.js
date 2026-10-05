@@ -1,3 +1,4 @@
+import {EXPANSION_PORTS} from './port-expansion-data.js';
 import {CROSSING_PORTS} from './crossing-data.js';
 import {WORLD_PORTS} from './world-data.js';
 import {REGION_PORTS} from './region-data.js';
@@ -26,3 +27,5 @@ Object.assign(PORT_GEOGRAPHY,REGION_PORTS);
 Object.assign(PORT_GEOGRAPHY,WORLD_PORTS);
 
 Object.assign(PORT_GEOGRAPHY,CROSSING_PORTS);
+
+Object.assign(PORT_GEOGRAPHY,EXPANSION_PORTS);

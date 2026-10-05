@@ -67,9 +67,17 @@ pub struct Road {
 #[derive(Clone, Deserialize)]
 pub struct Start {
     pub name: String,
-    pub stops: Vec<usize>,
     pub kind: String,
     pub id: String,
+    pub capital: f64,
+    pub licenses: Vec<usize>,
+    pub routes: Vec<StartRoute>,
+}
+#[derive(Clone, Deserialize)]
+pub struct StartRoute {
+    pub kind: String,
+    pub stops: Vec<usize>,
+    pub fleet: usize,
 }
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -333,6 +341,10 @@ pub struct Game {
     pub cargo_time_version: u32,
     #[serde(default)]
     pub transport_version: u32,
+    #[serde(default)]
+    pub roster_version: u32,
+    #[serde(default)]
+    pub city_version: u32,
     pub seed: u32,
     pub rng: u32,
     pub day: u32,
@@ -613,19 +625,11 @@ impl Game {
             true,
         )];
         for c in &d.starts {
-            let mut co = Company::new(
-                &c.id,
-                &c.name,
-                &c.kind,
-                if c.kind == "large" { 25000.0 } else { 5000.0 },
-                d.nations.len(),
-                false,
-            );
-            for &a in &c.stops {
-                let n = d.cities[a].nation;
-                if !co.licenses.contains(&n) {
-                    co.licenses.push(n);
-                }
+            let mut co = Company::new(&c.id, &c.name, &c.kind, c.capital, d.nations.len(), false);
+            co.licenses = c.licenses.clone();
+            // Starting licenses are granted; only the home country starts at 100.
+            if let Some(&n) = co.licenses.first() {
+                co.friendship[n] = 100.0;
             }
             companies.push(co);
         }
@@ -658,6 +662,8 @@ impl Game {
             version: 1,
             cargo_time_version: 1,
             transport_version: 1,
+            roster_version: 5,
+            city_version: 2,
             seed,
             rng,
             day: 0,

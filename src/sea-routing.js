@@ -1,16 +1,18 @@
+import {EXPANSION_PORTS,EXPANSION_APPROACHES,EXPANSION_CONNECTIONS} from './port-expansion-data.js';
 import {seaRoute as previousRoute,PORT_APPROACHES as OLD_APPROACHES} from './legacy/sea-routing-v12.js';
 import {CROSSING_APPROACHES,CROSSING_PORTS,CROSSING_CONNECTIONS} from './crossing-data.js';
 import {PORT_GEOGRAPHY,project} from './geography.js';
 import {NETWORK as BASE_NETWORK} from '../assets/maps/world-network.js';
 import {nauticalDistance,wrapLongitude,splitDateline} from './world-geometry.js';
 export {nauticalDistance,onLand,waterSegment} from './world-geometry.js';
-export const PORT_APPROACHES={...OLD_APPROACHES,...CROSSING_APPROACHES};
+const ADDED_PORTS={...CROSSING_PORTS,...EXPANSION_PORTS},ADDED_CONNECTIONS={...CROSSING_CONNECTIONS,...EXPANSION_CONNECTIONS};
+export const PORT_APPROACHES={...OLD_APPROACHES,...CROSSING_APPROACHES,...EXPANSION_APPROACHES};
 // Extend a copy of the immutable ocean mesh. Original port pairs use the frozen router.
 const NETWORK={points:[...BASE_NETWORK.points],links:BASE_NETWORK.links.map(edges=>[...edges])};
 const portNodes=Object.fromEntries(BASE_NETWORK.ports.map((id,i)=>[id,i]));
-for(const [id,c] of Object.entries(CROSSING_PORTS)){
+for(const [id,c] of Object.entries(ADDED_PORTS)){
  const i=NETWORK.points.length,edges=[];portNodes[id]=i;NETWORK.points.push(c.gateway);NETWORK.links.push(edges);
- for(const point of CROSSING_CONNECTIONS[id]){
+ for(const point of ADDED_CONNECTIONS[id]){
   const j=BASE_NETWORK.points.findIndex(p=>p[0]===point[0]&&p[1]===point[1]);
   if(j<0)throw Error('Missing sea connection: '+id);
   const nm=nauticalDistance(c.gateway,point);edges.push([j,nm]);NETWORK.links[j].push([i,nm]);
@@ -33,7 +35,7 @@ function shortest(start){
 export function seaRoute(a,b){
   if(!PORT_APPROACHES[a]||!PORT_APPROACHES[b]||a===b)return null;
   // Preserve existing voyages and all old port-pair distances exactly.
-  if(!CROSSING_PORTS[a]&&!CROSSING_PORTS[b])return previousRoute(a,b);
+  if(!ADDED_PORTS[a]&&!ADDED_PORTS[b])return previousRoute(a,b);
   const [from,to]=[a,b].sort(),key=from+':'+to;
   if(!cache.has(key)){
     const start=portNodes[from],end=portNodes[to],{cost,previous}=shortest(start);

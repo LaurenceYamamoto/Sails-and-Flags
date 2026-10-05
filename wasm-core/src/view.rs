@@ -32,7 +32,18 @@ impl Engine {
         let o = v.as_object_mut().unwrap();
         o.remove("distances");
         o.remove("paths");
-        o.remove("starts");
+        let rivals = o.remove("starts").unwrap();
+        o.insert(
+            "rivals".into(),
+            json!(
+                rivals
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|c| { json!({"id": c["id"], "name": c["name"], "nameEn": c["nameEn"]}) })
+                    .collect::<Vec<_>>()
+            ),
+        );
         o.remove("shipNames");
         for c in o["cities"].as_array_mut().unwrap() {
             for k in ["stocks", "supply", "demand", "modifiers", "seasons"] {
@@ -131,19 +142,39 @@ impl Engine {
                 && g.version == 1
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
+                && g.roster_version <= 5
+                && g.city_version <= 2
+                && (loading || g.city_version == 2)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
         )?;
         let d = &self.data;
+        let city_count = if loading {
+            match g.city_version {
+                0 => 114,
+                1 => 115,
+                _ => d.cities.len(),
+            }
+        } else {
+            d.cities.len()
+        };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()
                 && (0.0..1.0).contains(&g.fraction)
-                && g.companies.len() == d.starts.len() + 1
+                && g.companies.len()
+                    == match g.roster_version {
+                        0 => 4,
+                        1 => 11,
+                        2 => 12,
+                        3 => 13,
+                        4 => 14,
+                        _ => d.starts.len() + 1,
+                    }
                 && g.companies[0].id == "player"
-                && g.markets.len() == d.cities.len() * d.goods.len()
-                && g.development.len() == d.cities.len()
+                && g.markets.len() == city_count * d.goods.len()
+                && g.development.len() == city_count
                 && g.roads.len() == d.roads.len()
                 && g.pairs.len() == d.nations.len() * (d.nations.len() - 1) / 2,
             "保存データの構成が不正です。",
@@ -318,7 +349,7 @@ impl Engine {
                     ids.insert(r.id)
                         && r.id < g.next_id
                         && (2..=12).contains(&r.stops.len())
-                        && r.stops.iter().all(|&n| n < d.cities.len())
+                        && r.stops.iter().all(|&n| n < city_count)
                         && r.allowed.iter().all(|&n| n < d.goods.len())
                         && !r.allowed.is_empty()
                         && spec(&r.auto_type).is_some()
@@ -452,8 +483,8 @@ impl Engine {
                 if let Some(v) = &s.voyage {
                     ensure(
                         s.route.is_some()
-                            && v.from < d.cities.len()
-                            && v.to < d.cities.len()
+                            && v.from < city_count
+                            && v.to < city_count
                             && v.total.is_finite()
                             && v.remaining.is_finite()
                             && v.total > 0.0

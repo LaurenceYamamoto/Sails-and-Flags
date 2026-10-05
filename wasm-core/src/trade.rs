@@ -34,14 +34,18 @@ impl Engine {
     pub fn initialize(&mut self, seed: u32, events: bool) {
         self.game = Game::new(&self.data, seed, events);
         for (i, start) in self.data.starts.clone().iter().enumerate() {
-            self.open(
-                i + 1,
-                "sloop",
-                start.stops.clone(),
-                (0..self.data.goods.len()).collect(),
-                10.0,
-            )
-            .unwrap();
+            for route in &start.routes {
+                for _ in 0..route.fleet {
+                    self.open(
+                        i + 1,
+                        &route.kind,
+                        route.stops.clone(),
+                        (0..self.data.goods.len()).collect(),
+                        10.0,
+                    )
+                    .expect("validated starting route must be affordable and serviceable");
+                }
+            }
         }
         self.capture_accounts();
     }

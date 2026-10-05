@@ -100,6 +100,30 @@ impl Engine {
                     }
                 }
                 self.validate(&g, true)?;
+                // Rename only the known regional rivals, preserving custom and legacy names.
+                if g.roster_version >= 1 {
+                    for c in &mut g.companies {
+                        match (c.id.as_str(), c.name.as_str()) {
+                            ("company-5", "オスマン会社" | "Ottoman Company") => {
+                                c.name = "オスマン商人".into();
+                            }
+                            ("company-7", "中国商人" | "Chinese Merchants") => {
+                                c.name = "清国商人".into();
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                if g.city_version < 2 {
+                    // Append the new market without consuming the campaign's RNG or
+                    // touching existing stocks, ownership, routes, or company balances.
+                    let initial = Game::new(&self.data, g.seed, g.events_enabled);
+                    g.markets
+                        .extend_from_slice(&initial.markets[g.markets.len()..]);
+                    g.development
+                        .extend_from_slice(&initial.development[g.development.len()..]);
+                    g.city_version = 2;
+                }
                 Self::normalize_account_history(&mut g);
                 if g.cargo_time_version == 0 {
                     for c in &mut g.companies {

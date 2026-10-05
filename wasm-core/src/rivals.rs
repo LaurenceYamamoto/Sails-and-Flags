@@ -3,10 +3,10 @@ use crate::trade::{key, ratio};
 use std::collections::{BTreeMap, BTreeSet};
 impl Engine {
     fn base_reserve(&self, c: usize) -> f64 {
-        if self.game.companies[c].kind == "large" {
-            6000.0
-        } else {
-            1000.0
+        match self.game.companies[c].kind.as_str() {
+            "large" => 6000.0,
+            "medium" => 3000.0,
+            _ => 1000.0,
         }
     }
     fn overhead(&self, c: usize) -> f64 {
@@ -50,7 +50,11 @@ impl Engine {
             reserve,
             ((earned * 0.15)
                 .min((co.cash - reserve) / 180.0)
-                .min(if co.kind == "large" { 18.0 } else { 6.0 })
+                .min(match co.kind.as_str() {
+                    "large" => 18.0,
+                    "medium" => 12.0,
+                    _ => 6.0,
+                })
                 .max(0.0)
                 * 100.0)
                 .floor()
