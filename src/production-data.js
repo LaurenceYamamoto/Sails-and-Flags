@@ -3,8 +3,8 @@
 const lists={
  spices:new Set(['goa','colombo','batavia','malacca','aceh']),
  coffee:new Set(['mocha','sanaa']),
- silver:new Set(['veracruz','acapulco','mexicocity','guadalajara','callao','potosi','nagasaki']),
- gold:new Set(['elmina','kumasi','mozambique','cartagena','bogota','rio']),
+ silver:new Set(['veracruz','acapulco','mexicocity','guadalajara','callao','potosi','nagasaki','zacatecas','guanajuato']),
+ gold:new Set(['elmina','kumasi','mozambique','cartagena','bogota','rio','accra','sofala']),
 };
 export function localProduction(id,c,good,previous){
  const {lon,lat}=c,american=lon<-30,tropicalAmerica=american&&lat<26&&lat>-25;
@@ -22,7 +22,7 @@ export function localProduction(id,c,good,previous){
   case 'oliveOil':return lon>-10&&lon<45&&lat>28&&lat<46?(specialty?strong:.15):0;
   case 'cotton':return india||lon>95&&lat>0&&lat<38||tropicalAmerica||lon>=-10&&lon<65&&lat>-20&&lat<40?(specialty?strong:.12):0;
   case 'indigo':return india||tropicalAmerica||id==='charleston'?(specialty?strong:.08):0;
-  case 'silk':return eastAsia||india||lon>25&&lon<65&&lat>25&&lat<43||['genoa','livorno','venice','marseille','barcelona'].includes(id)?(specialty?strong:.15):0;
+  case 'silk':return eastAsia||india||lon>25&&lon<65&&lat>25&&lat<43||['genoa','livorno','venice','marseille','barcelona','valencia','lyon','milan','turin','florence','naples'].includes(id)?(specialty?strong:.15):0;
   case 'porcelain':return ['qing','japan'].includes(c.nation)?(specialty?strong:.12):0;
   case 'silver':return lists.silver.has(id)?strong:minor;
   case 'gold':return lists.gold.has(id)?strong:0;

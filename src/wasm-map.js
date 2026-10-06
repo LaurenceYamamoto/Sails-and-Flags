@@ -7,8 +7,8 @@ const colors=['#f4d78b','#ee91ed','#7ce4fc','#9def9a','#ffad75','#aba8ff','#f5a6
 export class WorldMap {
  constructor(host,catalog,handlers){
   this.host=host;this.catalog=catalog;
-  // Schematic inland offset separates Lima from Callao without changing game geography.
-  this.cities=catalog.cities.map(c=>c.id==='lima'?{...c,x:c.x+1.7,y:c.y-1.7}:c);
+  // Presentation offsets are separate from all game geography and saved coordinates.
+  this.cities=catalog.cities.map(c=>c.id==='lima'?{...c,x:c.x+1.7,y:c.y-1.7}:{...c,x:c.displayX??c.x,y:c.displayY??c.y});
   this.handlers=handlers;this.camera=cameraFor('world');this.markers=new Map();this.key='';this.paths={};
   this.svg=node('svg',{class:'map wasm-map',viewBox:'0 0 900 450',tabindex:0,role:'group','aria-label':'World trade map'});
   this.svg.append(node('path',{d:catalog.land,class:'world-land','fill-rule':'evenodd'}));
@@ -37,7 +37,7 @@ export class WorldMap {
   this.svg.addEventListener('click',e=>{const r=e.target.closest('[data-route]');if(r)handlers.route(+r.dataset.company,+r.dataset.route);});
  }
  displayLines(lines,a,b){
-  if(!lines.length||![a,b].some(i=>this.catalog.cities[i].id==='lima'))return lines;
+  if(!lines.length||![a,b].some(i=>this.cities[i].x!==this.catalog.cities[i].x||this.cities[i].y!==this.catalog.cities[i].y))return lines;
   const copy=lines.map(line=>line.map(p=>({...p})));
   const from=this.cities[a],to=this.cities[b];
   copy[0][0]={x:from.x,y:from.y};copy.at(-1)[copy.at(-1).length-1]={x:to.x,y:to.y};

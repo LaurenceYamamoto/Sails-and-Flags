@@ -1,3 +1,4 @@
+import {ATLANTIC_CITIES} from './atlantic-expansion-data.js';
 import {EUROPE_PORTS,EUROPE_INLAND} from './europe-expansion-data.js';
 import {EXPANSION_PORTS} from './port-expansion-data.js';
 import {CROSSING_PORTS} from './crossing-data.js';
@@ -32,3 +33,5 @@ Object.assign(PORT_GEOGRAPHY,CROSSING_PORTS);
 Object.assign(PORT_GEOGRAPHY,EXPANSION_PORTS);
 
 Object.assign(PORT_GEOGRAPHY,EUROPE_PORTS,EUROPE_INLAND);
+
+Object.assign(PORT_GEOGRAPHY,ATLANTIC_CITIES);

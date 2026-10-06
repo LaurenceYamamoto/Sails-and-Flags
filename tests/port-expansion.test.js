@@ -1,3 +1,4 @@
+import {ATLANTIC_PORTS} from '../src/atlantic-expansion-data.js';
 import {EUROPE_PORTS} from '../src/europe-expansion-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,7 +16,7 @@ test('Pondicherry lies on the coast and connects to every port over the sea',()=
  for(const [key,[a,b]]of segments)assert.ok(waterSegment(a,b),key);assert.ok(seaRoute('pondicherry','hughli').nm<=1800);
 });
 test('adding a port leaves all frozen sea-route distances unchanged',()=>{
- const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]&&!EUROPE_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
+ const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]&&!EUROPE_PORTS[id]&&!ATLANTIC_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
 });
 
 

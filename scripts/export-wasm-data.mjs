@@ -1,3 +1,4 @@
+import {layoutAddedCities} from './layout-map-cities.mjs';
 // Build-time conversion only. The browser never imports the reference JS engine.
 import fs from 'node:fs';
 import {CITIES,NATIONS,GOODS,SHIPS} from '../src/data.js';
@@ -17,6 +18,7 @@ const cities=Object.entries(CITIES).map(([id,c])=>{
   modifiers:GOODS.map(g=>(DEMAND_REGIONS[p.region].goods[g.id]??1)*(cl.goods[g.id]??1)),
   seasons:GOODS.map(g=>(cl.winter[g.id]??0)*(p.south?-1:1))};
 });
+layoutAddedCities(cities);
 const index=id=>cities.findIndex(c=>c.id===id),paths={},distances=cities.map(()=>cities.map(()=>null));
 for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].inland&&!cities[b].inland){
  const r=seaRoute(cities[a].id,cities[b].id);if(r){distances[a][b]=distances[b][a]=r.nm;paths[a+':'+b]=seaLines(cities[a].id,cities[b].id);}

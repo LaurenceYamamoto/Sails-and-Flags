@@ -1,3 +1,5 @@
+import {ATLANTIC_PORTS,ATLANTIC_APPROACHES} from './atlantic-expansion-data.js';
+import {ATLANTIC_CONNECTIONS} from './atlantic-sea-connections.js';
 import {EUROPE_PORTS,EUROPE_APPROACHES,EUROPE_CONNECTIONS} from './europe-expansion-data.js';
 import {EXPANSION_PORTS,EXPANSION_APPROACHES,EXPANSION_CONNECTIONS} from './port-expansion-data.js';
 import {seaRoute as previousRoute,PORT_APPROACHES as OLD_APPROACHES} from './legacy/sea-routing-v12.js';
@@ -6,8 +8,8 @@ import {PORT_GEOGRAPHY,project} from './geography.js';
 import {NETWORK as BASE_NETWORK} from '../assets/maps/world-network.js';
 import {nauticalDistance,wrapLongitude,splitDateline} from './world-geometry.js';
 export {nauticalDistance,onLand,waterSegment} from './world-geometry.js';
-const ADDED_PORTS={...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS},ADDED_CONNECTIONS={...CROSSING_CONNECTIONS,...EXPANSION_CONNECTIONS,...EUROPE_CONNECTIONS};
-export const PORT_APPROACHES={...OLD_APPROACHES,...CROSSING_APPROACHES,...EXPANSION_APPROACHES,...EUROPE_APPROACHES};
+const ADDED_PORTS={...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...ATLANTIC_PORTS},ADDED_CONNECTIONS={...CROSSING_CONNECTIONS,...EXPANSION_CONNECTIONS,...EUROPE_CONNECTIONS,...ATLANTIC_CONNECTIONS};
+export const PORT_APPROACHES={...OLD_APPROACHES,...CROSSING_APPROACHES,...EXPANSION_APPROACHES,...EUROPE_APPROACHES,...ATLANTIC_APPROACHES};
 // Extend a copy of the immutable ocean mesh. Original port pairs use the frozen router.
 const NETWORK={points:[...BASE_NETWORK.points],links:BASE_NETWORK.links.map(edges=>[...edges])};
 const portNodes=Object.fromEntries(BASE_NETWORK.ports.map((id,i)=>[id,i]));

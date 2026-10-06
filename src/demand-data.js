@@ -13,6 +13,9 @@ export const DEMAND_REGIONS={
  americas:{label:['南北アメリカ市場圏','American markets'],goods:{tools:1.25,cloth:1.2}},
 };
 DEMAND_REGIONS.centralEurope={label:['中央・東ヨーロッパ','Central and Eastern Europe'],goods:{...DEMAND_REGIONS.northEurope.goods}};
+DEMAND_REGIONS.westEurope={label:['西ヨーロッパ','Western Europe'],goods:{...DEMAND_REGIONS.northEurope.goods}};
+DEMAND_REGIONS.balkans={label:['バルカン半島','Balkans'],goods:{...DEMAND_REGIONS.mediterranean.goods}};
+DEMAND_REGIONS.scandinavia={label:['スカンジナビア','Scandinavia'],goods:{...DEMAND_REGIONS.northEurope.goods}};
 export const DEMAND_CLIMATES={
  cold:{label:['寒冷','Cold'],goods:{fur:1.35,timber:1.2},winter:{fur:.25,timber:.15,food:.08}},
  temperate:{label:['温帯','Temperate'],goods:{fur:1.1},winter:{fur:.2,timber:.12,food:.05}},
@@ -21,8 +24,8 @@ export const DEMAND_CLIMATES={
 };
 const dry=new Set(['cairo','suez','alexandria','baghdad','basra','aleppo','damascus','muscat','mocha','sanaa','bandarabbas','isfahan','shiraz','marrakesh']);
 const highland=new Set(['mexicocity','puebla','bogota','quito','cusco','potosi']);
-export function demandProfile(id,{lon,lat}){
- const region=centralEuropeanCities.has(id)?'centralEurope':lon<-30?'americas':lon>=100&&lat>=22?'eastAsia':lon>=95?'southeastAsia':lon>=65?'southAsia':lon>=26&&lat>=12&&lat<45?'westAsia':lat<35?'africa':lat<46?'mediterranean':'northEurope';
+export function demandProfile(id,{lon,lat,marketRegion}){
+ const region=marketRegion??(centralEuropeanCities.has(id)?'centralEurope':lon<-30?'americas':lon>=100&&lat>=22?'eastAsia':lon>=95?'southeastAsia':lon>=65?'southAsia':lon>=26&&lat>=12&&lat<45?'westAsia':lat<35?'africa':lat<46?'mediterranean':'northEurope');
  const climate=dry.has(id)?'arid':highland.has(id)?'temperate':Math.abs(lat)>=55?'cold':Math.abs(lat)<24?'tropical':'temperate';
  return {region,climate,south:lat<0};
 }

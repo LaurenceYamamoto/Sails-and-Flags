@@ -143,8 +143,8 @@ impl Engine {
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && g.city_version <= 3
-                && (loading || g.city_version == 3)
+                && g.city_version <= 4
+                && (loading || g.city_version == 4)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -155,13 +155,14 @@ impl Engine {
                 0 => 114,
                 1 => 115,
                 2 => 116,
+                3 => 135,
                 _ => d.cities.len(),
             }
         } else {
             d.cities.len()
         };
-        let nation_count = if loading && g.city_version < 3 { 23 } else { d.nations.len() };
-        let road_count = if loading && g.city_version < 3 { 69 } else { d.roads.len() };
+        let nation_count = if loading && g.city_version < 3 { 23 } else if loading && g.city_version == 3 { 31 } else { d.nations.len() };
+        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else { d.roads.len() };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()
