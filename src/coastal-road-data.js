@@ -12,6 +12,6 @@ export const COASTAL_ROAD_VIA={
  charleston_staugustine:[[-80.3,32.65],[-80.6,32.6],[-80.95,32.45],[-80.85,32.3],[-81.3,31.9],[-81.7,31.2],[-81.65,30.65],[-81.55,30.2]],
  accra_benin:[[.25,6],[1.2,6.5],[2.3,6.7],[3.4,6.8],[4.5,6.8],[5.2,6.6]],
 };
-// The simplified coastline places the real Luanda coordinate just offshore.
-// Move only its map anchor inland; real geography and sea distances stay fixed.
-export const COASTAL_CITY_DISPLAY={luanda:[13.35,-8.82]};
+// Mainland display anchors for ports on simplified coastal edges or small islands.
+// Presentation only: real geography and all sea distances stay fixed.
+export const COASTAL_CITY_DISPLAY={luanda:[13.35,-8.82],xiamen:[118.05,24.65],cochin:[76.35,9.98],bombay:[72.85,19.02]};

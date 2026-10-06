@@ -57,6 +57,8 @@ pub struct Road {
     pub id: String,
     #[serde(default)]
     pub retired: bool,
+    #[serde(default)]
+    pub retired_since: u32,
     pub a: usize,
     pub b: usize,
     pub km: f64,
@@ -665,7 +667,7 @@ impl Game {
             cargo_time_version: 1,
             transport_version: 1,
             roster_version: 5,
-            city_version: 9,
+            city_version: 12,
             seed,
             rng,
             day: 0,

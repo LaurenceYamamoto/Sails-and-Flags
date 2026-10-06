@@ -1,3 +1,5 @@
+import {ASIA_ADDED_ROADS} from '../src/asia-road-revisions.js';
+import {ASIA_ROADS} from '../src/asia-expansion-data.js';
 import {layoutAddedCities} from './layout-map-cities.mjs';
 // Build-time conversion only. The browser never imports the reference JS engine.
 import fs from 'node:fs';
@@ -28,8 +30,8 @@ for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].
 }
 const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
 // Check the actual map endpoints, including city presentation offsets.
-for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS)]){
- const r=roads.find(r=>r.id===id),points=r.points.map(p=>({...p}));
+for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS)]){
+ const r=roads.find(r=>r.id===id);if(r.retired)continue;const points=r.points.map(p=>({...p}));
  for(const [at,ci] of [[0,r.a],[points.length-1,r.b]]){const c=cities[ci];points[at]={x:c.displayX??c.x,y:c.displayY??c.y};}
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);
  for(let i=1;i<coordinates.length;i++)if(!landSegment(coordinates[i-1],coordinates[i]))throw Error(`Road crosses water: ${id}, segment ${i}`);
@@ -43,7 +45,7 @@ const starts=RIVAL_STARTS.map(c=>{
   const stops=r.stops.map(index),spec=specs.find(s=>s.id===r.kind);
   if(!spec||stops.length<2||stops.length>12||stops.some(i=>i<0)||!Number.isInteger(r.fleet)||r.fleet<1)throw Error('Invalid starting fleet: '+c.id);
   for(let i=0;i<stops.length;i++){
-   const a=stops[i],b=stops[(i+1)%stops.length],road=roads.find(r=>(r.a===a&&r.b===b)||(r.a===b&&r.b===a));
+   const a=stops[i],b=stops[(i+1)%stops.length],road=roads.find(r=>!r.retired&&((r.a===a&&r.b===b)||(r.a===b&&r.b===a)));
    const distance=spec.mode==='land'?road?.km:distances[a][b];
    const required=spec.mode==='land'?road?.nations:[cities[a].nation,cities[b].nation];
    if(a===b||distance==null||distance>spec.range||!required?.every(n=>licenses.includes(n)))throw Error('Unserviceable starting route: '+c.id+' '+cities[a].id+' / '+cities[b].id);

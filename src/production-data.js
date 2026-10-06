@@ -1,7 +1,7 @@
 // Local production including the surrounding hinterland, not port re-exports.
 // Game-scale suitability; quantities are not reconstructed historical statistics.
 const lists={
- spices:new Set(['goa','colombo','batavia','malacca','aceh']),
+ spices:new Set(['calicut','cochin','goa','colombo','batavia','malacca','aceh']),
  coffee:new Set(['mocha','sanaa']),
  silver:new Set(['veracruz','acapulco','mexicocity','guadalajara','callao','potosi','nagasaki','zacatecas','guanajuato']),
  gold:new Set(['elmina','kumasi','mozambique','cartagena','bogota','rio','accra','sofala']),

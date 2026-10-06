@@ -1,3 +1,4 @@
+import {ASIA_CITIES} from './asia-expansion-data.js';
 import {FRENCH_CARIBBEAN_PORTS} from './french-caribbean-data.js';
 import {TARANTO_PORTS} from './taranto-data.js';
 import {KOREA_CITIES} from './korea-expansion-data.js';
@@ -45,3 +46,5 @@ Object.assign(PORT_GEOGRAPHY,SIBERIAN_CITIES);
 Object.assign(PORT_GEOGRAPHY,FRENCH_CARIBBEAN_PORTS);
 Object.assign(PORT_GEOGRAPHY,TARANTO_PORTS);
 Object.assign(PORT_GEOGRAPHY,KOREA_CITIES);
+
+Object.assign(PORT_GEOGRAPHY,ASIA_CITIES);

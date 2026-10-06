@@ -164,16 +164,16 @@ export const RIVAL_STARTS = [
         "kind": "caravan",
         "fleet": 2,
         "stops": [
-          "beijing",
-          "nanjing"
+          "xian",
+          "hankou"
         ]
       },
       {
         "kind": "wagon",
         "fleet": 2,
         "stops": [
-          "nanjing",
-          "suzhou"
+          "suzhou",
+          "hangzhou"
         ]
       }
     ]
