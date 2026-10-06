@@ -1,5 +1,14 @@
 # Architecture — Sails & Flags 3.3.2
 
+## 沿岸道路の経由点と平壌（city_version=9）
+
+src/coastal-road-data.jsは9道路の経由点とLuandaの表示座標を保持し、land-data.jsで既存の道路スロットへ適用します。roadPointsから出力する折れ線をWasmのworld.jsonに格納し、地図道路・運行ルート・車両アニメーションが共有します。距離計算や道路の経済条件には影響しません。
+
+world-geometry.jsにlandSegmentを追加し、既存の海岸線交差判定を陸上にも適用。scripts/export-wasm-data.mjsは修正9道路と漢城―平壌について、表示補正後の端点も含めて海岸線・湖岸を横切らないことを検証してから出力します。これはビルド時処理であり、ブラウザに経路探索やシミュレーション処理を追加しません。
+
+src/korea-expansion-data.jsの平壌は都市番号227、漢城―平壌は道路番号224へ追加。保存city_version=9は228都市/225道路スロット（有効216、廃止予約9）。旧8は227都市/224スロットとして検証し、追加部分だけ初期化します。旧0～7の移行も維持します。都市の表示間隔はSantiago de Chile―Valparaíso基準を適用します。
+
+
 ## 陸路廃止・追加とTaranto（city_version=8）
 
 src/road-revisions.jsに廃止9区間とイベリアの追加2区間、src/taranto-data.jsにTaranto・接近経路・外洋接続・Naplesとの陸路を定義します。ゲーム用ROADSから廃止区間を除き、ROAD_SLOTSにはretired=trueの予約位置を残します。Wasmのroads配列と旧セーブの道路番号は維持され、全224スロットのうち215区間だけが利用可能です。地図・道路権一覧・経路判定・購入/投資コマンドで廃止区間を除外します。

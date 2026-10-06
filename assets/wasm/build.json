@@ -1,19 +1,19 @@
 {
-  "version": "3.3.3",
-  "binary": "e1d3899d2c34953de0b0b32f19d5f976639cb7cc72cd797264df13f72d8eb79d",
+  "version": "3.3.4",
+  "binary": "e02fba3e43f355479205efbe57b6375a30b4da15efc859df014cccaa052baf47",
   "sources": {
-    "wasm-core/Cargo.lock": "7f0ba080f5f9098a933613bb4fc43ff88ddc883dc59ff4e5e88fbd9531d389a9",
-    "wasm-core/Cargo.toml": "6b413e1bc7bf9111109c61a1e382e919e7f27df7fd9cafe349e301dd67899103",
-    "wasm-core/data/world.json": "ea3f363549e224e8e2c1e184de1e6caaadc6ad951a1bf3e8c55ebf855807bc80",
+    "wasm-core/Cargo.lock": "ef3c659a807ebf752be16e85d6f9a8596a94e9c8e2d95bc349b0ead1c4fa3866",
+    "wasm-core/Cargo.toml": "3fa174f58dbdc5e9334a83f2222a5b907cee76942109a5bdcd58b8b62f5c1ad0",
+    "wasm-core/data/world.json": "c4c377c650535e1af40d1110da0761f221c6beb5932a3438b9e2b7ac7cbfa405",
     "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
     "wasm-core/src/commands.rs": "77aa8eb42ca64e1f55041370f056ff85fc17226897be61930195152f55772b0c",
-    "wasm-core/src/lib.rs": "f8f33543c560a65324a706a3f722ebec64051e1d2fa11162a04ac6abc5948788",
+    "wasm-core/src/lib.rs": "54708f5d1dc404ef5db99a832a3575d8f7491361e33c78ebe579388a7f22116f",
     "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
-    "wasm-core/src/model.rs": "19c2feaa1dc4af38cfa45dd57c0689db88f3257932a86aba7f5cc7d1afbc5ab0",
+    "wasm-core/src/model.rs": "55a7d41551ea7fc423d5af2b00a657562651ac632bedf070357072891e0d6a77",
     "wasm-core/src/movement.rs": "46f2e93d6bf7469ba68af6f28fd5a4a99707ca0e22278a98b4bfc48c6e775b59",
     "wasm-core/src/rivals.rs": "6b635dadeeb3a27bbdccd22eadf94e3625058d2115bb6392e37fcdd482dd5d6c",
     "wasm-core/src/simulation.rs": "5f3b16c32ad4dcd0599493909313f99278aceb9f5dd7e5313f68a577bbe714b4",
     "wasm-core/src/trade.rs": "a85e38b004f2ec185e545e61ef6df7980d7a8479ef93671e09c0b3c3b8ee7914",
-    "wasm-core/src/view.rs": "8511e833fad26502aaab6bc40b401c02a7bdcda16a0d422a66c45ca3f34d82cf"
+    "wasm-core/src/view.rs": "98b78a277fd01c5407d57d18e38044f7888d397c7ac44a630a8fc2c8ffcaad0d"
   }
 }

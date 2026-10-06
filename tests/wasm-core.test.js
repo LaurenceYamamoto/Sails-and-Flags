@@ -184,7 +184,7 @@ test('unfunded diplomacy records no payment or friendship gain',async()=>{
  assert.equal(h.unfunded,true);assert.equal(h.spent,0);assert.equal(h.investment,0);assert.equal(h.delta,0);assert.equal(e.view().companies[0].cash,cash);
 });
 test('Wasm owns initial state, license escalation and symmetric tax formula',async()=>{
- const e=await engine();assert.equal(e.data.cities.length,227);assert.equal(e.data.roads.length,224);assert.equal(e.view().licenses.filter(l=>l.owned).length,0);
+ const e=await engine();assert.equal(e.data.cities.length,228);assert.equal(e.data.roads.length,225);assert.equal(e.view().licenses.filter(l=>l.owned).length,0);
  e.cmd({action:'license',nation:0});let v=e.view();assert.equal(v.licenses[0].friendship,100);assert.equal(v.licenses[0].tax,5);assert.equal(v.licenses[1].tax,9);assert.equal(v.licenses[1].fee,e.data.nations[1].fee*3);assert.equal(v.licenses[0].daily,e.data.nations[0].daily*10*.6);
  const g=e.save();for(const c of g.companies.slice(1))assert.ok(c.friendship.every((f,n)=>f===(n===c.licenses[0]?100:60)));
  const before=e.save();assert.throws(()=>e.cmd({action:'license',nation:0}));assert.deepEqual(e.save(),before);
@@ -362,7 +362,7 @@ test('migration validates discarded records and does not invent missing monthly 
 
 
 test('fourteen regional rivals start with licensed serviceable fleets, paid from tiered capital',async()=>{
- const e=await engine(),g=e.save();assert.equal(g.roster_version,5);assert.equal(g.city_version,8);assert.equal(g.companies.length,15);assert.equal(g.companies[0].cash,5000);assert.deepEqual(g.companies[0].licenses,[]);
+ const e=await engine(),g=e.save();assert.equal(g.roster_version,5);assert.equal(g.city_version,9);assert.equal(g.companies.length,15);assert.equal(g.companies[0].cash,5000);assert.deepEqual(g.companies[0].licenses,[]);
  const expected=[
   ['オランダ西インド会社',25000,['netherlands'],[['amsterdam','willemstad']]],
   ['スペイン商館',60000,['spain'],[['cadiz','havana'],['havana','santiago','sanjuan']]],
@@ -432,9 +432,9 @@ test('twelve-rival saves remain unchanged; Omani merchants start with licensed l
 test('Pondicherry extends old saves without changing existing markets, companies, RNG or journeys',async()=>{
  const e=await engine(),g=e.save();assert.equal(city(e,'pondicherry'),114);const cityData=e.data.cities[114];assert.equal(e.data.nations[cityData.nation].id,'france');assert.equal(cityData.mapName,'Pondicherry');assert.equal(cityData.inland,false);
  g.roster_version=4;g.companies.length=14;delete g.city_version;g.markets.length=114*e.data.goods.length;g.development.length=114;omitUnavailableRoutes(g,114);trimLegacyWorld(g);
- const before=structuredClone(g);e.load(g);const after=e.save();assert.equal(after.city_version,8);assert.equal(after.markets.length,227*e.data.goods.length);assert.equal(after.development[114].owner,'state');assert.deepEqual(after.markets.slice(0,g.markets.length),g.markets);assert.deepEqual(after.development.slice(0,114),g.development);
+ const before=structuredClone(g);e.load(g);const after=e.save();assert.equal(after.city_version,9);assert.equal(after.markets.length,228*e.data.goods.length);assert.equal(after.development[114].owner,'state');assert.deepEqual(after.markets.slice(0,g.markets.length),g.markets);assert.deepEqual(after.development.slice(0,114),g.development);
  const comparison=structuredClone(after);delete comparison.city_version;comparison.markets.length=g.markets.length;comparison.development.length=114;trimLegacyWorld(comparison);assert.deepEqual(comparison,before);e.load(after);assert.deepEqual(e.save(),after);assert.ok(e.view(114).market.every(m=>m.demand>0));
- for(const change of [g=>g.city_version=9,g=>g.markets.pop(),g=>g.development.pop(),g=>g.city_version=1]){const bad=structuredClone(before);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=10,g=>g.markets.pop(),g=>g.development.pop(),g=>g.city_version=1]){const bad=structuredClone(before);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());assert.equal(e.save().companies.length,14);
  e.cmd({action:'new',seed:1700,events:false});const co=e.save().companies[14];assert.equal(co.name,'フランス東インド会社');assert.equal(co.cash,3200);assert.equal(co.kind,'small');assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['france','mughal']);assert.equal(co.friendship[nation(e,'france')],100);assert.equal(co.friendship[nation(e,'mughal')],60);assert.equal(co.ships[0].kind,'sloop');assert.deepEqual(co.routes[0].stops.map(n=>e.data.cities[n].id),['pondicherry','hughli']);
 });
@@ -442,7 +442,7 @@ test('Pondicherry extends old saves without changing existing markets, companies
 
 test('Edo is a Japanese port and 115-city saves gain only its new market and development record',async()=>{
  const e=await engine(),i=city(e,'edo');assert.equal(i,115);assert.equal(e.data.cities[i].mapName,'江戸');assert.equal(e.data.nations[e.data.cities[i].nation].id,'japan');assert.equal(e.data.cities[i].inland,false);
- const g=e.save();g.city_version=1;g.markets.length=115*e.data.goods.length;g.development.length=115;omitUnavailableRoutes(g,115);trimLegacyWorld(g);const before=structuredClone(g);e.load(g);const after=e.save();assert.equal(after.city_version,8);assert.equal(after.markets.length,227*e.data.goods.length);assert.equal(after.development[i].owner,'state');const comparable=structuredClone(after);comparable.city_version=1;comparable.markets.length=g.markets.length;comparable.development.length=115;trimLegacyWorld(comparable);assert.deepEqual(comparable,before);e.load(after);assert.deepEqual(e.save(),after);
+ const g=e.save();g.city_version=1;g.markets.length=115*e.data.goods.length;g.development.length=115;omitUnavailableRoutes(g,115);trimLegacyWorld(g);const before=structuredClone(g);e.load(g);const after=e.save();assert.equal(after.city_version,9);assert.equal(after.markets.length,228*e.data.goods.length);assert.equal(after.development[i].owner,'state');const comparable=structuredClone(after);comparable.city_version=1;comparable.markets.length=g.markets.length;comparable.development.length=115;trimLegacyWorld(comparable);assert.deepEqual(comparable,before);e.load(after);assert.deepEqual(e.save(),after);
  assert.ok(e.view(i).market.every(m=>m.demand>0));fund(e);const route=open(e,['edo','osaka']);assert.ok(route);e.cmd({action:'tick',days:30});e.load(e.save());assert.equal(e.save().companies[0].routes[0].stops[0],i);
 });
 

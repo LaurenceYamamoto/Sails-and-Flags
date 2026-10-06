@@ -10,6 +10,9 @@ import {DEMAND_REGIONS,DEMAND_CLIMATES,demandProfile} from '../src/demand-data.j
 import {seaRoute,seaLines} from '../src/sea-routing.js';
 import {LAND} from '../assets/maps/world-land.js';
 import {project} from '../src/geography.js';
+import {landSegment} from '../src/world-geometry.js';
+import {COASTAL_ROAD_VIA} from '../src/coastal-road-data.js';
+import {KOREA_ROADS} from '../src/korea-expansion-data.js';
 fs.mkdirSync('wasm-core/data',{recursive:true});
 const nations=Object.entries(NATIONS).map(([id,n])=>({id,...n}));
 const cities=Object.entries(CITIES).map(([id,c])=>{
@@ -24,6 +27,13 @@ for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].
  const r=seaRoute(cities[a].id,cities[b].id);if(r){distances[a][b]=distances[b][a]=r.nm;paths[a+':'+b]=seaLines(cities[a].id,cities[b].id);}
 }
 const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
+// Check the actual map endpoints, including city presentation offsets.
+for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS)]){
+ const r=roads.find(r=>r.id===id),points=r.points.map(p=>({...p}));
+ for(const [at,ci] of [[0,r.a],[points.length-1,r.b]]){const c=cities[ci];points[at]={x:c.displayX??c.x,y:c.displayY??c.y};}
+ const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);
+ for(let i=1;i<coordinates.length;i++)if(!landSegment(coordinates[i-1],coordinates[i]))throw Error(`Road crosses water: ${id}, segment ${i}`);
+}
 const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,...s,level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));

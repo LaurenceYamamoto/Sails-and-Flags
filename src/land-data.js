@@ -1,6 +1,8 @@
 import {FRENCH_CARIBBEAN_ROADS} from './french-caribbean-data.js';
 import {RETIRED_ROADS,ADDED_ROADS} from './road-revisions.js';
 import {TARANTO_ROADS} from './taranto-data.js';
+import {KOREA_ROADS} from './korea-expansion-data.js';
+import {COASTAL_ROAD_VIA,COASTAL_CITY_DISPLAY} from './coastal-road-data.js';
 import {SIBERIAN_ROADS} from './siberian-data.js';
 import {ATLANTIC_ROADS} from './atlantic-expansion-data.js';
 import {EUROPE_ROADS} from './europe-expansion-data.js';
@@ -32,6 +34,8 @@ for(const id of ARID_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],climate:'arid'};
 for(const id of RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true};
 Object.assign(ROAD_SLOTS,ADDED_ROADS);
 Object.assign(ROAD_SLOTS,TARANTO_ROADS);
+Object.assign(ROAD_SLOTS,KOREA_ROADS);
+for(const [id,via] of Object.entries(COASTAL_ROAD_VIA))ROAD_SLOTS[id]={...ROAD_SLOTS[id],via};
 export const ROADS=Object.fromEntries(Object.entries(ROAD_SLOTS).filter(([,r])=>!r.retired));
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();
@@ -41,5 +45,5 @@ for(const entry of Object.entries(ROADS)){
 export const roadBetween=(a,b)=>roadIndex.get(`${a}:${b}`);
 
 // Map geometry follows land rather than a straight chord across the Bay of Biscay.
-export function roadPoints(a,b){const link=roadBetween(a,b);if(!link)return [];const [,r]=link,from=PORT_GEOGRAPHY[r.a]??INLAND[r.a],to=PORT_GEOGRAPHY[r.b]??INLAND[r.b];const points=[[from.lon,from.lat],...(r.via??[]),[to.lon,to.lat]].map(([lon,lat])=>project(lon,lat));return a===r.a?points:points.reverse();}
+export function roadPoints(a,b){const link=roadBetween(a,b);if(!link)return [];const [,r]=link,from=PORT_GEOGRAPHY[r.a]??INLAND[r.a],to=PORT_GEOGRAPHY[r.b]??INLAND[r.b];const points=[COASTAL_CITY_DISPLAY[r.a]??[from.lon,from.lat],...(r.via??[]),COASTAL_CITY_DISPLAY[r.b]??[to.lon,to.lat]].map(([lon,lat])=>project(lon,lat));return a===r.a?points:points.reverse();}
 export function roadPosition(a,b,fraction){const points=roadPoints(a,b),lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y));let rest=Math.max(0,Math.min(1,fraction))*lengths.reduce((a,b)=>a+b,0);for(let i=0;i<lengths.length;i++){if(rest<=lengths[i]||i===lengths.length-1){const t=rest/lengths[i];return {x:points[i].x+(points[i+1].x-points[i].x)*t,y:points[i].y+(points[i+1].y-points[i].y)*t};}rest-=lengths[i];}return points[0];}

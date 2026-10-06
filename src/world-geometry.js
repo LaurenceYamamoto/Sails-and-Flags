@@ -21,8 +21,8 @@ function coastline(){
   }return index;
 }
 const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
-function clearSegment(a,b){
-  if(onLand(a)||onLand(b))return false;
+function clearSegment(a,b,land=false){
+  if(onLand(a)!==land||onLand(b)!==land)return false;
   const box=bounds([a,b]),seen=new Set(),edges=coastline();
   for(let x=Math.floor(box[0]/2);x<=Math.floor(box[1]/2);x++)for(let y=Math.floor(box[2]/2);y<=Math.floor(box[3]/2);y++)for(const e of edges.get(`${x},${y}`)??[]){
     if(seen.has(e))continue;seen.add(e);const q=e.box;
@@ -37,3 +37,5 @@ export function splitDateline(a,b){
   return [[a,[bound,y]],[[-bound,y],b]];
 }
 export const waterSegment=(a,b)=>splitDateline(a,b).every(([u,v])=>clearSegment(u,v));
+// Used at build/test time to reject road segments crossing seas, bays or lakes.
+export const landSegment=(a,b)=>splitDateline(a,b).every(([u,v])=>clearSegment(u,v,true));

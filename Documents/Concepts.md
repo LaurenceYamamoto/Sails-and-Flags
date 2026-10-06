@@ -1,5 +1,14 @@
 ﻿# Sails and Flags: ゲームコンセプト
 
+## 沿岸陸路の表示修正・平壌追加（2026-10-06）
+
+Bilbao―Bordeaux、Thessaloniki―Athens、Alexandria―Tripoli、Tripoli―Tunis、Luanda―Benguela、Mérida―Veracruz、Caracas―Cartagena、St. Augustine―Charleston、Accra―Benin Cityの9陸路に、湾・海・湖を避ける経由点を追加しました。道路線・交易ルート線・車両移動は同じ修正経路を使います。既存の距離・地形・所要時間・必要免許・道路権は維持します。
+
+Luandaは簡略海岸線の海側に点があったため、表示だけを東へ約0.12度（SVG上0.3）移動しました。地理座標・海路距離は変えません。
+
+平壌を朝鮮所属の内陸都市として末尾へ追加し、漢城―平壌の260kmの陸路を設置。主産品は食料・織物で、都市表記は平壌とします。世界228都市（123港・105内陸都市）・39国家・216有効陸路。旧セーブには市場・都市開発・道路を1件ずつ追加し、既存の運行・所有・会計・乱数を保持します。
+
+
 ## 陸路整理とTaranto追加（2026-10-06）
 
 Lima―Quito、Lima―Arequipa、Lisbon―Porto、Porto―Madrid、Cadiz―Madrid、Madrid―Barcelona、Nantes―Lyon、Paris―Frankfurt、Madrid―Parisの直接陸路9区間を廃止しました。Madrid―Bordeauxの直接道路は元からありません。港同士の海上交易には影響しません。
