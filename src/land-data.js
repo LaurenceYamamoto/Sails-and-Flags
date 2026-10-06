@@ -1,3 +1,7 @@
+import {FRENCH_CARIBBEAN_ROADS} from './french-caribbean-data.js';
+import {RETIRED_ROADS,ADDED_ROADS} from './road-revisions.js';
+import {TARANTO_ROADS} from './taranto-data.js';
+import {SIBERIAN_ROADS} from './siberian-data.js';
 import {ATLANTIC_ROADS} from './atlantic-expansion-data.js';
 import {EUROPE_ROADS} from './europe-expansion-data.js';
 import {CARAVANS,ARID_ROADS} from './caravan-data.js';
@@ -11,7 +15,8 @@ export const INLAND = {
   ...CONTINENTAL_CITIES,
 };
 export const WAGONS={wagon:{name:'馬車',nameEn:'Wagon',mode:'land',price:600,capacity:15,speed:40,range:2000,daily:1.2,guns:0},...CARAVANS};
-export const ROADS={
+// Keep retired slots in their original positions for indexed Wasm saves.
+export const ROAD_SLOTS={
   ...CONTINENTAL_ROADS,...CROSSING_ROADS,
   lisbon_porto:{a:'lisbon',b:'porto',km:310,terrain:'hill',penalty:.8,safety:.95,nations:['portugal']},
   porto_madrid:{a:'porto',b:'madrid',km:560,terrain:'hill',penalty:.65,safety:.90,nations:['portugal','spain']},
@@ -22,8 +27,12 @@ export const ROADS={
   nantes_paris:{a:'nantes',b:'paris',km:385,terrain:'plain',penalty:1,safety:.96,nations:['france']},
   madrid_paris:{a:'madrid',b:'paris',km:1280,via:[[-1.64,42.81],[-1.47,43.49],[-.58,44.84]],terrain:'mountain',penalty:.5,safety:.92,nations:['spain','france']},
 };
-Object.assign(ROADS,EUROPE_ROADS,ATLANTIC_ROADS);
-for(const id of ARID_ROADS)ROADS[id]={...ROADS[id],climate:'arid'};
+Object.assign(ROAD_SLOTS,EUROPE_ROADS,ATLANTIC_ROADS,SIBERIAN_ROADS,FRENCH_CARIBBEAN_ROADS);
+for(const id of ARID_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],climate:'arid'};
+for(const id of RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true};
+Object.assign(ROAD_SLOTS,ADDED_ROADS);
+Object.assign(ROAD_SLOTS,TARANTO_ROADS);
+export const ROADS=Object.fromEntries(Object.entries(ROAD_SLOTS).filter(([,r])=>!r.retired));
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();
 for(const entry of Object.entries(ROADS)){

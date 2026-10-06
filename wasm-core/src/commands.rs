@@ -138,6 +138,7 @@ impl Engine {
         .ceil()
     }
     pub fn buy_road(&mut self, c: usize, i: usize) -> Result<()> {
+        ensure(!self.data.roads[i].retired, "この陸路は廃止されました。")?;
         let d = &self.game.roads[i];
         ensure(
             d.owner != self.game.companies[c].id
@@ -551,6 +552,7 @@ impl Engine {
             }
             "roadInvestment" => {
                 let i = index(v, "road", self.data.roads.len())?;
+                ensure(!self.data.roads[i].retired, "この陸路は廃止されました。")?;
                 ensure(
                     self.game.roads[i].owner == "player",
                     "道路開発権が必要です。",

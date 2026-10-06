@@ -7,6 +7,8 @@ const lists={
  gold:new Set(['elmina','kumasi','mozambique','cartagena','bogota','rio','accra','sofala']),
 };
 export function localProduction(id,c,good,previous){
+ // Northern caravan markets import tea, silk and porcelain rather than producing them.
+ if(c.productionZone==='northernInterior'&&['tea','silk','porcelain'].includes(good))return 0;
  const {lon,lat}=c,american=lon<-30,tropicalAmerica=american&&lat<26&&lat>-25;
  const eastAsia=lon>100&&lat>20,india=lon>=65&&lon<95&&lat>=5&&lat<36;
  const specialty=c.exports?.includes(good)||previous>=2.2;

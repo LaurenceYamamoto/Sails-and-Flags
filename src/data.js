@@ -1,3 +1,6 @@
+import {FRENCH_CARIBBEAN_PORTS} from './french-caribbean-data.js';
+import {TARANTO_PORTS} from './taranto-data.js';
+import {SIBERIAN_CITIES} from './siberian-data.js';
 import {ATLANTIC_CITIES,ATLANTIC_NATIONS} from './atlantic-expansion-data.js';
 import {EUROPE_PORTS,EUROPE_INLAND,EUROPE_NATIONS} from './europe-expansion-data.js';
 import {EXPANSION_PORTS} from './port-expansion-data.js';
@@ -80,7 +83,7 @@ Object.assign(NATIONS,EUROPE_NATIONS);
 Object.assign(NATIONS,ATLANTIC_NATIONS);
 GOODS.push(...WORLD_GOODS);
 for(const [id,c] of Object.entries(CITIES))for(const g of WORLD_GOODS){const m=worldMarket(id,c,g);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
-for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES})){
+for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS})){
  const markets=GOODS.map(g=>worldMarket(id,c,g));
  CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)};
 }

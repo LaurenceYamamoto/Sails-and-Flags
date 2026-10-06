@@ -60,6 +60,7 @@ ja.shipSale='船の売却';en.shipSale='Ship sale';
 let language = 'ja';
 ja.technologyInvestment="技術投資";en.technologyInvestment="Technology investment";
 ja.shipyardRefund="旧造船所の返金";en.shipyardRefund="Retired shipyard refund";
+ja.retiredRoadRefund="廃止陸路の返金";en.retiredRoadRefund="Retired road refund";
 ja.shipyardPurchase="造船設備";en.shipyardPurchase="Shipyard purchase";
 ja.designResearch="設計研究";en.designResearch="Design research";
 ja.shipConstruction="船の建造";en.shipConstruction="Ship construction";

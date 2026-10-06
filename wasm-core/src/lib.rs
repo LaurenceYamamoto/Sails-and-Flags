@@ -13,6 +13,47 @@ use serde_json::{Value, json};
 use std::cell::RefCell;
 
 impl Engine {
+    // Retired roads retain save indices, but no longer support transport or investment.
+    // Validate the original save first; refund only assets still present in that save.
+    fn retire_roads(&self, g: &mut Game) -> Result<Vec<(usize, f64, usize)>> {
+        let mut refunds = Vec::new();
+        for (ci, c) in g.companies.iter_mut().enumerate() {
+            let removed: Vec<_> = c.routes.iter().filter(|r| r.mode == "land" &&
+                r.stops.iter().enumerate().any(|(i, &a)| {
+                    let b = r.stops[(i + 1) % r.stops.len()];
+                    self.data.roads.iter().any(|d| d.retired &&
+                        ((d.a == a && d.b == b) || (d.a == b && d.b == a)))
+                })).map(|r| r.id).collect();
+            let mut refund = 0.0;
+            for s in &mut c.ships {
+                if s.route.is_some_and(|id| removed.contains(&id)) {
+                    refund += s.cargo.iter().map(|item| item.cost).sum::<f64>();
+                    s.route = None;
+                    s.voyage = None;
+                    s.handling = None;
+                    s.cargo.clear();
+                    s.next = 0;
+                    s.ready = g.day;
+                }
+            }
+            c.routes.retain(|r| !removed.contains(&r.id));
+            for (i, r) in g.roads.iter().enumerate() {
+                if self.data.roads[i].retired && r.owner == c.id {
+                    refund += r.basis + r.pool;
+                }
+            }
+            model::ensure(model::amount(refund) && model::amount(c.cash.max(0.0) + refund + c.yard_value),
+                "廃止陸路の返金額が不正です。")?;
+            refunds.push((ci, refund, removed.len()));
+        }
+        for (i, r) in g.roads.iter_mut().enumerate() {
+            if self.data.roads[i].retired {
+                *r = model::RoadState { owner: "state".into(), basis: 0.0, quality: 0.0,
+                    security: 0.0, road_budget: 0.0, security_budget: 0.0, pool: 0.0 };
+            }
+        }
+        Ok(refunds)
+    }
     pub fn dispatch(&mut self, v: Value) -> Result<Value> {
         match v["op"].as_str().unwrap_or("") {
             "advance" => {
@@ -114,7 +155,7 @@ impl Engine {
                         }
                     }
                 }
-                if g.city_version < 4 {
+                if g.city_version < 8 {
                     let old_nation_count = g.companies[0].friendship.len();
                     // Append the new market without consuming the campaign's RNG or
                     // touching existing stocks, ownership, routes, or company balances.
@@ -131,7 +172,7 @@ impl Engine {
                     }
                     // Preserve existing pair order, wars and relations; append only new pairs.
                     g.pairs.extend(initial.pairs.into_iter().filter(|p| p.b >= old_nation_count));
-                    g.city_version = 4;
+                    g.city_version = 8;
                 }
                 Self::normalize_account_history(&mut g);
                 if g.cargo_time_version == 0 {
@@ -161,8 +202,17 @@ impl Engine {
                     c.yard_value = 0.0;
                 }
                 g.transport_version = 1;
+                let road_refunds = self.retire_roads(&mut g)?;
                 self.validate(&g, false)?;
                 self.game = g;
+                for (c, refund, removed) in road_refunds {
+                    if refund > 0.0 {
+                        self.entry(c, "retiredRoadRefund", refund, None, "Retired roads".into());
+                    }
+                    if c == 0 && (removed > 0 || refund > 0.0) {
+                        self.event("retiredRoad", format!("廃止陸路を含むルート{}件を解除し、車両を未使用に戻しました。返金 £{:.2} / Retired roads: {} route(s) removed; vehicles returned; refund £{:.2}", removed, refund, removed, refund));
+                    }
+                }
                 for (c, refund) in refunds.into_iter().enumerate() {
                     if refund > 0.0 {
                         self.entry(c, "shipyardRefund", refund, None, String::new());

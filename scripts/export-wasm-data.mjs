@@ -2,7 +2,7 @@ import {layoutAddedCities} from './layout-map-cities.mjs';
 // Build-time conversion only. The browser never imports the reference JS engine.
 import fs from 'node:fs';
 import {CITIES,NATIONS,GOODS,SHIPS} from '../src/data.js';
-import {ROADS,WAGONS,roadPoints} from '../src/land-data.js';
+import {ROADS,ROAD_SLOTS,WAGONS,roadPoints} from '../src/land-data.js';
 import {HULLS,HULL_LEVELS} from '../src/industry.js';
 import {RIVAL_STARTS} from '../src/rival-starts.js';
 import {SHIP_NAMES} from '../src/identity.js';
@@ -23,7 +23,7 @@ const index=id=>cities.findIndex(c=>c.id===id),paths={},distances=cities.map(()=
 for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].inland&&!cities[b].inland){
  const r=seaRoute(cities[a].id,cities[b].id);if(r){distances[a][b]=distances[b][a]=r.nm;paths[a+':'+b]=seaLines(cities[a].id,cities[b].id);}
 }
-const roads=Object.entries(ROADS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
+const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
 const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,...s,level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));

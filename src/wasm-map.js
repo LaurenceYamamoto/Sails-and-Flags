@@ -12,7 +12,7 @@ export class WorldMap {
   this.handlers=handlers;this.camera=cameraFor('world');this.markers=new Map();this.key='';this.paths={};
   this.svg=node('svg',{class:'map wasm-map',viewBox:'0 0 900 450',tabindex:0,role:'group','aria-label':'World trade map'});
   this.svg.append(node('path',{d:catalog.land,class:'world-land','fill-rule':'evenodd'}));
-  const roads=node('g',{class:'world-roads'});for(const r of catalog.roads)roads.append(node('path',{d:path(this.displayLines([r.points],r.a,r.b))}));this.svg.append(roads);
+  const roads=node('g',{class:'world-roads'});for(const r of catalog.roads.filter(r=>!r.retired))roads.append(node('path',{d:path(this.displayLines([r.points],r.a,r.b))}));this.svg.append(roads);
   this.routeLayer=node('g',{class:'world-routes'});this.svg.append(this.routeLayer);
   this.cityLayer=node('g');this.svg.append(this.cityLayer);
   // Keep names above vessels so an occupied port remains selectable by its label.

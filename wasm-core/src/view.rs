@@ -111,6 +111,7 @@ impl Engine {
             .roads
             .iter()
             .enumerate()
+            .filter(|(i, _)| !self.data.roads[*i].retired)
             .map(|(i, d)| {
                 let mut v = serde_json::to_value(d).unwrap();
                 v["index"] = json!(i);
@@ -137,14 +138,17 @@ impl Engine {
         json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"handlingRates":[self.handling_rate(0,"sea"),self.handling_rate(0,"land")],"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
     }
     pub fn validate(&self, g: &Game, loading: bool) -> Result<()> {
+        // Legacy routes must be fully validated before retiring them on load.
+        let road = |a, b| self.data.roads.iter().position(|r|
+            ((loading && g.city_version < 7) || !r.retired) && ((r.a == a && r.b == b) || (r.a == b && r.b == a)));
         ensure(
             g.format == "sails-flags-wasm"
                 && g.version == 1
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && g.city_version <= 4
-                && (loading || g.city_version == 4)
+                && g.city_version <= 8
+                && (loading || g.city_version == 8)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -156,13 +160,16 @@ impl Engine {
                 1 => 115,
                 2 => 116,
                 3 => 135,
+                4 => 209,
+                5 => 223,
+                6 | 7 => 226,
                 _ => d.cities.len(),
             }
         } else {
             d.cities.len()
         };
         let nation_count = if loading && g.city_version < 3 { 23 } else if loading && g.city_version == 3 { 31 } else { d.nations.len() };
-        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else { d.roads.len() };
+        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else if loading && g.city_version == 4 { 202 } else if loading && g.city_version == 5 { 219 } else if loading && g.city_version == 6 { 221 } else if loading && g.city_version == 7 { 223 } else { d.roads.len() };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()
@@ -368,7 +375,7 @@ impl Engine {
                             a != b
                                 && c.licenses.contains(&d.cities[a].nation)
                                 && if r.mode == "land" {
-                                    self.road(a, b).is_some_and(|j| {
+                                    road(a, b).is_some_and(|j| {
                                         d.roads[j].nations.iter().all(|n| c.licenses.contains(n))
                                     })
                                 } else {
@@ -430,7 +437,7 @@ impl Engine {
                             && r.stops.iter().enumerate().all(|(i, &a)| {
                                 let b = r.stops[(i + 1) % r.stops.len()];
                                 let distance = if r.mode == "land" {
-                                    d.roads[self.road(a, b).unwrap()].km
+                                    d.roads[road(a, b).unwrap()].km
                                 } else {
                                     d.distances[a][b].unwrap()
                                 };
@@ -539,7 +546,12 @@ impl Engine {
                 "保存データの都市が不正です。",
             )?;
         }
-        for r in &g.roads {
+        for (i, r) in g.roads.iter().enumerate() {
+            if d.roads[i].retired && (!loading || g.city_version >= 7) {
+                ensure(r.owner == "state" && [r.basis, r.quality, r.security,
+                    r.road_budget, r.security_budget, r.pool].iter().all(|&v| v == 0.0),
+                    "廃止された道路の状態が不正です。")?;
+            }
             ensure(
                 ["state", "private"].contains(&r.owner.as_str())
                     || g.companies.iter().any(|c| c.id == r.owner && !c.acquired),

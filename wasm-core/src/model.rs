@@ -55,6 +55,8 @@ pub struct Good {
 #[derive(Clone, Deserialize)]
 pub struct Road {
     pub id: String,
+    #[serde(default)]
+    pub retired: bool,
     pub a: usize,
     pub b: usize,
     pub km: f64,
@@ -430,7 +432,7 @@ impl Engine {
         self.data
             .roads
             .iter()
-            .position(|r| (r.a == a && r.b == b) || (r.a == b && r.b == a))
+            .position(|r| !r.retired && ((r.a == a && r.b == b) || (r.a == b && r.b == a)))
     }
     pub fn distance(&self, kind: &str, a: usize, b: usize) -> f64 {
         if self.spec(kind).is_ok_and(|s| s.mode == "land") {
@@ -663,7 +665,7 @@ impl Game {
             cargo_time_version: 1,
             transport_version: 1,
             roster_version: 5,
-            city_version: 4,
+            city_version: 8,
             seed,
             rng,
             day: 0,
