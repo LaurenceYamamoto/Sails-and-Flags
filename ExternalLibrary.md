@@ -48,3 +48,7 @@ Cargo.lockおよびローカルに取得済みの各Cargo.tomlから確認しま
 | Codex内蔵ブラウザ | 画面とIndexedDBの実動作確認 | 開発用ツール。成果物に同梱しません |
 
 ゲームルール、名称リスト、都市・商品・国家のゲーム用定義、独自の海路生成・地図表示は本プロジェクトのコードです。3.0.0からプロジェクトのライセンスを[GNU GPL version 3 or later](LICENSE)（SPDX: `GPL-3.0-or-later`）へ変更しました。外部ライブラリ・素材には上記の各ライセンスが引き続き適用され、同梱した著作権・ライセンス通知を維持します。外部地図サービス、翻訳API、解析サービスへの通信は行いません。Rust/Cargo依存の初回取得とターゲット追加には開発時のネットワーク接続が必要です。
+
+## 中央・東ヨーロッパ追加の参考資料（2026-10-06）
+
+外部ライブラリの追加はありません。都市座標・生産適性・道路はゲーム用の近似値であり、外部地図素材は追加していません。政治主体と商業史の参考: [Hamburg市の歴史](https://www.hamburg.com/residents/about-hamburg/history-18862)、[Berlin市の1701年の王国成立](https://www.berlin.de/en/history/8477225-8619314-the-royal-capital.en.html)、[ハプスブルクと1740年のSilesia](https://www.habsburger.net/en/chapter/habsburg-heiress-versus-european-world-men)、[Gdańsk博物館によるポーランドへの帰属](https://muzeumgdansk.pl/wydarzenia/szczegoly/news/krol-jedzie/)。文章・画像の転載はありません。

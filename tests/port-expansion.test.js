@@ -1,3 +1,4 @@
+import {EUROPE_PORTS} from '../src/europe-expansion-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CITIES} from '../src/data.js';
@@ -14,12 +15,12 @@ test('Pondicherry lies on the coast and connects to every port over the sea',()=
  for(const [key,[a,b]]of segments)assert.ok(waterSegment(a,b),key);assert.ok(seaRoute('pondicherry','hughli').nm<=1800);
 });
 test('adding a port leaves all frozen sea-route distances unchanged',()=>{
- const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
+ const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]&&!EUROPE_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
 });
 
 
 test('Edo uses a water-only bay approach and connects to every port without relocating older cities',()=>{
- const c=CITIES.edo;assert.equal(Object.keys(CITIES).at(-1),'edo');assert.equal(c.mapName,'江戸');assert.equal(c.nation,'japan');assert.ok(onLand([c.lon,c.lat]));assert.ok(!onLand(EXPANSION_PORTS.edo.gateway));
+ const c=CITIES.edo;assert.equal(Object.keys(CITIES)[115],'edo');assert.equal(c.mapName,'江戸');assert.equal(c.nation,'japan');assert.ok(onLand([c.lon,c.lat]));assert.ok(!onLand(EXPANSION_PORTS.edo.gateway));
  const approach=PORT_APPROACHES.edo;for(let i=1;i<approach.length;i++)assert.ok(waterSegment(approach[i-1],approach[i]));
  const segments=new Map();for(const id of Object.keys(PORT_APPROACHES).filter(id=>id!=='edo')){const r=seaRoute('edo',id);assert.ok(Number.isFinite(r.nm)&&r.nm>0);assert.equal(r.nm,seaRoute(id,'edo').nm);assert.deepEqual(r.coordinates[0],[c.lon,c.lat]);for(let i=1;i<r.offshore.length;i++)segments.set(JSON.stringify([r.offshore[i-1],r.offshore[i]].sort()),[r.offshore[i-1],r.offshore[i]]);}
  for(const [a,b]of segments.values())assert.ok(waterSegment(a,b));assert.ok(seaRoute('edo','osaka').nm<=1800);assert.ok(seaRoute('edo','nagasaki').nm<=1800);

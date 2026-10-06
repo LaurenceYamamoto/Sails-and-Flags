@@ -114,7 +114,7 @@ impl Engine {
                         }
                     }
                 }
-                if g.city_version < 2 {
+                if g.city_version < 3 {
                     // Append the new market without consuming the campaign's RNG or
                     // touching existing stocks, ownership, routes, or company balances.
                     let initial = Game::new(&self.data, g.seed, g.events_enabled);
@@ -122,7 +122,15 @@ impl Engine {
                         .extend_from_slice(&initial.markets[g.markets.len()..]);
                     g.development
                         .extend_from_slice(&initial.development[g.development.len()..]);
-                    g.city_version = 2;
+                    g.roads.extend_from_slice(&initial.roads[g.roads.len()..]);
+                    for c in &mut g.companies {
+                        c.friendship.resize(self.data.nations.len(), 60.0);
+                        c.diplomacy_budget.resize(self.data.nations.len(), 0.0);
+                        c.trade.resize(self.data.nations.len(), 0.0);
+                    }
+                    // Preserve existing pair order, wars and relations; append only new pairs.
+                    g.pairs.extend(initial.pairs.into_iter().filter(|p| p.b >= 23));
+                    g.city_version = 3;
                 }
                 Self::normalize_account_history(&mut g);
                 if g.cargo_time_version == 0 {

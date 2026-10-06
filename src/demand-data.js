@@ -1,3 +1,5 @@
+import {EUROPE_PORTS,EUROPE_INLAND} from './europe-expansion-data.js';
+const centralEuropeanCities=new Set([...Object.keys(EUROPE_PORTS),...Object.keys(EUROPE_INLAND)]);
 // Modest gameplay adjustments to existing city demand, not historical statistics.
 // Region follows the city's location, independently of its ruling nation.
 export const DEMAND_REGIONS={
@@ -10,6 +12,7 @@ export const DEMAND_REGIONS={
  africa:{label:['アフリカ市場圏','African markets'],goods:{cloth:1.2,tools:1.2}},
  americas:{label:['南北アメリカ市場圏','American markets'],goods:{tools:1.25,cloth:1.2}},
 };
+DEMAND_REGIONS.centralEurope={label:['中央・東ヨーロッパ','Central and Eastern Europe'],goods:{...DEMAND_REGIONS.northEurope.goods}};
 export const DEMAND_CLIMATES={
  cold:{label:['寒冷','Cold'],goods:{fur:1.35,timber:1.2},winter:{fur:.25,timber:.15,food:.08}},
  temperate:{label:['温帯','Temperate'],goods:{fur:1.1},winter:{fur:.2,timber:.12,food:.05}},
@@ -19,7 +22,7 @@ export const DEMAND_CLIMATES={
 const dry=new Set(['cairo','suez','alexandria','baghdad','basra','aleppo','damascus','muscat','mocha','sanaa','bandarabbas','isfahan','shiraz','marrakesh']);
 const highland=new Set(['mexicocity','puebla','bogota','quito','cusco','potosi']);
 export function demandProfile(id,{lon,lat}){
- const region=lon<-30?'americas':lon>=100&&lat>=22?'eastAsia':lon>=95?'southeastAsia':lon>=65?'southAsia':lon>=26&&lat>=12&&lat<45?'westAsia':lat<35?'africa':lat<46?'mediterranean':'northEurope';
+ const region=centralEuropeanCities.has(id)?'centralEurope':lon<-30?'americas':lon>=100&&lat>=22?'eastAsia':lon>=95?'southeastAsia':lon>=65?'southAsia':lon>=26&&lat>=12&&lat<45?'westAsia':lat<35?'africa':lat<46?'mediterranean':'northEurope';
  const climate=dry.has(id)?'arid':highland.has(id)?'temperate':Math.abs(lat)>=55?'cold':Math.abs(lat)<24?'tropical':'temperate';
  return {region,climate,south:lat<0};
 }

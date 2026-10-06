@@ -143,8 +143,8 @@ impl Engine {
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && g.city_version <= 2
-                && (loading || g.city_version == 2)
+                && g.city_version <= 3
+                && (loading || g.city_version == 3)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -154,11 +154,14 @@ impl Engine {
             match g.city_version {
                 0 => 114,
                 1 => 115,
+                2 => 116,
                 _ => d.cities.len(),
             }
         } else {
             d.cities.len()
         };
+        let nation_count = if loading && g.city_version < 3 { 23 } else { d.nations.len() };
+        let road_count = if loading && g.city_version < 3 { 69 } else { d.roads.len() };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()
@@ -175,8 +178,8 @@ impl Engine {
                 && g.companies[0].id == "player"
                 && g.markets.len() == city_count * d.goods.len()
                 && g.development.len() == city_count
-                && g.roads.len() == d.roads.len()
-                && g.pairs.len() == d.nations.len() * (d.nations.len() - 1) / 2,
+                && g.roads.len() == road_count
+                && g.pairs.len() == nation_count * (nation_count - 1) / 2,
             "保存データの構成が不正です。",
         )?;
         ensure(
@@ -248,10 +251,10 @@ impl Engine {
                 )?;
             }
             ensure(
-                c.friendship_history.len() <= 30 * d.nations.len() + 1
+                c.friendship_history.len() <= 30 * nation_count + 1
                     && c.friendship_history.iter().all(|h| {
                         h.day <= g.day
-                            && h.nation < d.nations.len()
+                            && h.nation < nation_count
                             && [h.before, h.after]
                                 .iter()
                                 .all(|v| v.is_finite() && (0.0..=100.0).contains(v))
@@ -315,9 +318,9 @@ impl Engine {
             ensure(
                 c.technology.len() == 6
                     && c.tech_budget.len() == 6
-                    && c.friendship.len() == d.nations.len()
-                    && c.diplomacy_budget.len() == d.nations.len()
-                    && c.trade.len() == d.nations.len()
+                    && c.friendship.len() == nation_count
+                    && c.diplomacy_budget.len() == nation_count
+                    && c.trade.len() == nation_count
                     && c.friendship
                         .iter()
                         .all(|f| f.is_finite() && (0.0..=100.0).contains(f))
@@ -331,7 +334,7 @@ impl Engine {
                 "保存データの会社が不正です。",
             )?;
             ensure(
-                c.licenses.iter().all(|&n| n < d.nations.len())
+                c.licenses.iter().all(|&n| n < nation_count)
                     && c.licenses.iter().collect::<BTreeSet<_>>().len() == c.licenses.len()
                     && c.ledger.len() <= if loading { 600 } else { LEDGER_RETAINED }
                     && c.history.len() <= 365
@@ -559,7 +562,7 @@ impl Engine {
         for p in &g.pairs {
             ensure(
                 p.a < p.b
-                    && p.b < d.nations.len()
+                    && p.b < nation_count
                     && pairs.insert((p.a, p.b))
                     && p.relation.is_finite()
                     && (0.0..=100.0).contains(&p.relation),

@@ -1,3 +1,4 @@
+import {EUROPE_ROADS} from './europe-expansion-data.js';
 import {CARAVANS,ARID_ROADS} from './caravan-data.js';
 import {CROSSING_ROADS} from './crossing-data.js';
 import {PORT_GEOGRAPHY,project} from './geography.js';
@@ -20,6 +21,7 @@ export const ROADS={
   nantes_paris:{a:'nantes',b:'paris',km:385,terrain:'plain',penalty:1,safety:.96,nations:['france']},
   madrid_paris:{a:'madrid',b:'paris',km:1280,via:[[-1.64,42.81],[-1.47,43.49],[-.58,44.84]],terrain:'mountain',penalty:.5,safety:.92,nations:['spain','france']},
 };
+Object.assign(ROADS,EUROPE_ROADS);
 for(const id of ARID_ROADS)ROADS[id]={...ROADS[id],climate:'arid'};
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();
