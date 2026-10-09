@@ -10,7 +10,7 @@ const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 
 test('Three French Caribbean ports have usable markets, national colors and appropriate display separation',()=>{
- assert.equal(w.cities.length,252);assert.equal(w.cities.filter(c=>!c.inland).length,128);assert.equal(w.roads.length,276);assert.equal(w.nations.length,41);
+ assert.equal(w.cities.length,256);assert.equal(w.cities.filter(c=>!c.inland).length,129);assert.equal(w.roads.length,281);assert.equal(w.nations.length,44);
  assert.deepEqual(w.cities.slice(223,226).map(c=>c.id),['neworleans','portauprince','saintpierre']);const get=id=>w.cities.find(c=>c.id===id),s=get('santiagodechile'),v=get('valparaiso'),min=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c]of Object.entries(ports)){const d=get(id);assert.equal(w.nations[d.nation].id,'france');assert.equal(d.inland,false);assert.ok(CITIES[id].demand.every(n=>n>0));for(const g of c.exports)assert.ok(CITIES[id].supply[GOODS.findIndex(x=>x.id===g)]>=3.2);assert.ok(onLand([d.displayX/2.5-180,90-d.displayY/2.5]));
   for(const b of w.cities)if(b.id!==id){const q=b.id==='lima'?{x:b.x+1.7,y:b.y-1.7}:{x:b.displayX??b.x,y:b.displayY??b.y};assert.ok(Math.hypot(d.displayX-q.x,d.displayY-q.y)>=min-1e-9,id+' / '+b.id);}
@@ -30,9 +30,9 @@ test('French ports reach every port by symmetric sea routes and Port-au-Prince a
 });
 
 test('223-city saves gain only the French port markets, development and roads',async()=>{
- const e=await engine(),old=e.save();old.city_version=5;trimLegacyNations(old);old.markets.length=223*e.data.goods.length;old.development.length=223;old.roads.length=219;old.markets[0].stock+=18;e.load(old);const after=e.save();assert.equal(after.city_version,12);assert.equal(after.development.length,252);assert.equal(after.roads.length,276);
+ const e=await engine(),old=e.save();old.city_version=5;trimLegacyNations(old);old.markets.length=223*e.data.goods.length;old.development.length=223;old.roads.length=219;old.markets[0].stock+=18;e.load(old);const after=e.save();assert.equal(after.city_version,13);assert.equal(after.development.length,256);assert.equal(after.roads.length,281);
  const back=structuredClone(after);back.city_version=5;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=223;back.roads.length=219;assert.deepEqual(back,old);
- for(const change of [g=>g.city_version=13,g=>g.markets.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=14,g=>g.markets.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 

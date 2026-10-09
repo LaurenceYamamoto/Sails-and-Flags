@@ -1,3 +1,4 @@
+import {INDOCHINA_PORTS} from '../src/indochina-data.js';
 import {ASIA_PORTS} from '../src/asia-expansion-data.js';
 import {TARANTO_PORTS} from '../src/taranto-data.js';
 import {FRENCH_CARIBBEAN_PORTS} from '../src/french-caribbean-data.js';
@@ -19,7 +20,7 @@ test('Pondicherry lies on the coast and connects to every port over the sea',()=
  for(const [key,[a,b]]of segments)assert.ok(waterSegment(a,b),key);assert.ok(seaRoute('pondicherry','hughli').nm<=1800);
 });
 test('adding a port leaves all frozen sea-route distances unchanged',()=>{
- const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]&&!EUROPE_PORTS[id]&&!ATLANTIC_PORTS[id]&&!FRENCH_CARIBBEAN_PORTS[id]&&!TARANTO_PORTS[id]&&!ASIA_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
+ const ports=Object.keys(PORT_APPROACHES).filter(id=>!CROSSING_PORTS[id]&&!EXPANSION_PORTS[id]&&!EUROPE_PORTS[id]&&!ATLANTIC_PORTS[id]&&!FRENCH_CARIBBEAN_PORTS[id]&&!TARANTO_PORTS[id]&&!ASIA_PORTS[id]&&!INDOCHINA_PORTS[id]);for(let i=0;i<ports.length;i++)for(let j=i+1;j<ports.length;j++)assert.equal(seaRoute(ports[i],ports[j]).nm,frozenRoute(ports[i],ports[j]).nm);
 });
 
 

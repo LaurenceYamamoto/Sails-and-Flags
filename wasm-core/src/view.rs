@@ -147,8 +147,8 @@ impl Engine {
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && g.city_version <= 12
-                && (loading || g.city_version == 12)
+                && g.city_version <= 13
+                && (loading || g.city_version == 13)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -165,13 +165,14 @@ impl Engine {
                 6 | 7 => 226,
                 8 => 227,
                 9 => 228,
+                10..=12 => 252,
                 _ => d.cities.len(),
             }
         } else {
             d.cities.len()
         };
-        let nation_count = if loading && g.city_version < 3 { 23 } else if loading && g.city_version == 3 { 31 } else if loading && g.city_version < 10 { 39 } else { d.nations.len() };
-        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else if loading && g.city_version == 4 { 202 } else if loading && g.city_version == 5 { 219 } else if loading && g.city_version == 6 { 221 } else if loading && g.city_version == 7 { 223 } else if loading && g.city_version == 8 { 224 } else if loading && g.city_version == 9 { 225 } else if loading && g.city_version == 10 { 274 } else { d.roads.len() };
+        let nation_count = if loading && g.city_version < 3 { 23 } else if loading && g.city_version == 3 { 31 } else if loading && g.city_version < 10 { 39 } else if loading && g.city_version < 13 { 41 } else { d.nations.len() };
+        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else if loading && g.city_version == 4 { 202 } else if loading && g.city_version == 5 { 219 } else if loading && g.city_version == 6 { 221 } else if loading && g.city_version == 7 { 223 } else if loading && g.city_version == 8 { 224 } else if loading && g.city_version == 9 { 225 } else if loading && g.city_version == 10 { 274 } else if loading && g.city_version < 13 { 276 } else { d.roads.len() };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()

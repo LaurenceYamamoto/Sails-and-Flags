@@ -10,7 +10,7 @@ const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)})};}
 
 test('Taranto is a Spanish port with a Naples road, suitable markets and enough map spacing',()=>{
- const c=w.cities.find(c=>c.id==='taranto');assert.equal(c.id,'taranto');assert.equal(w.cities.length,252);assert.equal(w.cities.filter(c=>!c.inland).length,128);assert.equal(w.roads.filter(r=>!r.retired).length,259);
+ const c=w.cities.find(c=>c.id==='taranto');assert.equal(c.id,'taranto');assert.equal(w.cities.length,256);assert.equal(w.cities.filter(c=>!c.inland).length,129);assert.equal(w.roads.filter(r=>!r.retired).length,264);
  assert.equal(w.nations[c.nation].id,'spain');assert.ok(CITIES.taranto.demand.every(n=>n>0));for(const id of ['food','oliveOil'])assert.ok(CITIES.taranto.supply[GOODS.findIndex(g=>g.id===id)]>=3.2);assert.equal(CITIES.taranto.supply[GOODS.findIndex(g=>g.id==='spices')],0);
  assert.equal(roadBetween('taranto','naples')[0],'naples_taranto');assert.ok(onLand([c.displayX/2.5-180,90-c.displayY/2.5]));const s=w.cities.find(c=>c.id==='santiagodechile'),v=w.cities.find(c=>c.id==='valparaiso'),min=Math.hypot(s.x-v.x,s.y-v.y);
  for(const b of w.cities.filter(c=>c.id!=='taranto')){const p=b.id==='lima'?{x:b.x+1.7,y:b.y-1.7}:{x:b.displayX??b.x,y:b.displayY??b.y};assert.ok(Math.hypot(c.displayX-p.x,c.displayY-p.y)>=min-1e-9,b.id);}
@@ -22,7 +22,7 @@ test('Taranto reaches every port by symmetric water-only offshore routes',()=>{
 });
 
 test('Version 7 saves gain Taranto without changing existing markets, roads, companies or RNG',async()=>{
- const e=await engine(),old=e.save();old.city_version=7;trimLegacyNations(old);old.markets.length=226*w.goods.length;old.development.length=226;old.roads.length=223;old.markets[0].stock+=19;e.load(old);const after=e.save();assert.equal(after.city_version,12);assert.equal(after.development.length,252);assert.equal(after.roads.length,276);const back=structuredClone(after);back.city_version=7;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=226;back.roads.length=223;assert.deepEqual(back,old);
+ const e=await engine(),old=e.save();old.city_version=7;trimLegacyNations(old);old.markets.length=226*w.goods.length;old.development.length=226;old.roads.length=223;old.markets[0].stock+=19;e.load(old);const after=e.save();assert.equal(after.city_version,13);assert.equal(after.development.length,256);assert.equal(after.roads.length,281);const back=structuredClone(after);back.city_version=7;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=226;back.roads.length=223;assert.deepEqual(back,old);
 });
 
 test('Naples–Taranto land and sea routes both operate with the Spanish license',async()=>{
