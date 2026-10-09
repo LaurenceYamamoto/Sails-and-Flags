@@ -1,5 +1,37 @@
 ﻿# Sails and Flags: ゲームコンセプト
 
+## Mexico City–Guadalajara直接陸路の廃止（2026-10-09）
+
+Guadalajara–Mexico Cityの直接陸路を廃止しました。Guanajuato経由の既存陸路は維持します。内部city_version=23とし、旧保存では該当区間を含む陸上ルートを解除、車両を未配置へ戻し、積み荷原価と道路権取得費・積立残高を一度だけ返金します。都市・国家は変更せず、320都市・52国家・334有効陸路です。
+
+## 北米とメキシコ北方（2026-10-09）
+
+Vincennes・Kaskaskiaを中継市場としてDetroit–Vincennes–Kaskaskia–New Orleansを陸路で接続します。歴史的な河川・積み替え交易網を現行の陸路へ抽象化しています。Louisbourg（フランス）とSt. John’s（イングランド）は漁業を食料に集約する海港で、両港の直接陸路はありません。
+
+Zacatecas–Durango–Chihuahua–El Paso del Norte–Santa Feをスペイン免許で利用できる陸路として追加します。銀産地と食料・織物市場を区別します。18世紀の拠点を開始時から利用できる仕様で、成立年・領有変更イベントは追加しません。[記録](../AgentNote/2026-10-09-north-america.md)。
+
+## Vila RicaとDetroit（2026-10-09）
+
+Vila Ricaはポルトガルの金生産地としてRio de JaneiroとSao Pauloへ接続します。Detroitはフランスの毛皮供給地としてMontrealとAlbanyへ接続します。Detroitの水運・陸上積み替えを含む歴史的な交易は、今回の仕様では2本の陸上交易路へ抽象化します。Detroit–Albanyはフランス・イングランド両免許を要求します。河川・湖沼交通は将来対応のままです。[記録](../AgentNote/2026-10-09-american-interior.md)。
+
+## カスピ海方面からロシア内地への接続（2026-10-09）
+
+Astrakhan、Derbent、Shamakhi、Baku、Rasht、Tsaritsynを追加しました。ロシア領はAstrakhan・Tsaritsyn、他4都市は1700年前後のサファヴィー朝の交易免許で扱います。Shamakhi・Rashtには絹の生産を設定し、Bakuを後世の石油工業都市として扱いません。
+
+Tiflis–Shamakhi–Derbent–Astrakhan–Tsaritsyn–Moscowを陸路で接続します。Shamakhi–Baku–Rasht–Tabrizを支線とし、既存のYerevan–Tiflis / Tabriz、Moscow–Kyivへ接続。距離・通過地・免許の範囲はゲーム用に集約します。河川の渡河と沿岸輸送は陸路に近似し、今回はカスピ海船舶交通を実装しません。[詳細](../AgentNote/2026-10-09-caspian.md)。
+
+## 追加の地域間陸路（2026-10-09）
+
+承認されたKano–Benin City（1,100km、丘陵）とMecca–Sanaa（1,450km、山地）の2区間のみを追加しました。前者は中間交易圏を省略した地域間流通、後者はイエメン方面の巡礼・隊商路をゲーム用に集約しています。通過地は経由点として扱い、都市を追加しません。両端の国の免許が必要です。[実装記録](../AgentNote/2026-10-09-regional-links.md)。
+
+## アジア・アフリカの15交易都市（2026-10-09）
+
+Ambon、Banda Neira、Syriam、Ava、Thatta、Lahori Bandar、Tiflis、Yerevan、Jeddah、Agadez、Kano、Suakin、Sennar、Mecca、Medinaを追加しました。香料諸島の香辛料生産、メッカの輸入食料・織物需要、メディナの食料生産を区別します。全都市に全品目の需要を維持します。
+
+Syriam―Ava、Multan―Thatta―Lahori Bandar、Tabriz―Yerevan―Tiflis、Timbuktu―Agadez―Kano、Sennar―Suakin、Jeddah―Mecca―Medina―Damascusを陸路として接続します。河川交通・渡河は今回も陸路へ抽象化し、巡礼イベントや小規模な宿駅市場は設けません。
+
+ビルマ・アイル・カノ・フンジを別の交易免許主体とします。Tiflisはカルチュリのサファヴィー朝への従属を同朝免許に抽象化し、ヒジャーズはオスマン免許で扱います。所在地・道路距離・生産需要値はゲーム用近似です。[実装記録](../AgentNote/2026-10-09-trade-hubs.md)。
+
 ## 日本の都市・街道拡充（2026-10-09）
 
 合意した6都市（名古屋・駿府・広島・博多・金沢・仙台）を追加し、日本は既存の京都・大阪・長崎・江戸と合わせて10都市です。博多・広島は海上交易も可能な港、その他4都市は内陸市場とします。世界289都市・48国家・303有効陸路です。

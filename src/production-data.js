@@ -1,10 +1,10 @@
 // Local production including the surrounding hinterland, not port re-exports.
 // Game-scale suitability; quantities are not reconstructed historical statistics.
 const lists={
- spices:new Set(['calicut','cochin','goa','colombo','batavia','malacca','aceh']),
+ spices:new Set(['calicut','cochin','goa','colombo','batavia','malacca','aceh','ambon','bandaneira']),
  coffee:new Set(['mocha','sanaa']),
- silver:new Set(['veracruz','acapulco','mexicocity','guadalajara','callao','potosi','nagasaki','zacatecas','guanajuato']),
- gold:new Set(['elmina','kumasi','mozambique','cartagena','bogota','rio','accra','sofala']),
+ silver:new Set(['durango','chihuahua','veracruz','acapulco','mexicocity','guadalajara','callao','potosi','nagasaki','zacatecas','guanajuato']),
+ gold:new Set(['vilarica','elmina','kumasi','mozambique','cartagena','bogota','rio','accra','sofala']),
 };
 export function localProduction(id,c,good,previous){
  // Northern caravan markets import tea, silk and porcelain rather than producing them.
@@ -13,6 +13,11 @@ export function localProduction(id,c,good,previous){
  if(c.productionZone==='centralAsianOasis'){
   if(['cotton','silk'].includes(good))return c.exports.includes(good)?Math.max(3.2,previous):.03;
   if(['tea','spices','coffee','indigo','porcelain','fur','timber'].includes(good))return good==='timber'?.03:0;
+ }
+ if(c.productionZone==='aridTradeHub'){
+  if(c.exports.includes(good))return Math.max(3.2,previous);
+  if(['food','cloth','tools'].includes(good))return .1;
+  return 0;
  }
  const {lon,lat}=c,american=lon<-30,tropicalAmerica=american&&lat<26&&lat>-25;
  const eastAsia=lon>100&&lat>20,india=lon>=65&&lon<95&&lat>=5&&lat<36;
@@ -27,13 +32,13 @@ export function localProduction(id,c,good,previous){
   case 'rum':return american&&lat<33&&lat>-25?(specialty?strong:.08):0;
   case 'tobacco':return american&&lat<40&&lat>-30?(specialty?strong:.15):lat>-10&&lat<45?.03:0;
   case 'oliveOil':return lon>-10&&lon<45&&lat>28&&lat<46?(specialty?strong:.15):0;
-  case 'cotton':return india||lon>95&&lat>0&&lat<38||tropicalAmerica||lon>=-10&&lon<65&&lat>-20&&lat<40?(specialty?strong:.12):0;
+  case 'cotton':return id==='yerevan'||india||lon>95&&lat>0&&lat<38||tropicalAmerica||lon>=-10&&lon<65&&lat>-20&&lat<40?(specialty?strong:.12):0;
   case 'indigo':return india||tropicalAmerica||id==='charleston'?(specialty?strong:.08):0;
   case 'silk':return eastAsia||india||c.nation==='nguyen'||lon>25&&lon<65&&lat>25&&lat<43||['genoa','livorno','venice','marseille','barcelona','valencia','lyon','milan','turin','florence','naples'].includes(id)?(specialty?strong:.15):0;
   case 'porcelain':return ['qing','japan'].includes(c.nation)?(specialty?strong:.12):0;
   case 'silver':return lists.silver.has(id)?strong:minor;
   case 'gold':return lists.gold.has(id)?strong:0;
-  case 'fur':return lat>=43?(specialty?strong:.3):0;
+  case 'fur':return lat>=43||['detroit','vincennes'].includes(id)?(specialty?strong:.3):0;
   case 'food':return Math.max(.4,previous);
   case 'timber':return ['muscat','mocha','sanaa','cairo','suez','alexandria','basra','baghdad'].includes(id)?.03:Math.max(.15,previous);
   // Crafts remain possible outside export centres, at a much smaller scale.

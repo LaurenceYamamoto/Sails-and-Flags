@@ -89,5 +89,5 @@ export function worldMarket(id,city,good){
   const producer=exports.includes(good.id);
   // Independent deterministic variation makes neighbouring markets distinct.
   const variation=[...id+good.id].reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,0)%30;
-  return {stock:producer?300+variation:65+variation,production:producer?3.2+variation/50:.35+variation/100,demand:producer?1.2+variation/100:2.2+variation/50};
+  return {stock:producer?300+variation:65+variation,production:producer?3.2+variation/50:.35+variation/100,demand:(producer?1.2+variation/100:2.2+variation/50)*(city.demandMultiplier?.[good.id]??1)};
 }

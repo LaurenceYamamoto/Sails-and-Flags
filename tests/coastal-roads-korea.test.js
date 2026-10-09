@@ -30,7 +30,7 @@ test('Nine corrected coastal roads stay on land at map endpoints and along every
 });
 
 test('Pyongyang remains a Joseon inland city with a retired direct Hanseong road and spaced map label',()=>{
- const p=w.cities.find(c=>c.id==='pyongyang');assert.equal(p.id,'pyongyang');assert.equal(p.mapName,'平壌');assert.equal(p.inland,true);assert.equal(w.nations[p.nation].id,'joseon');assert.equal(w.cities.length,289);assert.equal(w.roads.filter(r=>!r.retired).length,303);
+ const p=w.cities.find(c=>c.id==='pyongyang');assert.equal(p.id,'pyongyang');assert.equal(p.mapName,'平壌');assert.equal(p.inland,true);assert.equal(w.nations[p.nation].id,'joseon');assert.equal(w.cities.length,320);assert.equal(w.roads.filter(r=>!r.retired).length,334);
  assert.ok(CITIES.pyongyang.demand.every(n=>n>0));for(const g of ['food','cloth'])assert.ok(CITIES.pyongyang.supply[GOODS.findIndex(x=>x.id===g)]>=3.2);
  const r=ROAD_SLOTS.hanseong_pyongyang;assert.deepEqual(r.nations,['joseon']);assert.equal(r.retired,true);assert.deepEqual(roadPoints(r.a,r.b),[]);
  const s=w.cities.find(c=>c.id==='santiagodechile'),v=w.cities.find(c=>c.id==='valparaiso'),min=Math.hypot(s.x-v.x,s.y-v.y),a=display(p);assert.ok(onLand(coordinate(a)));for(const c of w.cities.filter(c=>c.id!==p.id)){const b=c.id==='lima'?{x:c.x+1.7,y:c.y-1.7}:display(c);assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=min-1e-9,c.id);}
@@ -41,9 +41,9 @@ test('3.3.3 saves preserve existing routes, cargo, cash, investments and RNG whi
  const e=await engine();let g=e.save();g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);
  for(const id of Object.keys(COASTAL_ROAD_VIA)){const r=ROADS[id];open(e,r.a,r.b);}
  const road=w.roads.findIndex(r=>r.id==='bilbao_bordeaux');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:1,securityBudget:1});e.cmd({action:'tick',days:7});
- const old=e.save();old.city_version=8;trimLegacyNations(old);old.markets.length=227*w.goods.length;old.development.length=227;old.roads.length=224;e.load(old);const after=e.save();assert.equal(after.city_version,17);assert.equal(after.markets.length,289*w.goods.length);assert.equal(after.roads.length,321);const back=structuredClone(after);back.city_version=8;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=227;back.roads.length=224;assert.deepEqual(back,old);
+ const old=e.save();old.city_version=8;trimLegacyNations(old);old.markets.length=227*w.goods.length;old.development.length=227;old.roads.length=224;e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);const back=structuredClone(after);back.city_version=8;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=227;back.roads.length=224;assert.deepEqual(back,old);
  const paths=e.call({op:'view',city:0}).paths;for(const id of Object.keys(COASTAL_ROAD_VIA)){const r=w.roads.find(r=>r.id===id);assert.deepEqual(paths[`land:${r.a}:${r.b}`],[r.points]);assert.deepEqual(paths[`land:${r.b}:${r.a}`],[r.points.toReversed()]);}
- for(const change of [g=>g.markets.pop(),g=>g.roads.pop(),g=>g.city_version=18]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.markets.pop(),g=>g.roads.pop(),g=>g.city_version=24]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 

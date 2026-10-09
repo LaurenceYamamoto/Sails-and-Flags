@@ -1,3 +1,7 @@
+import {NORTH_AMERICA_CITIES} from './north-america-data.js';
+import {AMERICAN_INTERIOR_CITIES} from './american-interior-data.js';
+import {CASPIAN_CITIES} from './caspian-data.js';
+import {TRADE_HUB_CITIES,TRADE_HUB_NATIONS} from './trade-hubs-data.js';
 import {JAPAN_CITIES} from './japan-expansion-data.js';
 import {MANCHURIA_KOREA_CITIES} from './manchuria-korea-data.js';
 import {SILK_ROAD_CITIES} from './silk-road-data.js';
@@ -87,10 +91,10 @@ for(const [id,c] of Object.entries(CITIES)){const m=oilMarket(id,c);c.stocks.pus
 Object.assign(NATIONS,WORLD_NATIONS);
 Object.assign(NATIONS,CONTINENTAL_NATIONS);
 Object.assign(NATIONS,EUROPE_NATIONS);
-Object.assign(NATIONS,ATLANTIC_NATIONS,ASIA_NATIONS,INDOCHINA_NATIONS,CENTRAL_ASIA_NATIONS);
+Object.assign(NATIONS,ATLANTIC_NATIONS,ASIA_NATIONS,INDOCHINA_NATIONS,CENTRAL_ASIA_NATIONS,TRADE_HUB_NATIONS);
 GOODS.push(...WORLD_GOODS);
 for(const [id,c] of Object.entries(CITIES))for(const g of WORLD_GOODS){const m=worldMarket(id,c,g);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
-for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES,...MANCHURIA_KOREA_CITIES,...JAPAN_CITIES})){
+for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES,...MANCHURIA_KOREA_CITIES,...JAPAN_CITIES,...TRADE_HUB_CITIES,...CASPIAN_CITIES,...AMERICAN_INTERIOR_CITIES,...NORTH_AMERICA_CITIES})){
  const markets=GOODS.map(g=>worldMarket(id,c,g));
  CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)};
 }

@@ -14,4 +14,4 @@ export const COASTAL_ROAD_VIA={
 };
 // Mainland display anchors for ports on simplified coastal edges or small islands.
 // Presentation only: real geography and all sea distances stay fixed.
-export const COASTAL_CITY_DISPLAY={phohien:[105.55,20],luanda:[13.35,-8.82],xiamen:[118.05,24.65],cochin:[76.35,9.98],bombay:[72.85,19.02]};
+export const COASTAL_CITY_DISPLAY={rio:[-43.25,-22.9],montreal:[-73.57,45.74],lahoribandar:[66.85,24.9],phohien:[105.55,20],luanda:[13.35,-8.82],xiamen:[118.05,24.65],cochin:[76.35,9.98],bombay:[72.85,19.02]};

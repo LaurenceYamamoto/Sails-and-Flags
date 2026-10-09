@@ -1,3 +1,4 @@
+import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,10 +12,10 @@ const city=id=>w.cities.findIndex(c=>c.id===id),nation=id=>w.nations.findIndex(n
 const display=c=>({x:c.displayX??c.x,y:c.displayY??c.y});
 const coordinate=p=>[p.x/2.5-180,90-p.y/2.5];
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)})};}
-function oldWorld(g){g.city_version=14;g.markets.length=265*w.goods.length;g.development.length=265;g.roads.length=293;return g;}
+function oldWorld(g){trimLegacyNations(g,48);g.city_version=14;g.markets.length=265*w.goods.length;g.development.length=265;g.roads.length=293;return g;}
 
 test('Nine inland oases have correct authorities, regional markets and minimum map spacing',()=>{
- assert.equal(w.cities.length,289);assert.equal(w.nations.length,48);assert.equal(w.roads.length,321);assert.equal(w.roads.filter(r=>!r.retired).length,303);
+ assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,334);
  assert.deepEqual(w.cities.slice(265,274).map(c=>c.id),Object.keys(SILK_ROAD_CITIES));
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c] of Object.entries(SILK_ROAD_CITIES)){
@@ -40,9 +41,9 @@ test('Ten roads form a contiguous Kashgar to Xian corridor with land-only geomet
 
 test('City-version 14 saves preserve old markets, roads, companies, diplomacy and random state',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=17;old.roads[292].quality=3;old.pairs[0].relation=12;old.pairs[0].until=31;
- e.load(old);const after=e.save();assert.equal(after.city_version,17);assert.equal(after.markets.length,289*w.goods.length);assert.equal(after.roads.length,321);assert.deepEqual(oldWorld(structuredClone(after)),old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);assert.deepEqual(oldWorld(structuredClone(after)),old);
  e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.city_version=18,g=>g.markets.pop(),g=>g.roads.pop(),g=>g.development.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.roads.pop(),g=>g.development.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

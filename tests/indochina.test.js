@@ -16,7 +16,7 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 function oldWorld(g){g.city_version=12;g.markets.length=252*w.goods.length;g.development.length=252;g.roads.length=276;trimLegacyNations(g,41);return g;}
 
 test('Indochina has four spaced markets, distinct authorities and five land-only connections',()=>{
- assert.equal(w.cities.length,289);assert.equal(w.nations.length,48);assert.equal(w.roads.filter(r=>!r.retired).length,303);
+ assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.filter(r=>!r.retired).length,334);
  assert.deepEqual(w.cities.slice(252,256).map(c=>c.id),Object.keys(INDOCHINA_CITIES));
  assert.deepEqual(w.nations.slice(41,44).map(n=>n.id),['trinh','nguyen','cambodia']);
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
@@ -48,10 +48,10 @@ test('Hoi An connects to every sea port with symmetric, water-only offshore path
 
 test('3.3.5 saves append Indochina without altering old assets, routes, markets, diplomacy or RNG',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=19;old.roads[0].quality=3;old.pairs[0].relation=10;old.pairs[0].until=35;
- e.load(old);const after=e.save();assert.equal(after.city_version,17);assert.equal(after.markets.length,289*w.goods.length);assert.equal(after.roads.length,321);assert.equal(after.pairs.length,1128);assert.deepEqual(oldWorld(structuredClone(after)),old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);assert.equal(after.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(after)),old);
  for(const c of after.companies){assert.deepEqual(c.friendship.slice(41),Array(7).fill(60));assert.deepEqual(c.diplomacy_budget.slice(41),Array(7).fill(0));}
  e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.city_version=18,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

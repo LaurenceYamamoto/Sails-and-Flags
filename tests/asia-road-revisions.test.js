@@ -12,7 +12,7 @@ function fund(e){const g=e.save();g.companies[0].cash+=1e8;g.companies[0].initia
 function open(e,a,b){const stops=[a,b].map(id=>e.data.cities.findIndex(c=>c.id===id));for(const nation of e.call({op:'query',request:{query:'opening',kind:'caravan',stops}}).missing)e.cmd({action:'license',nation});return e.cmd({action:'openRoute',kind:'caravan',stops,allowed:e.data.goods.map((_,i)=>i),margin:0});}
 
 test('Six Asian roads are retired in both directions; Bombay coastal land routes avoid water and deliver',async()=>{
- const e=await engine();fund(e);assert.equal(e.data.roads.length,321);assert.equal(e.view().roads.length,303);
+ const e=await engine();fund(e);assert.equal(e.data.roads.length,353);assert.equal(e.view().roads.length,334);
  assert.equal(roadBetween('ahmedabad','delhi'),undefined);assert.equal(roadBetween('ahmedabad','agra'),undefined);
  for(const id of ASIA_RETIRED_ROADS){const i=e.data.roads.findIndex(r=>r.id===id),r=e.data.roads[i];assert.equal(r.retired_since,11);assert.equal(r.retired,true);assert.ok(!e.view().roads.some(r=>r.index===i));
   for(const [a,b]of [[r.a,r.b],[r.b,r.a]]){const from=e.data.cities[a].id,to=e.data.cities[b].id;assert.equal(roadBetween(from,to),undefined);assert.deepEqual(roadPoints(from,to),[]);assert.throws(()=>open(e,from,to));}
@@ -22,7 +22,7 @@ test('Six Asian roads are retired in both directions; Bombay coastal land routes
   const points=roadPoints(r.a,r.b),coords=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);for(let i=1;i<coords.length;i++)assert.ok(landSegment(coords[i-1],coords[i]),id);
   assert.deepEqual(roadPoints(r.b,r.a),points.toReversed());const route=open(e,r.a,r.b);assert.equal(open(e,r.b,r.a),route);
  }
- for(let i=0;i<6;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.city_version,17);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0));e.load(g);assert.deepEqual(e.save(),g);
+ for(let i=0;i<6;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.city_version,23);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0));e.load(g);assert.deepEqual(e.save(),g);
  const qing=g.companies.find(c=>c.name==='清国商人');assert.ok(qing.routes.length>0);for(const r of qing.routes.filter(r=>r.mode==='land'))for(let i=0;i<r.stops.length;i++)assert.ok(roadBetween(e.data.cities[r.stops[i]].id,e.data.cities[r.stops[(i+1)%r.stops.length]].id));
 });
 
@@ -36,7 +36,7 @@ test('Version 10 retirement preserves idle, loading, moving and unloading fleets
   if(k%4!==0){cost=123;s.cargo=[{good:0,quantity:10,cost}];const trip={from:d.a,to:d.b,total:10,remaining:10,original_cost:cost,upkeep:0};if(k%4===2)s.voyage=trip;else{s.handling={rate:5,unloading:k%4===3,total:2,remaining:1,trip};if(s.handling.unloading){s.next=1;trip.remaining=0;}}}
   c.ships.push(s);ships.push([ci,s.id]);Object.assign(old.roads[ri],{owner:c.id,basis:2000,pool:17,road_budget:2,security_budget:3,quality:4,security:5});refunds.set(ci,(refunds.get(ci)??0)+2017+cost);
  }
- const untouched=structuredClone(old.markets),rng=old.rng;e.load(old);const migrated=e.save();assert.equal(migrated.city_version,17);assert.equal(migrated.roads.length,321);assert.deepEqual(migrated.markets.slice(0,untouched.length),untouched);assert.equal(migrated.rng,rng);assert.deepEqual(migrated.companies[0].routes.find(r=>r.id===template.id),template);
+ const untouched=structuredClone(old.markets),rng=old.rng;e.load(old);const migrated=e.save();assert.equal(migrated.city_version,23);assert.equal(migrated.roads.length,353);assert.deepEqual(migrated.markets.slice(0,untouched.length),untouched);assert.equal(migrated.rng,rng);assert.deepEqual(migrated.companies[0].routes.find(r=>r.id===template.id),template);
  for(const [ci,value]of refunds){assert.equal(migrated.companies[ci].cash,old.companies[ci].cash+value);assert.equal(migrated.companies[ci].totals.retiredRoadRefund,value);}
  for(const [ci,id]of ships){const s=migrated.companies[ci].ships.find(s=>s.id===id);assert.equal(s.route,null);assert.equal(s.handling,null);assert.equal(s.voyage,null);assert.deepEqual(s.cargo,[]);}
  for(const id of ASIA_RETIRED_ROADS){const r=migrated.roads[e.data.roads.findIndex(r=>r.id===id)];assert.equal(r.owner,'state');assert.equal(r.basis+r.pool+r.quality+r.security+r.road_budget+r.security_budget,0);}
@@ -60,7 +60,7 @@ test('Nanchang–Jingdezhen is straight and version 11 saves retire Ahmedabad–
   const r=structuredClone(template);r.id=old.next_id++;r.stops=[d.a,d.b];co.routes.push(r);co.ships.push({...structuredClone(ship),id:old.next_id++,route:r.id,cargo:[],voyage:null,handling:null,next:0});
   Object.assign(old.roads[i],{owner:'player',basis:1800,pool:23,road_budget:2,security_budget:1,quality:3,security:1});refund+=1823;
  }
- e.load(old);const g=e.save();assert.equal(g.city_version,17);assert.equal(g.roads.length,321);assert.equal(g.companies[0].cash,co.cash+refund);assert.deepEqual(g.companies[0].routes,[template]);assert.equal(g.companies[0].ships.filter(s=>s.route===null).length,2);assert.deepEqual(g.markets.slice(0,old.markets.length),old.markets);assert.equal(g.rng,old.rng);
+ e.load(old);const g=e.save();assert.equal(g.city_version,23);assert.equal(g.roads.length,353);assert.equal(g.companies[0].cash,co.cash+refund);assert.deepEqual(g.companies[0].routes,[template]);assert.equal(g.companies[0].ships.filter(s=>s.route===null).length,2);assert.deepEqual(g.markets.slice(0,old.markets.length),old.markets);assert.equal(g.rng,old.rng);
  e.load(g);assert.deepEqual(e.save(),g);const forged=structuredClone(old);forged.city_version=12;assert.throws(()=>e.load(forged));assert.deepEqual(e.save(),g);
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });

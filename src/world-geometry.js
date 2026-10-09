@@ -1,4 +1,4 @@
-import {LAND} from '../assets/maps/world-land.js';
+import {LAND} from './map-land.js';
 export const wrapLongitude=x=>((x+180)%360+360)%360-180;
 export function nauticalDistance(a,b){
   const r=Math.PI/180,h=Math.sin((b[1]-a[1])*r/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin((b[0]-a[0])*r/2)**2;

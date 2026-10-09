@@ -1,3 +1,8 @@
+import {NORTH_AMERICA_ROADS} from '../src/north-america-data.js';
+import {AMERICAN_INTERIOR_ROADS} from '../src/american-interior-data.js';
+import {CASPIAN_ROADS} from '../src/caspian-data.js';
+import {REGIONAL_LINK_ROADS} from '../src/regional-link-data.js';
+import {TRADE_HUB_ROADS} from '../src/trade-hubs-data.js';
 import {JAPAN_ROADS} from '../src/japan-expansion-data.js';
 import {MANCHURIA_KOREA_ROADS} from '../src/manchuria-korea-data.js';
 import {SILK_ROAD_ROADS} from '../src/silk-road-data.js';
@@ -15,7 +20,7 @@ import {RIVAL_STARTS} from '../src/rival-starts.js';
 import {SHIP_NAMES} from '../src/identity.js';
 import {DEMAND_REGIONS,DEMAND_CLIMATES,demandProfile} from '../src/demand-data.js';
 import {seaRoute,seaLines} from '../src/sea-routing.js';
-import {LAND} from '../assets/maps/world-land.js';
+import {LAND} from '../src/map-land.js';
 import {project} from '../src/geography.js';
 import {landSegment} from '../src/world-geometry.js';
 import {COASTAL_ROAD_VIA} from '../src/coastal-road-data.js';
@@ -35,7 +40,7 @@ for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].
 }
 const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
 // Check the actual map endpoints, including city presentation offsets.
-for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS),...Object.keys(MANCHURIA_KOREA_ROADS),...Object.keys(JAPAN_ROADS)]){
+for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS),...Object.keys(MANCHURIA_KOREA_ROADS),...Object.keys(JAPAN_ROADS),...Object.keys(TRADE_HUB_ROADS),...Object.keys(REGIONAL_LINK_ROADS),...Object.keys(CASPIAN_ROADS),...Object.keys(AMERICAN_INTERIOR_ROADS),...Object.keys(NORTH_AMERICA_ROADS)]){
  const r=roads.find(r=>r.id===id);if(r.retired)continue;const points=r.points.map(p=>({...p}));
  for(const [at,ci] of [[0,r.a],[points.length-1,r.b]]){const c=cities[ci];points[at]={x:c.displayX??c.x,y:c.displayY??c.y};}
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);

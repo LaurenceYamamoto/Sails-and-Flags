@@ -1,3 +1,8 @@
+import {NORTH_AMERICA_ROADS} from './north-america-data.js';
+import {AMERICAN_INTERIOR_ROADS} from './american-interior-data.js';
+import {CASPIAN_ROADS} from './caspian-data.js';
+import {REGIONAL_LINK_ROADS} from './regional-link-data.js';
+import {TRADE_HUB_ROADS} from './trade-hubs-data.js';
 import {JAPAN_ROADS} from './japan-expansion-data.js';
 import {MANCHURIA_KOREA_ROADS,MANCHURIA_KOREA_RETIRED_ROADS} from './manchuria-korea-data.js';
 import {SILK_ROAD_ROADS} from './silk-road-data.js';
@@ -41,10 +46,12 @@ for(const id of ARID_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],climate:'arid'};
 for(const id of RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:7};
 Object.assign(ROAD_SLOTS,ADDED_ROADS);
 Object.assign(ROAD_SLOTS,TARANTO_ROADS);
-Object.assign(ROAD_SLOTS,KOREA_ROADS,ASIA_ROADS,ASIA_ADDED_ROADS,INDOCHINA_ROADS,CENTRAL_ASIA_ROADS,SILK_ROAD_ROADS,MANCHURIA_KOREA_ROADS,JAPAN_ROADS);
+Object.assign(ROAD_SLOTS,KOREA_ROADS,ASIA_ROADS,ASIA_ADDED_ROADS,INDOCHINA_ROADS,CENTRAL_ASIA_ROADS,SILK_ROAD_ROADS,MANCHURIA_KOREA_ROADS,JAPAN_ROADS,TRADE_HUB_ROADS,REGIONAL_LINK_ROADS,CASPIAN_ROADS,AMERICAN_INTERIOR_ROADS,NORTH_AMERICA_ROADS);
 for(const id of MANCHURIA_KOREA_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:16};
 for(const id of ASIA_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:11};
 for(const id of ASIA_FURTHER_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:12};
+// Reserve the indexed slot for saves; remove the direct Mexico City link from play.
+ROAD_SLOTS.mexicocity_guadalajara={...ROAD_SLOTS.mexicocity_guadalajara,retired:true,retired_since:23};
 for(const [id,via] of Object.entries(COASTAL_ROAD_VIA))ROAD_SLOTS[id]={...ROAD_SLOTS[id],via};
 export const ROADS=Object.fromEntries(Object.entries(ROAD_SLOTS).filter(([,r])=>!r.retired));
 // Frequent departure, AI, validation and map lookups must not scan every road.

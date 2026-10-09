@@ -29,3 +29,6 @@ button[aria-pressed="true"]{background:#244c50;color:#fff}
 .account-chart text{font:11px "Segoe UI",sans-serif;fill:#49605c}
 .chart-key{display:flex;flex-wrap:wrap;gap:12px;margin:0 8px;font-size:12px}
 .chart-key i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:5px}
+
+/* Keep road dashes readable when inspecting close neighbouring cities. */
+.world-roads path{vector-effect:non-scaling-stroke;stroke-dasharray:3 4}

@@ -1,3 +1,4 @@
+import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,10 +14,10 @@ const coordinate=p=>[p.x/2.5-180,90-p.y/2.5];
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)})};}
 function fund(e){const g=e.save();g.events_enabled=false;g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);}
 function open(e,ids){return e.cmd({action:'openRoute',kind:'caravan',stops:ids.map(city),allowed:w.goods.map((_,i)=>i),margin:0});}
-function oldWorld(g){g.city_version=15;g.markets.length=274*w.goods.length;g.development.length=274;g.roads.length=303;return g;}
+function oldWorld(g){trimLegacyNations(g,48);g.city_version=15;g.markets.length=274*w.goods.length;g.development.length=274;g.roads.length=303;return g;}
 
 test('Nine inland cities and eleven roads connect Beijing, Manchuria and Korea on land with spaced markers',()=>{
- assert.equal(w.cities.length,289);assert.equal(w.nations.length,48);assert.equal(w.roads.length,321);assert.equal(w.roads.filter(r=>!r.retired).length,303);
+ assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,334);
  assert.deepEqual(w.cities.slice(274,283).map(c=>c.id),Object.keys(MANCHURIA_KOREA_CITIES));
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c] of Object.entries(MANCHURIA_KOREA_CITIES)){
@@ -52,13 +53,13 @@ test('Version 15 migration preserves idle/loading/travelling/unloading vehicles 
   const s=structuredClone(vehicle);s.id=old.next_id++;s.route=route.id;s.next=0;s.cargo=[];s.voyage=null;s.handling=null;const cost=state===0?0:123;
   if(state){s.cargo=[{good:0,quantity:10,cost}];const trip={from:d.a,to:d.b,total:10,remaining:10,original_cost:cost,upkeep:0};if(state===2)s.voyage=trip;else{s.handling={rate:5,unloading:state===3,total:2,remaining:1,trip};if(state===3){s.next=1;trip.remaining=0;}}}
   c.ships.push(s);Object.assign(old.roads[ri],{owner:c.id,basis:2000,pool:17,road_budget:2,security_budget:3,quality:4,security:5});
-  e.load(old);const g=e.save(),back=g.companies[ci].ships.find(x=>x.id===s.id);assert.equal(g.city_version,17);assert.equal(g.companies[ci].cash,c.cash+2017+cost);assert.equal(g.companies[ci].totals.retiredRoadRefund,2017+cost);
+  e.load(old);const g=e.save(),back=g.companies[ci].ships.find(x=>x.id===s.id);assert.equal(g.city_version,23);assert.equal(g.companies[ci].cash,c.cash+2017+cost);assert.equal(g.companies[ci].totals.retiredRoadRefund,2017+cost);
   assert.deepEqual(g.markets.slice(0,old.markets.length),old.markets);assert.deepEqual(g.development.slice(0,274),old.development);assert.equal(g.rng,old.rng);assert.deepEqual(g.companies[0].routes.find(r=>r.id===template.id),template);
   assert.equal(back.kind,s.kind);assert.equal(back.name,s.name);assert.equal(back.route,null);assert.equal(back.voyage,null);assert.equal(back.handling,null);assert.deepEqual(back.cargo,[]);assert.equal(g.companies[ci].ships.length,c.ships.length);assert.ok(!g.companies[ci].routes.some(r=>r.id===route.id));
   assert.equal(g.roads[ri].owner,'state');assert.equal(g.roads[ri].basis+g.roads[ri].pool+g.roads[ri].quality+g.roads[ri].security+g.roads[ri].road_budget+g.roads[ri].security_budget,0);
   e.load(g);assert.deepEqual(e.save(),g);
  }
- const good=e.save();for(const change of [g=>g.city_version=18,g=>g.markets.pop(),g=>g.roads.pop(),g=>g.development.pop()]){const bad=structuredClone(base);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),good);}
+ const good=e.save();for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.roads.pop(),g=>g.development.pop()]){const bad=structuredClone(base);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),good);}
 });
 
 test('All eleven roads and the Kaesong return itinerary trade with proper licenses and survive saving',async()=>{

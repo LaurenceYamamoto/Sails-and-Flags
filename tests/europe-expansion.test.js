@@ -26,10 +26,10 @@ test('North Sea and Baltic ports reach all ports without land-crossing offshore 
 test('3.3.0 world migration preserves existing balances, routes, investments, wars and RNG',async()=>{
  const e=await engine();const old=e.save();old.markets[0].stock+=123;old.roads[0].quality=2;old.city_version=2;old.markets.length=116*e.data.goods.length;old.development.length=116;old.roads.length=69;old.pairs=old.pairs.filter(p=>p.b<23);for(const c of old.companies){c.friendship.length=23;c.diplomacy_budget.length=23;c.trade.length=23;c.friendship_history=c.friendship_history.filter(h=>h.nation<23);}
  old.pairs[0].until=old.day+60;old.pairs[0].relation=12;
- e.load(old);const migrated=e.save();assert.equal(migrated.city_version,17);assert.equal(migrated.development.length,289);assert.equal(migrated.roads.length,321);assert.equal(migrated.pairs.length,48*47/2);
+ e.load(old);const migrated=e.save();assert.equal(migrated.city_version,23);assert.equal(migrated.development.length,320);assert.equal(migrated.roads.length,353);assert.equal(migrated.pairs.length,52*51/2);
  const back=structuredClone(migrated);back.city_version=2;back.markets.length=old.markets.length;back.development.length=116;back.roads.length=69;back.pairs=back.pairs.filter(p=>p.b<23);for(const c of back.companies){c.friendship.length=23;c.diplomacy_budget.length=23;c.trade.length=23;}assert.deepEqual(back,old);
  for(const c of migrated.companies){assert.ok(c.friendship.slice(23).every(x=>x===60));assert.ok(c.diplomacy_budget.slice(23).every(x=>x===0));}
- for(const mutate of [g=>g.companies[0].friendship.push(60),g=>g.roads.pop(),g=>g.pairs[0].b=30,g=>g.city_version=18]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),migrated);}
+ for(const mutate of [g=>g.companies[0].friendship.push(60),g=>g.roads.pop(),g=>g.pairs[0].b=30,g=>g.city_version=24]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),migrated);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 test('European sea and land routes operate and survive a save round trip',async()=>{

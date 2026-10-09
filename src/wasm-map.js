@@ -24,7 +24,7 @@ export class WorldMap {
    g.append(node(c.inland?'rect':'circle',{...(c.inland?{x:-2,y:-2,width:4,height:4,fill:catalog.nations[c.nation].color}:{r:2.5,fill:catalog.nations[c.nation].color}),...(['lima','callao'].includes(c.id)?{'pointer-events':'none'}:{})}));
    const title=node('title');title.textContent=(c.mapName??c.nameEn??c.id)+' · '+catalog.nations[c.nation].name;g.append(title);
    const labelGroup=node('g',{'data-city':i,transform:`translate(${c.x} ${c.y})`});
-   const label=node('text',{x:c.id==='callao'?-4:4,y:-3,'text-anchor':c.id==='callao'?'end':'start',class:'city-label'});label.textContent=c.mapName??c.nameEn??c.id;labelGroup.append(label);this.labelLayer.append(labelGroup);this.cityLayer.append(g);
+   const label=node('text',{x:c.mapLabelOffset?.[0]??(c.id==='callao'?-4:4),y:c.mapLabelOffset?.[1]??-3,'text-anchor':c.id==='callao'?'end':'start',class:'city-label'});label.textContent=c.mapName??c.nameEn??c.id;labelGroup.append(label);this.labelLayer.append(labelGroup);this.cityLayer.append(g);
   });
   this.ships=node('g',{class:'world-ships'});this.svg.append(this.ships,this.labelLayer);host.append(this.svg);
   installMapNavigation(host.closest('.map-panel'),{get:()=>this.camera,set:c=>this.setCamera(c),pause:handlers.pause,cancelRoute:()=>{}});
@@ -44,7 +44,7 @@ export class WorldMap {
   return copy;
  }
  destroy(){window.removeEventListener('pointerup',this.pointerUp);}
- setCamera(c){this.camera=c;const u=c[2]/900;for(const g of this.labelLayer.children){const label=g.querySelector('text');label.setAttribute('x',(this.cities[+g.dataset.city].id==='callao'?-5:5)*u);label.setAttribute('y',-5*u);}}
+ setCamera(c){this.camera=c;const u=c[2]/900;for(const g of this.labelLayer.children){const label=g.querySelector('text'),c=this.cities[+g.dataset.city],[dx,dy]=c.mapLabelOffset??[c.id==='callao'?-5:5,-5];label.setAttribute('x',dx*u);label.setAttribute('y',dy*u);}}
  select(city){for(const layer of [this.cityLayer,this.labelLayer])for(const n of layer.children)n.classList.toggle('selected',+n.dataset.city===city);}
  focus(city){this.setCamera(cityCamera(this.cities[city]));updateCameraElement(this.svg,this.camera);}
  update(view,selected){
