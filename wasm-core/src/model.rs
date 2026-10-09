@@ -667,7 +667,7 @@ impl Game {
             cargo_time_version: 1,
             transport_version: 1,
             roster_version: 5,
-            city_version: 13,
+            city_version: 15,
             seed,
             rng,
             day: 0,

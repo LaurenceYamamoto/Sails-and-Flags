@@ -1,12 +1,12 @@
 {
   "name": "sails-and-flags",
-  "version": "3.3.6",
+  "version": "3.3.7",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js tests/wasm-lists.test.js tests/port-expansion.test.js tests/europe-expansion.test.js tests/atlantic-expansion.test.js tests/siberian-expansion.test.js tests/french-caribbean.test.js tests/road-revisions.test.js tests/taranto.test.js tests/coastal-roads-korea.test.js tests/asia-expansion.test.js tests/asia-road-revisions.test.js tests/indochina.test.js",
+    "test": "node --test tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js tests/wasm-lists.test.js tests/port-expansion.test.js tests/europe-expansion.test.js tests/atlantic-expansion.test.js tests/siberian-expansion.test.js tests/french-caribbean.test.js tests/road-revisions.test.js tests/taranto.test.js tests/coastal-roads-korea.test.js tests/asia-expansion.test.js tests/asia-road-revisions.test.js tests/indochina.test.js tests/central-asia.test.js tests/silk-road.test.js",
     "build:wasm": "node scripts/build-wasm.mjs",
     "licenses:wasm": "node scripts/collect-rust-licenses.mjs",
     "benchmark:wasm": "node scripts/benchmark-wasm.mjs",

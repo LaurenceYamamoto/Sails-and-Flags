@@ -9,6 +9,11 @@ const lists={
 export function localProduction(id,c,good,previous){
  // Northern caravan markets import tea, silk and porcelain rather than producing them.
  if(c.productionZone==='northernInterior'&&['tea','silk','porcelain'].includes(good))return 0;
+ // Oasis specialities are local cultivation, not blanket production along a latitude band.
+ if(c.productionZone==='centralAsianOasis'){
+  if(['cotton','silk'].includes(good))return c.exports.includes(good)?Math.max(3.2,previous):.03;
+  if(['tea','spices','coffee','indigo','porcelain','fur','timber'].includes(good))return good==='timber'?.03:0;
+ }
  const {lon,lat}=c,american=lon<-30,tropicalAmerica=american&&lat<26&&lat>-25;
  const eastAsia=lon>100&&lat>20,india=lon>=65&&lon<95&&lat>=5&&lat<36;
  const specialty=c.exports?.includes(good)||previous>=2.2;

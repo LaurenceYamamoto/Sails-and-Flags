@@ -17,6 +17,7 @@ DEMAND_REGIONS.westEurope={label:['西ヨーロッパ','Western Europe'],goods:{
 DEMAND_REGIONS.balkans={label:['バルカン半島','Balkans'],goods:{...DEMAND_REGIONS.mediterranean.goods}};
 DEMAND_REGIONS.scandinavia={label:['スカンジナビア','Scandinavia'],goods:{...DEMAND_REGIONS.northEurope.goods}};
 DEMAND_REGIONS.siberia={label:['シベリア','Siberia'],goods:{tea:1.35,cloth:1.25,tools:1.25,silk:1.15}};
+DEMAND_REGIONS.centralAsia={label:['中央アジア','Central Asia'],goods:{tea:1.3,cloth:1.2,tools:1.2,porcelain:1.15}};
 export const DEMAND_CLIMATES={
  cold:{label:['寒冷','Cold'],goods:{fur:1.35,timber:1.2},winter:{fur:.25,timber:.15,food:.08}},
  temperate:{label:['温帯','Temperate'],goods:{fur:1.1},winter:{fur:.2,timber:.12,food:.05}},

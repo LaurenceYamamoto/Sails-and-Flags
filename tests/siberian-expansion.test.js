@@ -12,7 +12,7 @@ const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),query:request=>call({op:'query',request}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 
 test('Siberian and Mongolian towns connect Moscow, Beijing and Yakutsk with land-serviceable fur corridors',()=>{
- assert.equal(Object.keys(SIBERIAN_CITIES).length,14);assert.equal(Object.keys(SIBERIAN_ROADS).length,17);assert.equal(w.cities.length,256);assert.equal(w.roads.length,281);assert.equal(w.nations.length,44);
+ assert.equal(Object.keys(SIBERIAN_CITIES).length,14);assert.equal(Object.keys(SIBERIAN_ROADS).length,17);assert.equal(w.cities.length,274);assert.equal(w.roads.length,303);assert.equal(w.nations.length,48);
  assert.equal(w.cities[209].id,'kungur');assert.equal(w.cities[222].id,'yakutsk');
  const reached=new Set(['moscow']);for(let changed=true;changed;){changed=false;for(const r of Object.values(ROADS))if(reached.has(r.a)||reached.has(r.b))for(const id of [r.a,r.b])if(!reached.has(id)){reached.add(id);changed=true;}}
  for(const id of [...Object.keys(SIBERIAN_CITIES),'beijing'])assert.ok(reached.has(id),id);
@@ -38,9 +38,9 @@ test('Northern fur producers have stronger supply and import tea, silk and porce
 
 test('3.3.2 saves append Siberian markets and roads without altering any old state or diplomatic pairs',async()=>{
  const e=await engine(),old=e.save();old.city_version=4;trimLegacyNations(old);old.markets.length=209*e.data.goods.length;old.development.length=209;old.roads.length=202;old.markets[0].stock+=99;old.pairs[0].relation=10;old.pairs[0].until=60;old.roads[0].quality=2;
- e.load(old);const after=e.save();assert.equal(after.city_version,13);assert.equal(after.development.length,256);assert.equal(after.roads.length,281);const back=structuredClone(after);back.city_version=4;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=209;back.roads.length=202;assert.deepEqual(back,old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,15);assert.equal(after.development.length,274);assert.equal(after.roads.length,303);const back=structuredClone(after);back.city_version=4;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=209;back.roads.length=202;assert.deepEqual(back,old);
  assert.deepEqual(back.pairs,old.pairs);assert.deepEqual(back.companies,old.companies);
- for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.city_version=14,g=>g.development.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.city_version=16,g=>g.development.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 
