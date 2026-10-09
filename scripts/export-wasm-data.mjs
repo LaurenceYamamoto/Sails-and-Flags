@@ -1,3 +1,5 @@
+import {JAPAN_ROADS} from '../src/japan-expansion-data.js';
+import {MANCHURIA_KOREA_ROADS} from '../src/manchuria-korea-data.js';
 import {SILK_ROAD_ROADS} from '../src/silk-road-data.js';
 import {CENTRAL_ASIA_ROADS} from '../src/central-asia-data.js';
 import {INDOCHINA_ROADS} from '../src/indochina-data.js';
@@ -33,7 +35,7 @@ for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].
 }
 const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
 // Check the actual map endpoints, including city presentation offsets.
-for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS)]){
+for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS),...Object.keys(MANCHURIA_KOREA_ROADS),...Object.keys(JAPAN_ROADS)]){
  const r=roads.find(r=>r.id===id);if(r.retired)continue;const points=r.points.map(p=>({...p}));
  for(const [at,ci] of [[0,r.a],[points.length-1,r.b]]){const c=cities[ci];points[at]={x:c.displayX??c.x,y:c.displayY??c.y};}
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);

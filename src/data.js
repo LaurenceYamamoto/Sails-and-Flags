@@ -1,3 +1,5 @@
+import {JAPAN_CITIES} from './japan-expansion-data.js';
+import {MANCHURIA_KOREA_CITIES} from './manchuria-korea-data.js';
 import {SILK_ROAD_CITIES} from './silk-road-data.js';
 import {CENTRAL_ASIA_CITIES,CENTRAL_ASIA_NATIONS} from './central-asia-data.js';
 import {INDOCHINA_CITIES,INDOCHINA_NATIONS} from './indochina-data.js';
@@ -88,7 +90,7 @@ Object.assign(NATIONS,EUROPE_NATIONS);
 Object.assign(NATIONS,ATLANTIC_NATIONS,ASIA_NATIONS,INDOCHINA_NATIONS,CENTRAL_ASIA_NATIONS);
 GOODS.push(...WORLD_GOODS);
 for(const [id,c] of Object.entries(CITIES))for(const g of WORLD_GOODS){const m=worldMarket(id,c,g);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
-for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES})){
+for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES,...MANCHURIA_KOREA_CITIES,...JAPAN_CITIES})){
  const markets=GOODS.map(g=>worldMarket(id,c,g));
  CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)};
 }

@@ -1,3 +1,5 @@
+import {JAPAN_CITIES} from './japan-expansion-data.js';
+import {MANCHURIA_KOREA_CITIES} from './manchuria-korea-data.js';
 import {SILK_ROAD_CITIES} from './silk-road-data.js';
 import {CENTRAL_ASIA_CITIES} from './central-asia-data.js';
 import {INDOCHINA_CITIES} from './indochina-data.js';
@@ -55,3 +57,7 @@ Object.assign(PORT_GEOGRAPHY,ASIA_CITIES);
 Object.assign(PORT_GEOGRAPHY,INDOCHINA_CITIES);
 
 Object.assign(PORT_GEOGRAPHY,CENTRAL_ASIA_CITIES,SILK_ROAD_CITIES);
+
+Object.assign(PORT_GEOGRAPHY,MANCHURIA_KOREA_CITIES);
+
+Object.assign(PORT_GEOGRAPHY,JAPAN_CITIES);

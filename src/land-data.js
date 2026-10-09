@@ -1,3 +1,5 @@
+import {JAPAN_ROADS} from './japan-expansion-data.js';
+import {MANCHURIA_KOREA_ROADS,MANCHURIA_KOREA_RETIRED_ROADS} from './manchuria-korea-data.js';
 import {SILK_ROAD_ROADS} from './silk-road-data.js';
 import {CENTRAL_ASIA_ROADS} from './central-asia-data.js';
 import {INDOCHINA_ROADS} from './indochina-data.js';
@@ -39,7 +41,8 @@ for(const id of ARID_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],climate:'arid'};
 for(const id of RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:7};
 Object.assign(ROAD_SLOTS,ADDED_ROADS);
 Object.assign(ROAD_SLOTS,TARANTO_ROADS);
-Object.assign(ROAD_SLOTS,KOREA_ROADS,ASIA_ROADS,ASIA_ADDED_ROADS,INDOCHINA_ROADS,CENTRAL_ASIA_ROADS,SILK_ROAD_ROADS);
+Object.assign(ROAD_SLOTS,KOREA_ROADS,ASIA_ROADS,ASIA_ADDED_ROADS,INDOCHINA_ROADS,CENTRAL_ASIA_ROADS,SILK_ROAD_ROADS,MANCHURIA_KOREA_ROADS,JAPAN_ROADS);
+for(const id of MANCHURIA_KOREA_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:16};
 for(const id of ASIA_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:11};
 for(const id of ASIA_FURTHER_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:12};
 for(const [id,via] of Object.entries(COASTAL_ROAD_VIA))ROAD_SLOTS[id]={...ROAD_SLOTS[id],via};

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {bridge} from '../src/wasm-bridge.js';
 import {CITIES,GOODS} from '../src/data.js';
-import {ROADS,roadPoints} from '../src/land-data.js';
+import {ROADS,ROAD_SLOTS,roadPoints} from '../src/land-data.js';
 import {ATLANTIC_ROADS} from '../src/atlantic-expansion-data.js';
 import {COASTAL_ROAD_VIA} from '../src/coastal-road-data.js';
 import {landSegment,waterSegment,onLand} from '../src/world-geometry.js';
@@ -29,10 +29,10 @@ test('Nine corrected coastal roads stay on land at map endpoints and along every
  assert.equal(waterSegment([-30,20],[-29,20]),true);assert.equal(landSegment([-30,20],[-29,20]),false);
 });
 
-test('Pyongyang is appended as a Joseon inland city with a land-only Hanseong route and spaced map label',()=>{
- const p=w.cities.find(c=>c.id==='pyongyang');assert.equal(p.id,'pyongyang');assert.equal(p.mapName,'平壌');assert.equal(p.inland,true);assert.equal(w.nations[p.nation].id,'joseon');assert.equal(w.cities.length,274);assert.equal(w.roads.filter(r=>!r.retired).length,286);
+test('Pyongyang remains a Joseon inland city with a retired direct Hanseong road and spaced map label',()=>{
+ const p=w.cities.find(c=>c.id==='pyongyang');assert.equal(p.id,'pyongyang');assert.equal(p.mapName,'平壌');assert.equal(p.inland,true);assert.equal(w.nations[p.nation].id,'joseon');assert.equal(w.cities.length,289);assert.equal(w.roads.filter(r=>!r.retired).length,303);
  assert.ok(CITIES.pyongyang.demand.every(n=>n>0));for(const g of ['food','cloth'])assert.ok(CITIES.pyongyang.supply[GOODS.findIndex(x=>x.id===g)]>=3.2);
- const r=ROADS.hanseong_pyongyang;assert.deepEqual(r.nations,['joseon']);const pts=roadPoints(r.a,r.b).map(coordinate);for(let i=1;i<pts.length;i++)assert.ok(landSegment(pts[i-1],pts[i]));
+ const r=ROAD_SLOTS.hanseong_pyongyang;assert.deepEqual(r.nations,['joseon']);assert.equal(r.retired,true);assert.deepEqual(roadPoints(r.a,r.b),[]);
  const s=w.cities.find(c=>c.id==='santiagodechile'),v=w.cities.find(c=>c.id==='valparaiso'),min=Math.hypot(s.x-v.x,s.y-v.y),a=display(p);assert.ok(onLand(coordinate(a)));for(const c of w.cities.filter(c=>c.id!==p.id)){const b=c.id==='lima'?{x:c.x+1.7,y:c.y-1.7}:display(c);assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=min-1e-9,c.id);}
  assert.ok(w.distances[w.cities.indexOf(p)].every(x=>x===null));
 });
@@ -41,13 +41,13 @@ test('3.3.3 saves preserve existing routes, cargo, cash, investments and RNG whi
  const e=await engine();let g=e.save();g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);
  for(const id of Object.keys(COASTAL_ROAD_VIA)){const r=ROADS[id];open(e,r.a,r.b);}
  const road=w.roads.findIndex(r=>r.id==='bilbao_bordeaux');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:1,securityBudget:1});e.cmd({action:'tick',days:7});
- const old=e.save();old.city_version=8;trimLegacyNations(old);old.markets.length=227*w.goods.length;old.development.length=227;old.roads.length=224;e.load(old);const after=e.save();assert.equal(after.city_version,15);assert.equal(after.markets.length,274*w.goods.length);assert.equal(after.roads.length,303);const back=structuredClone(after);back.city_version=8;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=227;back.roads.length=224;assert.deepEqual(back,old);
+ const old=e.save();old.city_version=8;trimLegacyNations(old);old.markets.length=227*w.goods.length;old.development.length=227;old.roads.length=224;e.load(old);const after=e.save();assert.equal(after.city_version,17);assert.equal(after.markets.length,289*w.goods.length);assert.equal(after.roads.length,321);const back=structuredClone(after);back.city_version=8;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=227;back.roads.length=224;assert.deepEqual(back,old);
  const paths=e.call({op:'view',city:0}).paths;for(const id of Object.keys(COASTAL_ROAD_VIA)){const r=w.roads.find(r=>r.id===id);assert.deepEqual(paths[`land:${r.a}:${r.b}`],[r.points]);assert.deepEqual(paths[`land:${r.b}:${r.a}`],[r.points.toReversed()]);}
- for(const change of [g=>g.markets.pop(),g=>g.roads.pop(),g=>g.city_version=16]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.markets.pop(),g=>g.roads.pop(),g=>g.city_version=18]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 
-test('Hanseong–Pyongyang can open with a Joseon license, trade and restore',async()=>{
- const e=await engine();const route=open(e,'hanseong','pyongyang','wagon');assert.throws(()=>open(e,'hanseong','pyongyang','sloop'));
+test('Pyongyang–Kaesong can open with a Joseon license, trade and restore',async()=>{
+ const e=await engine(),initial=e.save();initial.events_enabled=false;initial.companies[0].cash+=1e8;initial.companies[0].initial_cash+=1e8;e.load(initial);const route=open(e,'pyongyang','kaesong','wagon');assert.throws(()=>open(e,'pyongyang','kaesong','sloop'));assert.throws(()=>open(e,'hanseong','pyongyang','wagon'));
  for(let i=0;i<6;i++)e.cmd({action:'tick',days:31});const g=e.save(),r=g.companies[0].routes.find(r=>r.id===route);assert.ok(r.deliveries>0);assert.deepEqual(g.companies[0].licenses,[w.nations.findIndex(n=>n.id==='joseon')]);e.load(g);assert.deepEqual(e.save(),g);
 });
