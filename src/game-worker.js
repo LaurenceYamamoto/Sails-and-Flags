@@ -7,10 +7,12 @@ onmessage=({data})=>{queue=queue.then(async()=>{
   try{
     const core=await ready;let value;
     if(data.op==='boot'){
+      let restored=false;
       try {
         const rows=(await storage.list()).sort((a,b)=>b.savedAt-a.savedAt);
-        for(const row of rows){try{core({op:'load',text:await storage.read(row.id)});lastAutoDay=row.day;break;}catch{postMessage({notice:'A save could not be loaded; trying the next most recent save.'});}}
+        for(const row of rows){try{core({op:'load',text:await storage.read(row.id)});lastAutoDay=row.day;restored=true;break;}catch{postMessage({notice:'A save could not be loaded; trying the next most recent save.'});}}
       } catch(e){postMessage({notice:'Save storage unavailable: '+e.message});}
+      if(!restored)core({op:'command',command:{action:'new',name:data.name}});
       value={catalog:core({op:'catalog'}),view:core({op:'view'})};
     }
     else if(data.op==='save'){

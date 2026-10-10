@@ -1,4 +1,10 @@
-# 外部ライブラリ・ライセンス一覧 — 3.3.9
+# 外部ライブラリ・ライセンス一覧 — 3.3.10
+
+## 多言語辞書の生成（3.3.10・2026-10-11）
+
+開発時依存として[opencc-js](https://github.com/nk2028/opencc-js) **1.4.2**を追加しました（MIT）。同梱変換辞書のopencc-dataはApache-2.0です。`package-lock.json`で版を固定し、`npm run build:translations`で簡体中文から繁体中文の静的翻訳ファイルを生成します。ブラウザ実行時にOpenCC本体・変換辞書・CDNを読み込むことはありません。
+
+配布文書を[MITライセンス](assets/licenses/opencc-js-1.4.2/LICENSE)、[第三者通知](assets/licenses/opencc-js-1.4.2/THIRD_PARTY_LICENSES.md)、[Apache-2.0全文](assets/licenses/opencc-js-1.4.2/Apache-2.0.txt)に同梱しました。下記の「npm依存なし」は以前のリリース時点の記録です。
 
 ## 2026-10-09：北米・メキシコ北方の追加
 

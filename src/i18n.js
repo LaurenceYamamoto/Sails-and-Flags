@@ -1,3 +1,8 @@
+import {errorKeys,errorTranslations} from './translation-errors.js';
+import {currentTranslations} from './translation-current.js';
+import {entityTranslations} from './translation-entities.js';
+import {traditionalTranslations} from './translation-traditional.js';
+import {localizedCityName} from './city-names.js';
 import {uiRefinementTranslations} from './translation-ui-refinement.js';
 import {storageTranslations} from './translation-storage.js';
 import {productionTranslations} from './translation-production.js';
@@ -57,7 +62,7 @@ export const en = {
 };
 en.escort='Escort fees';en.diplomacyInvestment='Diplomatic investment';
 ja.shipSale='船の売却';en.shipSale='Ship sale';
-let language = 'ja';
+let language = 'en';
 ja.technologyInvestment="技術投資";en.technologyInvestment="Technology investment";
 ja.shipyardRefund="旧造船所の返金";en.shipyardRefund="Retired shipyard refund";
 ja.retiredRoadRefund="廃止陸路の返金";en.retiredRoadRefund="Retired road refund";
@@ -70,14 +75,14 @@ ja.cityInvestment="都市投資";en.cityInvestment="City investment";
 ja.developmentIncome="都市の税収分配";en.developmentIncome="City tax share";
 Object.assign(ja,{map:'世界の交易網',prototype:'P8 世界への拡張',footer:'1700年ごろの主要交易拠点を結ぶ世界交易。海上交易と各地の陸上交易。',ships:'船・車両',ports:'都市',market:'都市市場',departure:'起点都市',destination:'都市2',shipPurchase:'船・車両の購入',roadPurchase:'道路開発権取得',roadSale:'道路開発権売却',roadInvestment:'道路・治安投資',roadToll:'道路通行料',roadIncome:'通行料分配',networkCompensation:'都市再編による返還'});
 Object.assign(en,{map:'World trade network',prototype:'P8 World expansion',footer:'Global trade inspired by the major trading centres around 1700, with maritime and inland trade routes.',ships:'Ships / vehicles',ports:'Cities',market:'City market',departure:'Starting city',destination:'City 2',shipPurchase:'Transport purchase',roadPurchase:'Road right purchase',roadSale:'Road right sale',roadInvestment:'Road and safety investment',roadToll:'Road toll',roadIncome:'Toll income',networkCompensation:'City revision refund'});
-export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
-export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations,...regionTranslations,...worldTranslations,...demandTranslations,...rivalInvestmentTranslations,...productionTranslations,...storageTranslations,...uiRefinementTranslations});
+export const LANGUAGES = Object.freeze({ja:{label:'日本語',locale:'ja-JP'},en:{label:'English',locale:'en-GB'},'zh-CN':{label:'简体中文',locale:'zh-CN'},'zh-TW':{label:'繁體中文',locale:'zh-TW'},ko:{label:'한국어',locale:'ko-KR'},fr:{label:'Français',locale:'fr-FR'},es:{label:'Español',locale:'es-ES'}});
+export const catalog = Object.freeze({...translations,...extraTranslations,...landTranslations,...regionTranslations,...worldTranslations,...demandTranslations,...rivalInvestmentTranslations,...productionTranslations,...storageTranslations,...uiRefinementTranslations,...currentTranslations,...entityTranslations,...errorTranslations});
 const languageIndex={'zh-CN':0,ko:1,fr:2,es:3};
 export const locale = () => LANGUAGES[language].locale;
-export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'ja'; }
+export function setLanguage(value) { language = Object.hasOwn(LANGUAGES,value) ? value : 'en'; }
 export const getLanguage = () => language;
 export function tx(japanese, english, values = {}) {
-  const text = language === 'ja' ? japanese : language === 'en' ? english : catalog[english]?.[languageIndex[language]] ?? english;
+  const text = language === 'ja' ? japanese : language === 'en' ? english : language === 'zh-TW' ? traditionalTranslations[english] ?? english : catalog[english]?.[languageIndex[language]] ?? english;
   return text.replace(/\{(\w+)\}/g, (token,key) => Object.hasOwn(values,key) ? String(values[key]) : token);
 }
 export function t(key) { return tx(ja[key] ?? key,en[key] ?? key); }
@@ -85,16 +90,21 @@ const names = {
   キングストン:'Kingston', ハバナ:'Havana', ロンドン:'London', カディス:'Cadiz', ナント:'Nantes', アムステルダム:'Amsterdam', リスボン:'Lisbon', サンティアゴ:'Santiago', サントドミンゴ:'Santo Domingo', サンフアン:'San Juan', ブリッジタウン:'Bridgetown', ウィレムスタット:'Willemstad',
   イングランド:'England', スペイン:'Spain', フランス:'France', オランダ:'Netherlands', ポルトガル:'Portugal', 砂糖:'Sugar', ラム酒:'Rum', 織物:'Cloth', 工具:'Tools', 食料:'Food', タバコ:'Tobacco', 木材:'Timber', カカオ:'Cocoa', 武器:'Weapons', スループ:'Sloop', ブリッグ:'Brig', フリュート:'Fluyt',
 };
-// Geographic names may retain their native script regardless of UI language.
+// Localize catalog names; player-entered names are never translated.
 export function nameOf(entity) {
   if(entity.customName!==undefined) return escapeName(entity.customName);
-  if(entity.mapName!==undefined) return entity.mapName;
-  const english=entity.nameEn ?? names[entity.name] ?? entity.name;
+  if(entity.mapName!==undefined) return cityName(entity);
+  if(entity.id?.startsWith('design-') && entity.nameEn===entity.name) return entity.name;
+  let english=entity.nameEn ?? names[entity.name] ?? entity.name ?? entity.id ?? '';
+  // Older generated designs could lack their base hull's English name.
+  const oldDesign=entity.name?.match(/^(.+) 設計 (#\d+)$/);
+  if(oldDesign && /^\s*design #\d+$/.test(english))english=(names[oldDesign[1]]??oldDesign[1])+' design '+oldDesign[2];
   const design=english.match(/^(Sloop|Brig|Fluyt|Corvette|Galleon|Wagon|Caravan) design( #\d+)?$/);
   if(design && language!=='ja') return tx(entity.name,'{hull} design{suffix}',{hull:tx(design[1],design[1]),suffix:design[2]??''});
   return tx(entity.name,english);
 }
 export function errorMessage(error) {
+  if(errorKeys[error.message])return tx(error.message,errorKeys[error.message]);
   const messages = {
     '基礎生産量がゼロの品目には投資できません。':'Cannot invest in goods with zero base production.',
 '道路を確認してください。':'Check the road.',
@@ -150,3 +160,6 @@ export function errorMessage(error) {
   };
   return language === 'ja' ? error.message : tx(error.message,messages[error.message] ?? (catalog[error.message] ? error.message : 'Invalid operation or save data. Check the selected ships, licenses and file.'));
 }
+
+export const cityName = city => localizedCityName(city,language);
+export const defaultCompanyName = () => tx('あなたの会社','Your company');

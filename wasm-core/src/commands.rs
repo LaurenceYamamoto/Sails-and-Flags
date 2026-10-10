@@ -352,11 +352,15 @@ impl Engine {
     pub fn command(&mut self, v: &Value) -> Result<Value> {
         let action = string(v, "action")?;
         if action == "new" {
+            // A localized default is input, just like a user-entered company name.
+            let name = v["name"].as_str().unwrap_or("Your company").trim();
+            ensure(!name.is_empty() && name.chars().count() <= 80, "会社名は1〜80文字で入力してください")?;
             self.game.fraction = 0.0;
             self.initialize(
                 v["seed"].as_u64().unwrap_or(1700) as u32,
                 v["events"].as_bool().unwrap_or(true),
             );
+            self.game.companies[0].name = name.to_string();
             return Ok(json!(true));
         }
         if action == "tick" {

@@ -1,5 +1,6 @@
 // Presentation-only ordering: the authoritative entities remain in Wasm.
-export const cityLabel=c=>c.mapName??c.nameEn??c.id;
+import {cityName} from './i18n.js';
+export const cityLabel=cityName;
 const compare=(locale)=>new Intl.Collator(locale,{numeric:true,sensitivity:'base'}).compare;
 export function cityOrder(cities,regions,order,locale){
  const cmp=compare(locale),rank=new Map(regions.map((r,i)=>[r.id,i]));

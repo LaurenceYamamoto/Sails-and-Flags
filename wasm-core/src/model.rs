@@ -622,7 +622,7 @@ impl Game {
             .collect();
         let mut companies = vec![Company::new(
             "player",
-            "あなたの会社",
+            "Your company",
             "player",
             5000.0,
             d.nations.len(),

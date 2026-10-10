@@ -46,7 +46,7 @@ for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),..
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);
  for(let i=1;i<coordinates.length;i++)if(!landSegment(coordinates[i-1],coordinates[i]))throw Error(`Road crosses water: ${id}, segment ${i}`);
 }
-const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,...s,level:HULL_LEVELS[id]??0}));
+const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));
  if(licenses.some(n=>n<0)||new Set(licenses).size!==licenses.length)throw Error('Invalid starting licenses: '+c.id);
