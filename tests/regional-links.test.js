@@ -11,7 +11,7 @@ const ll=p=>[p.x/2.5-180,90-p.y/2.5];
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)})};}
 
 test('Only the two approved roads are appended, with land-only displayed geometry and both licences',()=>{
- assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,334);
+ assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,332);
  assert.deepEqual(w.roads.slice(332,334).map(r=>r.id),['kano_benin','mecca_sanaa']);
  for(const r of w.roads.slice(332,334)){
   assert.deepEqual(r.nations,[w.cities[r.a].nation,w.cities[r.b].nation]);assert.ok(r.km<=2500);assert.equal(r.km,R[r.id].km);
@@ -23,11 +23,11 @@ test('Only the two approved roads are appended, with land-only displayed geometr
 
 test('Version 18 saves retain all state and append only two roads, rejecting malformed/future saves',async()=>{
  const e=await engine(),old=e.save();old.city_version=18;old.markets.length=304*w.goods.length;old.development.length=304;old.roads.length=332;old.roads[331].quality=2;old.markets[0].stock+=7;
- e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.roads.length,353);
+ e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.equal(after.roads.length,353);
  const back=structuredClone(after);back.city_version=18;back.markets.length=304*w.goods.length;back.development.length=304;back.roads.length=332;assert.deepEqual(back,old);
  for(const r of after.roads.slice(332)){assert.equal(r.owner,'state');assert.equal(r.quality,0);assert.equal(r.basis,0);}
  e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.roads.pop(),g=>g.roads.push(after.roads[332]),g=>g.city_version=24]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.roads.pop(),g=>g.roads.push(after.roads[332]),g=>g.city_version=27]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
 });
 
 test('Both routes require both licences, deliver cargo, support investment and survive saving',async()=>{

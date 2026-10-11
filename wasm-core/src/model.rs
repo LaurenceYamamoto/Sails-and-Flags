@@ -16,6 +16,8 @@ pub struct Spec {
     pub name: String,
     pub name_en: Option<String>,
     pub mode: String,
+    #[serde(default)]
+    pub base_hull: Option<String>,
     pub price: f64,
     pub capacity: usize,
     pub speed: f64,
@@ -69,6 +71,18 @@ pub struct Road {
     pub nations: Vec<usize>,
 }
 #[derive(Clone, Deserialize)]
+pub struct Waterway {
+    pub a: usize,
+    pub b: usize,
+    pub nm: f64,
+    pub nations: Vec<usize>,
+}
+impl Spec {
+    pub fn river_capable(&self) -> bool {
+        self.mode == "sea" && (self.id == "sloop" || self.base_hull.as_deref() == Some("sloop"))
+    }
+}
+#[derive(Clone, Deserialize)]
 pub struct Start {
     pub name: String,
     pub kind: String,
@@ -90,6 +104,7 @@ pub struct Data {
     pub nations: Vec<Nation>,
     pub goods: Vec<Good>,
     pub roads: Vec<Road>,
+    pub waterways: Vec<Waterway>,
     pub specs: Vec<Spec>,
     pub starts: Vec<Start>,
     pub ship_names: Vec<String>,
@@ -98,6 +113,7 @@ pub struct Data {
 pub struct Engine {
     pub data: Data,
     pub graphics: Value,
+    pub waterway_index: BTreeMap<(usize, usize), usize>,
     pub game: Game,
 }
 
@@ -417,6 +433,7 @@ impl Engine {
         let data: Data = serde_json::from_value(raw.clone()).unwrap();
         let game = Game::new(&data, 1700, true);
         Self {
+            waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             data,
             graphics: raw,
             game,
@@ -436,19 +453,25 @@ impl Engine {
             .iter()
             .position(|r| !r.retired && ((r.a == a && r.b == b) || (r.a == b && r.b == a)))
     }
+    pub fn waterway(&self, a: usize, b: usize) -> Option<usize> {
+        self.waterway_index.get(&(a.min(b),a.max(b))).copied()
+    }
+    pub fn water_distance(&self, spec: &Spec, a: usize, b: usize) -> f64 {
+        if let Some(i) = self.waterway(a,b) {
+            return if spec.river_capable() { self.data.waterways[i].nm } else { f64::INFINITY };
+        }
+        self.data.distances.get(a).and_then(|row| row.get(b)).copied().flatten().unwrap_or(f64::INFINITY)
+    }
+    pub fn has_waterway(&self, stops: &[usize]) -> bool {
+        stops.iter().enumerate().any(|(i,&a)| self.waterway(a,stops[(i+1)%stops.len()]).is_some())
+    }
     pub fn distance(&self, kind: &str, a: usize, b: usize) -> f64 {
         if self.spec(kind).is_ok_and(|s| s.mode == "land") {
             self.road(a, b)
                 .map(|i| self.data.roads[i].km)
                 .unwrap_or(f64::INFINITY)
         } else {
-            self.data
-                .distances
-                .get(a)
-                .and_then(|x| x.get(b))
-                .copied()
-                .flatten()
-                .unwrap_or(f64::INFINITY)
+            self.spec(kind).map(|s| self.water_distance(s,a,b)).unwrap_or(f64::INFINITY)
         }
     }
     pub fn terms(&self, c: usize, n: usize, count: usize) -> (f64, f64, f64) {
@@ -501,6 +524,13 @@ impl Engine {
             for (i, &a) in stops.iter().enumerate() {
                 if let Some(j) = self.road(a, stops[(i + 1) % stops.len()]) {
                     n.extend(&self.data.roads[j].nations);
+                }
+            }
+        }
+        if self.spec(kind).unwrap().mode == "sea" {
+            for (i,&a) in stops.iter().enumerate() {
+                if let Some(j) = self.waterway(a,stops[(i+1)%stops.len()]) {
+                    n.extend(&self.data.waterways[j].nations);
                 }
             }
         }
@@ -667,7 +697,7 @@ impl Game {
             cargo_time_version: 1,
             transport_version: 1,
             roster_version: 5,
-            city_version: 23,
+            city_version: 26,
             seed,
             rng,
             day: 0,

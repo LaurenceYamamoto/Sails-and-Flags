@@ -47,9 +47,9 @@ test('Every new port reaches the world on water and symmetric distances',()=>{
 function oldWorld(g){g.city_version=3;g.markets.length=135*world.goods.length;g.development.length=135;g.roads.length=101;g.pairs=g.pairs.filter(p=>p.b<31);for(const c of g.companies){c.friendship.length=31;c.diplomacy_budget.length=31;c.trade.length=31;}return g;}
 test('3.3.1 migration appends markets and authorities without changing existing gameplay state',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=23;old.roads[0].quality=2;old.pairs[0].until=old.day+60;old.pairs[0].relation=10;
- e.load(old);const migrated=e.save();assert.equal(migrated.city_version,23);assert.equal(migrated.development.length,320);assert.equal(migrated.roads.length,353);assert.equal(migrated.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(migrated)),old);
+ e.load(old);const migrated=e.save();assert.equal(migrated.city_version,26);assert.equal(migrated.development.length,320);assert.equal(migrated.roads.length,353);assert.equal(migrated.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(migrated)),old);
  for(const c of migrated.companies){assert.ok(c.friendship.slice(31).every(x=>x===60));assert.ok(c.diplomacy_budget.slice(31).every(x=>x===0));}
- for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.companies[0].friendship.pop(),g=>g.pairs[0].b=31,g=>g.city_version=24]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),migrated);}
+ for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.companies[0].friendship.pop(),g=>g.pairs[0].b=31,g=>g.city_version=27]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),migrated);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 

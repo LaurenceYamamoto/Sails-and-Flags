@@ -762,6 +762,8 @@ export const traditionalTranslations = {
   "Purchase / Daily": "取得費用 / 每日維護費",
   "Daily budget": "每日預算",
   "Locate": "在地圖上顯示",
+  "Blue lines: waterways (Sloop family only)": "藍線：水路（僅限單桅帆船系列）",
+  "Waterways allow only Sloops and designs based on the Sloop.": "水路僅允許單桅帆船及其改良設計通行。",
   "Retired road refund": "廢止道路退款",
   "Waiting": "待命",
   "Shipbuilding": "造船技術",

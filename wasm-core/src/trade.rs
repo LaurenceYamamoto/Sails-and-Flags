@@ -165,7 +165,7 @@ impl Engine {
             self.spec(kind)?.price
         };
         Ok(
-            json!({"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
+            json!({"waterway":self.has_waterway(stops),"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
         )
     }
     pub fn open(

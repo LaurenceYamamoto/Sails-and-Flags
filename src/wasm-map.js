@@ -14,6 +14,7 @@ export class WorldMap {
   this.svg=node('svg',{class:'map wasm-map',viewBox:'0 0 900 450',tabindex:0,role:'group','aria-label':t('map')});
   this.svg.append(node('path',{d:catalog.land,class:'world-land','fill-rule':'evenodd'}));
   const roads=node('g',{class:'world-roads'});for(const r of catalog.roads.filter(r=>!r.retired))roads.append(node('path',{d:path(this.displayLines([r.points],r.a,r.b))}));this.svg.append(roads);
+  const waterways=node('g',{class:'world-waterways'});for(const w of catalog.waterways){const line=node('path',{d:path(this.displayLines([w.points],w.a,w.b))});const title=node('title');title.textContent=w.river;line.append(title);waterways.append(line);}this.svg.append(waterways);
   this.routeLayer=node('g',{class:'world-routes'});this.svg.append(this.routeLayer);
   this.cityLayer=node('g');this.svg.append(this.cityLayer);
   // Keep names above vessels so an occupied port remains selectable by its label.

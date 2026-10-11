@@ -1,3 +1,4 @@
+import {WATERWAYS} from '../src/waterway-data.js';
 import {NORTH_AMERICA_ROADS} from '../src/north-america-data.js';
 import {AMERICAN_INTERIOR_ROADS} from '../src/american-interior-data.js';
 import {CASPIAN_ROADS} from '../src/caspian-data.js';
@@ -46,7 +47,19 @@ for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),..
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);
  for(let i=1;i<coordinates.length;i++)if(!landSegment(coordinates[i-1],coordinates[i]))throw Error(`Road crosses water: ${id}, segment ${i}`);
 }
-const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
+// Small-vessel waterways are separate from the open-sea matrix, including
+// corridors whose endpoints are inland. All distances here are nautical miles.
+const arc=(a,b)=>{const rad=Math.PI/180,dl=(b[0]-a[0])*rad,dp=(b[1]-a[1])*rad;return 6371*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(dp/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin(dl/2)**2)));};
+const waterways=Object.entries(WATERWAYS).map(([id,w])=>{
+ const r=w.a?{a:index(w.a),b:index(w.b),nations:w.nations.map(id=>nations.findIndex(n=>n.id===id))}:roads.find(r=>r.id===id);
+ if(!r||r.a<0||r.b<0||r.a===r.b||!r.nations.length||r.nations.some(n=>n<0))throw Error('Invalid waterway endpoints/rights: '+id);
+ const a=cities[r.a],b=cities[r.b];
+ const coordinates=[[a.lon,a.lat],...w.via,[b.lon,b.lat]];
+ const nm=coordinates.slice(1).reduce((n,p,i)=>n+arc(coordinates[i],p),0)*1.1/1.852;
+ if(!Number.isFinite(nm)||nm<=0)throw Error('Invalid waterway distance: '+id);
+ return {id,a:r.a,b:r.b,nations:r.nations,river:w.river,nm,points:coordinates.map(([lon,lat])=>project(lon,lat))};
+});
+const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,baseHull:id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));
  if(licenses.some(n=>n<0)||new Set(licenses).size!==licenses.length)throw Error('Invalid starting licenses: '+c.id);
@@ -56,8 +69,9 @@ const starts=RIVAL_STARTS.map(c=>{
   if(!spec||stops.length<2||stops.length>12||stops.some(i=>i<0)||!Number.isInteger(r.fleet)||r.fleet<1)throw Error('Invalid starting fleet: '+c.id);
   for(let i=0;i<stops.length;i++){
    const a=stops[i],b=stops[(i+1)%stops.length],road=roads.find(r=>!r.retired&&((r.a===a&&r.b===b)||(r.a===b&&r.b===a)));
-   const distance=spec.mode==='land'?road?.km:distances[a][b];
-   const required=spec.mode==='land'?road?.nations:[cities[a].nation,cities[b].nation];
+   const waterway=waterways.find(w=>(w.a===a&&w.b===b)||(w.a===b&&w.b===a));
+   const distance=spec.mode==='land'?road?.km:waterway?(spec.id==='sloop'?waterway.nm:null):distances[a][b];
+   const required=spec.mode==='land'?road?.nations:waterway?.nations??[cities[a].nation,cities[b].nation];
    if(a===b||distance==null||distance>spec.range||!required?.every(n=>licenses.includes(n)))throw Error('Unserviceable starting route: '+c.id+' '+cities[a].id+' / '+cities[b].id);
   }
   fleetCost+=spec.price*r.fleet;return {...r,stops};
@@ -66,5 +80,5 @@ const starts=RIVAL_STARTS.map(c=>{
  return {...c,licenses,routes};
 });
 const land=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');
-fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
+fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,waterways,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
 console.log(`Exported ${cities.length} cities, ${nations.length} nations, ${roads.length} roads`);

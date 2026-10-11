@@ -694,7 +694,7 @@ impl Engine {
                         })
                         .cloned()
                 };
-                Ok(json!({"routes":routes,"types":types,"stops":stops,"default":default}))
+                Ok(json!({"routes":routes,"types":types,"stops":stops,"default":default,"waterway":self.has_waterway(&stops)}))
             }
             "opening" => self.opening(
                 0,

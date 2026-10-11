@@ -30,9 +30,9 @@ test('French ports reach every port by symmetric sea routes and Port-au-Prince a
 });
 
 test('223-city saves gain only the French port markets, development and roads',async()=>{
- const e=await engine(),old=e.save();old.city_version=5;trimLegacyNations(old);old.markets.length=223*e.data.goods.length;old.development.length=223;old.roads.length=219;old.markets[0].stock+=18;e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.development.length,320);assert.equal(after.roads.length,353);
+ const e=await engine(),old=e.save();old.city_version=5;trimLegacyNations(old);old.markets.length=223*e.data.goods.length;old.development.length=223;old.roads.length=219;old.markets[0].stock+=18;e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.equal(after.development.length,320);assert.equal(after.roads.length,353);
  const back=structuredClone(after);back.city_version=5;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=223;back.roads.length=219;assert.deepEqual(back,old);
- for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=27,g=>g.markets.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 

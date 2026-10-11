@@ -1,5 +1,7 @@
 // Current Wasm UI: English key -> Simplified Chinese, Korean, French, Spanish.
 export const currentTranslations = {
+ 'Blue lines: waterways (Sloop family only)':['蓝线：水路（仅限单桅帆船系列）','파란 선: 수로 (슬루프 계열 전용)','Lignes bleues : voies navigables (famille Sloop uniquement)','Líneas azules: vías fluviales (solo familia Balandra)'],
+ 'Waterways allow only Sloops and designs based on the Sloop.':['水路仅允许单桅帆船及其改良设计通行。','수로는 슬루프와 슬루프 기반 설계선만 이용할 수 있습니다.','Les voies navigables sont réservées aux sloops et aux modèles dérivés du sloop.','Las vías fluviales solo admiten balandras y diseños basados en la balandra.'],
  'Retired road refund':['废止道路退款','폐지 도로 환불','Remboursement de route supprimée','Reembolso de ruta retirada'],
  'Your company':['你的公司','내 회사','Votre compagnie','Tu compañía'],
  'Waiting':['待命','대기 중','En attente','En espera'],

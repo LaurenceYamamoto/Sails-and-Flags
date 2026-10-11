@@ -14,7 +14,7 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 function oldWorld(g){trimLegacyNations(g,48);g.city_version=16;g.markets.length=283*w.goods.length;g.development.length=283;g.roads.length=314;return g;}
 
 test('Six Japanese markets have spaced land markers, regional production, demand and seven inland corridors',()=>{
- assert.equal(w.cities.length,320);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,334);assert.equal(w.nations.length,52);
+ assert.equal(w.cities.length,320);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,332);assert.equal(w.nations.length,52);
  assert.deepEqual(w.cities.slice(283,289).map(c=>c.id),Object.keys(JAPAN_CITIES));assert.equal(w.cities.filter(c=>c.nation===japan).length,10);
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c] of Object.entries(JAPAN_CITIES)){
@@ -47,8 +47,8 @@ test('Hakata and Hiroshima attach through water-only approaches and connect to e
 
 test('City-version 16 saves append Japan while preserving every existing field and reject truncated or future saves',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=17;old.roads[313].quality=3;
- e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.deepEqual(oldWorld(structuredClone(after)),old);e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.development.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.deepEqual(oldWorld(structuredClone(after)),old);e.load(after);assert.deepEqual(e.save(),after);
+ for(const change of [g=>g.city_version=27,g=>g.markets.pop(),g=>g.development.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

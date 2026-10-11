@@ -7,6 +7,7 @@ mod rivals;
 mod simulation;
 mod trade;
 mod view;
+mod waterway_rollback;
 pub use model::Engine;
 use model::{Game, Result};
 use serde_json::{Value, json};
@@ -18,7 +19,14 @@ impl Engine {
     fn retire_roads(&self, g: &mut Game) -> Result<Vec<(usize, f64, usize)>> {
         let mut refunds = Vec::new();
         for (ci, c) in g.companies.iter_mut().enumerate() {
-            let removed: Vec<_> = c.routes.iter().filter(|r| r.mode == "land" &&
+            let removed: Vec<_> = c.routes.iter().filter(|r| (g.city_version < 24 && r.mode == "sea" && self.has_waterway(&r.stops) && {
+                let compatible = |kind: &str| self.data.specs.iter().find(|s| s.id==kind).or_else(||g.designs.get(kind)).is_some_and(|s|
+                    r.stops.iter().enumerate().all(|(i,&a)|self.water_distance(s,a,r.stops[(i+1)%r.stops.len()])<=s.range));
+                !compatible(&r.auto_type) || c.ships.iter().filter(|s|s.route==Some(r.id)).any(|s|!compatible(&s.kind))
+                    || r.replacements.iter().any(|s|!compatible(s))
+                    || r.stops.iter().enumerate().any(|(i,&a)| self.waterway(a,r.stops[(i+1)%r.stops.len()]).is_some_and(|j|
+                        self.data.waterways[j].nations.iter().any(|n|!c.licenses.contains(n))))
+            }) || r.mode == "land" &&
                 r.stops.iter().enumerate().any(|(i, &a)| {
                     let b = r.stops[(i + 1) % r.stops.len()];
                     self.data.roads.iter().any(|d| d.retired &&
@@ -140,6 +148,15 @@ impl Engine {
                         }
                     }
                 }
+                // Legacy designs retain the base hull's required technology level.
+                // Sea hull levels are unique, even when a design was renamed.
+                if g.city_version < 24 {
+                    for design in g.designs.values_mut().filter(|s| s.base_hull.is_none() && s.mode == "sea") {
+                        let bases: Vec<_> = self.data.specs.iter().filter(|b| b.mode == design.mode && b.level == design.level).collect();
+                        if bases.len() == 1 { design.base_hull = Some(bases[0].id.clone()); }
+                    }
+                }
+                let prototype_refunds = self.rollback_waterways(&mut g)?;
                 self.validate(&g, true)?;
                 // Rename only the known regional rivals, preserving custom and legacy names.
                 if g.roster_version >= 1 {
@@ -155,7 +172,7 @@ impl Engine {
                         }
                     }
                 }
-                if g.city_version < 23 {
+                if g.city_version < 25 {
                     let old_nation_count = g.companies[0].friendship.len();
                     // Append the new market without consuming the campaign's RNG or
                     // touching existing stocks, ownership, routes, or company balances.
@@ -172,7 +189,7 @@ impl Engine {
                     }
                     // Preserve existing pair order, wars and relations; append only new pairs.
                     g.pairs.extend(initial.pairs.into_iter().filter(|p| p.b >= old_nation_count));
-                    g.city_version = 23;
+                    // Revision is advanced only after retiring legacy transport.
                 }
                 Self::normalize_account_history(&mut g);
                 if g.cargo_time_version == 0 {
@@ -202,7 +219,13 @@ impl Engine {
                     c.yard_value = 0.0;
                 }
                 g.transport_version = 1;
-                let road_refunds = self.retire_roads(&mut g)?;
+                let mut road_refunds = self.retire_roads(&mut g)?;
+                for (ci, refund, removed) in prototype_refunds {
+                    road_refunds[ci].1 += refund;
+                    road_refunds[ci].2 += removed;
+                    model::ensure(model::amount(road_refunds[ci].1) && model::amount(g.companies[ci].cash.max(0.0) + road_refunds[ci].1), "廃止陸路の返金額が不正です。")?;
+                }
+                g.city_version = 26;
                 self.validate(&g, false)?;
                 self.game = g;
                 for (c, refund, removed) in road_refunds {

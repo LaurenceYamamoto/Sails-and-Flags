@@ -15,7 +15,7 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 function oldWorld(g){g.city_version=13;g.markets.length=256*w.goods.length;g.development.length=256;g.roads.length=281;trimLegacyNations(g,44);return g;}
 
 test('Nine Central Asian cities have oasis markets, spaced land positions and Dzungar Kashgar',()=>{
- assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,334);
+ assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,332);
  assert.deepEqual(w.cities.slice(256,265).map(c=>c.id),Object.keys(CENTRAL_ASIA_CITIES));
  assert.deepEqual(w.nations.slice(44,48).map(n=>n.id),['bukhara','khiva','kazakh','dzungar']);
  assert.equal(w.nations[w.cities[city('kashgar')].nation].nameEn,'Dzungar Khanate');
@@ -46,10 +46,10 @@ test('All twelve caravan corridors stay on land and connect Persia, India, Russi
 
 test('3.3.6 saves append Central Asia while preserving all old state and rejecting malformed/future saves',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=17;old.roads[0].quality=3;old.pairs[0].relation=12;old.pairs[0].until=31;
- e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);assert.equal(after.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(after)),old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);assert.equal(after.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(after)),old);
  for(const c of after.companies){assert.deepEqual(c.friendship.slice(44,48),[60,60,60,60]);assert.deepEqual(c.diplomacy_budget.slice(44,48),[0,0,0,0]);}
  e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.city_version=24,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=27,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

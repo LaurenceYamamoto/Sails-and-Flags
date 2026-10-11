@@ -32,3 +32,6 @@ button[aria-pressed="true"]{background:#244c50;color:#fff}
 
 /* Keep road dashes readable when inspecting close neighbouring cities. */
 .world-roads path{vector-effect:non-scaling-stroke;stroke-dasharray:3 4}
+
+.world-waterways path{fill:none;stroke:#59daf1;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:none}
+.waterway-key{color:#17637a}

@@ -38,9 +38,9 @@ test('Northern fur producers have stronger supply and import tea, silk and porce
 
 test('3.3.2 saves append Siberian markets and roads without altering any old state or diplomatic pairs',async()=>{
  const e=await engine(),old=e.save();old.city_version=4;trimLegacyNations(old);old.markets.length=209*e.data.goods.length;old.development.length=209;old.roads.length=202;old.markets[0].stock+=99;old.pairs[0].relation=10;old.pairs[0].until=60;old.roads[0].quality=2;
- e.load(old);const after=e.save();assert.equal(after.city_version,23);assert.equal(after.development.length,320);assert.equal(after.roads.length,353);const back=structuredClone(after);back.city_version=4;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=209;back.roads.length=202;assert.deepEqual(back,old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.equal(after.development.length,320);assert.equal(after.roads.length,353);const back=structuredClone(after);back.city_version=4;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=209;back.roads.length=202;assert.deepEqual(back,old);
  assert.deepEqual(back.pairs,old.pairs);assert.deepEqual(back.companies,old.companies);
- for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.city_version=24,g=>g.development.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const mutate of [g=>g.markets.pop(),g=>g.roads.push(g.roads[0]),g=>g.city_version=27,g=>g.development.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 

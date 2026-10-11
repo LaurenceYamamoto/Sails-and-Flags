@@ -72,6 +72,10 @@ impl Engine {
                             p.reverse();
                         }
                         json!([p])
+                    } else if let Some(idx) = self.waterway(a,b) {
+                        let mut p = self.graphics["waterways"][idx]["points"].as_array().unwrap().clone();
+                        if self.data.waterways[idx].a != a { p.reverse(); }
+                        json!([p])
                     } else {
                         let mut lines = self.graphics["paths"]
                             [format!("{}:{}", a.min(b), a.max(b))]
@@ -103,7 +107,7 @@ impl Engine {
             .chain(co.designs.iter().filter_map(|id| self.game.designs.get(id)))
             .collect::<Vec<_>>();
         catalog.sort_by(|a, b| a.price.total_cmp(&b.price));
-        let companies=self.game.companies.iter().enumerate().filter(|(_,c)|!c.acquired).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["cycle"]=json!(cycle);v["handlingRate"]=json!(self.handling_rate(ci,&r.mode));v["disasterRates"]=json!(r.stops.iter().enumerate().map(|(i,&a)| self.disaster_chance(ci,&r.auto_type,a,r.stops[(i+1)%r.stops.len()])*100.0).collect::<Vec<_>>());v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["idleRatio"]=json!(r.activity.idle_ratio());v["observing"]=json!(((self.game.day-r.activity.since) as f64)<cycle);v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"fixed":c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
+        let companies=self.game.companies.iter().enumerate().filter(|(_,c)|!c.acquired).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["waterway"]=json!(r.mode=="sea" && self.has_waterway(&r.stops));v["cycle"]=json!(cycle);v["handlingRate"]=json!(self.handling_rate(ci,&r.mode));v["disasterRates"]=json!(r.stops.iter().enumerate().map(|(i,&a)| self.disaster_chance(ci,&r.auto_type,a,r.stops[(i+1)%r.stops.len()])*100.0).collect::<Vec<_>>());v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["idleRatio"]=json!(r.activity.idle_ratio());v["observing"]=json!(((self.game.day-r.activity.since) as f64)<cycle);v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"fixed":c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
         let licenses=self.data.nations.iter().enumerate().map(|(n,_)|{let(fee,daily,tax)=self.terms(0,n,co.licenses.len());json!({"nation":n,"friendship":co.friendship[n],"fee":fee,"daily":daily,"tax":tax*100.0,"owned":co.licenses.contains(&n),"eligible":co.friendship[n]>=30.0&&co.cash>=fee,"budget":co.diplomacy_budget[n],"changes":co.friendship_history.iter().rev().filter(|h|h.nation==n).collect::<Vec<_>>()})}).collect::<Vec<_>>();
         let market=self.data.goods.iter().enumerate().map(|(g,good)|{let(production,demand,consumption,_)=self.market_flow(city,g);let stock=self.game.markets[city*self.data.goods.len()+g].stock;json!({"good":g,"stock":stock,"price":good.base*ratio(stock),"production":production,"demand":demand,"consumption":consumption,"unmet":(demand-consumption).max(0.0),"details":self.demand_details(city,g),"baseProduction":self.data.cities[city].supply[g],"budget":self.game.development[city].production_budget[g],"level":self.game.development[city].production[g]})}).collect::<Vec<_>>();
         let roads = self
@@ -147,8 +151,8 @@ impl Engine {
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && g.city_version <= 23
-                && (loading || g.city_version == 23)
+                && (g.city_version <= 23 || g.city_version == 26)
+                && (loading || g.city_version == 26)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -174,6 +178,7 @@ impl Engine {
                 18 | 19 => 304,
                 20 => 310,
                 21 => 312,
+                22 | 23 => 320,
                 _ => d.cities.len(),
             }
         } else {
@@ -390,7 +395,9 @@ impl Engine {
                                         d.roads[j].nations.iter().all(|n| c.licenses.contains(n))
                                     })
                                 } else {
-                                    d.distances[a][b].is_some()
+                                    if loading && g.city_version < 24 && d.distances[a][b].is_some() { true }
+                                    else { self.water_distance(spec(&r.auto_type).unwrap(),a,b).is_finite()
+                                        && self.waterway(a,b).is_none_or(|j| d.waterways[j].nations.iter().all(|n| c.licenses.contains(n))) }
                                 }
                         })
                         && r.transport.since <= g.day
@@ -409,7 +416,8 @@ impl Engine {
                         .all(|&x| amount(x))
                         && r.started <= g.day
                         && r.replacements.len() <= 200
-                        && r.replacements.iter().all(|k| spec(k).is_some())
+                        && r.replacements.iter().all(|k| spec(k).is_some_and(|s|
+                            (loading && g.city_version < 24) || r.mode != "sea" || !self.has_waterway(&r.stops) || s.river_capable()))
                         && r.min_margin.is_finite()
                         && (0.0..=10000.0).contains(&r.min_margin)
                         && [r.profit, r.revenue, r.expenses, r.forecast]
@@ -450,7 +458,8 @@ impl Engine {
                                 let distance = if r.mode == "land" {
                                     d.roads[road(a, b).unwrap()].km
                                 } else {
-                                    d.distances[a][b].unwrap()
+                                    if loading && g.city_version < 24 && d.distances[a][b].is_some() { d.distances[a][b].unwrap() }
+                                    else { self.water_distance(spec,a,b) }
                                 };
                                 distance <= spec.range
                             }),
@@ -530,6 +539,8 @@ impl Engine {
                 v.id == *id
                     && id.starts_with("design-")
                     && ["sea", "land"].contains(&v.mode.as_str())
+                    && v.base_hull.as_ref().is_none_or(|id| d.specs.iter().any(|b| &b.id==id && b.mode==v.mode && b.level==v.level))
+                    && (v.mode != "sea" || v.base_hull.is_some() || loading && g.city_version<24)
                     && v.roughness.is_finite()
                     && (0.0..=1.0).contains(&v.roughness)
                     && v.capacity > 0

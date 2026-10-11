@@ -1,3 +1,4 @@
+import {WATERWAYS} from './waterway-data.js';
 import {NORTH_AMERICA_ROADS} from './north-america-data.js';
 import {AMERICAN_INTERIOR_ROADS} from './american-interior-data.js';
 import {CASPIAN_ROADS} from './caspian-data.js';
@@ -53,6 +54,11 @@ for(const id of ASIA_FURTHER_RETIRED_ROADS)ROAD_SLOTS[id]={...ROAD_SLOTS[id],ret
 // Reserve the indexed slot for saves; remove the direct Mexico City link from play.
 ROAD_SLOTS.mexicocity_guadalajara={...ROAD_SLOTS.mexicocity_guadalajara,retired:true,retired_since:23};
 for(const [id,via] of Object.entries(COASTAL_ROAD_VIA))ROAD_SLOTS[id]={...ROAD_SLOTS[id],via};
+for(const [id,w] of Object.entries(WATERWAYS)){
+ if(w.a)continue; // New waterway, not a conversion of an indexed road.
+ if(!ROAD_SLOTS[id]||ROAD_SLOTS[id].retired)throw Error('Invalid waterway conversion: '+id);
+ ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:w.since??24,waterway:true};
+}
 export const ROADS=Object.fromEntries(Object.entries(ROAD_SLOTS).filter(([,r])=>!r.retired));
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();
