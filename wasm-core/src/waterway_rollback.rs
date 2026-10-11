@@ -47,7 +47,8 @@ impl Engine {
         data.waterways = if g.city_version == 24 { old.waterways24 } else { old.waterways25 };
         let waterway_index = data.waterways.iter().enumerate()
             .map(|(i, w)| ((w.a.min(w.b), w.a.max(w.b)), i)).collect();
-        let checker = Engine { data, graphics: Value::Null, waterway_index, game: g.clone() };
+        let checker = Engine { data, graphics: Value::Null, waterway_index,
+            water_connections: Default::default(), game: g.clone() };
         let mut prior = g.clone();
         prior.city_version = 26; // Validate as a complete save in its own catalog.
         checker.validate(&prior, false)?;

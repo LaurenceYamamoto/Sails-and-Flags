@@ -114,6 +114,7 @@ pub struct Engine {
     pub data: Data,
     pub graphics: Value,
     pub waterway_index: BTreeMap<(usize, usize), usize>,
+    pub water_connections: BTreeMap<(usize, usize), crate::water_connections::WaterConnection>,
     pub game: Game,
 }
 
@@ -433,6 +434,7 @@ impl Engine {
         let data: Data = serde_json::from_value(raw.clone()).unwrap();
         let game = Game::new(&data, 1700, true);
         Self {
+            water_connections: crate::water_connections::connections(&data),
             waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             data,
             graphics: raw,
@@ -460,10 +462,21 @@ impl Engine {
         if let Some(i) = self.waterway(a,b) {
             return if spec.river_capable() { self.data.waterways[i].nm } else { f64::INFINITY };
         }
+        if let Some(connection) = self.water_connections.get(&(a.min(b), a.max(b))) {
+            return if spec.river_capable() { connection.nm } else { f64::INFINITY };
+        }
         self.data.distances.get(a).and_then(|row| row.get(b)).copied().flatten().unwrap_or(f64::INFINITY)
     }
+    pub fn water_nations(&self, a: usize, b: usize) -> &[usize] {
+        if let Some(i) = self.waterway(a, b) { return &self.data.waterways[i].nations; }
+        self.water_connections.get(&(a.min(b), a.max(b)))
+            .map(|c| c.nations.as_slice()).unwrap_or(&[])
+    }
     pub fn has_waterway(&self, stops: &[usize]) -> bool {
-        stops.iter().enumerate().any(|(i,&a)| self.waterway(a,stops[(i+1)%stops.len()]).is_some())
+        stops.iter().enumerate().any(|(i,&a)| {
+            let b = stops[(i+1)%stops.len()];
+            self.waterway(a,b).is_some() || self.water_connections.contains_key(&(a.min(b),a.max(b)))
+        })
     }
     pub fn distance(&self, kind: &str, a: usize, b: usize) -> f64 {
         if self.spec(kind).is_ok_and(|s| s.mode == "land") {
@@ -529,9 +542,7 @@ impl Engine {
         }
         if self.spec(kind).unwrap().mode == "sea" {
             for (i,&a) in stops.iter().enumerate() {
-                if let Some(j) = self.waterway(a,stops[(i+1)%stops.len()]) {
-                    n.extend(&self.data.waterways[j].nations);
-                }
+                n.extend(self.water_nations(a,stops[(i+1)%stops.len()]));
             }
         }
         n.sort();

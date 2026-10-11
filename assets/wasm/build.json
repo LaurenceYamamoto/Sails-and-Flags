@@ -1,21 +1,22 @@
 {
-  "version": "3.3.11",
-  "binary": "c0dddee83444dab156b0f67990137b5fe3478e6529f907c56dffe26ee7636ff6",
+  "version": "3.3.12",
+  "binary": "9613a2a563e6adfc7e8ee6fb1871073d06b197dc0f299afa33eefaee29894d4f",
   "sources": {
-    "wasm-core/Cargo.lock": "089156606df2b7bf2db96dd300cee858412c182b58ca3d9191e6885fa84be941",
-    "wasm-core/Cargo.toml": "f04ff4f9e8ac4d065008d97f5261838d264e28900e4933a73e2fa7d1ca9af4d3",
+    "wasm-core/Cargo.lock": "4289804de25d24b49fb180801fc1bd3cc9d2f12f1749dbfccd10e326281b07a6",
+    "wasm-core/Cargo.toml": "99333287442559ce4ac2f965bd7292aa432b0c113b356ecc1a3a70130e4eb5c6",
     "wasm-core/data/retired-waterway-catalog.json": "99b1e4b8b1537dc612bdd12314341534f109cc3c388c4c457be28902586f5bd5",
     "wasm-core/data/world.json": "c87014d78bd3041b864afb472971b33cb83dc07d868ceab72f71244527d1f7e5",
     "wasm-core/src/accounts.rs": "e5040dd254a3ece48186a66fa28fe14541776fb851bb5c7e9d10c38e2ea96338",
     "wasm-core/src/commands.rs": "932db3b39433e457b7f233afc6932bea303619af6bac425eee6678649359e9d2",
-    "wasm-core/src/lib.rs": "3abc7d633cbe1d2403387a7eb6de06553ff90812c3e5b14794d3bc1e6d5ef4fc",
+    "wasm-core/src/lib.rs": "bf40162cd4081507d733e67e2aa66c62197cd070c06aed3eafbf5c5758113554",
     "wasm-core/src/loading.rs": "e7ce9347ffdb97475c2c0abd24b1705eeeada5f148be310ed731a1b051f97b94",
-    "wasm-core/src/model.rs": "16c038de7a75c22f1a623b7c9dd46715da9a35d634ca8c7034c8350429db2c8f",
+    "wasm-core/src/model.rs": "04cb3ad0bb21ec147527902b869c9c62436a2bab3d1beb4245f87851164f9249",
     "wasm-core/src/movement.rs": "46f2e93d6bf7469ba68af6f28fd5a4a99707ca0e22278a98b4bfc48c6e775b59",
     "wasm-core/src/rivals.rs": "6b635dadeeb3a27bbdccd22eadf94e3625058d2115bb6392e37fcdd482dd5d6c",
     "wasm-core/src/simulation.rs": "5f3b16c32ad4dcd0599493909313f99278aceb9f5dd7e5313f68a577bbe714b4",
     "wasm-core/src/trade.rs": "3238faf7f348348518355e6e99a8177ef98095fa080abc49d3f5e4701c38af92",
-    "wasm-core/src/view.rs": "38c45e787ea9d6ea936aaab8467e9963974942126560d93c2cbbb3bd9dfcd995",
-    "wasm-core/src/waterway_rollback.rs": "9ce3fa4023dbaf48114ebbc8b520bef524beb76cdaead1c739ea6a38838f2a5e"
+    "wasm-core/src/view.rs": "f20e989dd117c6e8376f680d7f4bed4dbfc5c7a3ae96e05e08db8f463776123c",
+    "wasm-core/src/water_connections.rs": "525105032bb4857a720f514d666482926cb7851ed38afcff3ab4e5bd06285bb3",
+    "wasm-core/src/waterway_rollback.rs": "25c779e2557ece0e827683454ead7a7decfe3e368513d28c78a713f5c4d50e3c"
   }
 }

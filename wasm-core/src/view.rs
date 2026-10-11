@@ -52,6 +52,36 @@ impl Engine {
         }
         v
     }
+    fn water_path(&self, a: usize, b: usize) -> Value {
+        if let Some(connection) = self.water_connections.get(&(a.min(b), a.max(b))) {
+            let mut cities = connection.cities.clone();
+            if a > b { cities.reverse(); }
+            let mut lines: Vec<Vec<Value>> = vec![];
+            for pair in cities.windows(2) {
+                for line in self.water_path(pair[0], pair[1]).as_array().unwrap() {
+                    let points = line.as_array().unwrap();
+                    if let Some(last) = lines.last_mut().filter(|l| l.last() == points.first()) {
+                        last.extend(points.iter().skip(1).cloned());
+                    } else {
+                        lines.push(points.clone());
+                    }
+                }
+            }
+            return json!(lines);
+        }
+        if let Some(idx) = self.waterway(a, b) {
+            let mut points = self.graphics["waterways"][idx]["points"].as_array().unwrap().clone();
+            if self.data.waterways[idx].a != a { points.reverse(); }
+            return json!([points]);
+        }
+        let mut lines = self.graphics["paths"][format!("{}:{}", a.min(b), a.max(b))]
+            .as_array().cloned().unwrap_or_default();
+        if a > b {
+            lines.reverse();
+            for line in &mut lines { line.as_array_mut().unwrap().reverse(); }
+        }
+        json!(lines)
+    }
     pub fn paths(&self) -> Value {
         let mut paths = serde_json::Map::new();
         for co in &self.game.companies {
@@ -72,23 +102,9 @@ impl Engine {
                             p.reverse();
                         }
                         json!([p])
-                    } else if let Some(idx) = self.waterway(a,b) {
-                        let mut p = self.graphics["waterways"][idx]["points"].as_array().unwrap().clone();
-                        if self.data.waterways[idx].a != a { p.reverse(); }
-                        json!([p])
                     } else {
-                        let mut lines = self.graphics["paths"]
-                            [format!("{}:{}", a.min(b), a.max(b))]
-                        .as_array()
-                        .cloned()
-                        .unwrap_or_default();
-                        if a > b {
-                            lines.reverse();
-                            for line in &mut lines {
-                                line.as_array_mut().unwrap().reverse();
-                            }
-                        }
-                        json!(lines)
+                        self.water_path(a, b)
+
                     };
                     paths.insert(k, points);
                 }
@@ -397,7 +413,7 @@ impl Engine {
                                 } else {
                                     if loading && g.city_version < 24 && d.distances[a][b].is_some() { true }
                                     else { self.water_distance(spec(&r.auto_type).unwrap(),a,b).is_finite()
-                                        && self.waterway(a,b).is_none_or(|j| d.waterways[j].nations.iter().all(|n| c.licenses.contains(n))) }
+                                        && self.water_nations(a,b).iter().all(|n| c.licenses.contains(n)) }
                                 }
                         })
                         && r.transport.since <= g.day

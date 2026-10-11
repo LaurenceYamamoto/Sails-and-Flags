@@ -8,6 +8,7 @@ mod simulation;
 mod trade;
 mod view;
 mod waterway_rollback;
+mod water_connections;
 pub use model::Engine;
 use model::{Game, Result};
 use serde_json::{Value, json};
