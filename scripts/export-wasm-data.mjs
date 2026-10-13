@@ -1,4 +1,6 @@
+import {YANGTZE_ROADS} from '../src/yangtze-cities.js';
 import {WATERWAYS} from '../src/waterway-data.js';
+import {RIVER_MOUTHS,YANGTZE_WATERWAYS} from '../src/yangtze-waterways.js';
 import {NORTH_AMERICA_ROADS} from '../src/north-america-data.js';
 import {AMERICAN_INTERIOR_ROADS} from '../src/american-interior-data.js';
 import {CASPIAN_ROADS} from '../src/caspian-data.js';
@@ -20,10 +22,10 @@ import {HULLS,HULL_LEVELS} from '../src/industry.js';
 import {RIVAL_STARTS} from '../src/rival-starts.js';
 import {SHIP_NAMES} from '../src/identity.js';
 import {DEMAND_REGIONS,DEMAND_CLIMATES,demandProfile} from '../src/demand-data.js';
-import {seaRoute,seaLines} from '../src/sea-routing.js';
+import {seaRoute,seaLines,seaFromGateway} from '../src/sea-routing.js';
 import {LAND} from '../src/map-land.js';
 import {project} from '../src/geography.js';
-import {landSegment} from '../src/world-geometry.js';
+import {landSegment,nauticalDistance,splitDateline} from '../src/world-geometry.js';
 import {COASTAL_ROAD_VIA} from '../src/coastal-road-data.js';
 import {KOREA_ROADS} from '../src/korea-expansion-data.js';
 fs.mkdirSync('wasm-core/data',{recursive:true});
@@ -41,7 +43,7 @@ for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].
 }
 const roads=Object.entries(ROAD_SLOTS).map(([id,r])=>({id,...r,a:index(r.a),b:index(r.b),nations:r.nations.map(n=>nations.findIndex(x=>x.id===n)),points:roadPoints(r.a,r.b)}));
 // Check the actual map endpoints, including city presentation offsets.
-for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS),...Object.keys(MANCHURIA_KOREA_ROADS),...Object.keys(JAPAN_ROADS),...Object.keys(TRADE_HUB_ROADS),...Object.keys(REGIONAL_LINK_ROADS),...Object.keys(CASPIAN_ROADS),...Object.keys(AMERICAN_INTERIOR_ROADS),...Object.keys(NORTH_AMERICA_ROADS)]){
+for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),...Object.keys(ASIA_ROADS),...Object.keys(ASIA_ADDED_ROADS),...Object.keys(INDOCHINA_ROADS),...Object.keys(CENTRAL_ASIA_ROADS),...Object.keys(SILK_ROAD_ROADS),...Object.keys(MANCHURIA_KOREA_ROADS),...Object.keys(JAPAN_ROADS),...Object.keys(TRADE_HUB_ROADS),...Object.keys(REGIONAL_LINK_ROADS),...Object.keys(CASPIAN_ROADS),...Object.keys(AMERICAN_INTERIOR_ROADS),...Object.keys(NORTH_AMERICA_ROADS),...Object.keys(YANGTZE_ROADS)]){
  const r=roads.find(r=>r.id===id);if(r.retired)continue;const points=r.points.map(p=>({...p}));
  for(const [at,ci] of [[0,r.a],[points.length-1,r.b]]){const c=cities[ci];points[at]={x:c.displayX??c.x,y:c.displayY??c.y};}
  const coordinates=points.map(p=>[p.x/2.5-180,90-p.y/2.5]);
@@ -50,6 +52,7 @@ for(const id of [...Object.keys(COASTAL_ROAD_VIA),...Object.keys(KOREA_ROADS),..
 // Small-vessel waterways are separate from the open-sea matrix, including
 // corridors whose endpoints are inland. All distances here are nautical miles.
 const arc=(a,b)=>{const rad=Math.PI/180,dl=(b[0]-a[0])*rad,dp=(b[1]-a[1])*rad;return 6371*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(dp/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin(dl/2)**2)));};
+const displayPoint=c=>({x:c.displayX??c.x,y:c.displayY??c.y});
 const waterways=Object.entries(WATERWAYS).map(([id,w])=>{
  const r=w.a?{a:index(w.a),b:index(w.b),nations:w.nations.map(id=>nations.findIndex(n=>n.id===id))}:roads.find(r=>r.id===id);
  if(!r||r.a<0||r.b<0||r.a===r.b||!r.nations.length||r.nations.some(n=>n<0))throw Error('Invalid waterway endpoints/rights: '+id);
@@ -57,8 +60,33 @@ const waterways=Object.entries(WATERWAYS).map(([id,w])=>{
  const coordinates=[[a.lon,a.lat],...w.via,[b.lon,b.lat]];
  const nm=coordinates.slice(1).reduce((n,p,i)=>n+arc(coordinates[i],p),0)*1.1/1.852;
  if(!Number.isFinite(nm)||nm<=0)throw Error('Invalid waterway distance: '+id);
- return {id,a:r.a,b:r.b,nations:r.nations,river:w.river,nm,points:coordinates.map(([lon,lat])=>project(lon,lat))};
+ const displayPoints=Object.hasOwn(YANGTZE_WATERWAYS,id)
+  ?[displayPoint(a),...(w.displayVia??w.via).map(p=>project(...p)),displayPoint(b)]
+  :coordinates.map(p=>project(...p));
+ return {id,a:r.a,b:r.b,nations:r.nations,river:w.river,nm,points:coordinates.map(([lon,lat])=>project(lon,lat)),displayPoints};
 });
+const riverMouths=Object.entries(RIVER_MOUTHS).map(([id,m])=>{
+ const a=index(m.city),c=cities[a];
+ if(a<0)throw Error('Invalid river mouth city: '+id);
+ const coordinates=[[c.lon,c.lat],...m.via,m.gateway];
+ return {id,a,river:m.river,nations:m.nations.map(id=>nations.findIndex(n=>n.id===id)),
+  coordinates,points:coordinates.map(p=>project(...p)),
+  nm:coordinates.slice(1).reduce((sum,p,i)=>sum+nauticalDistance(coordinates[i],p),0)*1.1};
+});
+const waterAccess=[];
+for(const mouth of riverMouths)for(let b=0;b<cities.length;b++){
+ if(cities[b].inland)continue;
+ const ocean=seaFromGateway(mouth.coordinates.at(-1),cities[b].id);
+ const coordinates=[...mouth.coordinates,...ocean.slice(1)],lines=[];
+ for(let i=1;i<coordinates.length;i++)for(const [partIndex,[from,to]]of splitDateline(coordinates[i-1],coordinates[i]).entries()){
+  if(!lines.length||partIndex>0)lines.push([project(...from)]);
+  lines.at(-1).push(project(...to));
+ }
+ const nm=mouth.nm+ocean.slice(1).reduce((sum,p,i)=>sum+nauticalDistance(ocean[i],p),0);
+ // Connect the displayed estuary to the same Shanghai marker as the rivers.
+ lines[0][0]=displayPoint(cities[mouth.a]);
+ waterAccess.push({a:mouth.a,b,nm,nations:[...new Set([...mouth.nations,cities[b].nation])],lines});
+}
 const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,baseHull:id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));
@@ -80,5 +108,5 @@ const starts=RIVAL_STARTS.map(c=>{
  return {...c,licenses,routes};
 });
 const land=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');
-fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,waterways,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
+fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,waterways,riverMouths,waterAccess,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
 console.log(`Exported ${cities.length} cities, ${nations.length} nations, ${roads.length} roads`);

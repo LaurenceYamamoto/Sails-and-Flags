@@ -1,6 +1,9 @@
 // Presentation only. IDs, coordinates and saved route endpoints never change.
 // ID -> Latin, Japanese, Simplified Chinese, Traditional Chinese, Korean.
 export const cityNames = {
+ shanghai:['Shanghai','上海','上海','上海','상하이'],
+ jiujiang:['Jiujiang','九江','九江','九江','주장'],
+ yueyang:['Yueyang','岳陽','岳阳','岳陽','웨양'],
  beijing:['Beijing','北京','北京','北京','베이징'],
  xian:["Xi’an",'西安','西安','西安','시안'],
  nanjing:['Nanjing','南京','南京','南京','난징'],

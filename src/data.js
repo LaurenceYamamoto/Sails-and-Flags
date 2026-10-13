@@ -1,3 +1,4 @@
+import {YANGTZE_CITIES} from './yangtze-cities.js';
 import {NORTH_AMERICA_CITIES} from './north-america-data.js';
 import {AMERICAN_INTERIOR_CITIES} from './american-interior-data.js';
 import {CASPIAN_CITIES} from './caspian-data.js';
@@ -94,7 +95,7 @@ Object.assign(NATIONS,EUROPE_NATIONS);
 Object.assign(NATIONS,ATLANTIC_NATIONS,ASIA_NATIONS,INDOCHINA_NATIONS,CENTRAL_ASIA_NATIONS,TRADE_HUB_NATIONS);
 GOODS.push(...WORLD_GOODS);
 for(const [id,c] of Object.entries(CITIES))for(const g of WORLD_GOODS){const m=worldMarket(id,c,g);c.stocks.push(m.stock);c.supply.push(m.production);c.demand.push(m.demand);}
-for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES,...MANCHURIA_KOREA_CITIES,...JAPAN_CITIES,...TRADE_HUB_CITIES,...CASPIAN_CITIES,...AMERICAN_INTERIOR_CITIES,...NORTH_AMERICA_CITIES})){
+for(const [id,c] of Object.entries({...WORLD_PORTS,...CROSSING_PORTS,...EXPANSION_PORTS,...EUROPE_PORTS,...Object.fromEntries(Object.entries(EUROPE_INLAND).map(([id,c])=>[id,{...c,inland:true}])),...ATLANTIC_CITIES,...SIBERIAN_CITIES,...FRENCH_CARIBBEAN_PORTS,...TARANTO_PORTS,...KOREA_CITIES,...ASIA_CITIES,...INDOCHINA_CITIES,...CENTRAL_ASIA_CITIES,...SILK_ROAD_CITIES,...MANCHURIA_KOREA_CITIES,...JAPAN_CITIES,...TRADE_HUB_CITIES,...CASPIAN_CITIES,...AMERICAN_INTERIOR_CITIES,...NORTH_AMERICA_CITIES,...YANGTZE_CITIES})){
  const markets=GOODS.map(g=>worldMarket(id,c,g));
  CITIES[id]={...c,...project(c.lon,c.lat),name:c.mapName,stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)};
 }
@@ -104,6 +105,7 @@ for(const id of Object.keys(CONTINENTAL_CITIES)){
  Object.assign(c,{stocks:markets.map(m=>m.stock),supply:markets.map(m=>m.production),demand:markets.map(m=>m.demand)});
 }
 for(const [id,c]of Object.entries(CITIES))c.supply=c.supply.map((n,i)=>localProduction(id,c,GOODS[i].id,n));
+CITIES.changsha.riverPort=true;
 export const SHIPS = {
   galleon:{name:'ガレオン',nameEn:'Galleon',mode:'sea',price:14500,capacity:100,speed:105,range:10000,daily:10,guns:24},
   sloop: { name: 'スループ', mode: 'sea', price: 1800, capacity: 30, speed: 150, range: 1800, daily: 3, guns:6 },

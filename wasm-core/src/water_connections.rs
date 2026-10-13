@@ -11,6 +11,8 @@ pub struct WaterConnection {
 // leg; never invent a waterway, open an isolated lake, or shorten an old sea leg.
 pub fn connections(data: &Data) -> BTreeMap<(usize, usize), WaterConnection> {
     let count = data.cities.len();
+    let access: BTreeMap<_,_> = data.water_access.iter()
+        .map(|w| ((w.a.min(w.b),w.a.max(w.b)),w.nm)).collect();
     let river: Vec<_> = (0..count).map(|start| {
         let mut paths = BTreeMap::from([(start, (0.0, vec![start]))]);
         for _ in 0..data.waterways.len() {
@@ -42,7 +44,8 @@ pub fn connections(data: &Data) -> BTreeMap<(usize, usize), WaterConnection> {
             for (&entrance, (first, incoming)) in &river[a] {
                 for (&exit, (last, outgoing)) in &river[b] {
                     if entrance == exit || is_river(entrance, exit) { continue; }
-                    let Some(sea) = data.distances[entrance][exit] else { continue; };
+                    let Some(sea) = data.distances[entrance][exit]
+                        .or_else(|| access.get(&(entrance.min(exit),entrance.max(exit))).copied()) else { continue; };
                     let nm = first + sea + last;
                     if best.as_ref().is_none_or(|(old, _)| nm < *old) {
                         let mut path = incoming.clone();
@@ -54,7 +57,7 @@ pub fn connections(data: &Data) -> BTreeMap<(usize, usize), WaterConnection> {
             if let Some((nm, cities)) = best {
                 let mut nations: Vec<_> = cities.iter().map(|&i| data.cities[i].nation).collect();
                 for pair in cities.windows(2) {
-                    if let Some(w) = data.waterways.iter().find(|w|
+                    if let Some(w) = data.waterways.iter().chain(data.water_access.iter()).find(|w|
                         (w.a == pair[0] && w.b == pair[1]) || (w.a == pair[1] && w.b == pair[0])) {
                         nations.extend(&w.nations);
                     }

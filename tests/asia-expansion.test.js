@@ -18,7 +18,7 @@ function oldWorld(g){g.city_version=9;g.markets.length=228*w.goods.length;g.deve
 
 test('Asia adds 24 distinct markets, 5 sea ports, 2 authorities and 49 land road definitions',()=>{
  assert.equal(Object.keys(ASIA_CITIES).length,24);assert.equal(Object.keys(ASIA_PORTS).length,5);assert.equal(Object.keys(ASIA_ROADS).length,49);
- assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.filter(r=>!r.retired).length,332);
+ assert.equal(w.cities.length,323);assert.equal(w.nations.length,52);assert.equal(w.roads.filter(r=>!r.retired).length,330);
  assert.deepEqual(w.cities.slice(228,252).map(c=>c.id),Object.keys(ASIA_CITIES));
  assert.equal(w.nations[w.cities[city('cochin')].nation].id,'netherlands');
  assert.equal(w.nations[w.cities[city('calicut')].nation].id,'calicut');assert.equal(w.nations[w.cities[city('madurai')].nation].id,'madurai');
@@ -30,7 +30,7 @@ test('Asia adds 24 distinct markets, 5 sea ports, 2 authorities and 49 land road
   if(c.inland)assert.ok(w.distances[city(id)].every(d=>d===null),id);
  }
  assert.equal(CITIES.calicut.supply[GOODS.findIndex(g=>g.id==='tea')],0);assert.equal(CITIES.tianjin.supply[GOODS.findIndex(g=>g.id==='spices')],0);
- const connected=new Set([city('beijing'),city('delhi')]);let changed=true;while(changed){changed=false;for(const r of w.roads.filter(r=>!r.retired))if(connected.has(r.a)||connected.has(r.b))for(const c of [r.a,r.b])if(!connected.has(c)){connected.add(c);changed=true;}}
+ const connected=new Set([city('beijing'),city('delhi')]);let changed=true;while(changed){changed=false;for(const r of [...w.roads.filter(r=>!r.retired),...w.waterways])if(connected.has(r.a)||connected.has(r.b))for(const c of [r.a,r.b])if(!connected.has(c)){connected.add(c);changed=true;}}
  for(const id of Object.keys(ASIA_CITIES))assert.ok(connected.has(city(id)),id+' disconnected');
  for(const [id,r]of Object.entries(ASIA_ROADS)){
   if(!ROADS[id])continue;
@@ -51,9 +51,9 @@ test('All five new ports connect to every existing port via symmetric water-only
 
 test('3.3.4 saves append Asian markets and nations without changing old company state or RNG',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=17;old.roads[0].quality=2;old.pairs[0].relation=12;old.pairs[0].until=45;
- e.load(old);const after=e.save();assert.equal(after.city_version,26);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);assert.equal(after.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(after)),old);
+ e.load(old);const after=e.save();assert.equal(after.city_version,30);assert.equal(after.markets.length,323*w.goods.length);assert.equal(after.roads.length,356);assert.equal(after.pairs.length,1326);assert.deepEqual(oldWorld(structuredClone(after)),old);
  for(const c of after.companies){assert.deepEqual(c.friendship.slice(39),Array(w.nations.length-39).fill(60));assert.deepEqual(c.diplomacy_budget.slice(39),Array(w.nations.length-39).fill(0));}
- for(const change of [g=>g.city_version=27,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const change of [g=>g.city_version=31,g=>g.markets.pop(),g=>g.companies[0].friendship.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

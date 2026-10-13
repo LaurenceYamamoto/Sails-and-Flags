@@ -1,3 +1,4 @@
+import {YANGTZE_ROADS,YANGTZE_RETIRED_ROADS} from './yangtze-cities.js';
 import {WATERWAYS} from './waterway-data.js';
 import {NORTH_AMERICA_ROADS} from './north-america-data.js';
 import {AMERICAN_INTERIOR_ROADS} from './american-interior-data.js';
@@ -59,6 +60,11 @@ for(const [id,w] of Object.entries(WATERWAYS)){
  if(!ROAD_SLOTS[id]||ROAD_SLOTS[id].retired)throw Error('Invalid waterway conversion: '+id);
  ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:w.since??24,waterway:true};
 }
+// Keep the previous direct river-conversion slot retired after splitting its geometry.
+ROAD_SLOTS.hankou_yichang={...ROAD_SLOTS.hankou_yichang,retired:true,retired_since:27,waterway:true};
+Object.assign(ROAD_SLOTS,YANGTZE_ROADS);
+ROAD_SLOTS.yueyang_changsha={...ROAD_SLOTS.yueyang_changsha,retired:true,retired_since:30,waterway:true};
+for(const id of YANGTZE_RETIRED_ROADS)if(!ROAD_SLOTS[id].retired)ROAD_SLOTS[id]={...ROAD_SLOTS[id],retired:true,retired_since:28};
 export const ROADS=Object.fromEntries(Object.entries(ROAD_SLOTS).filter(([,r])=>!r.retired));
 // Frequent departure, AI, validation and map lookups must not scan every road.
 const roadIndex=new Map();

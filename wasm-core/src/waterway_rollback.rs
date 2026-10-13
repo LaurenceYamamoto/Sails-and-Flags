@@ -28,6 +28,10 @@ impl Engine {
         let old: RetiredCatalog = serde_json::from_str(include_str!("../data/retired-waterway-catalog.json"))
             .map_err(|e| e.to_string())?;
         let mut data = self.data.clone();
+        data.cities.truncate(320);
+        data.roads.truncate(353);
+        data.distances.truncate(320);
+        for row in &mut data.distances { row.truncate(320); }
         if g.city_version == 25 {
             for (i, row) in data.distances.iter_mut().enumerate() {
                 row.extend(old.distance_rows.iter().map(|r| r[i]));
@@ -47,16 +51,17 @@ impl Engine {
         data.waterways = if g.city_version == 24 { old.waterways24 } else { old.waterways25 };
         let waterway_index = data.waterways.iter().enumerate()
             .map(|(i, w)| ((w.a.min(w.b), w.a.max(w.b)), i)).collect();
-        let checker = Engine { data, graphics: Value::Null, waterway_index,
+        data.water_access.clear();
+        let checker = Engine { data, graphics: Value::Null, waterway_index, water_access_index: Default::default(),
             water_connections: Default::default(), game: g.clone() };
         let mut prior = g.clone();
-        prior.city_version = 26; // Validate as a complete save in its own catalog.
+        prior.city_version = 30; // Validate as a complete save in its own catalog.
         checker.validate(&prior, false)?;
 
         let mut refunds = vec![];
         for (ci, c) in g.companies.iter_mut().enumerate() {
             let removed: Vec<_> = c.routes.iter().filter(|r| {
-                if r.stops.iter().any(|&i| i >= self.data.cities.len()) { return true; }
+                if r.stops.iter().any(|&i| i >= 320) { return true; }
                 if r.mode != "sea" { return false; }
                 // Restored land corridors cannot be sailed. Retain compatible
                 // coastal voyages and the two explicitly allowed rivers.
@@ -80,14 +85,35 @@ impl Engine {
                 }
             }
             c.routes.retain(|r| !removed.contains(&r.id));
-            refund += g.development.iter().skip(self.data.cities.len())
+            refund += g.development.iter().skip(320)
                 .filter(|d| d.owner == c.id).map(|d| d.basis + d.pool).sum::<f64>();
             ensure(amount(refund) && amount(c.cash.max(0.0) + refund), "廃止陸路の返金額が不正です。")?;
             refunds.push((ci, refund, removed.len()));
         }
-        g.markets.truncate(self.data.cities.len() * self.data.goods.len());
-        g.development.truncate(self.data.cities.len());
+        g.markets.truncate(320 * self.data.goods.len());
+        g.development.truncate(320);
         g.city_version = 26;
         Ok(refunds)
+    }
+}
+
+impl Engine {
+    // Revision 27 used a different river geometry. Validate that save in its
+    // original catalog before any route is retired for the new range limits.
+    pub(crate) fn validate_yangtze27(&self, g: &Game) -> Result<()> {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct Prior { waterways: Vec<Waterway>, water_access: Vec<Waterway> }
+        let old: Prior = serde_json::from_str(include_str!("../data/yangtze-revision-27.json")).map_err(|e|e.to_string())?;
+        let mut data = self.data.clone();
+        data.cities.truncate(320); data.roads.truncate(353); data.distances.truncate(320);
+        for row in &mut data.distances { row.truncate(320); }
+        for r in &mut data.roads { if r.retired_since == 28 { r.retired = false; r.retired_since = 0; } }
+        data.waterways = old.waterways; data.water_access = old.water_access;
+        let waterway_index = data.waterways.iter().enumerate().map(|(i,w)|((w.a.min(w.b),w.a.max(w.b)),i)).collect();
+        let water_connections = crate::water_connections::connections(&data);
+        let checker = Engine {data,graphics:Value::Null,waterway_index,water_access_index:Default::default(),water_connections,game:g.clone()};
+        let mut prior = g.clone(); prior.city_version = 30;
+        checker.validate(&prior,false)
     }
 }

@@ -105,6 +105,8 @@ pub struct Data {
     pub goods: Vec<Good>,
     pub roads: Vec<Road>,
     pub waterways: Vec<Waterway>,
+    #[serde(default)]
+    pub water_access: Vec<Waterway>,
     pub specs: Vec<Spec>,
     pub starts: Vec<Start>,
     pub ship_names: Vec<String>,
@@ -114,6 +116,7 @@ pub struct Engine {
     pub data: Data,
     pub graphics: Value,
     pub waterway_index: BTreeMap<(usize, usize), usize>,
+    pub water_access_index: BTreeMap<(usize, usize), usize>,
     pub water_connections: BTreeMap<(usize, usize), crate::water_connections::WaterConnection>,
     pub game: Game,
 }
@@ -435,6 +438,7 @@ impl Engine {
         let game = Game::new(&data, 1700, true);
         Self {
             water_connections: crate::water_connections::connections(&data),
+            water_access_index: data.water_access.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             data,
             graphics: raw,
@@ -708,7 +712,7 @@ impl Game {
             cargo_time_version: 1,
             transport_version: 1,
             roster_version: 5,
-            city_version: 26,
+            city_version: 30,
             seed,
             rng,
             day: 0,

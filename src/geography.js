@@ -1,3 +1,4 @@
+import {YANGTZE_CITIES} from './yangtze-cities.js';
 import {NORTH_AMERICA_CITIES} from './north-america-data.js';
 import {AMERICAN_INTERIOR_CITIES} from './american-interior-data.js';
 import {CASPIAN_CITIES} from './caspian-data.js';
@@ -69,3 +70,5 @@ Object.assign(PORT_GEOGRAPHY,JAPAN_CITIES);
 Object.assign(PORT_GEOGRAPHY,TRADE_HUB_CITIES);
 
 Object.assign(PORT_GEOGRAPHY,CASPIAN_CITIES,AMERICAN_INTERIOR_CITIES,NORTH_AMERICA_CITIES);
+
+Object.assign(PORT_GEOGRAPHY,YANGTZE_CITIES);

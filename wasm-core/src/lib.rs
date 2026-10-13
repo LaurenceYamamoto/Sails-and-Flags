@@ -20,7 +20,7 @@ impl Engine {
     fn retire_roads(&self, g: &mut Game) -> Result<Vec<(usize, f64, usize)>> {
         let mut refunds = Vec::new();
         for (ci, c) in g.companies.iter_mut().enumerate() {
-            let removed: Vec<_> = c.routes.iter().filter(|r| (g.city_version < 24 && r.mode == "sea" && self.has_waterway(&r.stops) && {
+            let removed: Vec<_> = c.routes.iter().filter(|r| ((g.city_version < 24 || g.city_version == 27) && r.mode == "sea" && self.has_waterway(&r.stops) && {
                 let compatible = |kind: &str| self.data.specs.iter().find(|s| s.id==kind).or_else(||g.designs.get(kind)).is_some_and(|s|
                     r.stops.iter().enumerate().all(|(i,&a)|self.water_distance(s,a,r.stops[(i+1)%r.stops.len()])<=s.range));
                 !compatible(&r.auto_type) || c.ships.iter().filter(|s|s.route==Some(r.id)).any(|s|!compatible(&s.kind))
@@ -158,7 +158,7 @@ impl Engine {
                     }
                 }
                 let prototype_refunds = self.rollback_waterways(&mut g)?;
-                self.validate(&g, true)?;
+                if g.city_version == 27 { self.validate_yangtze27(&g)?; } else { self.validate(&g, true)?; }
                 // Rename only the known regional rivals, preserving custom and legacy names.
                 if g.roster_version >= 1 {
                     for c in &mut g.companies {
@@ -173,7 +173,7 @@ impl Engine {
                         }
                     }
                 }
-                if g.city_version < 25 {
+                if g.city_version < 29 {
                     let old_nation_count = g.companies[0].friendship.len();
                     // Append the new market without consuming the campaign's RNG or
                     // touching existing stocks, ownership, routes, or company balances.
@@ -226,7 +226,7 @@ impl Engine {
                     road_refunds[ci].2 += removed;
                     model::ensure(model::amount(road_refunds[ci].1) && model::amount(g.companies[ci].cash.max(0.0) + road_refunds[ci].1), "廃止陸路の返金額が不正です。")?;
                 }
-                g.city_version = 26;
+                g.city_version = 30;
                 self.validate(&g, false)?;
                 self.game = g;
                 for (c, refund, removed) in road_refunds {

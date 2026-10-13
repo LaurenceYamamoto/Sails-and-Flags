@@ -32,6 +32,7 @@ impl Engine {
         let o = v.as_object_mut().unwrap();
         o.remove("distances");
         o.remove("paths");
+        o.remove("waterAccess");
         let rivals = o.remove("starts").unwrap();
         o.insert(
             "rivals".into(),
@@ -53,6 +54,14 @@ impl Engine {
         v
     }
     fn water_path(&self, a: usize, b: usize) -> Value {
+        if let Some(&idx) = self.water_access_index.get(&(a.min(b),a.max(b))) {
+            let mut lines = self.graphics["waterAccess"][idx]["lines"].as_array().unwrap().clone();
+            if self.data.water_access[idx].a != a {
+                lines.reverse();
+                for line in &mut lines { line.as_array_mut().unwrap().reverse(); }
+            }
+            return json!(lines);
+        }
         if let Some(connection) = self.water_connections.get(&(a.min(b), a.max(b))) {
             let mut cities = connection.cities.clone();
             if a > b { cities.reverse(); }
@@ -70,7 +79,7 @@ impl Engine {
             return json!(lines);
         }
         if let Some(idx) = self.waterway(a, b) {
-            let mut points = self.graphics["waterways"][idx]["points"].as_array().unwrap().clone();
+            let mut points = self.graphics["waterways"][idx]["displayPoints"].as_array().unwrap().clone();
             if self.data.waterways[idx].a != a { points.reverse(); }
             return json!([points]);
         }
@@ -167,8 +176,8 @@ impl Engine {
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
                 && g.roster_version <= 5
-                && (g.city_version <= 23 || g.city_version == 26)
-                && (loading || g.city_version == 26)
+                && (g.city_version <= 23 || [26,27,28,29,30].contains(&g.city_version))
+                && (loading || g.city_version == 30)
                 && (loading || g.transport_version == 1)
                 && (loading || g.cargo_time_version == 1),
             "このセーブ形式は対応していません。3.0.0以降のセーブを指定してください。",
@@ -194,14 +203,14 @@ impl Engine {
                 18 | 19 => 304,
                 20 => 310,
                 21 => 312,
-                22 | 23 => 320,
+                22 | 23 | 26 | 27 => 320,
                 _ => d.cities.len(),
             }
         } else {
             d.cities.len()
         };
         let nation_count = if loading && g.city_version < 3 { 23 } else if loading && g.city_version == 3 { 31 } else if loading && g.city_version < 10 { 39 } else if loading && g.city_version < 13 { 41 } else if loading && g.city_version == 13 { 44 } else if loading && g.city_version < 18 { 48 } else { d.nations.len() };
-        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else if loading && g.city_version == 4 { 202 } else if loading && g.city_version == 5 { 219 } else if loading && g.city_version == 6 { 221 } else if loading && g.city_version == 7 { 223 } else if loading && g.city_version == 8 { 224 } else if loading && g.city_version == 9 { 225 } else if loading && g.city_version == 10 { 274 } else if loading && g.city_version < 13 { 276 } else if loading && g.city_version == 13 { 281 } else if loading && g.city_version == 14 { 293 } else if loading && g.city_version == 15 { 303 } else if loading && g.city_version == 16 { 314 } else if loading && g.city_version == 17 { 321 } else if loading && g.city_version == 18 { 332 } else if loading && g.city_version == 19 { 334 } else if loading && g.city_version == 20 { 342 } else if loading && g.city_version == 21 { 346 } else { d.roads.len() };
+        let road_count = if loading && g.city_version < 3 { 69 } else if loading && g.city_version == 3 { 101 } else if loading && g.city_version == 4 { 202 } else if loading && g.city_version == 5 { 219 } else if loading && g.city_version == 6 { 221 } else if loading && g.city_version == 7 { 223 } else if loading && g.city_version == 8 { 224 } else if loading && g.city_version == 9 { 225 } else if loading && g.city_version == 10 { 274 } else if loading && g.city_version < 13 { 276 } else if loading && g.city_version == 13 { 281 } else if loading && g.city_version == 14 { 293 } else if loading && g.city_version == 15 { 303 } else if loading && g.city_version == 16 { 314 } else if loading && g.city_version == 17 { 321 } else if loading && g.city_version == 18 { 332 } else if loading && g.city_version == 19 { 334 } else if loading && g.city_version == 20 { 342 } else if loading && g.city_version == 21 { 346 } else if loading && g.city_version < 28 { 353 } else if loading && g.city_version == 28 { 355 } else { d.roads.len() };
         ensure(
             g.day <= 3650000
                 && g.fraction.is_finite()

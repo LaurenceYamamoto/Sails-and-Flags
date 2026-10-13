@@ -61,6 +61,17 @@ export function seaRoute(a,b){
   const r=cache.get(key),reverse=a!==from;
   return {nm:r.nm,coordinates:reverse?[...r.coordinates].reverse():r.coordinates,offshore:reverse?[...r.offshore].reverse():r.offshore};
 }
+// Reach a geometry-only estuary from an existing ocean mesh point. Do not add
+// a city/port or mutate the mesh used by established sea-to-sea voyages.
+export function seaFromGateway(gateway,to){
+ const start=NETWORK.points.findIndex(p=>p[0]===gateway[0]&&p[1]===gateway[1]);
+ if(start<0||!PORT_APPROACHES[to])throw Error('Invalid river mouth connection');
+ const end=portNodes[to],{cost,previous}=shortest(start);
+ if(!Number.isFinite(cost[end]))throw Error('Disconnected river mouth');
+ const path=[];for(let i=end;i!==-1;i=previous[i])path.unshift(NETWORK.points[i]);
+ const c=PORT_GEOGRAPHY[to];
+ return [...path,...PORT_APPROACHES[to].slice(0,-1).reverse(),[c.lon,c.lat]];
+}
 export const seaPoints=(a,b)=>seaRoute(a,b)?.coordinates.map(([lon,lat])=>project(lon,lat))??[];
 export function seaLines(a,b){
   const points=seaRoute(a,b)?.coordinates??[],lines=[];

@@ -13,7 +13,7 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 function oldWorld(g){g.city_version=19;g.markets.length=304*w.goods.length;g.development.length=304;g.roads.length=334;return g;}
 
 test('Six land markets and eight roads connect the Caucasus, Caspian and Russia without crossing water',()=>{
- assert.equal(w.cities.length,320);assert.equal(w.nations.length,52);assert.equal(w.roads.length,353);assert.equal(w.roads.filter(r=>!r.retired).length,332);assert.equal(w.cities.filter(c=>!c.inland).length,139);
+ assert.equal(w.cities.length,323);assert.equal(w.nations.length,52);assert.equal(w.roads.length,356);assert.equal(w.roads.filter(r=>!r.retired).length,330);assert.equal(w.cities.filter(c=>!c.inland).length,139);
  assert.deepEqual(w.cities.slice(304,310).map(c=>c.id),Object.keys(C));assert.deepEqual(w.roads.slice(334,342).map(r=>r.id),Object.keys(R));
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c]of Object.entries(C)){
@@ -34,9 +34,9 @@ test('Six land markets and eight roads connect the Caucasus, Caspian and Russia 
 
 test('Version 19 saves append only markets, development and roads; reload is idempotent and malformed saves fail',async()=>{
  const e=await engine(),old=oldWorld(e.save());old.markets[0].stock+=21;old.roads[333].quality=3;e.load(old);const after=e.save();
- assert.equal(after.city_version,26);assert.deepEqual(oldWorld(structuredClone(after)),old);assert.equal(after.markets.length,320*w.goods.length);assert.equal(after.roads.length,353);
+ assert.equal(after.city_version,30);assert.deepEqual(oldWorld(structuredClone(after)),old);assert.equal(after.markets.length,323*w.goods.length);assert.equal(after.roads.length,356);
  e.load(after);assert.deepEqual(e.save(),after);
- for(const mutate of [g=>g.city_version=27,g=>g.markets.pop(),g=>g.development.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
+ for(const mutate of [g=>g.city_version=31,g=>g.markets.pop(),g=>g.development.pop(),g=>g.roads.pop()]){const bad=structuredClone(old);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 

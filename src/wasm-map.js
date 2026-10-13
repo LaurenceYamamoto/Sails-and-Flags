@@ -14,7 +14,7 @@ export class WorldMap {
   this.svg=node('svg',{class:'map wasm-map',viewBox:'0 0 900 450',tabindex:0,role:'group','aria-label':t('map')});
   this.svg.append(node('path',{d:catalog.land,class:'world-land','fill-rule':'evenodd'}));
   const roads=node('g',{class:'world-roads'});for(const r of catalog.roads.filter(r=>!r.retired))roads.append(node('path',{d:path(this.displayLines([r.points],r.a,r.b))}));this.svg.append(roads);
-  const waterways=node('g',{class:'world-waterways'});for(const w of catalog.waterways){const line=node('path',{d:path(this.displayLines([w.points],w.a,w.b))});const title=node('title');title.textContent=w.river;line.append(title);waterways.append(line);}this.svg.append(waterways);
+  const waterways=node('g',{class:'world-waterways'});for(const w of catalog.waterways){const line=node('path',{d:path(this.displayLines([w.displayPoints??w.points],w.a,w.b))});const title=node('title');title.textContent=w.river;line.append(title);waterways.append(line);}this.svg.append(waterways);
   this.routeLayer=node('g',{class:'world-routes'});this.svg.append(this.routeLayer);
   this.cityLayer=node('g');this.svg.append(this.cityLayer);
   // Keep names above vessels so an occupied port remains selectable by its label.
@@ -23,7 +23,7 @@ export class WorldMap {
    const g=node('g',{'data-city':i,transform:`translate(${c.x} ${c.y})`,tabindex:0,role:'button','aria-label':cityName(c)});
    // Keep the close Lima/Callao hit areas from covering the other city's marker.
    g.append(node('circle',{class:'city-hit',r:10,fill:'transparent',...(['lima','callao'].includes(c.id)?{style:'r:min(1.5px, calc(4px * var(--map-unit,1)))'}:{})}));
-   g.append(node(c.inland?'rect':'circle',{...(c.inland?{x:-2,y:-2,width:4,height:4,fill:catalog.nations[c.nation].color}:{r:2.5,fill:catalog.nations[c.nation].color}),...(['lima','callao'].includes(c.id)?{'pointer-events':'none'}:{})}));
+   g.append(node(c.inland&&!c.riverPort?'rect':'circle',{...(c.inland&&!c.riverPort?{x:-2,y:-2,width:4,height:4,fill:catalog.nations[c.nation].color}:{r:2.5,fill:catalog.nations[c.nation].color}),...(['lima','callao'].includes(c.id)?{'pointer-events':'none'}:{})}));
    const title=node('title');title.textContent=(cityName(c))+' · '+nameOf(catalog.nations[c.nation]);g.append(title);
    const labelGroup=node('g',{'data-city':i,transform:`translate(${c.x} ${c.y})`});
    const label=node('text',{x:c.mapLabelOffset?.[0]??(c.id==='callao'?-4:4),y:c.mapLabelOffset?.[1]??-3,'text-anchor':c.id==='callao'?'end':'start',class:'city-label'});label.textContent=cityName(c);labelGroup.append(label);this.labelLayer.append(labelGroup);this.cityLayer.append(g);
