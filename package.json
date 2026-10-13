@@ -14,7 +14,8 @@
     "test:campaign": "node --test tests/campaign.test.js",
     "benchmark:world": "node scripts/benchmark-world.mjs",
     "benchmark:scale": "node scripts/benchmark-scale.mjs",
-    "build:translations": "node scripts/build-translations.mjs"
+    "build:translations": "node scripts/build-translations.mjs",
+    "build:legal": "node scripts/build-legal.mjs"
   },
   "engines": {
     "node": ">=22"

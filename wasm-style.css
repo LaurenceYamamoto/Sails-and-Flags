@@ -35,3 +35,5 @@ button[aria-pressed="true"]{background:#244c50;color:#fff}
 
 .world-waterways path{fill:none;stroke:#59daf1;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:none}
 .waterway-key{color:#17637a}
+
+.legal-footer{max-width:2100px;margin:0 auto;padding:12px 24px 24px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;font-size:12px;color:#526961}.legal-footer a{color:#275a62;text-underline-offset:3px}.legal-footer a:focus-visible{outline:3px solid #a65913;outline-offset:4px}.legal-footer small{flex-basis:100%;font-size:12px}

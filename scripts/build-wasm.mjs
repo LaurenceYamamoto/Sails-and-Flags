@@ -2,6 +2,7 @@ import {execFileSync} from 'node:child_process';
 import {mkdirSync,copyFileSync,writeFileSync,readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 execFileSync(process.execPath,['scripts/export-wasm-data.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/build-legal.mjs'],{stdio:'inherit'});
 execFileSync('cargo',['build','--manifest-path','wasm-core/Cargo.toml','--target','wasm32-unknown-unknown','--release','--locked'],{stdio:'inherit'});
 mkdirSync('assets/wasm',{recursive:true});
 copyFileSync('wasm-core/target/wasm32-unknown-unknown/release/sails_flags_core.wasm','assets/wasm/engine.wasm');
