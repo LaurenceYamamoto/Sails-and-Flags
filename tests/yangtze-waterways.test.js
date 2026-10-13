@@ -83,7 +83,7 @@ test('Yangtze network uses Poyang, ends at Yichang and reaches the ocean through
 test('all requested river links and ocean connections allow only Sloop hulls and enforce total range',async()=>{
  const e=await engine();fund(e);
  const links=w.waterways.filter(r=>Object.hasOwn(YANGTZE_WATERWAYS,r.id)).map(r=>[r.a,r.b]);
- for(const stops of [...links,...ids.map(id=>[city('ningbo'),city(id)])])for(const points of [stops,stops.toReversed()]){
+ for(const stops of [...links,...ids.filter(id=>id!=='shanghai').map(id=>[city('ningbo'),city(id)])])for(const points of [stops,stops.toReversed()]){
   const q=e.query({query:'connection',stops:points});assert.equal(q.waterway,true);assert.deepEqual(q.types,['sloop']);
   for(const kind of ['brig','fluyt','galleon','caravan','wagon'])assert.throws(()=>e.query({query:'opening',kind,stops:points}));
   open(e,points);const paths=e.view().paths,forward=paths[`sea:${points[0]}:${points[1]}`];assert.ok(forward.length);assert.deepEqual(paths[`sea:${points[1]}:${points[0]}`],forward.toReversed().map(p=>p.toReversed()));
@@ -135,4 +135,60 @@ test('real revision27 saves append markets and retire replaced roads without los
  assert.equal(p.cash,old.companies[0].cash+1350);assert.deepEqual(p.routes,old.companies[0].routes.slice(1));assert.deepEqual(p.ships.slice(1),old.companies[0].ships.slice(1));assert.equal(p.ships[0].route,null);assert.deepEqual(p.ships[0].cargo,[]);
  for(const change of [g=>g.markets.at(-1).stock=-1,g=>g.companies[0].ships[0].cargo[0].cost=-1,g=>g.development.push(g.development[0]),g=>g.companies[0].routes[1].stops[0]=320]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
  e.load(after);assert.deepEqual(e.save(),after);e.cmd({action:'tick',days:31});e.load(e.save());
+});
+
+
+test('Shanghai admits every sea hull from the ocean, while upstream legs remain Sloop-only',async()=>{
+ const e=await engine();fund(e);const stops=['ningbo','shanghai'].map(city);
+ assert.ok(w.waterAccess.every(a=>a.allShips));
+ for(const points of [stops,stops.toReversed()]){
+  const connection=e.query({query:'connection',stops:points});assert.equal(connection.waterway,false);
+  for(const kind of w.specs.filter(s=>s.mode==='sea').map(s=>s.id)){
+   assert.ok(connection.types.includes(kind),kind);const q=e.query({query:'opening',kind,stops:points});
+   assert.equal(q.longest,w.waterAccess.find(a=>a.b===city('ningbo')).nm);
+  }
+ }
+ const route=open(e,stops,'galleon');assert.equal(e.view().companies[0].routes.find(r=>r.id===route).waterway,false);
+ e.cmd({action:'research',kind:'brig',budgets:[1000,1000,1000,1000,1000]});const design=Object.values(e.save().designs).find(s=>s.baseHull==='brig').id;
+ assert.ok(e.query({query:'connection',stops}).types.includes(design));
+ const combined=['ningbo','shanghai','nanjing'].map(city);
+ assert.deepEqual(e.query({query:'connection',stops:combined}).types,['sloop']);
+ for(const points of [combined,combined.toReversed()])for(const kind of ['brig','galleon',design])assert.throws(()=>e.query({query:'opening',kind,stops:points}));
+ const current=e.save();e.load(current);assert.deepEqual(e.save(),current);
+ e.cmd({action:'tick',days:31});e.load(e.save());
+});
+
+test('bulk hull and automation replacement skips restricted services and prices only eligible ships',async()=>{
+ const e=await engine();fund(e);
+ const sea=open(e,['ningbo','shanghai'].map(city));
+ const river=open(e,['shanghai','yangzhou'].map(city));
+ const mixed=open(e,['stjohns','montreal'].map(city));
+ const extra=e.cmd({action:'buyShip',kind:'sloop'});e.cmd({action:'assign',route:river,ship:extra});
+ const idle=e.cmd({action:'buyShip',kind:'sloop'});
+ let base=e.save();base.day=50;e.load(base);base=e.save();
+ const player=base.companies[0],restricted=[river,mixed],spec=kind=>w.specs.find(s=>s.id===kind);
+ const q=e.query({query:'replacement',mode:'type',source:'sloop',target:'brig'});
+ assert.equal(q.count,2);assert.equal(q.skipped,3);assert.deepEqual(q.skippedRoutes,restricted);assert.ok(q.ships.includes(idle));
+ assert.equal(q.purchase,2*spec('brig').price);assert.equal(q.sale,2*spec('sloop').price);
+ assert.deepEqual(e.save(),base,'quotes do not mutate the game');
+ const poor=structuredClone(base);poor.companies[0].initial_cash+=q.cost-1-poor.companies[0].cash;poor.companies[0].cash=q.cost-1;e.load(poor);const poorBefore=e.save();
+ assert.equal(e.query({query:'replacement',mode:'type',source:'sloop',target:'brig'}).affordable,false);
+ assert.throws(()=>e.cmd({action:'replace',mode:'type',source:'sloop',target:'brig'}));assert.deepEqual(e.save(),poorBefore);
+ e.load(base);e.cmd({action:'replace',mode:'type',source:'sloop',target:'brig'});
+ const after=e.save(),p=after.companies[0];assert.equal(p.cash,player.cash-q.cost);
+ for(const s of p.ships)if(restricted.includes(s.route))assert.deepEqual(s,player.ships.find(old=>old.id===s.id));else assert.equal(s.kind,'brig');
+ for(const id of restricted)assert.deepEqual(p.routes.find(r=>r.id===id),player.routes.find(r=>r.id===id),'skipped schedules and statistics stay intact');
+ e.load(after);assert.deepEqual(e.save(),after);
+ const empty=e.query({query:'replacement',mode:'type',source:'sloop',target:'brig'});assert.equal(empty.count,0);assert.equal(empty.skipped,3);assert.equal(empty.affordable,false);
+ assert.throws(()=>e.cmd({action:'replace',mode:'type',source:'sloop',target:'brig'}));assert.deepEqual(e.save(),after);
+ e.load(base);const auto=e.query({query:'replacement',mode:'automation',source:'sloop',target:'brig'});assert.equal(auto.count,1);assert.equal(auto.skipped,2);assert.deepEqual(auto.routes,[sea]);
+ e.cmd({action:'replace',mode:'automation',source:'sloop',target:'brig'});const autoAfter=e.save();assert.equal(autoAfter.companies[0].cash,player.cash);assert.deepEqual(autoAfter.companies[0].ships,player.ships);
+ for(const r of autoAfter.companies[0].routes)if(r.id===sea)assert.equal(r.auto_type,'brig');else assert.deepEqual(r,player.routes.find(old=>old.id===r.id));
+ const none=e.query({query:'replacement',mode:'automation',source:'sloop',target:'brig'});assert.equal(none.count,0);assert.equal(none.skipped,2);assert.equal(none.affordable,false);
+ assert.throws(()=>e.cmd({action:'replace',mode:'automation',source:'sloop',target:'brig'}));assert.deepEqual(e.save(),autoAfter);
+ e.load(base);for(const kind of ['sloop','brig'])e.cmd({action:'research',kind,budgets:[1000,1000,1000,1000,1000]});
+ const small=Object.values(e.save().designs).find(s=>s.baseHull==='sloop').id,large=Object.values(e.save().designs).find(s=>s.baseHull==='brig').id;
+ assert.equal(e.query({query:'replacement',mode:'type',source:'sloop',target:large}).skipped,3);
+ for(const mode of ['type','automation']){const quote=e.query({query:'replacement',mode,source:'sloop',target:small});assert.equal(quote.skipped,0);assert.equal(quote.count,mode==='type'?5:3);e.cmd({action:'replace',mode,source:'sloop',target:small});}
+ assert.ok(e.save().companies[0].ships.every(s=>s.kind===small));assert.ok(e.save().companies[0].routes.every(r=>r.auto_type===small));e.load(e.save());
 });

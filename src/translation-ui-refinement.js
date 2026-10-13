@@ -1,5 +1,8 @@
 // Simplified Chinese, Korean, French, Spanish.
 export const uiRefinementTranslations={
+ 'Skipped route settings':['跳过的自动调整设置','건너뛴 자동 증감 설정','Réglages automatiques ignorés','Ajustes automáticos omitidos'],
+ 'Skipped ships':['跳过的船只','건너뛴 선박','Navires ignorés','Barcos omitidos'],
+ 'Sloop-only routes are unchanged.':['仅限单桅帆船的航线保持不变。','슬루프 전용 항로는 변경하지 않습니다.','Les routes réservées aux sloops restent inchangées.','Las rutas exclusivas para balandras no se modifican.'],
  'Required technology':['所需技术','필요 기술','Technologie requise','Tecnología requerida'],
  'Retired shipyard refund':['旧船厂退款','폐지된 조선소 환급','Remboursement de l’ancien chantier naval','Reembolso del antiguo astillero'],
  'Ship cargo handling':['船舶装卸技术','선박 하역 기술','Manutention maritime','Manipulación marítima'],

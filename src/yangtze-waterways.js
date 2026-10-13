@@ -19,6 +19,6 @@ YANGTZE_WATERWAYS.shanghai_yangzhou.displayVia=[...shanghaiToWusong,[121.5,31.7]
 YANGTZE_WATERWAYS.jiujiang_nanchang.displayVia=hukouToNanchang.slice(1);
 // Ocean access remains a geometry-only point, with no extra market or cargo handling.
 export const RIVER_MOUTHS={
- yangtze:{city:'shanghai',nations:['qing'],river:'Huangpu / Yangtze',gateway:[123,31],
+ yangtze:{city:'shanghai',allShips:true,nations:['qing'],river:'Huangpu / Yangtze',gateway:[123,31],
   via:[...shanghaiToWusong,[121.9,31.6],[122.4,31.5]]},
 };

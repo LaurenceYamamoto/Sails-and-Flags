@@ -72,6 +72,8 @@ pub struct Road {
 }
 #[derive(Clone, Deserialize)]
 pub struct Waterway {
+    #[serde(default, rename = "allShips")]
+    pub all_ships: bool,
     pub a: usize,
     pub b: usize,
     pub nm: f64,
@@ -467,7 +469,7 @@ impl Engine {
             return if spec.river_capable() { self.data.waterways[i].nm } else { f64::INFINITY };
         }
         if let Some(connection) = self.water_connections.get(&(a.min(b), a.max(b))) {
-            return if spec.river_capable() { connection.nm } else { f64::INFINITY };
+            return if !connection.sloop_only || spec.river_capable() { connection.nm } else { f64::INFINITY };
         }
         self.data.distances.get(a).and_then(|row| row.get(b)).copied().flatten().unwrap_or(f64::INFINITY)
     }
@@ -479,7 +481,7 @@ impl Engine {
     pub fn has_waterway(&self, stops: &[usize]) -> bool {
         stops.iter().enumerate().any(|(i,&a)| {
             let b = stops[(i+1)%stops.len()];
-            self.waterway(a,b).is_some() || self.water_connections.contains_key(&(a.min(b),a.max(b)))
+            self.waterway(a,b).is_some() || self.water_connections.get(&(a.min(b),a.max(b))).is_some_and(|c| c.sloop_only)
         })
     }
     pub fn distance(&self, kind: &str, a: usize, b: usize) -> f64 {

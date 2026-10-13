@@ -69,7 +69,7 @@ const riverMouths=Object.entries(RIVER_MOUTHS).map(([id,m])=>{
  const a=index(m.city),c=cities[a];
  if(a<0)throw Error('Invalid river mouth city: '+id);
  const coordinates=[[c.lon,c.lat],...m.via,m.gateway];
- return {id,a,river:m.river,nations:m.nations.map(id=>nations.findIndex(n=>n.id===id)),
+ return {id,a,allShips:m.allShips===true,river:m.river,nations:m.nations.map(id=>nations.findIndex(n=>n.id===id)),
   coordinates,points:coordinates.map(p=>project(...p)),
   nm:coordinates.slice(1).reduce((sum,p,i)=>sum+nauticalDistance(coordinates[i],p),0)*1.1};
 });
@@ -85,7 +85,7 @@ for(const mouth of riverMouths)for(let b=0;b<cities.length;b++){
  const nm=mouth.nm+ocean.slice(1).reduce((sum,p,i)=>sum+nauticalDistance(ocean[i],p),0);
  // Connect the displayed estuary to the same Shanghai marker as the rivers.
  lines[0][0]=displayPoint(cities[mouth.a]);
- waterAccess.push({a:mouth.a,b,nm,nations:[...new Set([...mouth.nations,cities[b].nation])],lines});
+ waterAccess.push({a:mouth.a,b,allShips:mouth.allShips,nm,nations:[...new Set([...mouth.nations,cities[b].nation])],lines});
 }
 const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,baseHull:id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
 const starts=RIVAL_STARTS.map(c=>{

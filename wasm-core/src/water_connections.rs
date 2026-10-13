@@ -2,6 +2,7 @@ use crate::model::Data;
 use std::collections::BTreeMap;
 
 pub struct WaterConnection {
+    pub sloop_only: bool,
     pub nm: f64,
     pub cities: Vec<usize>,
     pub nations: Vec<usize>,
@@ -64,7 +65,13 @@ pub fn connections(data: &Data) -> BTreeMap<(usize, usize), WaterConnection> {
                 }
                 nations.sort();
                 nations.dedup();
-                result.insert((a, b), WaterConnection { nm, cities, nations });
+                // A port approach may admit all sea hulls, but any river leg
+                // still restricts the entire connection to the Sloop family.
+                let sloop_only = cities.windows(2).any(|pair| {
+                    is_river(pair[0], pair[1]) || data.water_access.iter().any(|w|
+                        !w.all_ships && ((w.a == pair[0] && w.b == pair[1]) || (w.a == pair[1] && w.b == pair[0])))
+                });
+                result.insert((a, b), WaterConnection { nm, cities, nations, sloop_only });
             }
         }
     }

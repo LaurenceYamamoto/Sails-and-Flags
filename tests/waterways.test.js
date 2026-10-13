@@ -12,7 +12,7 @@ function open(e,ids,kind='sloop'){const stops=ids.map(e.city);for(const nation o
 function legacy(e,g){g.city_version=23;g.roads.length=353;g.markets.length=320*e.data.goods.length;g.development.length=320;for(const c of g.companies)for(const r of c.routes){if(!e.data.waterways.some(w=>r.stops.includes(w.a)&&r.stops.includes(w.b)))continue;r.mode='land';r.auto_type=c.id==='company-7'?'wagon':'caravan';for(const s of c.ships.filter(s=>s.route===r.id))s.kind=r.auto_type;}return g;}
 
 test('Allowlisted sailing waterways preserve converted road slots and admit only Sloops, in both directions',async()=>{
- const e=await engine();assert.equal(e.data.waterways.length,9);assert.deepEqual(e.data.waterways.map(w=>w.id),Object.keys(WATERWAYS));
+ const e=await engine();assert.equal(e.data.waterways.length,10);assert.deepEqual(e.data.waterways.map(w=>w.id),Object.keys(WATERWAYS));
  for(const w of e.data.waterways){
   const r=e.data.roads.find(r=>r.id===w.id);if(r){assert.ok(r.retired&&r.retired_since===(WATERWAYS[w.id].since??24));assert.deepEqual([w.a,w.b],[r.a,r.b]);}else assert.ok(WATERWAYS[w.id].a);assert.ok(w.nm>0&&w.points.length>=3);
   for(const stops of [[w.a,w.b],[w.b,w.a]]){const q=e.query({query:'connection',stops});assert.equal(q.waterway,true);assert.deepEqual(q.types,['sloop']);assert.equal(q.default,'sloop');for(const kind of ['wagon','caravan','brig','fluyt','galleon'])assert.throws(()=>e.query({query:'opening',stops,kind}));}

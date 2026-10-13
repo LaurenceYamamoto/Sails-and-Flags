@@ -298,22 +298,26 @@ impl Engine {
             0
         };
         let co = &self.game.companies[0];
+        let target_spec = self.spec(target)?;
+        let restricted = |r: &Route| r.mode == "sea" && target_spec.mode == "sea" && !target_spec.river_capable() && self.has_waterway(&r.stops);
         if mode == "automation" {
-            let routes = co
+            let candidates = co
                 .routes
                 .iter()
                 .filter(|r| r.auto_type == source)
                 .collect::<Vec<_>>();
+            ensure(!candidates.is_empty(), "置換対象または航続距離を確認してください。")?;
+            let skipped_routes = candidates.iter().filter(|r| restricted(r)).map(|r| r.id).collect::<Vec<_>>();
+            let routes = candidates.into_iter().filter(|r| !restricted(r)).collect::<Vec<_>>();
             ensure(
-                !routes.is_empty()
-                    && routes.iter().all(|r| {
+                routes.iter().all(|r| {
                         self.spec(target).unwrap().mode == r.mode
                             && self.can_serve(target, &r.stops)
                     }),
                 "置換対象または航続距離を確認してください。",
             )?;
             return Ok(
-                json!({"cost":0,"sale":0,"purchase":0,"count":routes.len(),"ships":[],"affordable":true}),
+                json!({"cost":0,"sale":0,"purchase":0,"count":routes.len(),"ships":[],"routes":routes.iter().map(|r|r.id).collect::<Vec<_>>(),"skipped":skipped_routes.len(),"skippedRoutes":skipped_routes,"affordable":!routes.is_empty()}),
             );
         }
         let ships = co
@@ -328,6 +332,12 @@ impl Engine {
             })
             .collect::<Vec<_>>();
         ensure(!ships.is_empty(), "置換する船がありません。")?;
+        let skipped_routes = if mode == "type" {
+            co.routes.iter().filter(|r| restricted(r) && ships.iter().any(|s| s.route == Some(r.id))).map(|r| r.id).collect::<Vec<_>>()
+        } else { Vec::new() };
+        let candidates = ships.len();
+        let ships = ships.into_iter().filter(|s| !s.route.is_some_and(|id| skipped_routes.contains(&id))).collect::<Vec<_>>();
+        let skipped = candidates - ships.len();
         ensure(
             ships.iter().all(|s| {
                 self.spec(&s.kind).unwrap().mode == self.spec(target).unwrap().mode
@@ -346,7 +356,7 @@ impl Engine {
             .sum::<f64>();
         let purchase = ships.len() as f64 * self.spec(target)?.price;
         Ok(
-            json!({"cost":purchase-sale,"sale":sale,"purchase":purchase,"count":ships.len(),"ships":ships.iter().map(|s|s.id).collect::<Vec<_>>(),"affordable":co.cash>=purchase-sale}),
+            json!({"cost":purchase-sale,"sale":sale,"purchase":purchase,"count":ships.len(),"ships":ships.iter().map(|s|s.id).collect::<Vec<_>>(),"skipped":skipped,"skippedRoutes":skipped_routes,"affordable":!ships.is_empty() && co.cash>=purchase-sale}),
         )
     }
     pub fn command(&mut self, v: &Value) -> Result<Value> {
@@ -586,13 +596,14 @@ impl Engine {
             }
             "replace" => {
                 let q = self.replacement_quote(v)?;
+                ensure(q["count"].as_u64().unwrap_or(0) > 0, "置換する船がありません。")?;
                 let cost = q["cost"].as_f64().unwrap();
                 self.affordable(0, cost)?;
                 let target = string(v, "target")?;
                 if v["mode"] == "automation" {
-                    let source = string(v, "source")?;
+                    let ids = q["routes"].as_array().unwrap();
                     for r in &mut self.game.companies[0].routes {
-                        if r.auto_type == source {
+                        if ids.iter().any(|id| id.as_u64() == Some(r.id as u64)) {
                             r.auto_type = target.into();
                         }
                     }
@@ -620,6 +631,7 @@ impl Engine {
                     let routes = self.game.companies[0]
                         .routes
                         .iter()
+                        .filter(|r| self.game.companies[0].ships.iter().any(|s| s.route == Some(r.id) && ids.iter().any(|id| id.as_u64() == Some(s.id as u64))))
                         .map(|r| r.id)
                         .collect::<Vec<_>>();
                     for id in routes {
