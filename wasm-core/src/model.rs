@@ -38,6 +38,8 @@ pub struct City {
     pub stocks: Vec<f64>,
     pub supply: Vec<f64>,
     pub demand: Vec<f64>,
+    #[serde(rename = "marketSize")]
+    pub market_size: f64,
     pub modifiers: Vec<f64>,
     pub seasons: Vec<f64>,
 }

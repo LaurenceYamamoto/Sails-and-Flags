@@ -1,4 +1,5 @@
 import {YANGTZE_ROADS} from '../src/yangtze-cities.js';
+import {applyMarketSizes} from '../src/city-market-size.js';
 import {WATERWAYS} from '../src/waterway-data.js';
 import {RIVER_MOUTHS,YANGTZE_WATERWAYS} from '../src/yangtze-waterways.js';
 import {NORTH_AMERICA_ROADS} from '../src/north-america-data.js';
@@ -37,6 +38,7 @@ const cities=Object.entries(CITIES).map(([id,c])=>{
   seasons:GOODS.map(g=>(cl.winter[g.id]??0)*(p.south?-1:1))};
 });
 layoutAddedCities(cities);
+applyMarketSizes(cities, GOODS);
 const index=id=>cities.findIndex(c=>c.id===id),paths={},distances=cities.map(()=>cities.map(()=>null));
 for(let a=0;a<cities.length;a++)for(let b=a+1;b<cities.length;b++)if(!cities[a].inland&&!cities[b].inland){
  const r=seaRoute(cities[a].id,cities[b].id);if(r){distances[a][b]=distances[b][a]=r.nm;paths[a+':'+b]=seaLines(cities[a].id,cities[b].id);}

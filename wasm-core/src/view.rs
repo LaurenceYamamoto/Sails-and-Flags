@@ -25,7 +25,7 @@ impl Engine {
         } else {
             1.0
         };
-        json!({"base":c.demand[g],"location":c.modifiers[g],"season":1.0+c.seasons[g]*(std::f64::consts::TAU*ordinal as f64/length as f64).cos(),"city":self.city_demand_multiplier(city),"war":war,"price":(1.0/ratio(self.game.markets[city*self.data.goods.len()+g].stock+production)).clamp(0.25,3.0)})
+        json!({"base":c.demand[g],"marketSize":c.market_size,"location":c.modifiers[g],"season":1.0+c.seasons[g]*(std::f64::consts::TAU*ordinal as f64/length as f64).cos(),"city":self.city_demand_multiplier(city),"war":war,"price":(1.0/ratio(self.game.markets[city*self.data.goods.len()+g].stock+production)).clamp(0.25,3.0)})
     }
     pub fn catalog(&self) -> Value {
         let mut v = self.graphics.clone();

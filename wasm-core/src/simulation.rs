@@ -35,6 +35,7 @@ impl Engine {
             1.0
         };
         let requested = c.demand[g]
+            * c.market_size
             * self.city_demand_multiplier(city)
             * c.modifiers[g]
             * (1.0

@@ -675,6 +675,8 @@ export const traditionalTranslations = {
   "Overwrite this slot": "覆蓋此槽位",
   "Save in this slot": "保存到此槽位",
   "When space is low, old autosaves are removed. Manual slots and preserved migration saves are never automatically deleted.": "空間不足時會清理舊自動存檔。手動存檔和遷移保留存檔不會被自動刪除。",
+  "Base consumption scale": "基礎消費規模",
+  "Development effect": "開發效果",
   "Skipped route settings": "跳過的自動調整設置",
   "Skipped ships": "跳過的船隻",
   "Sloop-only routes are unchanged.": "僅限單桅帆船的航線保持不變。",

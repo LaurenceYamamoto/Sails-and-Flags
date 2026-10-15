@@ -74,7 +74,7 @@ test('city demand and production keep growing beyond former ceilings with dimini
   for(const level of [0,5,10,15,100,1000000]){
    const g=structuredClone(baseline);g.development[i].size=level;g.development[i].production[best]=level;e.load(g);
    const m=e.view(i).market[best],d=m.details;series.push([d.city,m.production/m.baseProduction]);
-   assert.ok(Math.abs(m.demand-d.base*d.location*d.season*d.city*d.war*d.price)<1e-9);
+   assert.ok(Math.abs(m.demand-d.base*d.marketSize*d.location*d.season*d.city*d.war*d.price)<1e-9);
    assert.ok(Number.isFinite(m.demand)&&Number.isFinite(m.production));
    const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
   }
