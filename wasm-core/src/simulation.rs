@@ -63,7 +63,7 @@ impl Engine {
                 continue;
             }
             self.advance_diplomacy(c);
-            self.advance_industry(c);
+            if c != 0 || self.game.companies[0].investment_plan.is_none() { self.advance_industry(c); }
             if c == 0 {
                 for city in 0..self.data.cities.len() {
                     for g in 0..self.data.goods.len() {
@@ -124,6 +124,13 @@ impl Engine {
             if !self.game.companies[c].bankrupt {
                 self.sail(c);
                 self.automate(c);
+                if c == 0 {
+                    self.auto_buy_investment_rights();
+                    if self.game.companies[0].investment_plan.is_some() {
+                        self.prepare_investment(true);
+                        self.advance_industry(0);
+                    }
+                }
                 if c > 0 && self.calendar().1 == 1 {
                     self.rival(c);
                 }
@@ -464,7 +471,7 @@ impl Engine {
                     self.spec(&kind).unwrap().price
                 };
                 if a.spent + cost <= a.budget
-                    && self.game.companies[c].cash - cost >= a.reserve
+                    && self.game.companies[c].cash - cost >= self.game.companies[c].investment_plan.as_ref().map_or(a.reserve, |p|p.reserve)
                     && self.producible(c, &kind)
                 {
                     if let Ok(ship) = idle

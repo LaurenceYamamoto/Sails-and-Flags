@@ -312,6 +312,15 @@ pub struct Automation {
     pub spent: f64,
     pub month: u32,
 }
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct RoadAuto {
+    pub enabled: bool,
+    pub rivals: bool,
+    pub reserve: f64,
+}
+impl RoadAuto {
+    pub fn is_default(&self) -> bool { self == &Self::default() }
+}
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FriendshipChange {
     pub day: u32,
@@ -355,6 +364,10 @@ pub struct Company {
     pub yard_value: f64,
     pub designs: Vec<String>,
     pub automation: Automation,
+    #[serde(default, skip_serializing_if = "RoadAuto::is_default")]
+    pub road_auto: RoadAuto,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub investment_plan: Option<crate::investment::InvestmentPlan>,
     pub ledger: Vec<Ledger>,
     pub totals: BTreeMap<String, f64>,
     pub history: Vec<[f64; 3]>,
@@ -791,6 +804,8 @@ impl Company {
             tech_budget: vec![0.0; 6],
             yard_value: 0.0,
             designs: vec![],
+            road_auto: RoadAuto::default(),
+            investment_plan: None,
             automation: Automation {
                 enabled: false,
                 replace_lost: false,

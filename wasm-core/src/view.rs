@@ -164,7 +164,7 @@ impl Engine {
             .filter(|p| p.until.is_some())
             .map(|p| json!({"a":p.a,"b":p.b}))
             .collect::<Vec<_>>();
-        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"handlingRates":[self.handling_rate(0,"sea"),self.handling_rate(0,"land")],"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
+        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"roadAuto":co.road_auto,"handlingRates":[self.handling_rate(0,"sea"),self.handling_rate(0,"land")],"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
     }
     pub fn validate(&self, g: &Game, loading: bool) -> Result<()> {
         // Legacy routes must be fully validated before retiring them on load.
@@ -341,6 +341,8 @@ impl Engine {
                     && c.trade.iter().all(|&x| amount(x))
                     && c.designs.iter().all(|id| g.designs.contains_key(id))
                     && c.designs.iter().collect::<BTreeSet<_>>().len() == c.designs.len()
+                    && amount(c.road_auto.reserve)
+                    && c.investment_plan.as_ref().is_none_or(|p|p.valid(d.cities.len(), d.roads.len(), d.goods.len()))
                     && amount(c.yard_value)
                     && ((loading && g.transport_version == 0) || c.yard_value == 0.0)
                     && [

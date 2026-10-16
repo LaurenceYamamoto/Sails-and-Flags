@@ -1,5 +1,7 @@
 // Stable engine messages -> localized presentation. Stored data stays language-neutral.
 export const errorRows = [
+ ['投資画面で設定してください。','Use the Investments screen to change this setting.','请在投资页面修改此设置。','투자 화면에서 설정을 변경하세요.','Modifiez ce réglage dans Investissements.','Cambia este ajuste en Inversiones.'],
+ ['一括処理の見積もりが変わりました。再確認してください。','The bulk quote has changed. Please review it again.','批量处理报价已更改。请重新确认。','일괄 처리 견적이 변경되었습니다. 다시 확인하세요.','Le devis groupé a changé. Veuillez le vérifier à nouveau.','El presupuesto del lote ha cambiado. Revísalo de nuevo.'],
  ['金額が不正です。','Invalid amount.','金额无效。','금액이 올바르지 않습니다.','Montant invalide.','Importe no válido.'],
  ['識別子が不正です。','Invalid identifier.','标识符无效。','식별자가 올바르지 않습니다.','Identifiant invalide.','Identificador no válido.'],
  ['対象が不正です。','Invalid selection.','选择无效。','선택이 올바르지 않습니다.','Sélection invalide.','Selección no válida.'],

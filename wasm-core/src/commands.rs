@@ -381,7 +381,29 @@ impl Engine {
             return Ok(json!(true));
         }
         self.playable(0)?;
+        if self.game.companies[0].investment_plan.is_some() {
+            ensure(!["cityInvestment","roadInvestment","technology","roadAuto"].contains(&action)
+                && !(action=="bulkInvestment" && ["cityBudget","roadBudget"].contains(&v["mode"].as_str().unwrap_or(""))),
+                "投資画面で設定してください。")?;
+        }
         match action {
+            "investmentPlan" => {
+                self.set_investment_plan(&v["plan"])?;
+                if let Some(a)=v.get("automation") {
+                    let mut a=a.clone();
+                    a["action"]=json!("automation");
+                    a["reserve"]=json!(self.game.companies[0].investment_plan.as_ref().unwrap().reserve);
+                    self.command(&a)?;
+                }
+            }
+            "bulkInvestment" => { self.apply_bulk_investment(v)?; }
+            "roadAuto" => {
+                self.game.companies[0].road_auto = RoadAuto {
+                    enabled: v["enabled"].as_bool().ok_or("対象が不正です。")?,
+                    rivals: v["rivals"].as_bool().ok_or("対象が不正です。")?,
+                    reserve: number(v, "reserve")?,
+                };
+            }
             "license" => {
                 self.buy_license(0, index(v, "nation", self.data.nations.len())?)?;
             }
@@ -475,7 +497,7 @@ impl Engine {
             }
             "automation" => {
                 let budget = number(v, "budget")?;
-                let reserve = number(v, "reserve")?;
+                let reserve = self.game.companies[0].investment_plan.as_ref().map(|p|p.reserve).unwrap_or(number(v, "reserve")?);
                 let expand = v["expand"]
                     .as_f64()
                     .ok_or("待機時間割合を指定してください。")?;
@@ -658,6 +680,8 @@ impl Engine {
     }
     pub fn query(&self, v: &Value) -> Result<Value> {
         match string(v, "query")? {
+            "investmentPlan" => self.investment_report(v),
+            "bulkInvestment" => self.bulk_investment_quote(v),
             "accounts" => Ok(self.account_report(v["annual"] == true)),
             "connection" => {
                 let stops = normalize(list(v, "stops", self.data.cities.len())?);

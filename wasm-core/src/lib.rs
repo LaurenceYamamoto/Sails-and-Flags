@@ -1,4 +1,6 @@
 mod accounts;
+mod bulk_investment;
+mod investment;
 mod commands;
 mod loading;
 mod model;
