@@ -1,9 +1,9 @@
 {
-  "version": "3.4.1",
-  "binary": "917d4893881262d674911f593d7b13592be9cec3f9995401826120ae608d07e6",
+  "version": "3.4.2",
+  "binary": "5f40fb08eadeecf7c39b087c5e3e3bf4c94879e063d92f31f533670eb280f459",
   "sources": {
-    "wasm-core/Cargo.lock": "751eb1217a3de05ecdc2cd7402174914be440cda3e5563d3bccb7b8cfefe94d3",
-    "wasm-core/Cargo.toml": "a22f0ff1f057cbb07fdd8ccaed38568ed5d51b22417969cf2699fdf6b550df5b",
+    "wasm-core/Cargo.lock": "a578faf47fd586374b0387558187d612c138fbe522afe7e8b190e4c98fc71bf1",
+    "wasm-core/Cargo.toml": "31b09fecca1e34663e244c63e3b90c480096c1f4d0f55b050943391475b06ffd",
     "wasm-core/data/retired-waterway-catalog.json": "99b1e4b8b1537dc612bdd12314341534f109cc3c388c4c457be28902586f5bd5",
     "wasm-core/data/world.json": "57769234b634d71f9e8c644f0de332e910c06e5b7e0fc45399b5992a0a100464",
     "wasm-core/data/yangtze-revision-27.json": "462b5df5b19dda0d5475615d3b16069bfa69aadddcc6dd09200ab91aa1c0e98b",
