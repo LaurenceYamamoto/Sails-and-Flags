@@ -461,6 +461,17 @@ impl Engine {
             "removeRoute" => {
                 self.remove_route(0, identifier(v, "route")?, false)?;
             }
+            "bulkEscorts" => {
+                let mode = string(v, "mode")?;
+                ensure(matches!(mode, "sea" | "land"), "対象が不正です。")?;
+                let escorts = v["escorts"].as_u64().filter(|n| *n <= 3)
+                    .ok_or("対象が不正です。")? as u32;
+                for route in &mut self.game.companies[0].routes {
+                    if route.mode == mode {
+                        route.escorts = escorts;
+                    }
+                }
+            }
             "route" => {
                 let id = identifier(v, "route")?;
                 let ri = self.game.companies[0]

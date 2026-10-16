@@ -3,6 +3,17 @@ use crate::trade::ratio;
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 impl Engine {
+    pub fn escort_groups(&self) -> Value {
+        json!(["sea", "land"].map(|mode| {
+            let routes = self.game.companies[0].routes.iter()
+                .filter(|r| r.mode == mode).collect::<Vec<_>>();
+            let current = routes.first().map(|r| r.escorts)
+                .filter(|n| routes.iter().all(|r| r.escorts == *n));
+            json!({"mode":mode,"count":routes.len(),"current":current,
+                "daily":routes.iter().map(|r| r.escorts as f64 * 4.0).sum::<f64>(),
+                "options":(0..4).map(|n| json!({"escorts":n,"daily":routes.len() as f64 * n as f64 * 4.0})).collect::<Vec<_>>()})
+        }))
+    }
     pub fn investments(&self, ci: usize) -> Value {
         let owner = &self.game.companies[ci].id;
         let cities=self.game.development.iter().enumerate().filter(|(_,d)|&d.owner==owner).map(|(i,d)|json!({"city":i,"size":d.size,"sizeBudget":d.size_budget,"production":d.production,"productionBudget":d.production_budget})).collect::<Vec<_>>();
@@ -164,7 +175,7 @@ impl Engine {
             .filter(|p| p.until.is_some())
             .map(|p| json!({"a":p.a,"b":p.b}))
             .collect::<Vec<_>>();
-        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"roadAuto":co.road_auto,"handlingRates":[self.handling_rate(0,"sea"),self.handling_rate(0,"land")],"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
+        json!({"fraction":self.game.fraction,"day":self.game.day,"companies":companies,"licenses":licenses,"market":market,"city":city,"development":self.game.development[city],"developmentCost":self.development_cost(city),"roads":roads,"catalog":catalog,"fleetGroups":catalog.iter().filter_map(|kind|{let ships=co.ships.iter().filter(|s|s.kind==kind.id).collect::<Vec<_>>();if ships.is_empty(){None}else{Some(json!({"kind":kind.id,"used":ships.iter().filter(|s|s.route.is_some()||s.voyage.is_some()||s.handling.is_some()||!s.cargo.is_empty()).count(),"idle":ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()).count()}))}}).collect::<Vec<_>>(),"defaultShip":co.default_ship,"defaultVehicle":co.default_vehicle,"automation":co.automation,"roadAuto":co.road_auto,"escortGroups":self.escort_groups(),"handlingRates":[self.handling_rate(0,"sea"),self.handling_rate(0,"land")],"technology":co.technology,"techBudget":co.tech_budget,"firstRank":self.game.first_rank,"events":self.game.events.iter().rev().take(15).collect::<Vec<_>>(),"ledger":co.ledger.iter().rev().take(LEDGER_RETAINED).collect::<Vec<_>>(),"wars":pairs,"paths":self.paths(),"operating":co.totals.iter().filter(|(k,_)|["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"].contains(&k.as_str())).map(|(_,v)|v).sum::<f64>()})
     }
     pub fn validate(&self, g: &Game, loading: bool) -> Result<()> {
         // Legacy routes must be fully validated before retiring them on load.

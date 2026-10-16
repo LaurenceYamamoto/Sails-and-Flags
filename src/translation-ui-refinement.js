@@ -1,5 +1,13 @@
 // Simplified Chinese, Korean, French, Spanish.
 export const uiRefinementTranslations={
+ 'Bulk escort settings':['批量设置护卫','호위 일괄 설정','Réglage groupé des escortes','Configuración conjunta de escoltas'],
+ 'Land':['陆上','육상','Terre','Tierra'],
+ 'Applies to all your existing routes, including paused and filtered-out routes. New routes are not affected.':['应用于所有现有自有路线，包括已暂停和被筛选隐藏的路线。不影响新建路线。','일시 정지 및 필터로 숨겨진 노선을 포함한 기존 자사 노선 전체에 적용합니다. 새 노선에는 적용하지 않습니다.','S’applique à toutes vos routes existantes, y compris celles en pause ou masquées par le filtre. Les nouvelles routes ne sont pas concernées.','Se aplica a todas tus rutas existentes, incluidas las pausadas y ocultas por el filtro. No afecta a las rutas nuevas.'],
+ 'Sea (including waterways)':['海上（含内河航道）','해상 (내륙 수로 포함)','Mer (voies navigables incluses)','Mar (incluidas vías fluviales)'],
+ 'Current daily cost':['当前每日费用','현재 일일 비용','Coût quotidien actuel','Coste diario actual'],
+ 'Escorts per route':['每条路线的护卫数','노선당 호위 수','Escortes par route','Escoltas por ruta'],
+ 'Choose escort count':['选择护卫数量','호위 수 선택','Choisir le nombre d’escortes','Elegir cantidad de escoltas'],
+ 'Apply to all':['批量更改','일괄 변경','Appliquer à toutes','Aplicar a todas'],
  'Technology / design':['技术与设计','기술·설계','Technologie / conception','Tecnología y diseño'],
  'Only cities on your routes':['仅限自有线路上的城市','자사 노선의 도시만','Uniquement les villes de vos lignes','Solo ciudades de tus rutas'],
  'Investments':['投资','투자','Investissements','Inversiones'],
