@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {bridge} from '../src/wasm-bridge.js';
 const binary=fs.readFileSync(new URL('../assets/wasm/engine.wasm',import.meta.url));
-async function engine(){const {instance}=await WebAssembly.instantiate(binary);const call=bridge(instance);return {call,cmd:c=>call({op:'command',command:c}),query:q=>call({op:'query',request:q}),view:city=>call({op:'view',city}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
+function canonicalPaths(e,paths){const pairs=[];for(const path of [...paths].sort((a,b)=>(a.length!==2)-(b.length!==2)))for(let i=0;i<path.length;i++){const pair=[path[i],path[(i+1)%path.length]].sort((a,b)=>e.data.cities[city(e,a)].order-e.data.cities[city(e,b)].order);if(!pairs.some(p=>JSON.stringify(p)===JSON.stringify(pair)))pairs.push(pair);}return pairs;}
+// Tests in this file run sequentially; reset all game state while reusing immutable world data.
+let testCall;
+async function engine(){if(!testCall)testCall=bridge((await WebAssembly.instantiate(binary)).instance);else testCall({op:'command',command:{action:'new',seed:1700,events:true}});const call=testCall;return {call,cmd:c=>call({op:'command',command:c}),query:q=>call({op:'query',request:q}),view:city=>call({op:'view',city}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 function trimLegacyWorld(g){g.roads.length=69;g.pairs=g.pairs.filter(p=>p.b<23);for(const c of g.companies){c.friendship.length=23;c.diplomacy_budget.length=23;c.trade.length=23;}}
 function omitUnavailableRoutes(g,cityCount){for(const c of g.companies){const removed=new Set(c.routes.filter(r=>r.stops.some(i=>i>=cityCount)).map(r=>r.id));c.routes=c.routes.filter(r=>!removed.has(r.id));for(const ship of c.ships)if(removed.has(ship.route))ship.route=null;}}
 function fund(e,value=1e9){const g=e.save();g.companies[0].cash+=value;g.companies[0].initial_cash+=value;e.load(g);}
@@ -194,11 +197,11 @@ test('fractional clock, pause and deterministic save/restore',async()=>{
  e.call({op:'advance',ms:500,speed:4,running:false});assert.equal(e.view().fraction,.25);
  const g=e.save();e.cmd({action:'tick',days:31});const after=e.save();e.load(g);e.cmd({action:'tick',days:31});assert.deepEqual(e.save(),after);
 });
-test('shared routes, inventory reuse and automatic purchase; ordered revisits',async()=>{
+test('shared routes, inventory reuse and automatic purchase; rejects circuits',async()=>{
  const e=await engine();fund(e);const id=open(e,['kingston','havana']);const g=e.save(),cash=g.companies[0].cash;
  e.cmd({action:'buyShip',kind:'sloop'});assert.equal(e.query({query:'opening',kind:'sloop',stops:[0,1]}).cost,0);
  const again=e.cmd({action:'openRoute',kind:'sloop',stops:[1,0],allowed:[0,1],margin:10});assert.equal(id,again);assert.equal(e.view().companies[0].routes.length,1);assert.equal(e.view().companies[0].routes[0].fleet.length,2);assert.equal(e.view().companies[0].cash,cash-1800);
- const circuit=open(e,['cadiz','lisbon','sanjuan','santodomingo','sanjuan','lisbon','cadiz'],'galleon');assert.equal(e.view().companies[0].routes.find(r=>r.id===circuit).stops.length,6);
+ assert.throws(()=>open(e,['cadiz','lisbon','sanjuan','santodomingo','sanjuan','lisbon','cadiz'],'galleon'));
 });
 test('sea detours, Pacific crossing and land connections remain available',async()=>{
  const e=await engine();const q=(a,b)=>e.query({query:'opening',kind:'galleon',stops:[city(e,a),city(e,b)]});
@@ -210,13 +213,13 @@ test('production suitability, nonzero demand and commodity-specific investment',
  const e=await engine();fund(e);const london=city(e,'london'),spice=e.data.goods.findIndex(g=>g.id==='spices');const v=e.view(london);assert.ok(v.market.every(m=>m.demand>0));assert.equal(v.market[spice].production,0);
  e.cmd({action:'license',nation:nation(e,'england')});e.cmd({action:'buyDevelopment',city:london});assert.throws(()=>e.cmd({action:'cityInvestment',city:london,good:spice,value:10}));const g=v.market.find(m=>m.production>0).good;e.cmd({action:'cityInvestment',city:london,good:g,value:10});e.cmd({action:'tick',days:31});const w=e.view(london);assert.ok(w.market[g].production>v.market[g].production);assert.equal(w.market[spice].production,0);
 });
-test('design budgets, names, fleet replacement and automation kind',async()=>{
+test('design budgets, names and managed fleet renewal',async()=>{
  const e=await engine();fund(e);const id=open(e,['kingston','havana']);const g=e.save();g.companies[0].technology[0]=30;e.load(g);
  const q=e.query({query:'design',kind:'sloop',budgets:[1000,1000,1000,1000,1000]});assert.ok(q.spec.range>1800);assert.ok(e.query({query:'design',kind:'sloop',budgets:[1000,0,0,0,0]}).spec.capacity>30);
  e.cmd({action:'research',kind:'sloop',budgets:[1000,1000,1000,1000,1000]});const design=e.view().catalog.find(s=>s.id.startsWith('design-')).id;
  e.cmd({action:'rename',kind:'design',id:design,name:'Ocean Swift'});e.cmd({action:'rename',kind:'company',name:'Wasm Trading'});
- const before=e.view().companies[0].cash,quote=e.query({query:'replacement',mode:'route',route:id,target:design,source:''});e.cmd({action:'replace',mode:'route',route:id,target:design,source:''});assert.equal(e.view().companies[0].cash,before-quote.cost);assert.ok(e.view().companies[0].ships.every(s=>s.kind===design));
- e.cmd({action:'replace',mode:'automation',source:'sloop',target:design});assert.equal(e.view().companies[0].routes[0].auto_type,design);assert.equal(e.view().companies[0].name,'Wasm Trading');
+ e.cmd({action:'routePolicy',policy:{enabled:true,ships:[design],vehicles:[]}});e.cmd({action:'automation',enabled:true,replaceLost:true,budget:1e7,reserve:0,expand:0,shrink:100});e.cmd({action:'tick',days:1});
+ assert.ok(e.save().companies[0].ships.every(s=>s.kind===design));assert.equal(e.view().companies[0].routes[0].auto_type,design);assert.equal(e.view().companies[0].name,'Wasm Trading');
 });
 test('invalid and legacy saves roll back without damaging live state',async()=>{
  const e=await engine(),before=e.save();for(const mutate of [g=>g.version=99,g=>g.markets.pop(),g=>g.companies[0].cash++,g=>g.companies[0].friendship[0]=101,g=>g.roads[0].quality=-1]){const g=structuredClone(before);mutate(g);assert.throws(()=>e.load(g));assert.deepEqual(e.save(),before);}
@@ -239,7 +242,7 @@ test('unprofitable return legs can reposition empty towards a profitable leg',as
  const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);const id=open(e,['kingston','havana']);e.cmd({action:'route',route:id,allowed:[0],margin:10});const g=e.save(),len=e.data.goods.length;g.markets[0].stock=2000;g.markets[len].stock=0;e.load(g);let empty=false;for(let i=0;i<40;i++){e.cmd({action:'tick',days:1});const s=e.view().companies[0].ships[0];if(s.voyage&&s.cargo.length===0)empty=true;}assert.ok(empty);e.save();
 });
 test('calendar uses real month boundaries, and malformed routes cannot trap Wasm',async()=>{
- const e=await engine();e.cmd({action:'tick',days:30});assert.equal(e.save().companies[0].automation.month,0);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].automation.month,1);
+ const e=await engine();e.cmd({action:'tick',days:30});assert.equal(e.query({query:'accounts'}).periods.at(-1).month,1);e.cmd({action:'tick',days:1});assert.equal(e.query({query:'accounts'}).periods.at(-1).month,2);
  fund(e);open(e,['kingston','havana']);const before=e.save();for(const mutate of [r=>r.mode='land',r=>r.stops=[0,999],r=>r.stops=[0,0],r=>r.auto_type='unknown']){const g=structuredClone(before);mutate(g.companies[0].routes[0]);assert.throws(()=>e.load(g));assert.deepEqual(e.save(),before);}
 });
 test('rival land operations reinvest in roads within the shared investment policy',async()=>{
@@ -381,10 +384,10 @@ test('fourteen regional rivals start with licensed serviceable fleets, paid from
  ];
  for(const [i,[name,capital,licenses,routes]] of expected.entries()){
   const co=g.companies[i+1];assert.equal(co.name,name);assert.equal(co.initial_cash,capital);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),licenses);assert.equal(co.friendship[co.licenses[0]],100);assert.ok(co.licenses.slice(1).every(n=>co.friendship[n]===60));
-  assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),routes);assert.ok(co.cash>0);assert.equal(co.cash+co.ships.reduce((n,s)=>n+e.data.specs.find(k=>k.id===s.kind).price,0),capital);
-  for(const r of co.routes){const ships=co.ships.filter(s=>s.route===r.id);assert.ok(ships.length>0);assert.equal(r.mode,i>=4&&i<=6?'land':'sea');assert.equal(r.started,0);assert.equal(r.active,true);
+  assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),canonicalPaths(e,routes));assert.ok(co.cash>0);assert.equal(co.cash+co.ships.reduce((n,s)=>n+e.data.specs.find(k=>k.id===s.kind).price,0),capital);
+  for(const r of co.routes){const ships=co.ships.filter(s=>s.route===r.id);assert.ok(co.ships.length>0);assert.equal(r.mode,i>=4&&i<=6?'land':'sea');assert.equal(r.started,0);assert.equal(r.active,true);
    for(const ship of ships){const q=e.query({query:'opening',kind:ship.kind,stops:r.stops});assert.ok(q.longest<=q.range);assert.ok(q.travelDays.every(d=>d>0));assert.ok(q.missing.every(n=>co.licenses.includes(n)));}
-   const v=e.view().companies[i+1].routes.find(v=>v.id===r.id);assert.ok(v.interval>0);assert.ok(Math.abs(v.cycle/v.fleet.length-v.interval)<1e-8);
+   const v=e.view().companies[i+1].routes.find(v=>v.id===r.id);assert.ok(v.interval>0);assert.ok(Math.abs(v.cycle/Math.max(1,v.fleet.length)-v.interval)<1e-8);
   }
  }
  assert.equal(e.data.rivals.length,14);assert.equal(e.data.rivals[3].nameEn,'Dutch East India Company');assert.ok(!Object.hasOwn(e.data,'starts'));e.load(g);assert.deepEqual(e.save(),g);
@@ -418,13 +421,13 @@ test('eleven-rival saves retain the South Sea Company and Portuguese routes are 
  const e=await engine(),g=e.save();g.roster_version=2;g.companies.length=12;e.load(g);assert.deepEqual(e.save(),g);e.cmd({action:'tick',days:31});e.load(e.save());assert.equal(e.save().companies[11].name,'南海会社');assert.equal(e.save().companies.length,12);
  e.cmd({action:'new',seed:1700,events:false});const co=e.save().companies[12];assert.equal(co.name,'ポルトガル商館');assert.equal(co.kind,'medium');assert.equal(co.initial_cash,25000);assert.equal(co.cash,14600);assert.equal(co.routes.length,2);assert.equal(co.ships.length,2);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['portugal']);assert.equal(co.friendship[co.licenses[0]],100);
  for(const r of co.routes){assert.equal(r.mode,'sea');assert.equal(co.ships.filter(s=>s.route===r.id).length,1);const q=e.query({query:'opening',kind:'brig',stops:r.stops});assert.ok(q.longest<=5000);}
- assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),[['lisbon','luanda'],['luanda','mozambique']]);
+ assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),canonicalPaths(e,[['lisbon','luanda'],['luanda','mozambique']]));
 });
 
 
 test('twelve-rival saves remain unchanged; Omani merchants start with licensed long and short sea routes',async()=>{
  const e=await engine(),g=e.save();g.roster_version=3;g.companies.length=13;e.load(g);assert.deepEqual(e.save(),g);e.cmd({action:'tick',days:31});e.load(e.save());assert.equal(e.save().companies.length,13);assert.equal(e.save().companies[12].name,'ポルトガル商館');
- e.cmd({action:'new',seed:1700,events:false});const co=e.save().companies[13];assert.equal(co.name,'オマーン商人');assert.equal(co.kind,'medium');assert.equal(co.initial_cash,25000);assert.equal(co.cash,18000);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['oman']);assert.equal(co.friendship[co.licenses[0]],100);assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),[['muscat','mombasa'],['mombasa','zanzibar']]);assert.deepEqual(co.ships.map(s=>s.kind),['brig','sloop']);
+ e.cmd({action:'new',seed:1700,events:false});const co=e.save().companies[13];assert.equal(co.name,'オマーン商人');assert.equal(co.kind,'medium');assert.equal(co.initial_cash,25000);assert.equal(co.cash,18000);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['oman']);assert.equal(co.friendship[co.licenses[0]],100);assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),canonicalPaths(e,[['muscat','mombasa'],['mombasa','zanzibar']]));assert.deepEqual(co.ships.map(s=>s.kind),['brig','sloop']);
  for(const r of co.routes){const ships=co.ships.filter(s=>s.route===r.id);assert.equal(ships.length,1);assert.equal(r.mode,'sea');const q=e.query({query:'opening',kind:ships[0].kind,stops:r.stops});assert.ok(q.longest<=q.range);assert.deepEqual(q.missing.map(n=>e.data.nations[n].id),['oman']);}
 });
 
@@ -443,11 +446,11 @@ test('Pondicherry extends old saves without changing existing markets, companies
 test('Edo is a Japanese port and 115-city saves gain only its new market and development record',async()=>{
  const e=await engine(),i=city(e,'edo');assert.equal(i,115);assert.equal(e.data.cities[i].mapName,'江戸');assert.equal(e.data.nations[e.data.cities[i].nation].id,'japan');assert.equal(e.data.cities[i].inland,false);
  const g=e.save();g.city_version=1;g.markets.length=115*e.data.goods.length;g.development.length=115;omitUnavailableRoutes(g,115);trimLegacyWorld(g);const before=structuredClone(g);e.load(g);const after=e.save();assert.equal(after.city_version,30);assert.equal(after.markets.length,323*e.data.goods.length);assert.equal(after.development[i].owner,'state');const comparable=structuredClone(after);comparable.city_version=1;comparable.markets.length=g.markets.length;comparable.development.length=115;trimLegacyWorld(comparable);assert.deepEqual(comparable,before);e.load(after);assert.deepEqual(e.save(),after);
- assert.ok(e.view(i).market.every(m=>m.demand>0));fund(e);const route=open(e,['edo','osaka']);assert.ok(route);e.cmd({action:'tick',days:30});e.load(e.save());assert.equal(e.save().companies[0].routes[0].stops[0],i);
+ assert.ok(e.view(i).market.every(m=>m.demand>0));fund(e);const route=open(e,['edo','osaka']);assert.ok(route);e.cmd({action:'tick',days:30});e.load(e.save());assert.ok(e.save().companies[0].routes[0].stops.includes(i));
 });
 
 
 test('Japanese merchants retain Osaka-Nagasaki and add an independently crewed Osaka-Edo sea route',async()=>{
- const e=await engine(),co=e.save().companies[8];assert.equal(co.kind,'small');assert.equal(co.initial_cash,5000);assert.equal(co.cash,1400);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['japan']);assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),[['osaka','nagasaki'],['osaka','edo']]);
+ const e=await engine(),co=e.save().companies[8];assert.equal(co.kind,'small');assert.equal(co.initial_cash,5000);assert.equal(co.cash,1400);assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),['japan']);assert.deepEqual(co.routes.map(r=>r.stops.map(n=>e.data.cities[n].id)),canonicalPaths(e,[['osaka','nagasaki'],['osaka','edo']]));
  for(const r of co.routes){assert.equal(r.mode,'sea');const fleet=co.ships.filter(s=>s.route===r.id);assert.equal(fleet.length,1);assert.equal(fleet[0].kind,'sloop');}e.load(e.save());
 });

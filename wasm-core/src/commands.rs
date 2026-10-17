@@ -1,5 +1,5 @@
 use crate::model::*;
-use crate::trade::{key, normalize};
+use crate::trade::key;
 use serde_json::{Value, json};
 pub fn string<'a>(v: &'a Value, k: &str) -> Result<&'a str> {
     v[k].as_str().ok_or(format!("{}を指定してください。", k))
@@ -280,85 +280,6 @@ impl Engine {
         }
         Ok(())
     }
-    pub fn replacement_quote(&self, v: &Value) -> Result<Value> {
-        let target = string(v, "target")?;
-        ensure(
-            self.producible(0, target),
-            "購入可能な置換先を指定してください。",
-        )?;
-        let mode = string(v, "mode")?;
-        ensure(
-            ["type", "route", "automation"].contains(&mode),
-            "置換方法が不正です。",
-        )?;
-        let source = v["source"].as_str().unwrap_or("");
-        let id = if mode == "route" {
-            identifier(v, "route")?
-        } else {
-            0
-        };
-        let co = &self.game.companies[0];
-        let target_spec = self.spec(target)?;
-        let restricted = |r: &Route| r.mode == "sea" && target_spec.mode == "sea" && !target_spec.river_capable() && self.has_waterway(&r.stops);
-        if mode == "automation" {
-            let candidates = co
-                .routes
-                .iter()
-                .filter(|r| r.auto_type == source)
-                .collect::<Vec<_>>();
-            ensure(!candidates.is_empty(), "置換対象または航続距離を確認してください。")?;
-            let skipped_routes = candidates.iter().filter(|r| restricted(r)).map(|r| r.id).collect::<Vec<_>>();
-            let routes = candidates.into_iter().filter(|r| !restricted(r)).collect::<Vec<_>>();
-            ensure(
-                routes.iter().all(|r| {
-                        self.spec(target).unwrap().mode == r.mode
-                            && self.can_serve(target, &r.stops)
-                    }),
-                "置換対象または航続距離を確認してください。",
-            )?;
-            return Ok(
-                json!({"cost":0,"sale":0,"purchase":0,"count":routes.len(),"ships":[],"routes":routes.iter().map(|r|r.id).collect::<Vec<_>>(),"skipped":skipped_routes.len(),"skippedRoutes":skipped_routes,"affordable":!routes.is_empty()}),
-            );
-        }
-        let ships = co
-            .ships
-            .iter()
-            .filter(|s| {
-                if mode == "route" {
-                    s.route == Some(id)
-                } else {
-                    s.kind == source
-                }
-            })
-            .collect::<Vec<_>>();
-        ensure(!ships.is_empty(), "置換する船がありません。")?;
-        let skipped_routes = if mode == "type" {
-            co.routes.iter().filter(|r| restricted(r) && ships.iter().any(|s| s.route == Some(r.id))).map(|r| r.id).collect::<Vec<_>>()
-        } else { Vec::new() };
-        let candidates = ships.len();
-        let ships = ships.into_iter().filter(|s| !s.route.is_some_and(|id| skipped_routes.contains(&id))).collect::<Vec<_>>();
-        let skipped = candidates - ships.len();
-        ensure(
-            ships.iter().all(|s| {
-                self.spec(&s.kind).unwrap().mode == self.spec(target).unwrap().mode
-                    && s.route.is_none_or(|id| {
-                        self.can_serve(
-                            target,
-                            &co.routes.iter().find(|r| r.id == id).unwrap().stops,
-                        )
-                    })
-            }),
-            "置換先の輸送方法・航続距離を確認してください。",
-        )?;
-        let sale = ships
-            .iter()
-            .map(|s| self.spec(&s.kind).unwrap().price)
-            .sum::<f64>();
-        let purchase = ships.len() as f64 * self.spec(target)?.price;
-        Ok(
-            json!({"cost":purchase-sale,"sale":sale,"purchase":purchase,"count":ships.len(),"ships":ships.iter().map(|s|s.id).collect::<Vec<_>>(),"skipped":skipped,"skippedRoutes":skipped_routes,"affordable":!ships.is_empty() && co.cash>=purchase-sale}),
-        )
-    }
     pub fn command(&mut self, v: &Value) -> Result<Value> {
         let action = string(v, "action")?;
         if action == "new" {
@@ -387,6 +308,15 @@ impl Engine {
                 "投資画面で設定してください。")?;
         }
         match action {
+            "routePolicy" => { self.set_route_policy(&v["policy"])?; }
+            "autoRoutes" => {
+                let city=index(v,"city",self.data.cities.len())?;
+                let enabled=v["enabled"].as_bool().ok_or("対象が不正です。")?;
+                ensure(!enabled || self.game.companies[0].licenses.contains(&self.data.cities[city].nation),
+                    "この都市の国の交易免許が必要です。")?;
+                let cities=&mut self.game.companies[0].auto_route_cities;
+                cities.retain(|&i|i!=city); if enabled {cities.push(city);cities.sort();}
+            }
             "investmentPlan" => {
                 self.set_investment_plan(&v["plan"])?;
                 if let Some(a)=v.get("automation") {
@@ -444,6 +374,7 @@ impl Engine {
                 self.entry(0, "shipSale", price, None, detail);
             }
             "openRoute" => {
+                ensure(v["stops"].as_array().is_some_and(|s|s.len()==2), "経路は異なる2都市を指定してください。")?;
                 return Ok(json!(self.open(
                     0,
                     string(v, "kind")?,
@@ -466,6 +397,8 @@ impl Engine {
                 ensure(matches!(mode, "sea" | "land"), "対象が不正です。")?;
                 let escorts = v["escorts"].as_u64().filter(|n| *n <= 3)
                     .ok_or("対象が不正です。")? as u32;
+                let defaults=self.game.companies[0].route_escorts.get_or_insert([0,0]);
+                defaults[if mode=="sea"{0}else{1}]=escorts;
                 for route in &mut self.game.companies[0].routes {
                     if route.mode == mode {
                         route.escorts = escorts;
@@ -507,7 +440,6 @@ impl Engine {
                 }
             }
             "automation" => {
-                let budget = number(v, "budget")?;
                 let reserve = self.game.companies[0].investment_plan.as_ref().map(|p|p.reserve).unwrap_or(number(v, "reserve")?);
                 let expand = v["expand"]
                     .as_f64()
@@ -524,8 +456,6 @@ impl Engine {
                     "待機時間割合は0～100%で、拡大の基準を縮小の基準以下にしてください。",
                 )?;
                 let a = &mut self.game.companies[0].automation;
-                ensure(budget >= a.spent, "使用済み予算より小さくできません。")?;
-                a.budget = budget;
                 a.reserve = reserve;
                 a.expand = expand;
                 a.shrink = shrink;
@@ -627,51 +557,6 @@ impl Engine {
                     _ => return Err("名前の対象が不正です。".into()),
                 }
             }
-            "replace" => {
-                let q = self.replacement_quote(v)?;
-                ensure(q["count"].as_u64().unwrap_or(0) > 0, "置換する船がありません。")?;
-                let cost = q["cost"].as_f64().unwrap();
-                self.affordable(0, cost)?;
-                let target = string(v, "target")?;
-                if v["mode"] == "automation" {
-                    let ids = q["routes"].as_array().unwrap();
-                    for r in &mut self.game.companies[0].routes {
-                        if ids.iter().any(|id| id.as_u64() == Some(r.id as u64)) {
-                            r.auto_type = target.into();
-                        }
-                    }
-                } else {
-                    let ids = q["ships"].as_array().unwrap();
-                    self.entry(
-                        0,
-                        "shipSale",
-                        q["sale"].as_f64().unwrap(),
-                        None,
-                        String::new(),
-                    );
-                    self.entry(
-                        0,
-                        "shipPurchase",
-                        -q["purchase"].as_f64().unwrap(),
-                        None,
-                        String::new(),
-                    );
-                    for s in &mut self.game.companies[0].ships {
-                        if ids.iter().any(|id| id.as_u64() == Some(s.id as u64)) {
-                            s.kind = target.into();
-                        }
-                    }
-                    let routes = self.game.companies[0]
-                        .routes
-                        .iter()
-                        .filter(|r| self.game.companies[0].ships.iter().any(|s| s.route == Some(r.id) && ids.iter().any(|id| id.as_u64() == Some(s.id as u64))))
-                        .map(|r| r.id)
-                        .collect::<Vec<_>>();
-                    for id in routes {
-                        self.reschedule(0, id);
-                    }
-                }
-            }
             _ => return Err("不明な操作です。".into()),
         }
         Ok(json!(true))
@@ -695,7 +580,8 @@ impl Engine {
             "bulkInvestment" => self.bulk_investment_quote(v),
             "accounts" => Ok(self.account_report(v["annual"] == true)),
             "connection" => {
-                let stops = normalize(list(v, "stops", self.data.cities.len())?);
+                let stops = self.ordered_stops(list(v, "stops", self.data.cities.len())?);
+                ensure(stops.len()==2 && stops[0]!=stops[1], "経路は異なる2都市を指定してください。")?;
                 let routes = self.game.companies[0]
                     .routes
                     .iter()
@@ -743,11 +629,11 @@ impl Engine {
                 };
                 Ok(json!({"routes":routes,"types":types,"stops":stops,"default":default,"waterway":self.has_waterway(&stops)}))
             }
-            "opening" => self.opening(
-                0,
-                string(v, "kind")?,
-                &normalize(list(v, "stops", self.data.cities.len())?),
-            ),
+            "opening" => {
+                let stops=self.ordered_stops(list(v,"stops",self.data.cities.len())?);
+                ensure(stops.len()==2 && stops[0]!=stops[1], "経路は異なる2都市を指定してください。")?;
+                self.opening(0,string(v,"kind")?,&stops)
+            },
             "design" => {
                 let budgets = v["budgets"]
                     .as_array()
@@ -760,7 +646,7 @@ impl Engine {
                     json!({"eligible":self.game.companies[0].technology[if spec.mode=="land"{3}else{0}]>=spec.level&&self.game.designs.len()<100,"spec":spec,"cost":cost,"remaining":self.game.companies[0].cash-cost,"affordable":self.game.companies[0].cash>=cost}),
                 )
             }
-            "replacement" => self.replacement_quote(v),
+
             "acquisition" => self.acquisition(index(v, "company", self.game.companies.len())?),
             _ => Err("不明な照会です。".into()),
         }

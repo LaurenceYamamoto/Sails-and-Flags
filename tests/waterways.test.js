@@ -28,7 +28,7 @@ test('waterway hull provenance survives design, rename, replacement and save/loa
  const designs=Object.values(e.save().designs),small=designs.find(s=>s.baseHull==='sloop').id,large=designs.find(s=>s.baseHull==='brig').id;
  e.cmd({action:'rename',kind:'design',id:small,name:'Renamed vessel'});e.cmd({action:'rename',kind:'design',id:large,name:'Sloop'});
  const stops=['newyork','albany'].map(e.city),q=e.query({query:'connection',stops});assert.ok(q.types.includes(small));assert.ok(!q.types.includes(large));
- e.cmd({action:'replace',mode:'route',route,target:small,source:''});e.cmd({action:'route',route,kind:small,auto:true});
+ const originalShip=e.save().companies[0].ships[0].id;e.cmd({action:'release',ship:originalShip});e.cmd({action:'sellShip',ship:originalShip});const designed=e.cmd({action:'buyShip',kind:small});e.cmd({action:'assign',route,ship:designed});e.cmd({action:'route',route,kind:small,auto:true});
  const ship=e.cmd({action:'buyShip',kind:'brig'}),before=e.save();
  for(const command of [{action:'assign',route,ship},{action:'route',route,kind:large},{action:'replace',mode:'route',route,target:'brig',source:''},{action:'replace',mode:'automation',source:small,target:large}]){assert.throws(()=>e.cmd(command));assert.deepEqual(e.save(),before);}
  e.load(before);assert.deepEqual(e.save(),before);assert.equal(e.view().companies[0].routes[0].waterway,true);
@@ -37,8 +37,8 @@ test('waterway hull provenance survives design, rename, replacement and save/loa
  const scaling=e.save();scaling.day=100;const r=scaling.companies[0].routes[0];r.cooldown=0;r.activity={since:0,moving:100,loading:20,unloading:20,waiting:0};scaling.companies[0].ships.forEach(s=>s.ready=10000);e.load(scaling);e.cmd({action:'tick',days:1});const fleet=e.save().companies[0].ships;assert.equal(fleet.filter(s=>s.route===route&&s.kind===small).length,2);assert.equal(fleet.find(s=>s.kind==='brig').route,null);
 });
 
-test('river geometry, mixed sea/river circuits, travel, handling and trade execute in Wasm',async()=>{
- const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['newyork','albany','newyork','boston']);
+test('river geometry, sea/river two-city services, travel, handling and trade execute in Wasm',async()=>{
+ const e=await engine();e.cmd({action:'new',seed:1700,events:false});fund(e);open(e,['newyork','albany']);open(e,['albany','boston']);
  let g=e.save();for(const c of g.companies.slice(1))for(const r of c.routes)r.active=false;
  const [a,b]=['newyork','albany'].map(e.city);for(let i=0;i<e.data.goods.length;i++){g.markets[a*e.data.goods.length+i].stock=2000;g.markets[b*e.data.goods.length+i].stock=0;}e.load(g);
  const w=e.data.waterways.find(w=>w.id==='newyork_albany'),v=e.view();assert.deepEqual(v.paths[`sea:${a}:${b}`],[w.points]);assert.deepEqual(v.paths[`sea:${b}:${a}`],[[...w.points].reverse()]);

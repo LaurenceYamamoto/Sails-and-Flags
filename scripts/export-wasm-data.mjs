@@ -1,3 +1,4 @@
+import {DISPLAY_REGIONS,applyCatalogOrder} from '../src/catalog-order.js';
 import {YANGTZE_ROADS} from '../src/yangtze-cities.js';
 import {applyMarketSizes} from '../src/city-market-size.js';
 import {WATERWAYS} from '../src/waterway-data.js';
@@ -109,6 +110,7 @@ const starts=RIVAL_STARTS.map(c=>{
  if(!Number.isFinite(c.capital)||fleetCost>=c.capital)throw Error('Insufficient starting capital: '+c.id);
  return {...c,licenses,routes};
 });
+applyCatalogOrder(cities,nations);
 const land=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');
-fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:Object.entries(DEMAND_REGIONS).map(([id,r])=>({id,name:r.label[0],nameEn:r.label[1]})),nations,goods:GOODS,roads,waterways,riverMouths,waterAccess,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
+fs.writeFileSync('wasm-core/data/world.json',JSON.stringify({cities,regions:DISPLAY_REGIONS,nations,goods:GOODS,roads,waterways,riverMouths,waterAccess,specs,starts,shipNames:SHIP_NAMES,distances,paths,land}));
 console.log(`Exported ${cities.length} cities, ${nations.length} nations, ${roads.length} roads`);

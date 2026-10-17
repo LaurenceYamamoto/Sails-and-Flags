@@ -1,6 +1,8 @@
 mod accounts;
 mod bulk_investment;
 mod investment;
+mod route_management;
+mod route_pairs;
 mod commands;
 mod loading;
 mod model;
@@ -229,8 +231,12 @@ impl Engine {
                     model::ensure(model::amount(road_refunds[ci].1) && model::amount(g.companies[ci].cash.max(0.0) + road_refunds[ci].1), "廃止陸路の返金額が不正です。")?;
                 }
                 g.city_version = 30;
+                let pair_refunds=self.split_routes(&mut g)?;
+                // Previously the UI could enable unlicensed origins. Do not arm them for later purchases.
+                for co in &mut g.companies {co.auto_route_cities.retain(|&i|co.licenses.contains(&self.data.cities[i].nation));}
                 self.validate(&g, false)?;
                 self.game = g;
+                for (c,refund) in pair_refunds {if refund>0.0 {self.entry(c,"routeReorganization",refund,None,"Cargo returned during route reorganization".into());}}
                 for (c, refund, removed) in road_refunds {
                     if refund > 0.0 {
                         self.entry(c, "retiredRoadRefund", refund, None, "Retired roads".into());

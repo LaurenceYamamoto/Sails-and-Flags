@@ -18,7 +18,7 @@ test('Deleted roads cannot be selected, opened or invested in; new Spanish links
  }
  assert.equal(roadBetween('madrid','bordeaux'),undefined);assert.equal(roadBetween('madrid','paris'),undefined);
  for(const [id,r]of Object.entries(ADDED_ROADS)){assert.equal(roadBetween(r.b,r.a)[0],id);assert.deepEqual(roadPoints(r.b,r.a),roadPoints(r.a,r.b).toReversed());const route=open(e,[r.a,r.b]);assert.equal(open(e,[r.b,r.a]),route);const i=e.data.roads.findIndex(d=>d.id===id);e.cmd({action:'buyRoad',road:i});e.cmd({action:'roadInvestment',road:i,roadBudget:1,securityBudget:1});}
- for(const ids of [['quito','guayaquil','trujillo','lima','trujillo','guayaquil'],['lima','cusco','arequipa','cusco'],['lisbon','coimbra','porto','coimbra'],['cadiz','seville','madrid','seville']])open(e,ids);
+ for(const ids of [['quito','guayaquil','trujillo','lima','trujillo','guayaquil'],['lima','cusco','arequipa','cusco'],['lisbon','coimbra','porto','coimbra'],['cadiz','seville','madrid','seville']])for(let i=1;i<ids.length;i++)open(e,[ids[i-1],ids[i]]);
  for(let i=0;i<4;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.city_version,30);e.load(g);assert.deepEqual(e.save(),g);
  for(const c of g.companies)for(const r of c.routes)if(r.mode==='land')for(let i=0;i<r.stops.length;i++)assert.ok(roadBetween(e.data.cities[r.stops[i]].id,e.data.cities[r.stops[(i+1)%r.stops.length]].id));
 });

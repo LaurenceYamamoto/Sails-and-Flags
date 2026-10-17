@@ -125,6 +125,7 @@ impl Engine {
                 self.sail(c);
                 self.automate(c);
                 if c == 0 {
+                    self.auto_create_routes();
                     self.auto_buy_investment_rights();
                     if self.game.companies[0].investment_plan.is_some() {
                         self.prepare_investment(true);
@@ -420,14 +421,10 @@ impl Engine {
         )
     }
     fn automate(&mut self, c: usize) {
-        let month = self.calendar().0;
-        if self.game.companies[c].automation.month != month {
-            self.game.companies[c].automation.month = month;
-            self.game.companies[c].automation.spent = 0.0;
-        }
         if !self.game.companies[c].automation.enabled {
             return;
         }
+        if c == 0 { self.maintain_routes(); }
         let ids: Vec<_> = self.game.companies[c].routes.iter().map(|r| r.id).collect();
         for id in ids {
             let ri = self.game.companies[c]
@@ -436,7 +433,7 @@ impl Engine {
                 .position(|r| r.id == id)
                 .unwrap();
             let r = self.game.companies[c].routes[ri].clone();
-            if !r.active || !r.auto_manage {
+            if !r.active || !r.auto_manage || (c==0 && self.game.companies[0].route_policy.as_ref().is_some_and(|p|p.enabled) && self.policy_kind(&r.mode,&r.stops).is_none()) {
                 continue;
             }
             let a = self.game.companies[c].automation.clone();
@@ -470,8 +467,7 @@ impl Engine {
                 } else {
                     self.spec(&kind).unwrap().price
                 };
-                if a.spent + cost <= a.budget
-                    && self.game.companies[c].cash - cost >= self.game.companies[c].investment_plan.as_ref().map_or(a.reserve, |p|p.reserve)
+                if self.game.companies[c].cash - cost >= self.game.companies[c].investment_plan.as_ref().map_or(a.reserve, |p|p.reserve)
                     && self.producible(c, &kind)
                 {
                     if let Ok(ship) = idle
@@ -479,7 +475,6 @@ impl Engine {
                         .or_else(|_| self.buy_ship(c, &kind))
                     {
                         if self.assign(c, id, ship).is_ok() {
-                            self.game.companies[c].automation.spent += cost;
                             if replacement.is_some() {
                                 self.game.companies[c].routes[ri].replacements.remove(0);
                             }

@@ -41,7 +41,7 @@ test('The direct Pyongyang–Hanseong road cannot reopen, receive investment or 
  for(const ids of [['hanseong','pyongyang'],['pyongyang','hanseong']]){assert.equal(roadBetween(...ids),undefined);assert.deepEqual(roadPoints(...ids),[]);assert.throws(()=>open(e,ids));}
  assert.throws(()=>e.cmd({action:'buyRoad',road:i}));assert.throws(()=>e.cmd({action:'roadInvestment',road:i,roadBudget:1,securityBudget:1}));
  const g=e.save(),bad=structuredClone(g);bad.roads[i].owner='player';assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),g);
- open(e,['pyongyang','kaesong','hanseong','kaesong']);const forged=e.save();forged.companies[0].routes[0].stops=['pyongyang','hanseong'].map(city);assert.throws(()=>e.load(forged));
+ open(e,['pyongyang','kaesong']);const forged=e.save();forged.companies[0].routes[0].stops=['pyongyang','hanseong'].map(city);assert.throws(()=>e.load(forged));
 });
 
 test('Version 15 migration preserves idle/loading/travelling/unloading vehicles and refunds the retired road exactly once',async()=>{
@@ -62,10 +62,10 @@ test('Version 15 migration preserves idle/loading/travelling/unloading vehicles 
  const good=e.save();for(const change of [g=>g.city_version=31,g=>g.markets.pop(),g=>g.roads.pop(),g=>g.development.pop()]){const bad=structuredClone(base);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),good);}
 });
 
-test('All eleven roads and the Kaesong return itinerary trade with proper licenses and survive saving',async()=>{
+test('All eleven roads as two-city services trade with proper licenses and survive saving',async()=>{
  const e=await engine();fund(e);const cross=['fenghuangcheng','uiju'].map(city),opening=()=>e.call({op:'query',request:{query:'opening',kind:'caravan',stops:cross}});
  assert.deepEqual(opening().missing.toSorted(),['qing','joseon'].map(nation).sort());e.cmd({action:'license',nation:nation('qing')});assert.deepEqual(opening().missing,[nation('joseon')]);assert.throws(()=>open(e,['fenghuangcheng','uiju']));e.cmd({action:'license',nation:nation('joseon')});
- for(const r of Object.values(MANCHURIA_KOREA_ROADS))open(e,[r.a,r.b]);open(e,['pyongyang','kaesong','hanseong','kaesong']);
+ for(const r of Object.values(MANCHURIA_KOREA_ROADS))open(e,[r.a,r.b]);assert.throws(()=>open(e,['pyongyang','kaesong','hanseong','kaesong']));
  const road=w.roads.findIndex(r=>r.id==='fenghuangcheng_uiju');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.companies[0].routes.length,12);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(g.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(g.roads[road].quality>0);assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));e.load(g);assert.deepEqual(e.save(),g);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.companies[0].routes.length,11);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(g.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(g.roads[road].quality>0);assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));e.load(g);assert.deepEqual(e.save(),g);
 });

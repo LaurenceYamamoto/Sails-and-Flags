@@ -161,6 +161,11 @@ impl Engine {
                         }
                     }
                 } else {
+                    // Finish unloading before exchanging a hull; never strand cargo in a smaller hold.
+                    if c == 0 && self.maintenance_target(&ship).is_some() {
+                        self.game.companies[c].routes[ri].activity.waiting += left;
+                        break;
+                    }
                     let now = self.game.day as f64 - left;
                     if !route.active || ship.ready as f64 >= now + left {
                         self.game.companies[c].routes[ri].activity.waiting += left;

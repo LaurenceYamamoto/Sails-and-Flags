@@ -44,15 +44,15 @@ test('3.3.2 saves append Siberian markets and roads without altering any old sta
  e.cmd({action:'tick',days:31});e.load(e.save());
 });
 
-test('Caravans operate all Siberian corridors and the cross-border circuit requires both licenses',async()=>{
+test('Caravans operate all Siberian corridors and the cross-border route requires both licenses',async()=>{
  const e=await engine();e.cmd({action:'new',seed:1700,events:false});const g=e.save();g.companies[0].cash+=1e9;g.companies[0].initial_cash+=1e9;e.load(g);
  const city=id=>e.data.cities.findIndex(c=>c.id===id),nation=id=>e.data.nations.findIndex(n=>n.id===id),border=['kyakhta','urga'].map(city),q=()=>e.query({query:'opening',kind:'caravan',stops:border});
  assert.deepEqual([...q().missing].sort((a,b)=>a-b),[nation('russia'),nation('qing')].sort((a,b)=>a-b));e.cmd({action:'license',nation:nation('russia')});assert.deepEqual(q().missing,[nation('qing')]);
  assert.throws(()=>e.cmd({action:'openRoute',kind:'caravan',stops:border,allowed:[18],margin:10}));e.cmd({action:'license',nation:nation('qing')});
  for(const r of Object.values(SIBERIAN_ROADS)){const stops=[r.a,r.b].map(city);e.cmd({action:'openRoute',kind:'caravan',stops,allowed:e.data.goods.map((_,i)=>i),margin:10});}
- const stops=['irkutsk','verkhneudinsk','kyakhta','urga','kyakhta','verkhneudinsk'].map(city);e.cmd({action:'openRoute',kind:'caravan',stops,allowed:e.data.goods.map((_,i)=>i),margin:10});
+ const stops=['irkutsk','verkhneudinsk','kyakhta','urga','kyakhta','verkhneudinsk'].map(city);assert.throws(()=>e.cmd({action:'openRoute',kind:'caravan',stops,allowed:e.data.goods.map((_,i)=>i),margin:10}));
  for(let n=0;n<400;){const days=Math.min(31,400-n);e.cmd({action:'tick',days});n+=days;}
- const saved=e.save();assert.equal(saved.companies[0].routes.length,18);assert.ok(saved.companies[0].routes.some(r=>r.deliveries>0));assert.ok(saved.companies[0].totals.sale>0);assert.ok(saved.markets.every(m=>Number.isFinite(m.stock)&&m.stock>=0));e.load(saved);assert.deepEqual(e.save(),saved);
+ const saved=e.save();assert.equal(saved.companies[0].routes.length,17);assert.ok(saved.companies[0].routes.some(r=>r.deliveries>0));assert.ok(saved.companies[0].totals.sale>0);assert.ok(saved.markets.every(m=>Number.isFinite(m.stock)&&m.stock>=0));e.load(saved);assert.deepEqual(e.save(),saved);
 });
 
 test('Fur-only feeder and border services actually sell Siberian furs in Qing territory',async()=>{

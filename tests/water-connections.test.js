@@ -25,13 +25,13 @@ test('ocean-river and river-ocean-river through services use summed distances an
  assert.throws(()=>e.query({query:'opening',kind:'sloop',stops:[city('london'),montreal]}),'whole through leg must fit range');
 });
 
-test('through services restrict designs, assignment, replacement, scaling and save loads to the Sloop family',async()=>{
+test('through services restrict designs, assignment, managed renewal, scaling and save loads to the Sloop family',async()=>{
  const e=await engine(),stops=[johns,montreal],route=open(e,stops);
  for(const kind of ['sloop','brig'])e.cmd({action:'research',kind,budgets:[1000,1000,1000,1000,1000]});
  const designs=Object.values(e.save().designs),small=designs.find(d=>d.baseHull==='sloop').id,large=designs.find(d=>d.baseHull==='brig').id;
  e.cmd({action:'rename',kind:'design',id:large,name:'Sloop'});const types=e.query({query:'connection',stops}).types;assert.ok(types.includes(small));assert.ok(!types.includes(large));
- e.cmd({action:'replace',mode:'route',route,target:small,source:''});e.cmd({action:'route',route,kind:small,auto:true});const ship=e.cmd({action:'buyShip',kind:'brig'}),before=e.save();
- for(const command of [{action:'assign',route,ship},{action:'route',route,kind:large},{action:'replace',mode:'route',route,target:large,source:''},{action:'replace',mode:'automation',source:small,target:large}]){assert.throws(()=>e.cmd(command));assert.deepEqual(e.save(),before);}
+ e.cmd({action:'routePolicy',policy:{enabled:true,ships:[large,small],vehicles:[]}});e.cmd({action:'automation',enabled:true,replaceLost:true,budget:1e7,reserve:0,expand:0,shrink:100});e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships[0].kind,small);e.cmd({action:'route',route,kind:small,auto:true});const ship=e.cmd({action:'buyShip',kind:'brig'}),before=e.save();
+ for(const command of [{action:'assign',route,ship},{action:'route',route,kind:large}]){assert.throws(()=>e.cmd(command));assert.deepEqual(e.save(),before);}
  for(const mutate of [g=>g.companies[0].ships[0].kind='brig',g=>g.companies[0].routes[0].auto_type=large,g=>g.companies[0].routes[0].replacements=['brig'],g=>g.companies[0].licenses.splice(g.companies[0].licenses.indexOf(world.cities[quebec].nation),1)]){const g=structuredClone(before);mutate(g);assert.throws(()=>e.load(g));assert.deepEqual(e.save(),before);}
  e.cmd({action:'automation',enabled:true,replaceLost:true,budget:50000,reserve:0,expand:10,shrink:30});const g=e.save();g.day=100;const r=g.companies[0].routes[0];r.cooldown=0;r.activity={since:0,moving:100,loading:20,unloading:20,waiting:0};g.companies[0].ships.forEach(s=>s.ready=10000);e.load(g);e.cmd({action:'tick',days:1});assert.equal(e.save().companies[0].ships.filter(s=>s.route===route&&s.kind===small).length,2);
 });
@@ -40,7 +40,7 @@ test('direct ocean-river journeys deliver only at requested stops and restore wh
  const e=await engine(),stops=[johns,montreal];open(e,stops);const g=e.save();for(const c of g.companies.slice(1))for(const r of c.routes)r.active=false;
  for(let i=0;i<world.goods.length;i++){g.markets[johns*world.goods.length+i].stock=2000;g.markets[montreal*world.goods.length+i].stock=0;}e.load(g);
  let moving=false,handling=false;for(let day=0;day<60;day++){
-  e.cmd({action:'tick',days:1});const save=e.save(),p=save.companies[0];assert.deepEqual(p.routes[0].stops,stops);
+  e.cmd({action:'tick',days:1});const save=e.save(),p=save.companies[0];assert.deepEqual(p.routes[0].stops,[...stops].sort((a,b)=>world.cities[a].order-world.cities[b].order));
   for(const s of p.ships){const trip=s.voyage??s.handling?.trip;if(trip){assert.ok(stops.includes(trip.from)&&stops.includes(trip.to));assert.notEqual(trip.from,trip.to);}if(s.voyage&&!moving){e.load(save);assert.deepEqual(e.save(),save);moving=true;}if(s.handling)handling=true;}
  }
  assert.ok(moving&&handling);const after=e.save();assert.ok(after.companies[0].routes[0].deliveries>0);assert.ok(after.companies[0].routes[0].activity.unloading>0);e.load(after);assert.deepEqual(e.save(),after);assert.equal(e.view().companies[0].routes[0].waterway,true);

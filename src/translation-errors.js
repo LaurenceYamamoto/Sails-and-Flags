@@ -1,5 +1,7 @@
 // Stable engine messages -> localized presentation. Stored data stays language-neutral.
 export const errorRows = [
+['この都市の国の交易免許が必要です。','A trade license for this city’s nation is required.','需要取得该城市所属国家的贸易许可。','이 도시가 속한 국가의 무역 면허가 필요합니다.','Une licence commerciale du pays de cette ville est requise.','Se necesita una licencia comercial del país de esta ciudad.'],
+["経路は異なる2都市を指定してください。","Specify two different cities for a route.","请为路线指定两个不同的城市。","노선에 서로 다른 두 도시를 지정하세요.","Indiquez deux villes différentes pour une route.","Indica dos ciudades diferentes para una ruta."],
  ['投資画面で設定してください。','Use the Investments screen to change this setting.','请在投资页面修改此设置。','투자 화면에서 설정을 변경하세요.','Modifiez ce réglage dans Investissements.','Cambia este ajuste en Inversiones.'],
  ['一括処理の見積もりが変わりました。再確認してください。','The bulk quote has changed. Please review it again.','批量处理报价已更改。请重新确认。','일괄 처리 견적이 변경되었습니다. 다시 확인하세요.','Le devis groupé a changé. Veuillez le vérifier à nouveau.','El presupuesto del lote ha cambiado. Revísalo de nuevo.'],
  ['金額が不正です。','Invalid amount.','金额无效。','금액이 올바르지 않습니다.','Montant invalide.','Importe no válido.'],

@@ -60,12 +60,12 @@ export class WorldMap {
  setCamera(c){this.camera=c;this.updateHitAreas();const u=c[2]/900;for(const g of this.labelLayer.children){const label=g.querySelector('text'),c=this.cities[+g.dataset.city],[dx,dy]=c.mapLabelOffset??[c.id==='callao'?-5:5,-5];label.setAttribute('x',dx*u);label.setAttribute('y',dy*u);}}
  select(city){for(const layer of [this.cityLayer,this.labelLayer])for(const n of layer.children)n.classList.toggle('selected',+n.dataset.city===city);}
  focus(city){this.setCamera(cityCamera(this.cities[city]));updateCameraElement(this.svg,this.camera);}
- update(view,selected){
+ update(view,selected,city){
   this.view=view;this.sampled=performance.now();if(view.paths)this.paths=Object.fromEntries(Object.entries(view.paths).map(([key,lines])=>{const [,a,b]=key.split(':');return [key,this.displayLines(lines,+a,+b)];}));
-  const key=JSON.stringify([view.companies.map(c=>[c.index,this.handlers.companyName(c),c.routes.map(r=>[r.id,r.stops])]),selected]);
+  const key=JSON.stringify([view.companies.map(c=>[c.index,this.handlers.companyName(c),c.routes.map(r=>[r.id,r.stops])]),selected,city]);
   if(key!==this.key){this.key=key;this.routeLayer.replaceChildren();for(const c of view.companies)for(const r of c.routes){
    const lines=r.stops.flatMap((a,i)=>this.paths[`${r.mode}:${a}:${r.stops[(i+1)%r.stops.length]}`]??[]);
-   const p=node('path',{d:path(lines),stroke:colors[c.index%colors.length],class:'trade-path'+(selected===r.id?' chosen':''),'data-action':'select-route','data-route':r.id,'data-company':c.index,tabindex:0,role:'button','aria-label':this.handlers.companyName(c)+' '+t('routes')+' '+r.id});
+   const p=node('path',{d:path(lines),stroke:colors[c.index%colors.length],class:'trade-path'+(selected===r.id?' chosen':'')+(r.stops.includes(city)?' city-related':''),'data-action':'select-route','data-route':r.id,'data-company':c.index,tabindex:0,role:'button','aria-label':this.handlers.companyName(c)+' '+t('routes')+' '+r.id});
    if(c.index)p.setAttribute('stroke-dasharray','4 3');this.routeLayer.append(p);
   }}
   const active=new Set();for(const c of view.companies)for(const s of c.ships){if(s.route===null)continue;active.add(s.id);let n=this.markers.get(s.id);if(!n){n=node('path',{d:'M 0 -3 L 2.8 2.3 L -2.8 2.3 Z',class:'vessel-marker'});this.markers.set(s.id,n);this.ships.append(n);}n.setAttribute('fill',colors[c.index%colors.length]);}

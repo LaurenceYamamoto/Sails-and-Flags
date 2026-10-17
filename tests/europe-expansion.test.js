@@ -35,9 +35,9 @@ test('3.3.0 world migration preserves existing balances, routes, investments, wa
 test('European sea and land routes operate and survive a save round trip',async()=>{
  const e=await engine(),g=e.save();g.companies[0].cash+=1e9;g.companies[0].initial_cash+=1e9;e.load(g);
  const city=id=>e.data.cities.findIndex(c=>c.id===id);
- for(const [kind,names]of [['wagon',['leipzig','dresden']],['wagon',['prague','vienna','buda','vienna']],['sloop',['hamburg','amsterdam']],['sloop',['gdansk','konigsberg']]]){
+ for(const [kind,names]of [['wagon',['leipzig','dresden']],['wagon',['prague','vienna']],['wagon',['vienna','buda']],['sloop',['hamburg','amsterdam']],['sloop',['gdansk','konigsberg']]]){
   const stops=names.map(city),q=e.call({op:'query',request:{query:'opening',kind,stops}});for(const nation of q.missing)e.cmd({action:'license',nation});e.cmd({action:'openRoute',kind,stops,allowed:e.data.goods.map((_,i)=>i),margin:10});
  }
- e.cmd({action:'tick',days:180});assert.equal(e.save().companies[0].routes.length,4);const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
+ e.cmd({action:'tick',days:180});assert.equal(e.save().companies[0].routes.length,5);const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
  for(const id of ids){const v=e.call({op:'view',city:city(id)});assert.ok(v.market.every(m=>m.demand>0),id);}
 });

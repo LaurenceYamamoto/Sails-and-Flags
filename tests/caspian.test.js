@@ -40,14 +40,14 @@ test('Version 19 saves append only markets, development and roads; reload is ide
  e.cmd({action:'tick',days:31});const saved=e.save();e.load(saved);assert.deepEqual(e.save(),saved);
 });
 
-test('All eight roads and a Caucasus–Kyiv return itinerary deliver with licences, investment and save support',async()=>{
+test('All eight roads with two-city itineraries deliver with licences, investment and save support',async()=>{
  const e=await engine(),g=e.save();g.events_enabled=false;g.companies[0].cash+=1e9;g.companies[0].initial_cash+=1e9;e.load(g);
  const open=(ids,kind='caravan')=>e.cmd({action:'openRoute',kind,stops:ids.map(city),allowed:w.goods.map((_,i)=>i),margin:0});
  assert.throws(()=>open(['tiflis','shamakhi']));e.cmd({action:'license',nation:nation('safavid')});assert.throws(()=>open(['derbent','astrakhan']));e.cmd({action:'license',nation:nation('russia')});
  for(const r of Object.values(R))open([r.a,r.b]);
- open(['tiflis','shamakhi','derbent','astrakhan','tsaritsyn','moscow','kyiv','moscow','tsaritsyn','astrakhan','derbent','shamakhi']);
+ assert.throws(()=>open(['tiflis','shamakhi','derbent','astrakhan','tsaritsyn','moscow','kyiv','moscow','tsaritsyn','astrakhan','derbent','shamakhi']));
  assert.throws(()=>open(['baku','astrakhan'],'sloop'));assert.throws(()=>open(['tiflis','moscow']));
  const road=w.roads.findIndex(r=>r.id==='derbent_astrakhan');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,9);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,8);
  assert.ok(saved.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(saved.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(saved.roads[road].quality>0);assert.ok(saved.companies.slice(1).every(c=>c.routes.length<=50));e.load(saved);assert.deepEqual(e.save(),saved);
 });

@@ -14,11 +14,11 @@ test('Mexico City–Guadalajara is unavailable in either direction; Guanajuato c
  assert.ok(!e.call({op:'view'}).roads.some(r=>r.index===road));
  for(const [a,b]of [['mexicocity','guadalajara'],['guadalajara','mexicocity']]){assert.equal(roadBetween(a,b),undefined);assert.deepEqual(roadPoints(a,b),[]);assert.throws(()=>open(e,[a,b]));}
  assert.throws(()=>e.cmd({action:'buyRoad',road}));assert.throws(()=>e.cmd({action:'roadInvestment',road,roadBudget:1,securityBudget:0}));
- open(e,['mexicocity','guanajuato','guadalajara','guanajuato']);e.cmd({action:'tick',days:31});const g=e.save();e.load(g);assert.deepEqual(e.save(),g);
+ open(e,['mexicocity','guanajuato']);open(e,['guanajuato','guadalajara']);e.cmd({action:'tick',days:31});const g=e.save();e.load(g);assert.deepEqual(e.save(),g);
 });
 
 test('Version 22 routes are retired for player and rival, preserving vehicles and refunding cargo and road assets once',async()=>{
- const e=await ready();open(e,['mexicocity','guanajuato']);const old=e.save();old.city_version=22;
+ const e=await ready();open(e,['mexicocity','guanajuato']);const old=e.save();old.city_version=22;old.markets.length=320*w.goods.length;old.development.length=320;old.roads.length=353;
  const template=structuredClone(old.companies[0].routes[0]),vehicle=structuredClone(old.companies[0].ships.find(s=>s.route===template.id)),removed=[];
  for(const ci of [0,1]){
   const c=old.companies[ci];c.licenses=[...new Set([...c.licenses,...old.companies[0].licenses])];const r=structuredClone(template);r.id=old.next_id++;r.stops=[city('mexicocity'),city('guadalajara')];c.routes.push(r);
@@ -29,7 +29,7 @@ test('Version 22 routes are retired for player and rival, preserving vehicles an
   }
  }
  Object.assign(old.roads[road],{owner:'player',basis:2000,pool:17,road_budget:2,security_budget:3,quality:4,security:5});
- e.load(old);const after=e.save();assert.equal(after.city_version,30);assert.deepEqual(after.markets,old.markets);assert.deepEqual(after.development,old.development);assert.equal(after.rng,old.rng);assert.deepEqual(after.companies[0].routes.find(r=>r.id===template.id),template);
+ e.load(old);const after=e.save();assert.equal(after.city_version,30);assert.deepEqual(after.markets.slice(0,old.markets.length),old.markets);assert.deepEqual(after.development.slice(0,320),old.development);assert.equal(after.rng,old.rng);assert.deepEqual(after.companies[0].routes.find(r=>r.id===template.id),template);
  for(const ci of [0,1]){const refund=369+(ci===0?2017:0);assert.equal(after.companies[ci].cash,old.companies[ci].cash+refund);assert.equal(after.companies[ci].routes.length,old.companies[ci].routes.length-1);}
  for(const [ci,id]of removed){const s=after.companies[ci].ships.find(s=>s.id===id);assert.ok(s);assert.equal(s.route,null);assert.equal(s.voyage,null);assert.equal(s.handling,null);assert.deepEqual(s.cargo,[]);}
  assert.equal(after.roads[road].owner,'state');assert.equal(after.roads[road].basis+after.roads[road].pool+after.roads[road].road_budget+after.roads[road].security_budget,0);

@@ -10,7 +10,7 @@ test('city and road display orders use geographic groups and canonical name pair
  const roads=[{a:0,b:1},{a:3,b:2},{a:0,b:2}];assert.deepEqual(roadPair(roads[0],cities,'en'),[1,0]);
  const rows=roads.map((_,index)=>({index}));
  assert.deepEqual(sortedRoads(rows,roads,cities,regions,'name','en').map(r=>r.index),[0,1,2]);
- assert.deepEqual(sortedRoads(rows,roads,cities,regions,'region','en').map(r=>r.index),[1,2,0]);
+ assert.deepEqual(sortedRoads(rows,roads,cities,regions,'region','en').map(r=>r.index),[2,1,0]);
 });
 test('route sorting is descending for profit and fleet, ascending for opening; filtering is partial and case-insensitive',()=>{
  const routes=[{id:1,started:2,profit:50,fleet:[1],stops:[0,1]},{id:2,started:1,profit:100,fleet:[2,3],stops:[2,3]},{id:3,started:1,profit:-5,fleet:[4,5,6],stops:[0,3]}];

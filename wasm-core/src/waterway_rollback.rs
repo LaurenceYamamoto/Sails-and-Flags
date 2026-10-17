@@ -56,7 +56,7 @@ impl Engine {
             water_connections: Default::default(), game: g.clone() };
         let mut prior = g.clone();
         prior.city_version = 30; // Validate as a complete save in its own catalog.
-        checker.validate(&prior, false)?;
+        checker.validate(&prior, true)?;
 
         let mut refunds = vec![];
         for (ci, c) in g.companies.iter_mut().enumerate() {
@@ -114,6 +114,6 @@ impl Engine {
         let water_connections = crate::water_connections::connections(&data);
         let checker = Engine {data,graphics:Value::Null,waterway_index,water_access_index:Default::default(),water_connections,game:g.clone()};
         let mut prior = g.clone(); prior.city_version = 30;
-        checker.validate(&prior,false)
+        checker.validate(&prior,true)
     }
 }

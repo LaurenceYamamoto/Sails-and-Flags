@@ -31,6 +31,8 @@ pub struct Spec {
 #[derive(Clone, Deserialize)]
 pub struct City {
     pub id: String,
+    #[serde(default)] // Migration-only catalogs predate display ranks.
+    pub order: usize,
     pub nation: usize,
     pub inland: bool,
     pub lon: f64,
@@ -38,11 +40,12 @@ pub struct City {
     pub stocks: Vec<f64>,
     pub supply: Vec<f64>,
     pub demand: Vec<f64>,
-    #[serde(rename = "marketSize")]
+    #[serde(rename = "marketSize", default = "legacy_market_size")]
     pub market_size: f64,
     pub modifiers: Vec<f64>,
     pub seasons: Vec<f64>,
 }
+fn legacy_market_size() -> f64 { 1.0 }
 #[derive(Clone, Deserialize)]
 pub struct Nation {
     pub id: String,
@@ -305,11 +308,15 @@ pub struct Ship {
 pub struct Automation {
     pub enabled: bool,
     pub replace_lost: bool,
+    // Legacy save fields only; monthly purchase limits are no longer used.
+    #[serde(default)]
     pub budget: f64,
     pub reserve: f64,
     pub expand: f64,
     pub shrink: f64,
+    #[serde(default)]
     pub spent: f64,
+    #[serde(default)]
     pub month: u32,
 }
 #[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -368,6 +375,12 @@ pub struct Company {
     pub road_auto: RoadAuto,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub investment_plan: Option<crate::investment::InvestmentPlan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub route_policy: Option<crate::route_management::RoutePolicy>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub auto_route_cities: Vec<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub route_escorts: Option<[u32;2]>,
     pub ledger: Vec<Ledger>,
     pub totals: BTreeMap<String, f64>,
     pub history: Vec<[f64; 3]>,
@@ -380,6 +393,8 @@ pub struct Game {
     pub version: u32,
     #[serde(default)]
     pub cargo_time_version: u32,
+    #[serde(default)]
+    pub route_pair_version: u32,
     #[serde(default)]
     pub transport_version: u32,
     #[serde(default)]
@@ -731,6 +746,7 @@ impl Game {
             format: "sails-flags-wasm".into(),
             version: 1,
             cargo_time_version: 1,
+            route_pair_version: 1,
             transport_version: 1,
             roster_version: 5,
             city_version: 30,
@@ -810,6 +826,9 @@ impl Company {
             designs: vec![],
             road_auto: RoadAuto::default(),
             investment_plan: None,
+            route_policy: None,
+            auto_route_cities: vec![],
+            route_escorts: None,
             automation: Automation {
                 enabled: false,
                 replace_lost: false,

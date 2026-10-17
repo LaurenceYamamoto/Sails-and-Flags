@@ -63,7 +63,7 @@ test('unified investment plans: monthly allocation, thresholds, reserve, priorit
   let g=save();g.roads[road].owner='state';g.development[cairo].owner='state';g.development[suez].owner='state';
   g.companies[0].routes[0].replacements=['caravan'];load(g);
   const p=defaults();p.budgets=p.budgets.map(()=>({mode:'fixed',value:0}));p.roads=true;p.cities=true;p.reserve=1000;p.route_only=true;
-  const a={enabled:true,replaceLost:true,budget:100000,expand:10,shrink:30};
+  const a={enabled:true,replaceLost:true,expand:10,shrink:30};
   // Measure unavoidable daily operating costs independently of automated purchases.
   cmd({action:'tick',days:1});const expense=g.companies[0].cash-save().companies[0].cash;load(g);
   const roadCost=query({query:'bulkInvestment',mode:'roadPurchase',rivals:false}).cost;

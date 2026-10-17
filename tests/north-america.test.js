@@ -13,7 +13,7 @@ function oldWorld(g){g.city_version=21;g.markets.length=312*w.goods.length;g.dev
 
 test('Eight markets supply food, furs and silver, with seven land corridors and two ocean ports',()=>{
  assert.equal(w.cities.length,323);assert.equal(w.nations.length,52);assert.equal(w.roads.length,356);assert.equal(w.roads.filter(r=>!r.retired).length,330);assert.equal(w.cities.filter(c=>!c.inland).length,139);
- assert.deepEqual(w.cities.slice(312).map(c=>c.id),Object.keys(C));assert.deepEqual(w.roads.slice(346).map(r=>r.id),Object.keys(R));
+ assert.deepEqual(w.cities.slice(312,320).map(c=>c.id),Object.keys(C));assert.deepEqual(w.roads.slice(346,353).map(r=>r.id),Object.keys(R));
  const s=w.cities[city('santiagodechile')],v=w.cities[city('valparaiso')],minimum=Math.hypot(s.x-v.x,s.y-v.y);
  for(const [id,c]of Object.entries(C)){
   const d=w.cities[city(id)],p=display(d);assert.equal(d.nation,nation(c.nation));assert.equal(d.lon,c.lon);assert.equal(d.lat,c.lat);assert.equal(d.inland,c.inland);assert.ok(onLand(ll(p)));assert.ok(d.demand.every(x=>x>0));
@@ -22,7 +22,7 @@ test('Eight markets supply food, furs and silver, with seven land corridors and 
   for(const g of ['spices','coffee','tea'])assert.equal(d.supply[good(g)],0);
   if(c.inland){assert.ok(w.distances[city(id)].every(x=>x===null));assert.equal(seaRoute(id,'london'),null);}
  }
- for(const r of w.roads.slice(346)){
+ for(const r of w.roads.slice(346,353)){
   assert.ok(r.nations.includes(w.cities[r.a].nation)&&r.nations.includes(w.cities[r.b].nation));
   const ps=structuredClone(r.points);ps[0]=display(w.cities[r.a]);ps[ps.length-1]=display(w.cities[r.b]);
   for(let i=1;i<ps.length;i++)assert.ok(landSegment(ll(ps[i-1]),ll(ps[i])),r.id+' '+i);
@@ -53,10 +53,10 @@ test('Seven roads, Atlantic shipping and complete inland itineraries deliver and
  assert.throws(()=>open(['zacatecas','durango']));e.cmd({action:'license',nation:nation('spain')});
  for(const r of Object.values(R).filter(r=>r.nations.includes('spain')))open([r.a,r.b]);
  assert.throws(()=>open(['louisbourg','london'],'brig'));e.cmd({action:'license',nation:nation('england')});open(['louisbourg','london'],'brig');open(['stjohns','london'],'brig');
- open(['detroit','vincennes','kaskaskia','neworleans','kaskaskia','vincennes']);
- open(['zacatecas','durango','chihuahua','elpasodelnorte','santafe','elpasodelnorte','chihuahua','durango']);
+ assert.throws(()=>open(['detroit','vincennes','kaskaskia','neworleans','kaskaskia','vincennes']));
+ assert.throws(()=>open(['zacatecas','durango','chihuahua','elpasodelnorte','santafe','elpasodelnorte','chihuahua','durango']));
  assert.throws(()=>open(['detroit','vincennes'],'sloop'));assert.throws(()=>open(['louisbourg','stjohns']));
  const road=w.roads.findIndex(r=>r.id==='durango_chihuahua');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,11);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,9);
  assert.ok(saved.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(saved.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(saved.roads[road].quality>0);assert.ok(saved.companies.slice(1).every(c=>c.routes.length<=50));e.load(saved);assert.deepEqual(e.save(),saved);
 });

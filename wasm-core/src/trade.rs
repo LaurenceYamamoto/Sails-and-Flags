@@ -47,6 +47,9 @@ impl Engine {
                 }
             }
         }
+        let mut g=self.game.clone();
+        self.split_routes(&mut g).expect("valid initial routes");
+        self.game=g;
         self.capture_accounts();
     }
     pub fn buy_license(&mut self, c: usize, n: usize) -> Result<()> {
@@ -193,7 +196,7 @@ impl Engine {
         margin: f64,
     ) -> Result<u32> {
         self.playable(c)?;
-        let stops = normalize(stops);
+        let stops = self.ordered_stops(normalize(stops));
         let q = self.opening(c, kind, &stops)?;
         ensure(
             q["missing"].as_array().unwrap().is_empty(),
