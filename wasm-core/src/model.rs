@@ -532,6 +532,10 @@ impl Engine {
         let quality = self.game.roads[i].quality;
         base + (1.0 - base) * quality / (5.0 + quality)
     }
+    pub fn road_speed_factor(&self, kind: &str, road: usize) -> f64 {
+        let pass = self.road_passability(road);
+        pass + (1.0 - pass) * self.spec(kind).unwrap().roughness
+    }
     pub fn days(&self, kind: &str, a: usize, b: usize) -> u32 {
         let s = self.spec(kind).unwrap();
         let mut speed = s.speed;
@@ -539,7 +543,7 @@ impl Engine {
             let Some(i) = self.road(a, b) else {
                 return u32::MAX;
             };
-            speed *= self.road_passability(i) + (1.0 - self.road_passability(i)) * s.roughness;
+            speed *= self.road_speed_factor(kind, i);
         }
         (self.distance(kind, a, b) / speed).ceil().max(1.0) as u32
     }

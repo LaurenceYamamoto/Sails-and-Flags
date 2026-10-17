@@ -144,6 +144,22 @@ impl Engine {
             "海陸の経路または航続距離を確認してください。",
         )
     }
+    fn opening_roads(&self, c: usize, kind: &str, stops: &[usize]) -> Value {
+        if self.spec(kind).unwrap().mode != "land" { return Value::Null; }
+        let legs = stops.iter().enumerate().map(|(i, &a)| {
+            let b = stops[(i + 1) % stops.len()];
+            let road = self.road(a, b).unwrap();
+            json!({"from":a,"to":b,"passability":self.road_passability(road),
+                "speedFactor":self.road_speed_factor(kind, road),"days":self.days(kind,a,b)})
+        }).collect::<Vec<_>>();
+        let vehicles = self.data.specs.iter().chain(self.game.designs.values())
+            .filter(|s| s.mode == "land" && self.producible(c,&s.id) && self.check_stops(&s.id,stops).is_ok())
+            .map(|s| json!({"kind":s.id,"roughness":s.roughness,"capacity":s.capacity,
+                "daily":self.daily(c,&s.id),"days":stops.iter().enumerate()
+                    .map(|(i,&a)| self.days(&s.id,a,stops[(i+1)%stops.len()]) as u64).sum::<u64>()}))
+            .collect::<Vec<_>>();
+        json!({"legs":legs,"vehicles":vehicles})
+    }
     pub fn opening(&self, c: usize, kind: &str, stops: &[usize]) -> Result<Value> {
         self.check_stops(kind, stops)?;
         ensure(self.producible(c, kind), "購入可能な船種ではありません。")?;
@@ -165,7 +181,7 @@ impl Engine {
             self.spec(kind)?.price
         };
         Ok(
-            json!({"waterway":self.has_waterway(stops),"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
+            json!({"roads":self.opening_roads(c,kind,stops),"waterway":self.has_waterway(stops),"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
         )
     }
     pub fn open(

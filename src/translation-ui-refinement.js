@@ -1,5 +1,11 @@
 // Simplified Chinese, Korean, French, Spanish.
 export const uiRefinementTranslations={
+ 'Road conditions and vehicle comparison':['路况与车辆比较','도로 상태와 차량 비교','État des routes et comparaison des véhicules','Estado de las rutas y comparación de vehículos'],
+ 'Lower passability means rougher roads. Vehicles with higher rough-road capability lose less speed.':['通行性越低，路况越差。恶劣路况适应性越高的车辆，速度损失越小。','통행성이 낮을수록 험한 도로입니다. 험로 적성이 높은 차량일수록 속도 감소가 적습니다.','Une faible praticabilité indique une route difficile. Les véhicules adaptés aux chemins difficiles perdent moins de vitesse.','Una menor transitabilidad indica peores caminos. Los vehículos mejor adaptados pierden menos velocidad.'],
+ 'Selected vehicle speed retained':['所选车辆保留速度比例','선택 차량의 속도 유지율','Vitesse conservée du véhicule choisi','Velocidad conservada del vehículo elegido'],
+ 'Travel days for one round trip or circuit under current road conditions. Loading, unloading and waiting are excluded.':['按当前路况计算一次往返或完整巡回的行驶天数。不含装卸及等待时间。','현재 도로 상태에서 왕복 또는 순환 1회의 이동 일수입니다. 상하차 및 대기 시간은 제외합니다.','Jours de trajet pour un aller-retour ou un circuit selon l’état actuel des routes. Chargement, déchargement et attente exclus.','Días de viaje de una ida y vuelta o un circuito según el estado actual de las rutas. Excluye carga, descarga y espera.'],
+ 'Travel days':['行驶天数','이동 일수','Jours de trajet','Días de viaje'],
+ 'Leg':['区间','구간','Tronçon','Tramo'],
  'Bulk escort settings':['批量设置护卫','호위 일괄 설정','Réglage groupé des escortes','Configuración conjunta de escoltas'],
  'Land':['陆上','육상','Terre','Tierra'],
  'Applies to all your existing routes, including paused and filtered-out routes. New routes are not affected.':['应用于所有现有自有路线，包括已暂停和被筛选隐藏的路线。不影响新建路线。','일시 정지 및 필터로 숨겨진 노선을 포함한 기존 자사 노선 전체에 적용합니다. 새 노선에는 적용하지 않습니다.','S’applique à toutes vos routes existantes, y compris celles en pause ou masquées par le filtre. Les nouvelles routes ne sont pas concernées.','Se aplica a todas tus rutas existentes, incluidas las pausadas y ocultas por el filtro. No afecta a las rutas nuevas.'],

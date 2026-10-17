@@ -38,6 +38,9 @@ button[aria-pressed="true"]{background:#244c50;color:#fff}
 .bulk-escorts form{display:block}
 .bulk-escorts fieldset{min-width:0;margin:10px 0;padding:12px;border:1px solid #c8d0c5;border-radius:6px;display:flex;flex-wrap:wrap;gap:10px;align-items:end}
 .bulk-escorts legend{font-weight:600}
+#quote{flex-basis:100%;min-width:0}
+.opening-roads .chosen-vehicle{background:#e5eee7;font-weight:600}
+.opening-roads th,.opening-roads td{overflow-wrap:anywhere}
 .bulk-escorts fieldset p{flex-basis:100%;margin:0}
 .waterway-key{color:#17637a}
 
