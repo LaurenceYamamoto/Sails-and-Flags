@@ -2,7 +2,7 @@ import {assertDetour} from './land-detour-assert.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {roadBetween,roadPoints} from '../src/land-data.js';
 const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 const city=id=>w.cities.findIndex(c=>c.id===id),road=w.roads.findIndex(r=>r.id==='mexicocity_guadalajara');

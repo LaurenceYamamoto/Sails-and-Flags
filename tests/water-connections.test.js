@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 const world=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 const binary=fs.readFileSync('assets/wasm/engine.wasm');
 const city=id=>world.cities.findIndex(c=>c.id===id);

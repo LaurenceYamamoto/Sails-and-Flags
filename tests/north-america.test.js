@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {NORTH_AMERICA_CITIES as C,NORTH_AMERICA_ROADS as R,NORTH_AMERICA_PORTS as P} from '../src/north-america-data.js';
 import {landSegment,onLand,waterSegment} from '../src/world-geometry.js';
 import {seaRoute,PORT_APPROACHES} from '../src/sea-routing.js';

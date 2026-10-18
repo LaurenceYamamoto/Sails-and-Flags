@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge,exerciseRoutesWithPriceFixture} from './post-fixture.js';
 import {TRADE_HUB_CITIES as C,TRADE_HUB_NATIONS as N,TRADE_HUB_ROADS as R,TRADE_HUB_PORTS as P,TRADE_HUB_APPROACHES as A,TRADE_HUB_CONNECTIONS as X} from '../src/trade-hubs-data.js';
 import {seaRoute} from '../src/sea-routing.js';
 import {roadPoints} from '../src/land-data.js';
@@ -64,7 +64,7 @@ test('Every new road and port operates, enforces licences, delivers cargo and su
  for(const [a,b]of [['ambon','batavia'],['bandaneira','batavia'],['syriam','goa'],['lahoribandar','goa'],['jeddah','goa'],['suakin','jeddah']])open([a,b],'brig');
  assert.throws(()=>open(['mecca','jeddah'],'sloop'));
  const road=w.roads.findIndex(r=>r.id==='agadez_kano');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,17);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});exerciseRoutesWithPriceFixture(e,w);const saved=e.save();assert.equal(saved.companies[0].routes.length,17);
  assert.ok(saved.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(saved.companies[0].routes.map(r=>({cities:r.stops.map(i=>w.cities[i].id),deliveries:r.deliveries}))));
  assert.ok(saved.roads[road].quality>0);assert.ok(saved.companies.slice(1).every(c=>c.routes.length<=50));e.load(saved);assert.deepEqual(e.save(),saved);
 });

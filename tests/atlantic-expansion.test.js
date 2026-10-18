@@ -6,7 +6,7 @@ import {ROADS} from '../src/land-data.js';
 import {ATLANTIC_CITIES,ATLANTIC_NATIONS,ATLANTIC_PORTS,ATLANTIC_ROADS} from '../src/atlantic-expansion-data.js';
 import {seaRoute,PORT_APPROACHES,waterSegment,onLand} from '../src/sea-routing.js';
 import {project} from '../src/geography.js';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 const world=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 

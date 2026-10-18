@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {CASPIAN_CITIES as C,CASPIAN_ROADS as R} from '../src/caspian-data.js';
 import {roadBetween} from '../src/land-data.js';
 import {seaRoute} from '../src/sea-routing.js';

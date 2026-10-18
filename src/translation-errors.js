@@ -43,7 +43,7 @@ export const errorRows = [
  ['不明な操作です。','Unknown action.','未知操作。','알 수 없는 작업입니다.','Action inconnue.','Acción desconocida.'],
  ['不明な照会です。','Unknown query.','未知查询。','알 수 없는 조회입니다.','Requête inconnue.','Consulta desconocida.'],
  ['保存データがありません。','No save data supplied.','未提供存档数据。','저장 데이터가 없습니다.','Aucune sauvegarde fournie.','No se han proporcionado datos de partida.'],
- ['この保存形式は読み込めません。旧版セーブには対応していません。','Unsupported save format. Use a save from version 3.0.0 or later.','存档格式不受支持，请使用3.0.0及以后的存档。','지원하지 않는 저장 형식입니다. 3.0.0 이후 저장을 사용하세요.','Format incompatible. Utilisez une sauvegarde de version 3.0.0 ou ultérieure.','Formato incompatible. Usa una partida de la versión 3.0.0 o posterior.'],
+ ['この保存形式は読み込めません。旧版セーブには対応していません。','Unsupported save format. Start a new game in the trading-post version.','不支持此存档格式。请在商馆版本中开始新游戏。','지원하지 않는 저장 형식입니다. 상관 버전에서 새 게임을 시작하세요.','Format incompatible. Commencez une nouvelle partie dans la version avec comptoirs.','Formato incompatible. Inicia una partida nueva en la versión con factorías.'],
  ['船種が不正です。','Invalid vessel type.','船舶或车辆类型无效。','선박·차량 종류가 올바르지 않습니다.','Type de transport invalide.','Tipo de transporte no válido.'],
  ['破産または買収済みの会社は操作できません。','A bankrupt or acquired company cannot be managed.','无法操作已破产或已被收购的公司。','파산하거나 인수된 회사는 운영할 수 없습니다.','Une compagnie en faillite ou acquise ne peut pas être gérée.','No se puede gestionar una compañía en quiebra o adquirida.'],
  ['資金が不足しています。','Insufficient funds.','资金不足。','자금이 부족합니다.','Fonds insuffisants.','Fondos insuficientes.'],

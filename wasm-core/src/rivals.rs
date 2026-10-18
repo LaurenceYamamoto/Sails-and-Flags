@@ -2,6 +2,20 @@ use crate::model::*;
 use crate::trade::{key, ratio};
 use std::collections::{BTreeMap, BTreeSet};
 impl Engine {
+    // Also repair still-solvent preview saves that seeded posts at every endpoint.
+    // Retire only free, unused facilities; never discard paid assets or inventory.
+    pub fn consolidate_rival_posts(&mut self,c:usize) {
+        let cities=self.game.companies[c].posts.keys().copied().collect::<Vec<_>>();
+        for city in cities {
+            let co=&self.game.companies[c];
+            let p=&co.posts[&city];
+            if p.basis!=0.0 || p.level!=1 || p.warehouse!=0 || p.handling!=0
+                || !p.stock.is_empty() || p.size_budget!=0.0 || p.production_budget.iter().any(|v|*v!=0.0) {continue;}
+            if co.routes.iter().all(|r|r.stops.iter().any(|&i|i!=city&&co.posts.contains_key(&i))) {
+                self.game.companies[c].posts.remove(&city);
+            }
+        }
+    }
     fn base_reserve(&self, c: usize) -> f64 {
         match self.game.companies[c].kind.as_str() {
             "large" => 6000.0,
@@ -11,7 +25,7 @@ impl Engine {
     }
     fn overhead(&self, c: usize) -> f64 {
         let co = &self.game.companies[c];
-        co.licenses
+        self.post_fixed(c) + co.licenses
             .iter()
             .map(|&n| self.terms(c, n, 0).1)
             .sum::<f64>()
@@ -68,15 +82,8 @@ impl Engine {
         for v in &mut self.game.companies[c].tech_budget {
             scale(v);
         }
-        let owner = &self.game.companies[c].id;
-        for d in &mut self.game.development {
-            if &d.owner == owner {
-                scale(&mut d.size_budget);
-                for v in &mut d.production_budget {
-                    scale(v);
-                }
-            }
-        }
+        for d in self.game.companies[c].posts.values_mut(){scale(&mut d.size_budget);for v in &mut d.production_budget{scale(v);}}
+        let owner=&self.game.companies[c].id;
         for d in &mut self.game.roads {
             if &d.owner == owner {
                 scale(&mut d.road_budget);
@@ -87,13 +94,7 @@ impl Engine {
     pub fn guard_rival_budget(&mut self, c: usize) {
         let owner = &self.game.companies[c].id;
         let current = self.game.companies[c].tech_budget.iter().sum::<f64>()
-            + self
-                .game
-                .development
-                .iter()
-                .filter(|d| &d.owner == owner)
-                .map(|d| d.size_budget + d.production_budget.iter().sum::<f64>())
-                .sum::<f64>()
+            + self.game.companies[c].posts.values().map(|d|d.size_budget+d.production_budget.iter().sum::<f64>()).sum::<f64>()
             + self
                 .game
                 .roads
@@ -154,24 +155,8 @@ impl Engine {
         let max = if large { 3 } else { 1 };
         let mut candidates = vec![];
         if daily >= 1.0 {
-            if self
-                .game
-                .development
-                .iter()
-                .filter(|d| d.owner == owner)
-                .count()
-                < max
-            {
-                for (&i, &traffic) in &cities {
-                    let d = &self.game.development[i];
-                    if ["state", "private"].contains(&d.owner.as_str())
-                        && co.licenses.contains(&self.data.cities[i].nation)
-                    {
-                        let cost = self.development_cost(i);
-                        candidates.push((false, i, cost, traffic / cost));
-                    }
-                }
-            }
+            // Extra posts must be justified by a new route's marginal profit below.
+            // Traffic alone cannot justify the network-wide administration increase.
             if self.game.roads.iter().filter(|d| d.owner == owner).count() < max {
                 for (&i, &traffic) in &roads {
                     let d = &self.game.roads[i];
@@ -209,7 +194,7 @@ impl Engine {
         });
         let cities = cities
             .keys()
-            .filter(|&&i| self.game.development[i].owner == owner)
+            .filter(|&&i| co.posts.contains_key(&i))
             .copied()
             .collect::<Vec<_>>();
         let roads = roads
@@ -217,7 +202,8 @@ impl Engine {
             .filter(|&&i| self.game.roads[i].owner == owner)
             .copied()
             .collect::<Vec<_>>();
-        let count = sea as usize + land as usize + cities.len() + roads.len();
+        let post_research=!cities.is_empty();
+        let count = sea as usize + land as usize + cities.len() + roads.len() + post_research as usize;
         if count == 0 {
             return;
         }
@@ -229,6 +215,8 @@ impl Engine {
             0.0,
             if land { share } else { 0.0 },
             0.0,
+            if post_research {share/2.0} else {0.0},
+            if post_research {share/2.0} else {0.0},
         ];
         for i in cities {
             let good = self.data.cities[i]
@@ -238,8 +226,8 @@ impl Engine {
                 .max_by(|a, b| a.1.total_cmp(b.1))
                 .unwrap()
                 .0;
-            self.game.development[i].size_budget = share / 3.0;
-            self.game.development[i].production_budget[good] = share * 2.0 / 3.0;
+            self.game.companies[c].posts.get_mut(&i).unwrap().size_budget = share / 3.0;
+            self.game.companies[c].posts.get_mut(&i).unwrap().production_budget[good] = share * 2.0 / 3.0;
         }
         for i in roads {
             self.game.roads[i].road_budget = share * 2.0 / 3.0;
@@ -247,6 +235,37 @@ impl Engine {
         }
     }
     pub fn rival(&mut self, c: usize) {
+        // Facility spending must leave operating capital, not just construction cash.
+        let (reserve, daily) = self.investment_budget(c);
+        if daily > 0.0 {
+            let candidates:Vec<_>=self.game.companies[c].posts.keys().copied().collect();
+            for city in candidates {
+                let p=&self.game.companies[c].posts[&city];
+                let traffic=self.game.companies[c].routes.iter().filter(|r|r.stops.contains(&city))
+                    .map(|r| (r.activity.loading+r.activity.unloading)*self.handling_rate(c,&r.mode)
+                        / (2.0*(self.game.day-r.activity.since).max(1) as f64)).sum::<f64>();
+                // Do not add speculative warehouses: changing a destination into a
+                // warehouse also removes immediate cash receipts from its deliveries.
+                let cost=500.0;
+                if p.handling==0 && traffic.min(crate::posts::HANDLING_UNITS)*crate::posts::HANDLING_FEE>4.0+cost/365.0
+                    && self.game.companies[c].cash-cost>=reserve+180.0*daily+90.0*4.0 {
+                    let _=self.upgrade_post(c,city,"handling");break;
+                }
+                // Use actual recent taxes, not fleet count, to justify scale upgrades.
+                // The bounded ledger can undercount busy companies, conservatively.
+                let prefix=format!("{} · ",self.data.cities[city].id);
+                let tax_daily=self.game.companies[c].ledger.iter()
+                    .filter(|e|e.category=="tax" && e.day>self.game.day.saturating_sub(30) && e.detail.starts_with(&prefix))
+                    .map(|e|-e.amount).sum::<f64>()/30.0;
+                let cost=crate::posts::POST_COST*p.level as f64;
+                let savings=tax_daily*0.15/(1.0+0.15*(p.level+1) as f64);
+                if p.level<3 && savings>0.5+cost/365.0
+                    && self.game.companies[c].cash-cost>=reserve+180.0*daily+90.0*0.5 {
+                    let _=self.upgrade_post(c,city,"post");break;
+                }
+            }
+        }
+
         if self.game.companies[c].routes.len() > 1 {
             let remove = self.game.companies[c]
                 .routes
@@ -283,6 +302,7 @@ impl Engine {
             sample.insert(pairs[(offset + i) % pairs.len()]);
         }
         let co = &self.game.companies[c];
+        let current_reserve=self.investment_budget(c).0;
         let mut candidates = vec![];
         for (a, b) in sample {
             for kind in ["sloop", "brig", "fluyt", "wagon", "caravan"] {
@@ -315,12 +335,22 @@ impl Engine {
                     continue;
                 }
                 let cost = if idle { 0.0 } else { spec.price }
+                    + if self.has_post(c,&[a,b]){0.0}else{self.post_open_cost(c)}
                     + missing
                         .iter()
                         .enumerate()
                         .map(|(i, &n)| self.terms(c, n, co.licenses.len() + i).0)
                         .sum::<f64>();
-                if co.cash - cost < self.base_reserve(c) {
+                let post_delta = if self.has_post(c,&[a,b]) {0.0} else {
+                    let count=co.posts.len() as f64;
+                    (count+1.0)*crate::posts::POST_BASE_UPKEEP*self.post_upkeep_multiplier(c).powf(count)
+                        - count*self.post_base_upkeep(c) + 0.5
+                };
+                let license_daily=missing.iter().map(|&n|self.terms(c,n,0).1).sum::<f64>();
+                let operating_reserve=current_reserve
+                    + 90.0*(post_delta+license_daily+if idle {0.0}else{self.daily(c,kind)})
+                    + spec.capacity as f64*50.0;
+                if co.cash - cost < operating_reserve {
                     continue;
                 }
                 let cycle = 2.0
@@ -355,26 +385,27 @@ impl Engine {
                     / cycle
                     - self.daily(c, kind)
                     - toll / cycle;
-                candidates.push((a, b, kind, cost, cycle, toll, missing, estimate));
+                candidates.push((a, b, kind, cost, cycle, toll, missing, estimate-post_delta,post_delta,operating_reserve));
             }
         }
         candidates.sort_by(|a, b| b.7.total_cmp(&a.7));
         let mut best = None;
-        for (a, b, kind, cost, cycle, toll, missing, _) in candidates.into_iter().take(4) {
+        for (a, b, kind, cost, cycle, toll, missing, _,post_delta,operating_reserve) in candidates.into_iter().take(4) {
             let capacity = self.spec(kind).unwrap().capacity;
-            let budget = (co.cash - cost - self.base_reserve(c)).max(0.0);
+            let budget = (co.cash - cost - operating_reserve).max(0.0);
             let goods = (0..self.data.goods.len()).collect::<Vec<_>>();
             let profit = [(a, b), (b, a)]
                 .iter()
                 .map(|&(from, to)| {
                     let (_, cost, sales) =
                         self.load_plan(c, from, to, capacity, budget, &goods, 10.0);
-                    sales - cost
+                    sales - cost - 2.0*capacity as f64*crate::posts::HANDLING_FEE
                 })
                 .sum::<f64>();
             let score = (profit - toll) / cycle
                 - self.daily(c, kind)
-                - missing.iter().map(|&n| self.terms(c, n, 0).1).sum::<f64>();
+                - missing.iter().map(|&n| self.terms(c, n, 0).1).sum::<f64>()
+                - post_delta;
             if score > 2.0 && best.as_ref().is_none_or(|(_, _, _, _, v)| score > *v) {
                 best = Some((a, b, kind, missing, score));
             }
@@ -385,6 +416,7 @@ impl Engine {
                     return;
                 }
             }
+            if !self.has_post(c,&[a,b]) && self.build_post(c,a).is_err(){return;}
             let _ = self.open(
                 c,
                 kind,

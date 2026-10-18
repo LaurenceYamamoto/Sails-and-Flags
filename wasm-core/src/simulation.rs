@@ -62,8 +62,11 @@ impl Engine {
             if self.game.companies[c].acquired || self.game.companies[c].bankrupt {
                 continue;
             }
+            if c>0 {self.consolidate_rival_posts(c);}
+            self.advance_posts(c);
+            if self.game.companies[c].bankrupt {if c==0{return;}else{continue;}}
             self.advance_diplomacy(c);
-            if c != 0 || self.game.companies[0].investment_plan.is_none() { self.advance_industry(c); }
+            if c != 0 { self.advance_industry(c); }
             if c == 0 {
                 for city in 0..self.data.cities.len() {
                     for g in 0..self.data.goods.len() {
@@ -126,11 +129,12 @@ impl Engine {
                 self.automate(c);
                 if c == 0 {
                     self.auto_create_routes();
+                    self.advance_facilities();
                     self.auto_buy_investment_rights();
                     if self.game.companies[0].investment_plan.is_some() {
                         self.prepare_investment(true);
-                        self.advance_industry(0);
                     }
+                    self.advance_industry(0);
                 }
                 if c > 0 && self.calendar().1 == 1 {
                     self.rival(c);
@@ -299,7 +303,7 @@ impl Engine {
         if c > 0 {
             self.guard_rival_budget(c);
         }
-        for t in 0..6 {
+        for t in 0..8 {
             let budget = self.game.companies[c].tech_budget[t];
             if budget > 0.0 && self.game.companies[c].cash >= budget {
                 self.entry(c, "technologyInvestment", -budget, None, t.to_string());
@@ -307,21 +311,10 @@ impl Engine {
                 *level += budget.sqrt() / 100.0 / (1.0 + *level / 50.0);
             }
         }
-        for city in 0..self.game.development.len() {
-            if self.game.development[city].owner != owner {
-                continue;
-            }
-            let d = &self.game.development[city];
-            let income = 0.15 + 0.35 * d.size / (5.0 + d.size) + d.pool;
-            self.game.development[city].pool = 0.0;
-            self.entry(
-                c,
-                "developmentIncome",
-                income,
-                None,
-                self.data.cities[city].id.clone(),
-            );
-            let size = self.game.development[city].size_budget;
+        let effect=self.post_investment_effect(c);
+        let cities:Vec<_>=self.game.companies[c].posts.keys().copied().collect();
+        for city in cities {
+            let size = self.game.companies[c].posts[&city].size_budget;
             if size > 0.0 && self.game.companies[c].cash >= size {
                 self.entry(
                     c,
@@ -331,10 +324,10 @@ impl Engine {
                     self.data.cities[city].id.clone(),
                 );
                 let d = &mut self.game.development[city];
-                d.size += size.sqrt() / 200.0 / (1.0 + d.size / 5.0);
+                d.size += effect * size.sqrt() / 200.0 / (1.0 + d.size / 5.0);
             }
             for g in 0..self.data.goods.len() {
-                let value = self.game.development[city].production_budget[g];
+                let value = self.game.companies[c].posts[&city].production_budget[g];
                 if value > 0.0 && self.game.companies[c].cash >= value {
                     let apt = self.data.cities[city].supply[g]
                         / self.data.cities[city]
@@ -350,7 +343,7 @@ impl Engine {
                         format!("{} {}", self.data.cities[city].id, self.data.goods[g].id),
                     );
                     let level = &mut self.game.development[city].production[g];
-                    *level += value.sqrt() * apt / 200.0 / (1.0 + *level / 5.0);
+                    *level += effect * value.sqrt() * apt / 200.0 / (1.0 + *level / 5.0);
                 }
             }
         }

@@ -108,6 +108,10 @@ impl Engine {
                 if let Some(mut h) = ship.handling.take() {
                     let elapsed = left.min(h.remaining);
                     h.remaining = (h.remaining - elapsed).max(0.0);
+                    let city=if h.unloading{h.trip.to}else{h.trip.from};
+                    let fee=self.charge_handling(c,city,elapsed*h.rate,ship.route);
+                    h.trip.original_cost+=fee;
+                    self.game.companies[c].routes[ri].transport.costs+=fee;
                     h.trip.upkeep += daily * elapsed;
                     left -= elapsed;
                     let activity = &mut self.game.companies[c].routes[ri].activity;
@@ -191,26 +195,32 @@ impl Engine {
             } else {
                 self.game.companies[c].ships.push(ship);
             }
+            self.facility_immediate(c,route.stops[0],0);
+            self.facility_immediate(c,route.stops[1],0);
         }
     }
 
     fn finish_delivery(&mut self, c: usize, ri: usize, ship: &mut Ship, v: Voyage) {
         let cost = ship.cargo.iter().map(|x| x.cost).sum::<f64>();
         let mut revenue = 0.0;
+        let deposit=!v.direct_sale&&self.warehouse(c,v.to);
+        let mut room=if deposit{v.warehouse_units.unwrap_or(usize::MAX).min(self.warehouse_room(c,v.to))}else{0};
+        let mut stored_cost=0.0;
         for cargo in &ship.cargo {
-            revenue += self
-                .trade(c, v.to, cargo.good, cargo.quantity, false, ship.route)
-                .1;
+            let q=room.min(cargo.quantity);room-=q;
+            let value=cargo.cost*q as f64/cargo.quantity.max(1) as f64;stored_cost+=value;
+            if q>0{self.put_stock(c,v.to,Cargo{good:cargo.good,quantity:q,cost:value},Some(v.from));}
+            if cargo.quantity>q{revenue+=self.trade(c,v.to,cargo.good,cargo.quantity-q,false,ship.route).1;}
         }
         ship.cargo.clear();
         ship.voyages += 1;
-        let tax = revenue / (1.0 - self.terms(c, self.data.cities[v.to].nation, 0).2) - revenue;
+        let tax = revenue / (1.0 - self.post_tax(c,v.to)) - revenue;
         let r = &mut self.game.companies[c].routes[ri];
         r.deliveries += 1;
         r.transport.deliveries += 1;
         r.transport.sales += revenue + tax;
-        r.transport.costs += cost + tax;
-        r.actual = Some(revenue - v.original_cost - v.upkeep);
+        r.transport.costs += cost-stored_cost+tax;
+        r.actual = Some((stored_cost+revenue) - v.original_cost - v.upkeep);
     }
 
     fn raid_in_transit(
@@ -292,13 +302,8 @@ impl Engine {
                 .sum::<f64>()
             + co.diplomacy_budget.iter().sum::<f64>()
             + co.tech_budget.iter().sum::<f64>()
-            + self
-                .game
-                .development
-                .iter()
-                .filter(|d| d.owner == co.id)
-                .map(|d| d.size_budget + d.production_budget.iter().sum::<f64>())
-                .sum::<f64>()
+            + self.post_fixed(c)
+            + co.posts.values().map(|p|p.size_budget+p.production_budget.iter().sum::<f64>()).sum::<f64>()
             + self
                 .game
                 .roads
@@ -307,53 +312,25 @@ impl Engine {
                 .map(|d| d.road_budget + d.security_budget)
                 .sum::<f64>();
         let max_handling = 2.0 * spec.capacity as f64 / rate;
-        let reserve = mandatory * (days + max_handling + 1.0);
-        let (mut plan, cost, sale) = self.load_plan(
+        let reserve = mandatory * (days + max_handling + 1.0) + 2.0 * spec.capacity as f64 * crate::posts::HANDLING_FEE;
+        let (plan, cost, sale) = self.price_plan(
             c,
             a,
             b,
             spec.capacity,
             (co.cash - reserve - toll).max(0.0),
             &route.allowed,
-            route.min_margin,
+            route.buy_below, route.sell_above,
         );
         let quantity = plan.iter().map(|x| x.1).sum::<usize>();
-        let forecast = sale - cost - (days + 2.0 * quantity as f64 / rate) * daily - toll;
+        let handling = [a,b].iter().map(|i| {let own=self.game.companies[c].posts.get(i).map_or(0.0,|p|p.handling as f64*crate::posts::HANDLING_UNITS);quantity as f64*(1.0-own/rate).max(0.0)*crate::posts::HANDLING_FEE}).sum::<f64>();
+        let forecast = (if self.warehouse(c,b){0.0}else{sale-cost}) - (days + 2.0 * quantity as f64 / rate) * daily - toll - handling;
         self.game.companies[c].routes[ri].forecast = forecast;
-        let profitable = !plan.is_empty() && forecast > 0.0;
-        let reposition = !profitable
-            && self.game.companies[c].cash >= toll
-            && route.stops.iter().enumerate().any(|(j, &from)| {
-                if j == ship.next {
-                    return false;
-                }
-                let to = route.stops[(j + 1) % route.stops.len()];
-                let (next_plan, cost, sales) = self.load_plan(
-                    c,
-                    from,
-                    to,
-                    spec.capacity,
-                    (self.game.companies[c].cash - reserve * 2.0).max(0.0),
-                    &route.allowed,
-                    route.min_margin,
-                );
-                let handling = 2.0 * next_plan.iter().map(|x| x.1).sum::<usize>() as f64 / rate;
-                let next_toll = if route.mode == "land" {
-                    self.toll(c, from, to)
-                } else {
-                    0.0
-                };
-                sales - cost
-                    > daily * (days + self.days(&ship.kind, from, to) as f64 + handling)
-                        + toll
-                        + next_toll
-            });
-        if !profitable {
-            plan.clear();
-        }
-        if !profitable && !reposition {
-            return false;
-        }
+        let reposition = plan.is_empty() && self.game.companies[c].cash>=toll && {
+            let (next,_,_)=self.price_plan(c,b,a,spec.capacity,(self.game.companies[c].cash-reserve-toll).max(0.0),&route.allowed,route.buy_below,route.sell_above);
+            !next.is_empty()
+        };
+        if plan.is_empty()&&!reposition{return false;}
         if reposition {
             self.game.companies[c].routes[ri].forecast = -daily * days - toll;
         }
@@ -372,7 +349,7 @@ impl Engine {
         // Reserve stock and pay at loading start. Cargo remains unavailable to the
         // destination market until unloading has completed.
         for (g, q) in plan {
-            let (quantity, cost) = self.trade(c, a, g, q, true, ship.route);
+            let (quantity,cost)=if self.warehouse(c,a){let cargo=self.take_stock(c,a,g,q,Some(b));(cargo.quantity,cargo.cost)}else{self.trade(c,a,g,q,true,ship.route)};
             if quantity > 0 {
                 ship.cargo.push(Cargo {
                     good: g,
@@ -383,6 +360,8 @@ impl Engine {
             original_cost += cost;
         }
         let trip = Voyage {
+            direct_sale: !self.warehouse(c,b),
+            warehouse_units: None,
             from: a,
             to: b,
             total: days,

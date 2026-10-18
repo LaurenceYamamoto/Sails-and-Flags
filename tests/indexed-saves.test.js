@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IndexedSaves} from '../src/indexed-saves.js';
@@ -21,3 +22,9 @@ test('quota retry evicts oldest autos, never manual slots; final failure preserv
  const before=structuredClone([...s.snapshots]);await assert.rejects(s.write(null,'y'.repeat(100),{day:6}),{name:'QuotaExceededError'});assert.deepEqual([...s.snapshots],before);
 });
 test('unavailable IndexedDB reports failure instead of false success',async()=>{await assert.rejects(new IndexedSaves(null).list(),/unavailable/);});
+
+
+test('trading-post saves use a separate database without deleting the 3.x store',()=>{
+ const store=new IndexedSaves(undefined);assert.equal(store.name,'sails-flags-wasm-v2');
+ const source=fs.readFileSync('src/indexed-saves.js','utf8');assert.ok(!source.includes('deleteDatabase'));
+});

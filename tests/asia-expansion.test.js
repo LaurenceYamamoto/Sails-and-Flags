@@ -2,7 +2,7 @@ import {ROADS} from '../src/land-data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {ASIA_CITIES,ASIA_PORTS,ASIA_ROADS} from '../src/asia-expansion-data.js';
 import {CITIES,GOODS} from '../src/data.js';
 import {roadPoints} from '../src/land-data.js';

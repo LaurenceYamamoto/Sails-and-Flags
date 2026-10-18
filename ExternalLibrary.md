@@ -1,4 +1,4 @@
-# 外部ライブラリ・ライセンス一覧 — 3.4.5
+# 外部ライブラリ・ライセンス一覧 — 4.0.0
 
 2026-10-16の共通投資計画・画面は既存のRust／JavaScript／CSSで実装し、外部依存の追加はありません。
 
@@ -92,3 +92,5 @@ Cargo.lockおよびローカルに取得済みの各Cargo.tomlから確認しま
 ## 中央・東ヨーロッパ追加の参考資料（2026-10-06）
 
 外部ライブラリの追加はありません。都市座標・生産適性・道路はゲーム用の近似値であり、外部地図素材は追加していません。政治主体と商業史の参考: [Hamburg市の歴史](https://www.hamburg.com/residents/about-hamburg/history-18862)、[Berlin市の1701年の王国成立](https://www.berlin.de/en/history/8477225-8619314-the-royal-capital.en.html)、[ハプスブルクと1740年のSilesia](https://www.habsburger.net/en/chapter/habsburg-heiress-versus-european-world-men)、[Gdańsk博物館によるポーランドへの帰属](https://muzeumgdansk.pl/wydarzenia/szczegoly/news/krol-jedzie/)。文章・画像の転載はありません。
+
+商館システム（4.0.0）では、新たな外部依存を追加していません。

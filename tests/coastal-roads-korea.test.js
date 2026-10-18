@@ -2,7 +2,7 @@ import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {CITIES,GOODS} from '../src/data.js';
 import {ROADS,ROAD_SLOTS,roadPoints} from '../src/land-data.js';
 import {ATLANTIC_ROADS} from '../src/atlantic-expansion-data.js';

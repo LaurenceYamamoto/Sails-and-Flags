@@ -34,6 +34,18 @@ impl Engine {
     pub fn initialize(&mut self, seed: u32, events: bool) {
         self.game = Game::new(&self.data, seed, events);
         for (i, start) in self.data.starts.clone().iter().enumerate() {
+            // Cover every adjacent pair, including pairs produced by circuit splitting,
+            // with shared hubs instead of charging for a post at every endpoint.
+            let mut pairs = start.routes.iter().flat_map(|r| r.stops.iter().enumerate()
+                .map(|(j,&a)| (a,r.stops[(j+1)%r.stops.len()])))
+                .collect::<Vec<_>>();
+            while !pairs.is_empty() {
+                let mut degree = std::collections::BTreeMap::<usize,usize>::new();
+                for &(a,b) in &pairs { *degree.entry(a).or_default()+=1; *degree.entry(b).or_default()+=1; }
+                let city = *degree.iter().max_by(|a,b|a.1.cmp(b.1).then_with(||b.0.cmp(a.0))).unwrap().0;
+                self.game.companies[i+1].posts.insert(city,crate::posts::TradingPost::new(self.data.goods.len()));
+                pairs.retain(|&(a,b)|a!=city&&b!=city);
+            }
             for route in &start.routes {
                 for _ in 0..route.fleet {
                     self.open(
@@ -51,6 +63,17 @@ impl Engine {
         self.split_routes(&mut g).expect("valid initial routes");
         self.game=g;
         self.capture_accounts();
+    }
+    pub fn sell_ship(&mut self,c:usize,id:u32)->Result<f64> {
+        self.playable(c)?;
+        let i=self.game.companies[c].ships.iter().position(|s|s.id==id).ok_or("船・車両がありません。")?;
+        let ship=&self.game.companies[c].ships[i];
+        ensure(ship.can_sell(),"未使用の船・車両のみ売却できます。")?;
+        let price=self.spec(&ship.kind)?.price;
+        let detail=ship.name.clone();
+        self.game.companies[c].ships.remove(i);
+        self.entry(c,"shipSale",price,None,detail);
+        Ok(price)
     }
     pub fn buy_license(&mut self, c: usize, n: usize) -> Result<()> {
         self.playable(c)?;
@@ -182,7 +205,7 @@ impl Engine {
             self.spec(kind)?.price
         };
         Ok(
-            json!({"roads":self.opening_roads(c,kind,stops),"waterway":self.has_waterway(stops),"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
+            json!({"roads":self.opening_roads(c,kind,stops),"waterway":self.has_waterway(stops),"travelDays":stops.iter().enumerate().map(|(i,&a)|self.days(kind,a,stops[(i+1)%stops.len()])).collect::<Vec<_>>(),"daily":self.daily(c,kind),"handlingRate":self.handling_rate(c,&self.spec(kind)?.mode),"disasterRates":stops.iter().enumerate().map(|(i,&a)|self.disaster_chance(c,kind,a,stops[(i+1)%stops.len()])*100.0).collect::<Vec<_>>(),"cost":cost,"reuse":idle.map(|s|s.id),"hasPost":self.has_post(c,stops),"missing":missing,"affordable":self.game.companies[c].cash>=cost,"remaining":self.game.companies[c].cash-cost,"range":self.spec(kind)?.range,"longest":stops.iter().enumerate().map(|(i,&a)|self.distance(kind,a,stops[(i+1)%stops.len()])).fold(0.0,f64::max)}),
         )
     }
     pub fn open(
@@ -207,6 +230,7 @@ impl Engine {
                 && (-100.0..=10000.0).contains(&margin),
             "積載条件が不正です。",
         )?;
+        ensure(self.has_post(c,&stops), "A trading post is required at either endpoint of a route.")?;
         self.affordable(c, q["cost"].as_f64().unwrap())?;
         let mode = self.spec(kind)?.mode.clone();
         let old = self.game.companies[c]
@@ -223,7 +247,9 @@ impl Engine {
             id
         } else {
             let id = self.next_id();
+            let prices=self.game.companies[c].route_prices.unwrap_or([0.0,0.0]);
             self.game.companies[c].routes.push(Route {
+                buy_below:prices[0],sell_above:prices[1],
                 id,
                 stops,
                 mode,
@@ -414,9 +440,7 @@ impl Engine {
         let ix = city * self.data.goods.len() + g;
         let stock = self.game.markets[ix].stock;
         let nation = self.data.cities[city].nation;
-        let tax = self
-            .terms(c, nation, self.game.companies[c].licenses.len())
-            .2;
+        let tax = self.post_tax(c,city);
         let base = self.data.goods[g].base;
         let mut qty = if buy {
             q.min(stock.floor() as usize)
@@ -461,9 +485,7 @@ impl Engine {
             self.entry(c, "tax", -fee, route, detail);
             self.game.companies[c].trade[nation] =
                 (self.game.companies[c].trade[nation] + gross).min(5000.0);
-            if !["state", "private"].contains(&self.game.development[city].owner.as_str()) {
-                self.game.development[city].pool += fee * 0.15;
-            }
+
         }
         (qty, if buy { gross + fee } else { gross - fee })
     }
@@ -502,6 +524,8 @@ impl Engine {
                 d.pool = 0.0;
             }
         }
+        let removed:Vec<_>=self.game.companies[c].posts.keys().copied().filter(|&city|self.data.cities[city].nation==n).collect();
+        for city in removed {self.game.companies[c].posts.remove(&city);}
         self.game.companies[c].licenses.retain(|&x| x != n);
         self.event(
             "revoked",

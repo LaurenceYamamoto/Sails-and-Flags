@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {REGIONAL_LINK_ROADS as R} from '../src/regional-link-data.js';
 import {roadBetween} from '../src/land-data.js';
 import {landSegment} from '../src/world-geometry.js';

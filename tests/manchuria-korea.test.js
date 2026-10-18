@@ -3,7 +3,7 @@ import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge,exerciseRoutesWithPriceFixture} from './post-fixture.js';
 import {CITIES,GOODS} from '../src/data.js';
 import {MANCHURIA_KOREA_CITIES,MANCHURIA_KOREA_ROADS} from '../src/manchuria-korea-data.js';
 import {roadBetween,roadPoints} from '../src/land-data.js';
@@ -68,5 +68,5 @@ test('All eleven roads as two-city services trade with proper licenses and survi
  assert.deepEqual(opening().missing.toSorted(),['qing','joseon'].map(nation).sort());e.cmd({action:'license',nation:nation('qing')});assert.deepEqual(opening().missing,[nation('joseon')]);assert.throws(()=>open(e,['fenghuangcheng','uiju']));e.cmd({action:'license',nation:nation('joseon')});
  for(const r of Object.values(MANCHURIA_KOREA_ROADS))open(e,[r.a,r.b]);assert.throws(()=>open(e,['pyongyang','kaesong','hanseong','kaesong']));
  const road=w.roads.findIndex(r=>r.id==='fenghuangcheng_uiju');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.companies[0].routes.length,11);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(g.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(g.roads[road].quality>0);assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));e.load(g);assert.deepEqual(e.save(),g);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});exerciseRoutesWithPriceFixture(e,w);const g=e.save();assert.equal(g.companies[0].routes.length,11);assert.ok(g.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(g.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(g.roads[road].quality>0);assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));e.load(g);assert.deepEqual(e.save(),g);
 });

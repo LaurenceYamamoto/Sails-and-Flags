@@ -87,49 +87,8 @@ impl Engine {
         s.daily = base.daily * (0.45 * a + 0.25 * v + 0.1 * r + 0.2 * g) * (1.0 - m);
         Ok((s, (base.price * 0.25).ceil() + budgets.iter().sum::<f64>()))
     }
-    pub fn development_cost(&self, city: usize) -> f64 {
-        let d = &self.game.development[city];
-        let level = d.production.iter().sum::<f64>() / d.production.len() as f64;
-        ((if self.data.cities[city].lon < -20.0 {
-            2000.0
-        } else {
-            6000.0
-        }) * (1.0 + 0.15 * (d.size + level))
-            * if d.owner == "state" { 1.0 } else { 1.5 })
-        .ceil()
-    }
-    pub fn buy_development(&mut self, c: usize, city: usize) -> Result<()> {
-        let n = self.data.cities[city].nation;
-        let owner = self.game.development[city].owner.clone();
-        ensure(
-            self.game.companies[c].licenses.contains(&n) && owner != self.game.companies[c].id,
-            "免許と未取得の都市権利が必要です。",
-        )?;
-        let cost = self.development_cost(city);
-        self.affordable(c, cost)?;
-        self.entry(
-            c,
-            "developmentPurchase",
-            -cost,
-            None,
-            self.data.cities[city].id.clone(),
-        );
-        if let Some(seller) = self.game.companies.iter().position(|co| co.id == owner) {
-            self.entry(
-                seller,
-                "developmentSale",
-                cost,
-                None,
-                self.data.cities[city].id.clone(),
-            );
-        }
-        let d = &mut self.game.development[city];
-        d.owner = self.game.companies[c].id.clone();
-        d.basis = cost;
-        d.size_budget = 0.0;
-        d.production_budget.fill(0.0);
-        Ok(())
-    }
+    pub fn development_cost(&self,_city:usize)->f64 {self.post_open_cost(0)}
+    pub fn buy_development(&mut self,c:usize,city:usize)->Result<()> {self.build_post(c,city)}
     pub fn road_cost(&self, i: usize) -> f64 {
         let d = &self.game.roads[i];
         ((500.0 + self.data.roads[i].km * 2.0)
@@ -196,12 +155,20 @@ impl Engine {
             .sum::<f64>();
         let price = (self.assets(c).max(0.0) * 1.15).ceil();
         let required = price + fee + (-target.cash).max(0.0);
+        let post_capacity=target.posts.iter().all(|(&city,p)|{
+            let own=player.posts.get(&city);
+            let warehouse=p.warehouse+own.map_or(0,|p|p.warehouse);
+            let stock=p.quantity()+own.map_or(0,|p|p.quantity());
+            (warehouse==0||stock+self.reserved_stock(0,city)+self.reserved_stock(c,city)<=warehouse as usize*crate::posts::WAREHOUSE_UNITS)
+                &&warehouse<=10000&&p.level+own.map_or(0,|p|p.level)<=10000&&p.handling+own.map_or(0,|p|p.handling)<=10000
+        }) && player.posts.iter().filter(|(city,_)|!target.posts.contains_key(city)).all(|(&city,p)|p.warehouse==0||p.quantity()+self.reserved_stock(0,city)+self.reserved_stock(c,city)<=p.warehouse as usize*crate::posts::WAREHOUSE_UNITS);
         Ok(
-            json!({"price":price,"licenseCost":fee,"required":required,"cash":target.cash,"missing":missing,"eligible":missing.iter().all(|&n|player.friendship[n]>=30.0),"affordable":player.cash>=required}),
+            json!({"price":price,"licenseCost":fee,"required":required,"cash":target.cash,"missing":missing,"postCapacity":post_capacity,"eligible":missing.iter().all(|&n|player.friendship[n]>=30.0),"affordable":player.cash>=required}),
         )
     }
     pub fn acquire(&mut self, c: usize) -> Result<()> {
         let q = self.acquisition(c)?;
+        ensure(q["postCapacity"]==true,"Capacity must cover inbound cargo.")?;
         ensure(
             q["eligible"] == true,
             "買収に必要な免許の友好度が不足しています。",
@@ -251,13 +218,12 @@ impl Engine {
             }
         }
         self.game.companies[0].ships.extend(target.ships);
-        for d in &mut self.game.development {
-            if d.owner == target.id {
-                d.owner = "player".into();
-                d.size_budget = 0.0;
-                d.production_budget.fill(0.0);
-            }
+        for (city,post) in target.posts {
+            if let Some(p)=self.game.companies[0].posts.get_mut(&city){p.level+=post.level;p.basis+=post.basis;p.warehouse+=post.warehouse;p.handling+=post.handling;p.handled+=post.handled;p.handling_demand+=post.handling_demand.max(post.handled);p.monitoring=std::array::from_fn(|_|crate::facility_management::FacilityMonitor{changed:Some(self.game.day),..Default::default()});
+                for lot in post.stock {if let Some(s)=p.stock.iter_mut().find(|s|s.good==lot.good&&s.from==lot.from){s.quantity+=lot.quantity;s.cost+=lot.cost;}else{p.stock.push(lot);}}
+            }else{self.game.companies[0].posts.insert(city,post);}
         }
+        self.game.companies[c].posts.clear();
         for d in &mut self.game.roads {
             if d.owner == target.id {
                 d.owner = "player".into();
@@ -353,35 +319,26 @@ impl Engine {
                 self.game.companies[0].default_ship = sea.into();
                 self.game.companies[0].default_vehicle = land.into();
             }
-            "sellShip" => {
-                let id = identifier(v, "ship")?;
-                let i = self.game.companies[0]
-                    .ships
-                    .iter()
-                    .position(|s| s.id == id)
-                    .ok_or("船・車両がありません。")?;
-                let ship = &self.game.companies[0].ships[i];
-                ensure(
-                    ship.route.is_none()
-                        && ship.voyage.is_none()
-                        && ship.handling.is_none()
-                        && ship.cargo.is_empty(),
-                    "未使用の船・車両のみ売却できます。",
-                )?;
-                let price = self.spec(&ship.kind)?.price;
-                let detail = ship.name.clone();
-                self.game.companies[0].ships.remove(i);
-                self.entry(0, "shipSale", price, None, detail);
+            "sellShip" => { self.sell_ship(0,identifier(v,"ship")?)?; }
+            "sellIdleShips" => {
+                let kind=if v["all"]==true {None} else {Some(string(v,"kind")?)};
+                if let Some(kind)=kind {self.spec(kind)?;}
+                let ids=self.game.companies[0].ships.iter()
+                    .filter(|s|s.can_sell() && kind.is_none_or(|k|s.kind==k))
+                    .map(|s|s.id).collect::<Vec<_>>();
+                let mut total=0.0;
+                for &id in &ids {total+=self.sell_ship(0,id)?;}
+                return Ok(json!({"count":ids.len(),"total":total}));
             }
             "openRoute" => {
                 ensure(v["stops"].as_array().is_some_and(|s|s.len()==2), "経路は異なる2都市を指定してください。")?;
-                return Ok(json!(self.open(
-                    0,
-                    string(v, "kind")?,
-                    list(v, "stops", self.data.cities.len())?,
-                    list(v, "allowed", self.data.goods.len())?,
-                    number(v, "margin")?
-                )?));
+                let defaults=self.game.companies[0].route_prices.unwrap_or([0.0,0.0]);
+                let buy=if v.get("buyBelow").is_some(){number(v,"buyBelow")?}else{defaults[0]};let sell=if v.get("sellAbove").is_some(){number(v,"sellAbove")?}else{defaults[1]};
+                ensure(crate::posts::thresholds(buy,sell),"Invalid price thresholds")?;
+                let id=self.open(0,string(v,"kind")?,list(v,"stops",self.data.cities.len())?,list(v,"allowed",self.data.goods.len())?,0.0)?;
+                let r=self.game.companies[0].routes.iter_mut().find(|r|r.id==id).unwrap();
+                if v.get("buyBelow").is_some(){r.buy_below=buy;}if v.get("sellAbove").is_some(){r.sell_above=sell;}
+                return Ok(json!(id));
             }
             "assign" => {
                 self.assign(0, identifier(v, "route")?, identifier(v, "ship")?)?;
@@ -436,7 +393,10 @@ impl Engine {
                     let a = list(v, "allowed", self.data.goods.len())?;
                     ensure(!a.is_empty(), "交易品を選んでください。")?;
                     r.allowed = a;
-                    r.min_margin = number(v, "margin")?;
+                    r.min_margin = 0.0;
+                }
+                if v.get("buyBelow").is_some(){
+                    let buy=number(v,"buyBelow")?;let sell=number(v,"sellAbove")?;ensure(crate::posts::thresholds(buy,sell),"Invalid price thresholds")?;r.buy_below=buy;r.sell_above=sell;
                 }
             }
             "automation" => {
@@ -472,7 +432,7 @@ impl Engine {
                 self.game.companies[0].diplomacy_budget[n] = value;
             }
             "technology" => {
-                let k = index(v, "kind", 6)?;
+                let k = index(v, "kind", 8)?;
                 self.game.companies[0].tech_budget[k] = number(v, "value")?;
             }
             "research" => {
@@ -502,17 +462,34 @@ impl Engine {
                 self.game.companies[0].designs.push(id.clone());
                 self.entry(0, "designResearch", -cost, None, id);
             }
-            "buyDevelopment" => {
-                self.buy_development(0, index(v, "city", self.data.cities.len())?)?;
+            "buildPost" => {self.build_post(0,index(v,"city",self.data.cities.len())?)?;}
+            "lowerPost" => {self.lower_post(0,index(v,"city",self.data.cities.len())?,string(v,"facility")?,identifier(v,"target")?)?;}
+            "bulkPostLevel" => {self.bulk_post_level(identifier(v,"target")?,v["raise"]==true)?;}
+            "facilityPolicy" => {let policy=serde_json::from_value(v["policy"].clone()).map_err(|_|"Invalid facility settings")?;self.set_facility_policy(policy)?;}
+            "upgradePost" => {self.upgrade_post(0,index(v,"city",self.data.cities.len())?,string(v,"facility")?)?;}
+            "postRules" => {
+                let rules:Vec<crate::posts::PriceRule>=serde_json::from_value(v["rules"].clone()).map_err(|_|"Invalid price rules")?;
+                ensure(rules.len()==self.data.goods.len()&&rules.iter().all(|r|r.valid()),"Invalid price rules")?;
+                let targets=if v["all"]==true{self.game.companies[0].posts.keys().copied().collect::<Vec<_>>()}else{vec![index(v,"city",self.data.cities.len())?]};
+                ensure(targets.iter().all(|i|self.game.companies[0].posts.contains_key(i)),"A trading post is required")?;
+                for i in targets{self.game.companies[0].posts.get_mut(&i).unwrap().rules=rules.clone();}
+            }
+            "routePrices" => {
+                let buy=number(v,"buyBelow")?;let sell=number(v,"sellAbove")?;
+                ensure(crate::posts::thresholds(buy,sell),"Invalid price thresholds")?;
+                let id=if v["all"]==true{None}else{Some(identifier(v,"route")?)};
+                ensure(id.is_none_or(|id|self.game.companies[0].routes.iter().any(|r|r.id==id)),"Route not found")?;
+                if id.is_none(){self.game.companies[0].route_prices=Some([buy,sell]);}
+                for r in self.game.companies[0].routes.iter_mut().filter(|r|id.is_none_or(|id|r.id==id)){r.buy_below=buy;r.sell_above=sell;}
             }
             "cityInvestment" => {
                 let city = index(v, "city", self.data.cities.len())?;
                 ensure(
-                    self.game.development[city].owner == "player",
-                    "都市開発権が必要です。",
+                    self.game.companies[0].posts.contains_key(&city),
+                    "商館が必要です。 / A trading post is required.",
                 )?;
                 if v.get("size").is_some() {
-                    self.game.development[city].size_budget = number(v, "size")?;
+                    self.game.companies[0].posts.get_mut(&city).unwrap().size_budget = number(v, "size")?;
                 }
                 if v.get("good").is_some() {
                     let g = index(v, "good", self.data.goods.len())?;
@@ -521,7 +498,7 @@ impl Engine {
                         value == 0.0 || self.data.cities[city].supply[g] > 0.0,
                         "非産地の生産には投資できません。",
                     )?;
-                    self.game.development[city].production_budget[g] = value;
+                    self.game.companies[0].posts.get_mut(&city).unwrap().production_budget[g] = value;
                 }
             }
             "buyRoad" => {
@@ -576,6 +553,7 @@ impl Engine {
     }
     pub fn query(&self, v: &Value) -> Result<Value> {
         match string(v, "query")? {
+            "postLevel" => self.post_level_quote(identifier(v,"target")?,v["raise"]==true),
             "investmentPlan" => self.investment_report(v),
             "bulkInvestment" => self.bulk_investment_quote(v),
             "accounts" => Ok(self.account_report(v["annual"] == true)),

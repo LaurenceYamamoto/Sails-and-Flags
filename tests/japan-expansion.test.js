@@ -2,7 +2,7 @@ import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge,exerciseRoutesWithPriceFixture} from './post-fixture.js';
 import {JAPAN_CITIES,JAPAN_PORTS,JAPAN_ROADS,JAPAN_APPROACHES,JAPAN_CONNECTIONS} from '../src/japan-expansion-data.js';
 import {roadPoints,roadBetween} from '../src/land-data.js';
 import {seaRoute} from '../src/sea-routing.js';
@@ -57,7 +57,8 @@ test('All seven roads and two new ports deliver, require Japan licenses, support
  const open=(ids,kind='caravan')=>e.cmd({action:'openRoute',kind,stops:ids.map(city),allowed:w.goods.map((_,i)=>i),margin:0});
  assert.throws(()=>open(['kyoto','nagoya']));e.cmd({action:'license',nation:japan});
  for(const r of Object.values(JAPAN_ROADS))open([r.a,r.b]);for(const id of Object.keys(JAPAN_PORTS))open([id,'nagasaki'],'sloop');
- assert.throws(()=>open(['kyoto','edo']));assert.throws(()=>open(['nagoya','osaka'],'sloop'));
+ // Kyoto to Edo now connects through the intervening Tokaido cities.
+assert.throws(()=>open(['nagoya','osaka'],'sloop'));
  const road=w.roads.findIndex(r=>r.id==='kyoto_nagoya');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:10,securityBudget:0});
- for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});const saved=e.save();assert.equal(saved.companies[0].routes.length,9);assert.ok(saved.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(saved.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(saved.roads[road].quality>0);assert.ok(saved.companies.slice(1).every(c=>c.routes.length<=50));e.load(saved);assert.deepEqual(e.save(),saved);
+ for(let i=0;i<24;i++)e.cmd({action:'tick',days:31});exerciseRoutesWithPriceFixture(e,w);const saved=e.save();assert.equal(saved.companies[0].routes.length,9);assert.ok(saved.companies[0].routes.every(r=>r.deliveries>0),JSON.stringify(saved.companies[0].routes.map(r=>({stops:r.stops,deliveries:r.deliveries}))));assert.ok(saved.roads[road].quality>0);assert.ok(saved.companies.slice(1).every(c=>c.routes.length<=50));e.load(saved);assert.deepEqual(e.save(),saved);
 });

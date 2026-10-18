@@ -3,7 +3,7 @@ import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {ASIA_RETIRED_ROADS,ASIA_ADDED_ROADS,ASIA_FURTHER_RETIRED_ROADS} from '../src/asia-road-revisions.js';
 import {roadBetween,roadPoints} from '../src/land-data.js';
 import {landSegment} from '../src/world-geometry.js';

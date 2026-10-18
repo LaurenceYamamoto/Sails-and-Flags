@@ -1,0 +1,167 @@
+[
+  {
+    "seed": 1700,
+    "mode": "hold",
+    "day": 270,
+    "preExpansionCash": 11203.758135466627,
+    "startingCash": 11203.758135466627,
+    "endingCash": 22267.547218971016,
+    "assetChange": 13318.59341211671,
+    "bankrupt": false,
+    "deliveries": [
+      16
+    ]
+  },
+  {
+    "seed": 1700,
+    "mode": "same-hub",
+    "day": 270,
+    "preExpansionCash": 11203.758135466627,
+    "startingCash": 9403.758135466627,
+    "endingCash": 28691.121988397423,
+    "assetChange": 21542.168181543115,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      10
+    ]
+  },
+  {
+    "seed": 1700,
+    "mode": "new-post",
+    "day": 270,
+    "preExpansionCash": 11203.758135466627,
+    "startingCash": 8653.758135466627,
+    "endingCash": 47761.06304647303,
+    "assetChange": 42820.810541574014,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  },
+  {
+    "seed": 1700,
+    "mode": "new-post-research-10",
+    "day": 270,
+    "preExpansionCash": 11203.758135466627,
+    "startingCash": 8778.758135466627,
+    "endingCash": 49686.06304647301,
+    "assetChange": 44620.810541574,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  },
+  {
+    "seed": 1701,
+    "mode": "hold",
+    "day": 270,
+    "preExpansionCash": 11196.701551445252,
+    "startingCash": 11196.701551445252,
+    "endingCash": 22244.920967217084,
+    "assetChange": 13300.580576388396,
+    "bankrupt": false,
+    "deliveries": [
+      16
+    ]
+  },
+  {
+    "seed": 1701,
+    "mode": "same-hub",
+    "day": 270,
+    "preExpansionCash": 11196.701551445252,
+    "startingCash": 9396.701551445252,
+    "endingCash": 28644.75635860283,
+    "assetChange": 21500.41596777414,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      10
+    ]
+  },
+  {
+    "seed": 1701,
+    "mode": "new-post",
+    "day": 270,
+    "preExpansionCash": 11196.701551445252,
+    "startingCash": 8646.701551445252,
+    "endingCash": 47561.84435931367,
+    "assetChange": 42627.06424813512,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  },
+  {
+    "seed": 1701,
+    "mode": "new-post-research-10",
+    "day": 270,
+    "preExpansionCash": 11196.701551445252,
+    "startingCash": 8771.701551445252,
+    "endingCash": 49486.84435931367,
+    "assetChange": 44427.06424813512,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  },
+  {
+    "seed": 1702,
+    "mode": "hold",
+    "day": 270,
+    "preExpansionCash": 10569.431024025762,
+    "startingCash": 10569.431024025762,
+    "endingCash": 24212.377142216978,
+    "assetChange": 15253.32835327052,
+    "bankrupt": false,
+    "deliveries": [
+      16
+    ]
+  },
+  {
+    "seed": 1702,
+    "mode": "same-hub",
+    "day": 270,
+    "preExpansionCash": 10569.431024025762,
+    "startingCash": 8769.431024025762,
+    "endingCash": 30661.881067335242,
+    "assetChange": 23502.832278388785,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      10
+    ]
+  },
+  {
+    "seed": 1702,
+    "mode": "new-post",
+    "day": 270,
+    "preExpansionCash": 10569.431024025762,
+    "startingCash": 8019.431024025762,
+    "endingCash": 52207.78546040681,
+    "assetChange": 48105.873395009185,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  },
+  {
+    "seed": 1702,
+    "mode": "new-post-research-10",
+    "day": 270,
+    "preExpansionCash": 10569.431024025762,
+    "startingCash": 8144.431024025762,
+    "endingCash": 54132.78546040681,
+    "assetChange": 49905.873395009185,
+    "bankrupt": false,
+    "deliveries": [
+      16,
+      11
+    ]
+  }
+]

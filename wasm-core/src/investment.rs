@@ -39,7 +39,7 @@ impl InvestmentPlan {
         amount(self.reserve) && amount(self.min) && amount(self.max) && self.min <= self.max
             && self.budgets.len() == 3 && self.budgets.iter().all(|b|
                 amount(b.value) && (b.mode == "fixed" || (b.mode == "profit" && b.value <= 100.0)))
-            && self.weights.len() <= cities * (goods + 2) + roads * 3 + 6
+            && self.weights.len() <= cities * (goods + 2) + roads * 3 + 8
             && self.weights.iter().all(|(key, &value)| {
                 if !value.is_finite() || !(0.0..=1e6).contains(&value) { return false; }
                 let parts: Vec<_> = key.split(':').collect();
@@ -50,7 +50,7 @@ impl InvestmentPlan {
                 match parts[0] {
                     "city" => i < cities && (parts.len()==2 || item.is_some_and(|x|x<=goods && parts[2]==x.to_string())),
                     "road" => i < roads && (parts.len()==2 || item.is_some_and(|x|x<2 && parts[2]==x.to_string())),
-                    "tech" => i < 6 && parts.len()==2,
+                    "tech" => i < 8 && parts.len()==2,
                     _ => false,
                 }
             })
@@ -67,7 +67,7 @@ impl Engine {
         let month = self.calendar().0;
         if month == 0 { return 0.0; }
         let Some(p) = self.game.companies[0].accounts.as_ref().and_then(|a|a.months.get(&(month-1))) else { return 0.0; };
-        ["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome"]
+        ["purchase","sale","tax","upkeep","licenseDaily","escort","roadToll","roadIncome","developmentIncome","handlingFee","postUpkeep","warehouseUpkeep","handlingUpkeep"]
             .iter().map(|&k|p.income.get(k).copied().unwrap_or(0.0)-p.expense.get(k).copied().unwrap_or(0.0)).sum()
     }
     pub fn investment_plan(&self) -> InvestmentPlan {
@@ -80,7 +80,7 @@ impl Engine {
             budgets:(0..3).map(|_|InvestmentBudget{mode:"fixed".into(),value:0.0}).collect(),min:0.0,
             max:self.data.cities.iter().flat_map(|c|c.supply.iter().copied()).fold(0.0,f64::max),weights:BTreeMap::new()};
         let mut values=Vec::new();
-        for (i,d) in self.game.development.iter().enumerate().filter(|(_,d)|d.owner==c.id) {
+        for (&i,d) in &c.posts {
             values.push((0,format!("city:{i}:0"),d.size_budget));
             for (g,&v) in d.production_budget.iter().enumerate() { values.push((0,format!("city:{i}:{}",g+1),v)); }
         }
@@ -100,7 +100,7 @@ impl Engine {
             let weight=if eligible {p.weight(&key)*if group.is_empty(){1.0}else{p.weight(&group)}}else{0.0};
             rows.push(InvestmentTarget{category,index,item,key,group,base,eligible,weight,daily:0.0});
         };
-        for (i,d) in self.game.development.iter().enumerate().filter(|(_,d)|d.owner=="player") {
+        for (&i,d) in &self.game.companies[0].posts {
             let _=d;
             add(0,i,0,format!("city:{i}:0"),format!("city:{i}"),0.0);
             for (g,&base) in self.data.cities[i].supply.iter().enumerate() {
@@ -110,7 +110,7 @@ impl Engine {
         for (i,_) in self.game.roads.iter().enumerate().filter(|(i,r)|r.owner=="player"&&!self.data.roads[*i].retired) {
             for item in 0..2 {add(1,i,item,format!("road:{i}:{item}"),format!("road:{i}"),0.0);}
         }
-        for i in 0..6 {add(2,i,0,format!("tech:{i}"),String::new(),0.0);}
+        for i in 0..8 {add(2,i,0,format!("tech:{i}"),String::new(),0.0);}
         for k in 0..3 {
             let total: f64=rows.iter().filter(|r|r.category==k).map(|r|r.weight).sum();
             let budget=self.investment_monthly(p,k)/self.investment_days() as f64;
@@ -154,9 +154,7 @@ impl Engine {
         if p.cities {
             let co=&self.game.companies[0];
             let stops:BTreeSet<_>=co.routes.iter().flat_map(|r|r.stops.iter().copied()).collect();
-            let mut cities:Vec<_>=self.game.development.iter().enumerate().filter(|(i,d)|
-                d.owner!=co.id && (p.city_rivals||d.owner=="state"||d.owner=="private") && (!p.route_only||stops.contains(i))
-                    && co.licenses.contains(&self.data.cities[*i].nation)).map(|(i,_)|i).collect();
+            let mut cities:Vec<_>=(0..self.data.cities.len()).filter(|i|!co.posts.contains_key(i)&&(!p.route_only||stops.contains(i))&&co.licenses.contains(&self.data.cities[*i].nation)).collect();
             cities.sort_by(|&a,&b|self.development_cost(a).total_cmp(&self.development_cost(b)).then(a.cmp(&b)));
             for i in cities {if self.game.companies[0].cash-self.development_cost(i)>=p.reserve {let _=self.buy_development(0,i);}}
         }
@@ -167,13 +165,13 @@ impl Engine {
         let total:f64=rows.iter().map(|r|r.daily).sum();
         let scale=if limit_cash && total>0.0 {((self.game.companies[0].cash-p.reserve).max(0.0)/total).min(1.0)}else{1.0};
         self.game.companies[0].tech_budget.fill(0.0);
-        for d in self.game.development.iter_mut().filter(|d|d.owner=="player") {d.size_budget=0.0;d.production_budget.fill(0.0);}
+        for d in self.game.companies[0].posts.values_mut() {d.size_budget=0.0;d.production_budget.fill(0.0);}
         for r in self.game.roads.iter_mut().filter(|r|r.owner=="player") {r.road_budget=0.0;r.security_budget=0.0;}
         for r in rows {
             let value=r.daily*scale;
             match (r.category,r.item) {
-                (0,0)=>self.game.development[r.index].size_budget=value,
-                (0,g)=>self.game.development[r.index].production_budget[g-1]=value,
+                (0,0)=>self.game.companies[0].posts.get_mut(&r.index).unwrap().size_budget=value,
+                (0,g)=>self.game.companies[0].posts.get_mut(&r.index).unwrap().production_budget[g-1]=value,
                 (1,0)=>self.game.roads[r.index].road_budget=value,
                 (1,_)=>self.game.roads[r.index].security_budget=value,
                 _=>self.game.companies[0].tech_budget[r.index]=value,

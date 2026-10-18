@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 
 test('connected land services use all intermediate roads without trading at intermediate cities',async t=>{
  const call=bridge((await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'))).instance);
@@ -45,7 +45,7 @@ test('connected land services use all intermediate roads without trading at inte
   cmd({action:'tick',days:1});assert.equal(save().companies[0].routes[0].auto_type,'caravan');
  });
  await t.test('automatic creation includes non-adjacent land endpoints',()=>{
-  reset();cmd({action:'routePolicy',policy:{enabled:true,ships:[],vehicles:[{min:0,max:1,kind:'caravan'}]}});
+  reset();cmd({action:'buildPost',city:city('kyoto')});cmd({action:'routePolicy',policy:{enabled:true,ships:[],vehicles:[{min:0,max:1,kind:'caravan'}]}});
   cmd({action:'autoRoutes',city:city('kyoto'),enabled:true});cmd({action:'tick',days:15});
   const routes=save().companies[0].routes;assert.ok(routes.some(r=>r.mode==='land'&&stops.every(s=>r.stops.includes(s))));
   assert.ok(routes.every(r=>r.stops.length===2));
@@ -74,9 +74,9 @@ test('connected land services use all intermediate roads without trading at inte
   assert.ok(q.roads.legs.every(l=>!data.roads[l.road].retired));open(points,10000);const snap=save();load(snap);assert.deepEqual(save(),snap);
   const legacy=structuredClone(snap);delete legacy.land_path_version;assert.throws(()=>load(legacy));assert.deepEqual(save(),snap);
  });
- await t.test('real 3.4.4 save gains only the path version and keeps the existing direct routes',async()=>{
+ await t.test('real 3.4.4 saves are rejected without changing connected land services',async()=>{
   const oldBytes=execFileSync('git',['show','3.4.4:assets/wasm/engine.wasm'],{maxBuffer:30*1024*1024});
-  const oldCall=bridge((await WebAssembly.instantiate(oldBytes)).instance);oldCall({op:'command',command:{action:'new',seed:1700,events:false}});
-  const old=JSON.parse(oldCall({op:'save'}));load(old);assert.deepEqual(save(),{...old,land_path_version:1});
+  const oldCall=bridge((await WebAssembly.instantiate(oldBytes)).instance),before=save(),old=JSON.parse(oldCall({op:'save'}));
+  assert.throws(()=>load(old),/旧版セーブ/);assert.deepEqual(save(),before);
  });
 });

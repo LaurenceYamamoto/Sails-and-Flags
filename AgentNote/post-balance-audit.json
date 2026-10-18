@@ -1,0 +1,2270 @@
+[
+  {
+    "name": "Kingston-Havana",
+    "seed": 1700,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1950,
+    "endingCash": 210.2806599169527,
+    "assetChange": -1739.7193400830474,
+    "operating": -1739.7193400830447,
+    "deliveries": 20,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1244.8038357929986,
+        "assets": 4569.4854340769125,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2160.378083367193,
+        "assets": 5393.90131540828,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3657.8254786975467,
+        "assets": 5957.825478697547,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 2169.4039591732703,
+        "assets": 5684.088750509309,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 2522.689443803786,
+        "assets": 5972.311715729328,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 3649.8223720116935,
+        "assets": 5986.205590305117,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 3136.2221024463743,
+        "assets": 5436.222102446374,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 2558.5825834315915,
+        "assets": 4858.582583431591,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 1769.214795677828,
+        "assets": 4207.582583431591,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 1340.5584917186254,
+        "assets": 3640.558491718625,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 792.8523080642558,
+        "assets": 3092.852308064256,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 210.2806599169527,
+        "assets": 2510.2806599169526,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Havana",
+    "seed": 1700,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1200,
+    "endingCash": -0.27138390926734246,
+    "assetChange": -1200.2713839092676,
+    "operating": -1200.2713839092673,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -0.27138390926734246,
+        "assets": 3049.7286160907324,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Havana",
+    "seed": 1701,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1950,
+    "endingCash": 77.09407752020945,
+    "assetChange": -1872.9059224797907,
+    "operating": -1872.905922479793,
+    "deliveries": 20,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1222.7027202622123,
+        "assets": 4551.374806256749,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2121.912345649119,
+        "assets": 5358.17413463171,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3609.7061061759346,
+        "assets": 5909.706106175934,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 2120.256294830391,
+        "assets": 5633.9657982701865,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 2464.8591991551757,
+        "assets": 5913.7296655185155,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 3622.816410988982,
+        "assets": 5922.816410988982,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 3053.5007183979055,
+        "assets": 5353.500718397905,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 2475.718844021358,
+        "assets": 4775.718844021358,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 1686.2358109441639,
+        "assets": 4124.718844021358,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 1257.5786631204003,
+        "assets": 3557.5786631204,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 709.7759426918788,
+        "assets": 3009.7759426918788,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 77.09407752020945,
+        "assets": 2377.0940775202093,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Havana",
+    "seed": 1701,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1200,
+    "endingCash": -1.1258602932576878,
+    "assetChange": -1201.1258602932576,
+    "operating": -1201.1258602932578,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -1.1258602932576878,
+        "assets": 3048.8741397067424,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Havana",
+    "seed": 1702,
+    "posts": 1,
+    "day": 362,
+    "startingCash": 1950,
+    "endingCash": -2.5182370907657514,
+    "assetChange": -1952.518237090766,
+    "operating": -1952.5182370907569,
+    "deliveries": 19,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1253.9615512878995,
+        "assets": 4570.0222507510225,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2175.7101616223313,
+        "assets": 5403.292591341278,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3585.724754330791,
+        "assets": 5885.724754330791,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 2039.87782087915,
+        "assets": 5616.321265368362,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 2347.14114981386,
+        "assets": 5843.691069595595,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 3510.73953887918,
+        "assets": 5810.73953887918,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 2942.0839194409727,
+        "assets": 5242.083919440973,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 2364.7526263255018,
+        "assets": 4664.752626325502,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 1575.6375438135472,
+        "assets": 4013.7526263255018,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 1146.9795521333813,
+        "assets": 3446.9795521333813,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 599.4817629092342,
+        "assets": 2899.481762909234,
+        "bankrupt": false
+      },
+      {
+        "day": 362,
+        "cash": -2.5182370907657514,
+        "assets": 2297.481762909234,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Havana",
+    "seed": 1702,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1200,
+    "endingCash": -0.30432222965453093,
+    "assetChange": -1200.3043222296546,
+    "operating": -1200.3043222296546,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -0.30432222965453093,
+        "assets": 3049.6956777703454,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1700,
+    "posts": 1,
+    "day": 271,
+    "startingCash": 2450,
+    "endingCash": -2.6152629653248596,
+    "assetChange": -2452.6152629653247,
+    "operating": -2452.615262965325,
+    "deliveries": 13,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2428.3894188341224,
+        "assets": 4728.389418834122,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2439.660641548475,
+        "assets": 4739.660641548475,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 1072.73062569704,
+        "assets": 4193.160641548475,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 1242.5243081570939,
+        "assets": 4155.131887040083,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 1708.8215558218915,
+        "assets": 4008.8215558218917,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 1299.0472012149319,
+        "assets": 3599.047201214932,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 660.6213097295531,
+        "assets": 3176.1053308159885,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 459.38473703467514,
+        "assets": 2759.3847370346753,
+        "bankrupt": false
+      },
+      {
+        "day": 271,
+        "cash": -2.6152629653248596,
+        "assets": 2297.3847370346753,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1700,
+    "posts": 2,
+    "day": 44,
+    "startingCash": 1700,
+    "endingCash": -3.5952566053790633,
+    "assetChange": -1703.5952566053793,
+    "operating": -1703.5952566053788,
+    "deliveries": 2,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 580.9047433946209,
+        "assets": 3630.9047433946207,
+        "bankrupt": false
+      },
+      {
+        "day": 44,
+        "cash": -3.5952566053790633,
+        "assets": 3046.4047433946207,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1701,
+    "posts": 1,
+    "day": 272,
+    "startingCash": 2450,
+    "endingCash": -5.256730818123401,
+    "assetChange": -2455.2567308181233,
+    "operating": -2455.2567308181224,
+    "deliveries": 13,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2431.158874843713,
+        "assets": 4731.158874843713,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2444.1287061141775,
+        "assets": 4744.1287061141775,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 1078.3527003859865,
+        "assets": 4197.6287061141775,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 1248.8010137095998,
+        "assets": 4160.747743809376,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 1715.0941819336422,
+        "assets": 4015.094181933642,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 1301.900819086045,
+        "assets": 3601.900819086045,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 700.8423784828611,
+        "assets": 3180.0490047301596,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 467.2432691818766,
+        "assets": 2767.2432691818767,
+        "bankrupt": false
+      },
+      {
+        "day": 272,
+        "cash": -5.256730818123401,
+        "assets": 2294.7432691818767,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1701,
+    "posts": 2,
+    "day": 44,
+    "startingCash": 1700,
+    "endingCash": -1.897569725071662,
+    "assetChange": -1701.8975697250717,
+    "operating": -1701.8975697250717,
+    "deliveries": 2,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 582.6024302749283,
+        "assets": 3632.6024302749283,
+        "bankrupt": false
+      },
+      {
+        "day": 44,
+        "cash": -1.897569725071662,
+        "assets": 3048.1024302749283,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1702,
+    "posts": 1,
+    "day": 272,
+    "startingCash": 2450,
+    "endingCash": -4.650258221116587,
+    "assetChange": -2454.6502582211165,
+    "operating": -2454.6502582211156,
+    "deliveries": 13,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2433.9005136140377,
+        "assets": 4733.900513614038,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2448.555613070893,
+        "assets": 4748.555613070893,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 1083.9262226928522,
+        "assets": 4202.055613070893,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 1255.0255960811562,
+        "assets": 4166.315048279824,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 1721.3146849125696,
+        "assets": 4021.3146849125696,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 1306.679619527967,
+        "assets": 3606.6796195279667,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 668.8179434770875,
+        "assets": 3183.9174990063057,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 467.8497417788834,
+        "assets": 2767.8497417788835,
+        "bankrupt": false
+      },
+      {
+        "day": 272,
+        "cash": -4.650258221116587,
+        "assets": 2295.3497417788835,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Kingston-Bridgetown",
+    "seed": 1702,
+    "posts": 2,
+    "day": 44,
+    "startingCash": 1700,
+    "endingCash": -0.21671562052074478,
+    "assetChange": -1700.2167156205205,
+    "operating": -1700.2167156205205,
+    "deliveries": 2,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 584.2832843794793,
+        "assets": 3634.2832843794795,
+        "bankrupt": false
+      },
+      {
+        "day": 44,
+        "cash": -0.21671562052074478,
+        "assets": 3049.7832843794795,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1700,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 2400,
+    "endingCash": 34153.10836987801,
+    "assetChange": 33260.79960949977,
+    "operating": 31753.108369877802,
+    "deliveries": 22,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 599.4486160280171,
+        "assets": 5461.868195633026,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 7849.198595509412,
+        "assets": 10149.198595509413,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 11203.758135466627,
+        "assets": 13503.758135466627,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 13166.181035443313,
+        "assets": 15466.181035443313,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 17094.934701275393,
+        "assets": 19394.934701275393,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 18956.33626387843,
+        "assets": 21256.33626387843,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 23289.274322040288,
+        "assets": 25589.274322040288,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 25034.051547583298,
+        "assets": 27334.051547583298,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 29688.474338427746,
+        "assets": 31988.474338427746,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 31344.63763221422,
+        "assets": 33644.63763221422,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 28626.038661009283,
+        "assets": 33081.63763221427,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 34153.10836987801,
+        "assets": 37960.79960949977,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1700,
+    "posts": 2,
+    "day": 64,
+    "startingCash": 1650,
+    "endingCash": -2.405106507838674,
+    "assetChange": -1652.4051065078384,
+    "operating": -1652.4051065078402,
+    "deliveries": 3,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1247.7618745566838,
+        "assets": 4297.761874556683,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 208.4948934921613,
+        "assets": 3258.4948934921613,
+        "bankrupt": false
+      },
+      {
+        "day": 64,
+        "cash": -2.405106507838674,
+        "assets": 3047.5948934921616,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1701,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 2400,
+    "endingCash": 34167.12152287429,
+    "assetChange": 33274.93524352183,
+    "operating": 31767.121522874055,
+    "deliveries": 22,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 795.7031766175882,
+        "assets": 5580.705253009261,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 7781.7340265271705,
+        "assets": 10081.73402652717,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 11196.701551445252,
+        "assets": 13496.701551445252,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 13112.736150159399,
+        "assets": 15412.736150159399,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 17090.655962454955,
+        "assets": 19390.655962454955,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 18917.488443262868,
+        "assets": 21217.488443262868,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 23290.910026764283,
+        "assets": 25590.910026764283,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 25008.98212783361,
+        "assets": 27308.98212783361,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 29696.65955808606,
+        "assets": 31996.65955808606,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 31331.62229302151,
+        "assets": 33631.622293021515,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 28614.82578823725,
+        "assets": 33068.62229302155,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 34167.12152287429,
+        "assets": 37974.93524352183,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1701,
+    "posts": 2,
+    "day": 65,
+    "startingCash": 1650,
+    "endingCash": -16.683936959256677,
+    "assetChange": -1666.6839369592567,
+    "operating": -1666.6839369592585,
+    "deliveries": 3,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1250.0089282687932,
+        "assets": 4300.008928268793,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 262.3160630407433,
+        "assets": 3312.3160630407433,
+        "bankrupt": false
+      },
+      {
+        "day": 65,
+        "cash": -16.683936959256677,
+        "assets": 3033.3160630407433,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1702,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 2400,
+    "endingCash": 31607.52293002783,
+    "assetChange": 31324.847631924757,
+    "operating": 29207.52293002759,
+    "deliveries": 22,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 5784.591955359402,
+        "assets": 8084.591955359402,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 8761.307090597811,
+        "assets": 11061.307090597811,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 10569.431024025762,
+        "assets": 12869.431024025762,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 14238.259631160972,
+        "assets": 16538.259631160974,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 16005.475926490972,
+        "assets": 18305.475926490974,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 20154.73690804952,
+        "assets": 22454.73690804952,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 21850.5476037089,
+        "assets": 24150.5476037089,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 26334.459377296243,
+        "assets": 28634.459377296243,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 27974.02114998459,
+        "assets": 30274.02114998459,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 32727.896470234202,
+        "assets": 35027.896470234205,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 30626.479602107844,
+        "assets": 34464.89647023424,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 31607.52293002783,
+        "assets": 36024.84763192476,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Nagasaki",
+    "seed": 1702,
+    "posts": 2,
+    "day": 72,
+    "startingCash": 1650,
+    "endingCash": -3.7248073100121033,
+    "assetChange": -1653.7248073100118,
+    "operating": -1653.7248073100138,
+    "deliveries": 4,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1411.6791732061859,
+        "assets": 4461.679173206186,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 587.975192689988,
+        "assets": 3637.975192689988,
+        "bankrupt": false
+      },
+      {
+        "day": 72,
+        "cash": -3.7248073100121033,
+        "assets": 3046.275192689988,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1700,
+    "posts": 1,
+    "day": 141,
+    "startingCash": 2400,
+    "endingCash": -4.499999999993689,
+    "assetChange": -2404.4999999999936,
+    "operating": -2404.5000000000014,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1869.9000000000028,
+        "assets": 4169.900000000003,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1391.1000000000054,
+        "assets": 3691.1000000000054,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 861.000000000007,
+        "assets": 3161.0000000000073,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 348.00000000000637,
+        "assets": 2648.0000000000064,
+        "bankrupt": false
+      },
+      {
+        "day": 141,
+        "cash": -4.499999999993689,
+        "assets": 2295.5000000000064,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1700,
+    "posts": 2,
+    "day": 35,
+    "startingCash": 1650,
+    "endingCash": -9.39999999999916,
+    "assetChange": -1659.3999999999992,
+    "operating": -1659.3999999999999,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 174.40000000000083,
+        "assets": 3224.4000000000005,
+        "bankrupt": false
+      },
+      {
+        "day": 35,
+        "cash": -9.39999999999916,
+        "assets": 3040.600000000001,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1701,
+    "posts": 1,
+    "day": 141,
+    "startingCash": 2400,
+    "endingCash": -4.499999999993689,
+    "assetChange": -2404.4999999999936,
+    "operating": -2404.5000000000014,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1869.9000000000028,
+        "assets": 4169.900000000003,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1391.1000000000054,
+        "assets": 3691.1000000000054,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 861.000000000007,
+        "assets": 3161.0000000000073,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 348.00000000000637,
+        "assets": 2648.0000000000064,
+        "bankrupt": false
+      },
+      {
+        "day": 141,
+        "cash": -4.499999999993689,
+        "assets": 2295.5000000000064,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1701,
+    "posts": 2,
+    "day": 35,
+    "startingCash": 1650,
+    "endingCash": -9.39999999999916,
+    "assetChange": -1659.3999999999992,
+    "operating": -1659.3999999999999,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 174.40000000000083,
+        "assets": 3224.4000000000005,
+        "bankrupt": false
+      },
+      {
+        "day": 35,
+        "cash": -9.39999999999916,
+        "assets": 3040.600000000001,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1702,
+    "posts": 1,
+    "day": 141,
+    "startingCash": 2400,
+    "endingCash": -4.499999999993689,
+    "assetChange": -2404.4999999999936,
+    "operating": -2404.5000000000014,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 1869.9000000000028,
+        "assets": 4169.900000000003,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1391.1000000000054,
+        "assets": 3691.1000000000054,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 861.000000000007,
+        "assets": 3161.0000000000073,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 348.00000000000637,
+        "assets": 2648.0000000000064,
+        "bankrupt": false
+      },
+      {
+        "day": 141,
+        "cash": -4.499999999993689,
+        "assets": 2295.5000000000064,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Osaka-Edo",
+    "seed": 1702,
+    "posts": 2,
+    "day": 35,
+    "startingCash": 1650,
+    "endingCash": -9.39999999999916,
+    "assetChange": -1659.3999999999992,
+    "operating": -1659.3999999999999,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 174.40000000000083,
+        "assets": 3224.4000000000005,
+        "bankrupt": false
+      },
+      {
+        "day": 35,
+        "cash": -9.39999999999916,
+        "assets": 3040.600000000001,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1700,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 3300,
+    "endingCash": 7583.881982999439,
+    "assetChange": 4283.881982999439,
+    "operating": 4283.881982999643,
+    "deliveries": 16,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 4958.142701629876,
+        "assets": 6358.142701629876,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 5727.184996697881,
+        "assets": 7127.184996697881,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 6110.785827260083,
+        "assets": 7510.785827260083,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 7509.924153606152,
+        "assets": 8909.924153606153,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 7644.570222167491,
+        "assets": 9044.570222167491,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7076.109279546569,
+        "assets": 10224.93973170072,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 6609.043362458951,
+        "assets": 10124.017652655297,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 9499.281982999528,
+        "assets": 10899.281982999528,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 9028.281982999506,
+        "assets": 10428.281982999506,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 8541.581982999483,
+        "assets": 9941.581982999483,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 8070.581982999462,
+        "assets": 9470.581982999462,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 7583.881982999439,
+        "assets": 8983.881982999439,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1700,
+    "posts": 2,
+    "day": 182,
+    "startingCash": 2550,
+    "endingCash": -6.039182471142253,
+    "assetChange": -2556.0391824711423,
+    "operating": -2556.0391824711587,
+    "deliveries": 12,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2745.984968451685,
+        "assets": 4895.984968451685,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 2622.261185509455,
+        "assets": 4772.261185509455,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 2394.800095030444,
+        "assets": 4544.800095030444,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 1782.9988781575967,
+        "assets": 3932.9988781575967,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 1110.3242922910754,
+        "assets": 3260.3242922910754,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 14.460817528857747,
+        "assets": 2164.4608175288577,
+        "bankrupt": false
+      },
+      {
+        "day": 182,
+        "cash": -6.039182471142253,
+        "assets": 2143.9608175288577,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1701,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 3300,
+    "endingCash": 9142.799710626388,
+    "assetChange": 5842.799710626388,
+    "operating": 5842.7997106266175,
+    "deliveries": 18,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 5891.3523383044785,
+        "assets": 7291.3523383044785,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 6711.614406365861,
+        "assets": 8111.614406365861,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 7932.887534594116,
+        "assets": 9332.887534594116,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 8415.586333739106,
+        "assets": 9815.586333739106,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 9465.811351549257,
+        "assets": 10865.811351549257,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7953.368188824768,
+        "assets": 11078.566293316475,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 7162.486720243793,
+        "assets": 11009.473648237705,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 9668.104479659041,
+        "assets": 12094.936143891371,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 10587.199710626455,
+        "assets": 11987.199710626455,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 10100.499710626433,
+        "assets": 11500.499710626433,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 9629.49971062641,
+        "assets": 11029.49971062641,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 9142.799710626388,
+        "assets": 10542.799710626388,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1701,
+    "posts": 2,
+    "day": 310,
+    "startingCash": 2550,
+    "endingCash": -10.260050933484901,
+    "assetChange": -2560.260050933485,
+    "operating": -2560.260050933479,
+    "deliveries": 18,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 4229.027869227156,
+        "assets": 6379.027869227156,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 4204.735018259176,
+        "assets": 6354.735018259176,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 4494.282538053842,
+        "assets": 6644.282538053842,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 4071.7964172573375,
+        "assets": 6221.796417257337,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 4190.934689406238,
+        "assets": 6340.934689406238,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 1784.4445584702748,
+        "assets": 5648.927146785014,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 550.2916053971121,
+        "assets": 4649.050017883238,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 851.2223006779751,
+        "assets": 4506.217796712123,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 1673.4399490665132,
+        "assets": 3823.4399490665132,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 241.23994906651507,
+        "assets": 2391.239949066515,
+        "bankrupt": false
+      },
+      {
+        "day": 310,
+        "cash": -10.260050933484901,
+        "assets": 2139.739949066515,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1702,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 3300,
+    "endingCash": 8381.74510900818,
+    "assetChange": 5081.7451090081795,
+    "operating": 5081.745109008401,
+    "deliveries": 18,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 5810.489289612071,
+        "assets": 7210.489289612071,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 6606.721530820785,
+        "assets": 8006.721530820785,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 7779.838215841478,
+        "assets": 9179.838215841479,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 8238.320813692133,
+        "assets": 9638.320813692133,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 9243.263192752987,
+        "assets": 10643.263192752987,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 6972.182646892558,
+        "assets": 10830.518740188814,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 8502.05016167835,
+        "assets": 11652.35306281385,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 10297.145109008268,
+        "assets": 11697.145109008268,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 9826.145109008246,
+        "assets": 11226.145109008246,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 9339.445109008224,
+        "assets": 10739.445109008224,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 8868.445109008202,
+        "assets": 10268.445109008202,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 8381.74510900818,
+        "assets": 9781.74510900818,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Cairo-Suez",
+    "seed": 1702,
+    "posts": 2,
+    "day": 292,
+    "startingCash": 2550,
+    "endingCash": -4.336778634621808,
+    "assetChange": -2554.3367786346216,
+    "operating": -2554.3367786346244,
+    "deliveries": 18,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 31,
+        "cash": 4148.042540184216,
+        "assets": 6298.042540184216,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 4099.816690064161,
+        "assets": 6249.816690064161,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 4341.292087710362,
+        "assets": 6491.292087710362,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 3894.699960844442,
+        "assets": 6044.699960844442,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 3968.6530656146297,
+        "assets": 6118.65306561463,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 808.2057289924824,
+        "assets": 5401.272654007395,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 1403.4446903692,
+        "assets": 5292.876144913797,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 2254.263221365374,
+        "assets": 4404.263221365374,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 868.2632213653787,
+        "assets": 3018.2632213653787,
+        "bankrupt": false
+      },
+      {
+        "day": 292,
+        "cash": -4.336778634621808,
+        "assets": 2145.6632213653784,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1700,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1860,
+    "endingCash": 36607.43901283404,
+    "assetChange": 35504.826608410454,
+    "operating": 34747.439012834024,
+    "deliveries": 28,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2327.4239765765146,
+        "assets": 5309.604749023587,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 3684.6374072729927,
+        "assets": 6717.081790664686,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 6515.430543513675,
+        "assets": 8815.430543513674,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 5886.409369550822,
+        "assets": 9832.47716869981,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 7395.275610321224,
+        "assets": 11426.354462242418,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 13774.042844931208,
+        "assets": 16074.042844931208,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 16180.730897257528,
+        "assets": 19237.25229904329,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 19004.46766409194,
+        "assets": 22401.12641663622,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 24963.776863961783,
+        "assets": 27263.776863961783,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 26424.71121396809,
+        "assets": 30456.697460274594,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 34177.0426310087,
+        "assets": 36477.0426310087,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 36607.43901283404,
+        "assets": 39664.826608410454,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1700,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1110,
+    "endingCash": -1.330981980864368,
+    "assetChange": -1111.3309819808646,
+    "operating": -1111.330981980865,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -1.330981980864368,
+        "assets": 3048.6690180191354,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1701,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1860,
+    "endingCash": 36350.301526673284,
+    "assetChange": 35247.62251732732,
+    "operating": 34490.30152667325,
+    "deliveries": 28,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2270.0918174479775,
+        "assets": 5264.373312244539,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 3593.258175795764,
+        "assets": 6638.938924079839,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 5982.862456447902,
+        "assets": 8282.862456447903,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 5162.058759189451,
+        "assets": 9192.9709553411,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 6937.243731302871,
+        "assets": 10968.405631254445,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 13517.707089515028,
+        "assets": 15817.707089515028,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 15924.664577393583,
+        "assets": 18981.033247072126,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 18746.73071592885,
+        "assets": 22145.010681701948,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 24706.436683201628,
+        "assets": 27006.436683201628,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 26167.396867405438,
+        "assets": 30199.412500452796,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 33919.78533859233,
+        "assets": 36219.78533859233,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 36350.301526673284,
+        "assets": 39407.62251732732,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1701,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1110,
+    "endingCash": -0.11092027310908747,
+    "assetChange": -1110.110920273109,
+    "operating": -1110.1109202731095,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -0.11092027310908747,
+        "assets": 3049.889079726891,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1702,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1860,
+    "endingCash": 26390.844566104635,
+    "assetChange": 25365.854544768063,
+    "operating": 24530.84456610449,
+    "deliveries": 28,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 2308.5382054627844,
+        "assets": 5300.476589265829,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 3644.685130350141,
+        "assets": 6687.807770717378,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 5923.962863527355,
+        "assets": 8223.962863527355,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 4952.361922480482,
+        "assets": 8302.065681747139,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 7282.189350126244,
+        "assets": 9582.189350126244,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7908.678599078711,
+        "assets": 10208.67859907871,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 8010.038666016228,
+        "assets": 10567.430324103942,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 9295.763418106715,
+        "assets": 12354.09718815162,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 14432.072602085718,
+        "assets": 16732.07260208572,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 15984.627798357475,
+        "assets": 20016.393303987163,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 23883.63679537835,
+        "assets": 26183.63679537835,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 26390.844566104635,
+        "assets": 29525.854544768063,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "Genoa-Livorno",
+    "seed": 1702,
+    "posts": 2,
+    "day": 24,
+    "startingCash": 1110,
+    "endingCash": -5.700422580641799,
+    "assetChange": -1115.7004225806418,
+    "operating": -1115.7004225806425,
+    "deliveries": 1,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 24,
+        "cash": -5.700422580641799,
+        "assets": 3044.2995774193582,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1700,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1850,
+    "endingCash": 13075.11515495649,
+    "assetChange": 11225.11515495649,
+    "operating": 11225.115154956486,
+    "deliveries": 20,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 243.84366905127138,
+        "assets": 3417.5,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1129.6351476048685,
+        "assets": 4266.016883498627,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3192.024886030589,
+        "assets": 5492.024886030589,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 4448.024167107269,
+        "assets": 6748.024167107269,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 5710.828339111077,
+        "assets": 8010.828339111077,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7022.340465638283,
+        "assets": 9322.340465638283,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 5559.048504541117,
+        "assets": 8584.840465638283,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 6899.155092826485,
+        "assets": 9906.438242966839,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 8281.182224332686,
+        "assets": 11274.044831252206,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 10333.571962758408,
+        "assets": 12633.571962758408,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 11711.45727884606,
+        "assets": 14011.45727884606,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 13075.11515495649,
+        "assets": 15375.11515495649,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1700,
+    "posts": 2,
+    "day": 21,
+    "startingCash": 1100,
+    "endingCash": -1,
+    "assetChange": -1101,
+    "operating": -1101,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 21,
+        "cash": -1,
+        "assets": 3049,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1701,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1850,
+    "endingCash": 13082.31497558425,
+    "assetChange": 11232.31497558425,
+    "operating": 11232.31497558425,
+    "deliveries": 20,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 240.10792774526954,
+        "assets": 3417.5,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1147.979474321642,
+        "assets": 4287.317972029578,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3210.369212747363,
+        "assets": 5510.369212747362,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 4463.986138741348,
+        "assets": 6763.986138741348,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 5724.846534938438,
+        "assets": 8024.846534938438,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7034.752832512939,
+        "assets": 9334.752832512939,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 5570.113537803921,
+        "assets": 8597.252832512939,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 6909.067929402492,
+        "assets": 9917.503276229641,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 8290.088887427952,
+        "assets": 11283.957667828214,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 10342.478625853673,
+        "assets": 12642.478625853673,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 11719.46773654271,
+        "assets": 14019.46773654271,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 13082.31497558425,
+        "assets": 15382.31497558425,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1701,
+    "posts": 2,
+    "day": 21,
+    "startingCash": 1100,
+    "endingCash": -1,
+    "assetChange": -1101,
+    "operating": -1101,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 21,
+        "cash": -1,
+        "assets": 3049,
+        "bankrupt": true
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1702,
+    "posts": 1,
+    "day": 365,
+    "startingCash": 1850,
+    "endingCash": 13047.772972711851,
+    "assetChange": 11197.772972711851,
+    "operating": 11197.772972711853,
+    "deliveries": 20,
+    "bankrupt": false,
+    "months": [
+      {
+        "day": 31,
+        "cash": 236.3137850515368,
+        "assets": 3417.5,
+        "bankrupt": false
+      },
+      {
+        "day": 59,
+        "cash": 1124.6635068790638,
+        "assets": 4266.996895959358,
+        "bankrupt": false
+      },
+      {
+        "day": 90,
+        "cash": 3187.0532453047845,
+        "assets": 5487.0532453047845,
+        "bankrupt": false
+      },
+      {
+        "day": 120,
+        "cash": 4438.262228244496,
+        "assets": 6738.262228244496,
+        "bankrupt": false
+      },
+      {
+        "day": 151,
+        "cash": 5697.16133345715,
+        "assets": 7997.16133345715,
+        "bankrupt": false
+      },
+      {
+        "day": 181,
+        "cash": 7005.449588007228,
+        "assets": 9305.449588007228,
+        "bankrupt": false
+      },
+      {
+        "day": 212,
+        "cash": 5539.454261623151,
+        "assets": 8567.949588007228,
+        "bankrupt": false
+      },
+      {
+        "day": 243,
+        "cash": 6877.250112231239,
+        "assets": 9886.844000048872,
+        "bankrupt": false
+      },
+      {
+        "day": 273,
+        "cash": 8257.260153736943,
+        "assets": 11252.13985065696,
+        "bankrupt": false
+      },
+      {
+        "day": 304,
+        "cash": 10309.649892162664,
+        "assets": 12609.649892162664,
+        "bankrupt": false
+      },
+      {
+        "day": 334,
+        "cash": 11685.739175042103,
+        "assets": 13985.739175042103,
+        "bankrupt": false
+      },
+      {
+        "day": 365,
+        "cash": 13047.772972711851,
+        "assets": 15347.772972711851,
+        "bankrupt": false
+      }
+    ]
+  },
+  {
+    "name": "London-Nantes",
+    "seed": 1702,
+    "posts": 2,
+    "day": 21,
+    "startingCash": 1100,
+    "endingCash": -1,
+    "assetChange": -1101,
+    "operating": -1101,
+    "deliveries": 0,
+    "bankrupt": true,
+    "months": [
+      {
+        "day": 21,
+        "cash": -1,
+        "assets": 3049,
+        "bankrupt": true
+      }
+    ]
+  }
+]

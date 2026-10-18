@@ -7,7 +7,7 @@ import {SIBERIAN_CITIES,SIBERIAN_ROADS} from '../src/siberian-data.js';
 import {ROADS,roadBetween} from '../src/land-data.js';
 import {PORT_APPROACHES,onLand} from '../src/sea-routing.js';
 import {demandProfile} from '../src/demand-data.js';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),query:request=>call({op:'query',request}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 

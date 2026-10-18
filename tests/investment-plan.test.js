@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge,postFixture} from './post-fixture.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 test('unified investment plans: monthly allocation, thresholds, reserve, priorities and persistence',async t=>{
  const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));
@@ -12,7 +12,7 @@ test('unified investment plans: monthly allocation, thresholds, reserve, priorit
  const road=data.roads.findIndex(r=>!r.retired&&[r.a,r.b].includes(cairo)&&[r.a,r.b].includes(suez));
  const fund=(g,cash)=>{g.companies[0].initial_cash+=cash-g.companies[0].cash;g.companies[0].cash=cash;};
  const base=structuredClone(original);fund(base,1e8);base.companies[0].licenses=data.nations.map((_,i)=>i);
- base.development[cairo].owner='player';base.development[suez].owner='player';base.roads[road].owner='player';load(base);
+ base.companies[0].posts[cairo]=postFixture(data.goods.length);base.companies[0].posts[suez]=postFixture(data.goods.length);base.roads[road].owner='player';load(base);
  const defaults=()=>query({query:'investmentPlan'}).plan;
  const report=p=>query({query:'investmentPlan',plan:p});
  const apply=p=>cmd({action:'investmentPlan',plan:p});
@@ -52,15 +52,15 @@ test('unified investment plans: monthly allocation, thresholds, reserve, priorit
  });
  await t.test('no targets or zero weights leave budgets unspent; insufficient cash scales categories equally',()=>{
   load(base);const p=defaults();p.budgets=p.budgets.map(()=>({mode:'fixed',value:3100}));p.min=0;p.max=0;p.reserve=1000;
-  apply(p);let g=save();g.companies[0].licenses=[];fund(g,1030);load(g);cmd({action:'tick',days:1});g=save();
+  apply(p);let g=save();fund(g,1030+call({op:'view'}).companies[0].fixed);load(g);cmd({action:'tick',days:1});g=save();
   for(const k of ['technologyInvestment','cityInvestment','roadInvestment'])near(-g.companies[0].totals[k],10);
   assert.ok(g.companies[0].cash>=1000-1e-8);
-  load(original);const none=defaults();none.budgets=none.budgets.map(()=>({mode:'fixed',value:310}));for(let i=0;i<6;i++)none.weights[`tech:${i}`]=0;
+  load(original);const none=defaults();none.budgets=none.budgets.map(()=>({mode:'fixed',value:310}));for(let i=0;i<8;i++)none.weights[`tech:${i}`]=0;
   apply(none);near(report(none).daily,0);const cash=save().companies[0].cash;cmd({action:'tick',days:1});near(save().companies[0].cash,cash);
  });
  await t.test('fleet purchases precede roads, roads precede cities; automatic rights repeat and honor switches',()=>{
   load(base);cmd({action:'openRoute',kind:'caravan',stops:[cairo,suez],allowed:[0],margin:100});
-  let g=save();g.roads[road].owner='state';g.development[cairo].owner='state';g.development[suez].owner='state';
+  let g=save();g.roads[road].owner='state';delete g.companies[0].posts[suez];
   g.companies[0].routes[0].replacements=['caravan'];load(g);
   const p=defaults();p.budgets=p.budgets.map(()=>({mode:'fixed',value:0}));p.roads=true;p.cities=true;p.reserve=1000;p.route_only=true;
   const a={enabled:true,replaceLost:true,expand:10,shrink:30};
@@ -71,9 +71,8 @@ test('unified investment plans: monthly allocation, thresholds, reserve, priorit
   fund(g,1000+expense+price+roadCost+1);load(g);cmd({action:'investmentPlan',plan:p,automation:a});cmd({action:'tick',days:1});
   let after=save(),co=after.companies[0];assert.equal(co.ships.length,2);assert.equal(after.roads[road].owner,'player');assert.equal(after.development[cairo].owner,'state');assert.equal(after.development[suez].owner,'state');assert.ok(co.cash>=1000-1e-7);
   const log=co.ledger.filter(x=>x.day===1);assert.ok(log.findIndex(x=>x.category==='shipPurchase')<log.findIndex(x=>x.category==='roadPurchase'));
-  // Rival city excluded; state city bought. Enabling rival purchases pays its owner.
-  after.development[cairo].owner=after.companies[1].id;fund(after,1e7);load(after);cmd({action:'tick',days:1});assert.equal(save().development[suez].owner,'player');assert.equal(save().development[cairo].owner,after.companies[1].id);
-  p.city_rivals=true;apply(p);cmd({action:'tick',days:1});assert.equal(save().development[cairo].owner,'player');
+  // Existing posts remain; the missing endpoint receives an independent post.
+  fund(after,1e7);load(after);cmd({action:'tick',days:1});assert.ok(save().companies[0].posts[suez]);assert.ok(save().companies[0].posts[cairo]);
   p.cities=false;apply(p);const saved=save();load(saved);assert.deepEqual(save(),saved);
  });
 });

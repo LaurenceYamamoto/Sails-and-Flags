@@ -70,13 +70,13 @@ impl Engine {
                 }
             }
             "cityPurchase" => {
-                let rivals = flag(v, "rivals")?;
+
                 let route_only = flag(v, "routeOnly")?;
                 let stops: BTreeSet<_> = co.routes.iter().flat_map(|r|r.stops.iter().copied()).collect();
                 for (i, d) in self.game.development.iter().enumerate() {
-                    if d.owner == co.id || (!rivals && d.owner != "state" && d.owner != "private")
+                    if co.posts.contains_key(&i)
                         || (route_only && !stops.contains(&i)) || !co.licenses.contains(&self.data.cities[i].nation) { continue; }
-                    let price = self.development_cost(i);
+                    let price = self.post_open_cost_at(0,co.posts.len()+rows.len());
                     cost += price;
                     rows.push(json!({"city":i,"price":price,"owner":d.owner}));
                 }
@@ -101,8 +101,7 @@ impl Engine {
                     ensure(min<=max,"対象が不正です。")?;
                     (min,max)
                 } else { (0.0,0.0) };
-                for (i,d) in self.game.development.iter().enumerate() {
-                    if d.owner != co.id { continue; }
+                for (&i,d) in &co.posts {
                     let goods: Vec<_> = (0..self.data.goods.len()).filter(|&g| {
                         let base=self.data.cities[i].supply[g];
                         production.is_some() && base>=min && base<=max && (base>0.0 || production==Some(0.0))
@@ -139,9 +138,9 @@ impl Engine {
                 }
                 "cityBudget" => {
                     let i=row["city"].as_u64().unwrap() as usize;
-                    if v.get("size").is_some() { self.game.development[i].size_budget=number(v,"size")?; }
+                    if v.get("size").is_some() { self.game.companies[0].posts.get_mut(&i).unwrap().size_budget=number(v,"size")?; }
                     for g in row["goods"].as_array().unwrap() {
-                        self.game.development[i].production_budget[g.as_u64().unwrap() as usize]=number(v,"production")?;
+                        self.game.companies[0].posts.get_mut(&i).unwrap().production_budget[g.as_u64().unwrap() as usize]=number(v,"production")?;
                     }
                 }
                 _ => unreachable!(),

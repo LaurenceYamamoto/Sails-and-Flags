@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {gunzipSync} from 'node:zlib';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 import {YANGTZE_WATERWAYS,RIVER_MOUTHS} from '../src/yangtze-waterways.js';
 import {landSegment,onLand} from '../src/world-geometry.js';
 import {cityNames} from '../src/city-names.js';
@@ -11,7 +11,7 @@ const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 const city=id=>w.cities.findIndex(c=>c.id===id),ids=['shanghai','jiujiang','yueyang','yangzhou','nanjing','hankou','yichang','nanchang','changsha'];
 const binary=fs.readFileSync('assets/wasm/engine.wasm');
 const display=c=>({x:c.displayX??c.x,y:c.displayY??c.y});
-const orderedRoute=r=>({...r,stops:[...r.stops].sort((a,b)=>w.cities[a].order-w.cities[b].order)});
+const orderedRoute=r=>({...r,buy_below:r.buy_below??0,sell_above:r.sell_above??0,stops:[...r.stops].sort((a,b)=>w.cities[a].order-w.cities[b].order)});
 const orderedShip=(s,routes)=>{if(s.route==null)return s;const r=routes.find(r=>r.id===s.route);return {...s,next:orderedRoute(r).stops.indexOf(r.stops[s.next])};};
 // Tests in this file run sequentially; reset all game state while reusing immutable world data.
 let testCall;
@@ -38,14 +38,8 @@ test('schematic river junctions meet only at Yangzhou and Jiujiang while distanc
  }
 });
 
-test('revision28 saves append Shanghai-Suzhou without changing the existing campaign',async()=>{
- const e=await engine(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yangtze-before-display-28.json.gz')));
- assert.equal(old.city_version,28);e.load(old);const after=e.save();assert.equal(after.city_version,30);assert.equal(after.roads.length,356);
- assert.deepEqual(after.roads.slice(0,-1),old.roads);for(const key of ['markets','development','rng','day','ledger'])assert.deepEqual(after[key],old[key]);
- for(const [i,co] of old.companies.entries()){const {routes,ships,...rest}=co,{routes:nr,ships:ns,...next}=after.companies[i];assert.deepEqual(next,rest);assert.ok(nr.every(r=>r.stops.length===2));assert.deepEqual(ns.map(({route,next,...s})=>s),ships.map(({route,next,...s})=>s));}
- e.load(after);assert.deepEqual(e.save(),after);
- for(const stops of [['shanghai','suzhou'],['suzhou','shanghai']].map(pair=>pair.map(city))){assert.ok(e.query({query:'connection',stops}).types.includes('caravan'));open(e,stops,'caravan');}
- e.load(e.save());
+test('yangtze-before-display-28 saves are rejected before altering trading-post state',async()=>{
+ const e=await engine(),before=e.save(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yangtze-before-display-28.json.gz')));assert.throws(()=>e.load(old),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
 test('Yueyang-Changsha is a Sloop-only Dongting/Xiang branch and delivers from the ocean',async()=>{
@@ -60,16 +54,8 @@ test('Yueyang-Changsha is a Sloop-only Dongting/Xiang branch and delivers from t
  assert.ok(moving);assert.ok(e.save().companies[0].routes[0].deliveries>0);e.load(e.save());
 });
 
-test('revision29 Yueyang land convoy and road assets migrate once without changing unrelated routes',async()=>{
- const e=await engine(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yueyang-land-29.json.gz'))),road=w.roads.findIndex(r=>r.id==='yueyang_changsha');
- assert.equal(old.city_version,29);e.load(old);const after=e.save(),p=after.companies[0],prior=old.companies[0];assert.equal(after.city_version,30);
- assert.equal(p.cash,prior.cash+old.roads[road].basis+old.roads[road].pool+100);assert.deepEqual(p.routes,prior.routes.slice(1).map(orderedRoute));assert.deepEqual(p.ships.slice(1),prior.ships.slice(1).map(s=>orderedShip(s,prior.routes)));
- assert.equal(p.ships[0].id,prior.ships[0].id);assert.equal(p.ships[0].kind,'caravan');assert.equal(p.ships[0].route,null);assert.equal(p.ships[0].voyage,null);assert.deepEqual(p.ships[0].cargo,[]);
- assert.deepEqual(after.markets,old.markets);assert.deepEqual(after.development,old.development);assert.equal(after.rng,old.rng);assert.ok(after.next_id>=old.next_id);
- assert.equal(after.roads[road].owner,'state');assert.equal(after.roads[road].basis,0);assert.equal(after.roads[road].pool,0);
- e.load(after);assert.deepEqual(e.save(),after);
- for(const change of [g=>g.roads[road].pool=-1,g=>g.companies[0].ships[0].cargo[0].cost=-1]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
- for(const command of [{action:'buyRoad',road},{action:'roadInvestment',road,roadBudget:100,securityBudget:0}])assert.throws(()=>e.cmd(command));
+test('yueyang-land-29 saves are rejected before altering trading-post state',async()=>{
+ const e=await engine(),before=e.save(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yueyang-land-29.json.gz')));assert.throws(()=>e.load(old),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
 test('Yangtze network uses Poyang, ends at Yichang and reaches the ocean through Shanghai',()=>{
@@ -101,13 +87,8 @@ test('all requested river links and ocean connections allow only Sloop hulls and
  const catalog=e.catalog();assert.equal(catalog.waterAccess,undefined);assert.equal(catalog.cities.length,323);
 });
 
-test('real 3.3.12 land voyages migrate once while preserving unrelated sea-river services',async()=>{
- const e=await engine(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/pre-yangtze-26.json.gz')));assert.equal(old.city_version,26);e.load(old);const g=e.save(),p=g.companies[0];
- assert.equal(g.city_version,30);assert.equal(p.cash,old.companies[0].cash+2700);assert.deepEqual(g.markets.slice(0,old.markets.length),old.markets);assert.deepEqual(g.development.slice(0,old.development.length),old.development);assert.equal(g.rng,old.rng);
- assert.deepEqual(p.routes,[orderedRoute(old.companies[0].routes[2])]);assert.deepEqual(p.ships[2],orderedShip(old.companies[0].ships[2],old.companies[0].routes));
- for(let i=0;i<2;i++){assert.equal(p.ships[i].id,old.companies[0].ships[i].id);assert.equal(p.ships[i].kind,old.companies[0].ships[i].kind);assert.equal(p.ships[i].route,null);assert.equal(p.ships[i].voyage,null);assert.deepEqual(p.ships[i].cargo,[]);}
- for(const id of ['yangzhou_nanjing','hankou_yichang']){const i=w.roads.findIndex(r=>r.id===id);assert.equal(g.roads[i].owner,'state');assert.equal(g.roads[i].basis,0);const bad=structuredClone(old);bad.roads[i].basis=-1;assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),g);}
- e.load(g);assert.deepEqual(e.save(),g);
+test('pre-yangtze-26 saves are rejected before altering trading-post state',async()=>{
+ const e=await engine(),before=e.save(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/pre-yangtze-26.json.gz')));assert.throws(()=>e.load(old),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
 test('Ningbo-Yichang trades through the estuary with no intermediate unloading and restores underway',async()=>{
@@ -133,13 +114,8 @@ test('three new Yangtze cities and the exact requested river/road network are co
  const circuit=['shanghai','yangzhou','nanjing','jiujiang','nanchang','jiujiang','hankou','yueyang','yichang','yueyang','hankou','jiujiang'].map(city);assert.throws(()=>open(e,circuit));
 });
 
-test('real revision27 saves append markets and retire replaced roads without losing existing river fleets',async()=>{
- const e=await engine(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yangtze-before-cities-27.json.gz')));assert.equal(old.city_version,27);e.load(old);const after=e.save(),p=after.companies[0];
- assert.equal(after.city_version,30);assert.equal(after.development.length,323);assert.equal(after.roads.length,356);assert.equal(after.rng,old.rng);assert.ok(after.next_id>=old.next_id);
- assert.deepEqual(after.markets.slice(0,old.markets.length),old.markets);assert.deepEqual(after.development.slice(0,320),old.development);
- assert.equal(p.cash,old.companies[0].cash+1350);assert.deepEqual(p.routes,old.companies[0].routes.slice(1).map(orderedRoute));assert.deepEqual(p.ships.slice(1),old.companies[0].ships.slice(1).map(s=>orderedShip(s,old.companies[0].routes)));assert.equal(p.ships[0].route,null);assert.deepEqual(p.ships[0].cargo,[]);
- for(const change of [g=>g.markets.at(-1).stock=-1,g=>g.companies[0].ships[0].cargo[0].cost=-1,g=>g.development.push(g.development[0]),g=>g.companies[0].routes[1].stops[0]=320]){const bad=structuredClone(old);change(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),after);}
- e.load(after);assert.deepEqual(e.save(),after);e.cmd({action:'tick',days:31});e.load(e.save());
+test('yangtze-before-cities-27 saves are rejected before altering trading-post state',async()=>{
+ const e=await engine(),before=e.save(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/yangtze-before-cities-27.json.gz')));assert.throws(()=>e.load(old),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
 

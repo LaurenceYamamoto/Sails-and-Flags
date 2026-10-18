@@ -1,4 +1,6 @@
 mod accounts;
+mod posts;
+mod facility_management;
 mod bulk_investment;
 mod investment;
 mod route_management;
@@ -108,6 +110,8 @@ impl Engine {
                 let mut g: Game = serde_json::from_str(text).map_err(
                     |_| "この保存形式は読み込めません。旧版セーブには対応していません。",
                 )?;
+                model::ensure(g.version == 2 && g.post_version == 1,
+                    "この保存形式は読み込めません。旧版セーブには対応していません。")?;
                 if g.transport_version == 0 {
                     for c in &mut g.companies {
                         model::ensure(
@@ -162,6 +166,8 @@ impl Engine {
                         if bases.len() == 1 { design.base_hull = Some(bases[0].id.clone()); }
                     }
                 }
+                // Extend earlier trading-post previews only; pre-post formats are rejected above.
+                for c in &mut g.companies {if c.technology.len()==6 && c.tech_budget.len()==6 {c.technology.resize(8,0.0);c.tech_budget.resize(8,0.0);}}
                 let prototype_refunds = self.rollback_waterways(&mut g)?;
                 if g.city_version == 27 { self.validate_yangtze27(&g)?; } else { self.validate(&g, true)?; }
                 // Rename only the known regional rivals, preserving custom and legacy names.

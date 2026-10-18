@@ -5,7 +5,7 @@ import {CITIES,NATIONS,GOODS} from '../src/data.js';
 import {ROADS} from '../src/land-data.js';
 import {EUROPE_PORTS,EUROPE_INLAND,EUROPE_NATIONS,EUROPE_ROADS} from '../src/europe-expansion-data.js';
 import {seaRoute,PORT_APPROACHES,waterSegment} from '../src/sea-routing.js';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 const ids=[...Object.keys(EUROPE_PORTS),...Object.keys(EUROPE_INLAND)];
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 test('European cities have connected roads, suitable markets, historical authorities and sufficient map separation',()=>{

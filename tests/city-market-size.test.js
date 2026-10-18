@@ -48,17 +48,8 @@ test('Wasm consumption uses base market size and uncapped development, independe
  }
 });
 
-test('actual pre-change save restores without changing investments, stocks, cargo, schedules or accounting',async()=>{
- const e=await engine(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/pre-market-size-3.3.14.json.gz')));assert.equal(old.day,3);
- e.load(old);const migrated=e.save();
- for(const key of ['markets','development','roads','rng','day','ledger'])assert.deepEqual(migrated[key],old[key]);
- for(const [i,co] of old.companies.entries()){
-  const {routes,ships,...financial}=co,{routes:nextRoutes,ships:nextShips,...nextFinancial}=migrated.companies[i];assert.deepEqual(nextFinancial,financial);
-  assert.ok(nextRoutes.every(r=>r.stops.length===2));
-  assert.deepEqual(nextShips.map(({route,next,...s})=>s),ships.map(({route,next,...s})=>s));
- }
- e.load(migrated);assert.deepEqual(e.save(),migrated);
- e.cmd({action:'tick',days:1});const after=e.save();assert.equal(after.day,4);e.load(old);e.cmd({action:'tick',days:1});assert.deepEqual(e.save(),after);
+test('pre-trading-post market saves are rejected without changing the current campaign',async()=>{
+ const e=await engine(),before=e.save(),old=JSON.parse(gunzipSync(fs.readFileSync('tests/fixtures/pre-market-size-3.3.14.json.gz')));assert.throws(()=>e.load(old),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
 test('one year of local simulation keeps markets finite and ships trading across fixed seeds',async()=>{

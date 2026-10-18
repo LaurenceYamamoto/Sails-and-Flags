@@ -9,7 +9,7 @@ const world=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 const retired=JSON.parse(fs.readFileSync('wasm-core/data/retired-waterway-catalog.json'));
 const city=id=>world.cities.findIndex(c=>c.id===id);
 const fixture=revision=>JSON.parse(gunzipSync(fs.readFileSync(`tests/fixtures/waterway-${revision===23?'baseline':'prototype'}-${revision}.json.gz`)));
-const orderedRoute=r=>({...r,stops:[...r.stops].sort((a,b)=>world.cities[a].order-world.cities[b].order)});
+const orderedRoute=r=>({buy_below:0,sell_above:0,...r,stops:[...r.stops].sort((a,b)=>world.cities[a].order-world.cities[b].order)});
 const orderedShip=(s,routes)=>{if(s.route==null)return s;const r=routes.find(r=>r.id===s.route);return {...s,next:orderedRoute(r).stops.indexOf(r.stops[s.next])};};
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm')),call=bridge(instance);return {cmd:command=>call({op:'command',command}),query:request=>call({op:'query',request}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),view:()=>call({op:'view'})};}
 
@@ -31,24 +31,12 @@ test('allowlist preserves the restored world and explicitly enabled river corrid
  for(const c of RIVAL_STARTS)assert.deepEqual(world.starts.find(x=>x.id===c.id).routes.map(r=>r.kind),c.routes.map(r=>r.kind));
 });
 
-test('actual released 3.3.10 save preserves unrelated land routes and refunds only the two exceptions',async()=>{
- const e=await engine(),old=fixture(23);e.load(old);const g=e.save();
- assert.equal(g.city_version,30);assert.equal(g.companies[0].cash,old.companies[0].cash+1350);assert.deepEqual(g.markets.slice(0,old.markets.length),old.markets);assert.deepEqual(g.development.slice(0,old.development.length),old.development);assert.equal(g.rng,old.rng);
- assert.deepEqual(g.companies[0].routes,[orderedRoute(old.companies[0].routes[1])]);assert.equal(g.companies[0].ships[0].route,null);assert.equal(g.companies[0].ships[0].kind,'caravan');
- e.load(g);assert.deepEqual(e.save(),g);
+test('released 3.3.10 saves require a new trading-post campaign',async()=>{
+ const e=await engine(),before=e.save();assert.throws(()=>e.load(fixture(23)),/旧版セーブ/);assert.deepEqual(e.save(),before);
 });
 
-test('withdrawn revision 24/25 saves preserve ships, valid journeys and city capital without double refunds',async()=>{
- const e=await engine();for(const rev of [24,25]){
-  const old=fixture(rev),co=old.companies[0];e.load(old);const g=e.save(),p=g.companies[0];
-  assert.equal(g.city_version,30);assert.equal(p.cash,co.cash+123+(rev===25?4154:0));assert.equal(g.rng,old.rng);assert.ok(g.next_id>=old.next_id);
-  assert.deepEqual(g.markets.slice(0,320*world.goods.length),old.markets.slice(0,320*world.goods.length));assert.deepEqual(g.development.slice(0,320),old.development.slice(0,320));
-  const kept=co.routes.filter(r=>r.stops[0]===city('newyork')||r.stops[0]===city('london')||rev===24&&r.mode==='land');assert.deepEqual(p.routes,kept.map(orderedRoute));
-  assert.deepEqual(p.ships.map(s=>[s.id,s.kind,s.name]),co.ships.map(s=>[s.id,s.kind,s.name]));
-  for(const c of [g.companies[0]])for(const s of c.ships){const before=old.companies.find(x=>x.id===c.id).ships.find(x=>x.id===s.id);if(before.route&&!c.routes.some(r=>r.id===before.route)){assert.equal(s.route,null);assert.equal(s.handling,null);assert.equal(s.voyage,null);assert.deepEqual(s.cargo,[]);}}
-  for(const r of kept)assert.deepEqual(p.ships.filter(s=>s.route===r.id),co.ships.filter(s=>s.route===r.id).map(s=>orderedShip(s,co.routes)));
-  e.load(g);assert.deepEqual(e.save(),g);e.cmd({action:'tick',days:31});const ticked=e.save();e.load(ticked);assert.deepEqual(e.save(),ticked);
- }
+test('withdrawn waterway prototypes are rejected without modifying the current campaign',async()=>{
+ const e=await engine(),before=e.save();for(const rev of [24,25]){assert.throws(()=>e.load(fixture(rev)),/旧版セーブ/);assert.deepEqual(e.save(),before);}
 });
 
 test('invalid prototype data is rejected before discarded cities, cargo or routes are removed',async()=>{

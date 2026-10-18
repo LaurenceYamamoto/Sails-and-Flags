@@ -1,7 +1,8 @@
+// Separate the trading-post campaigns from incompatible 3.x saves; keep the old database intact.
 // This store contains opaque Wasm snapshots; it never interprets game rules.
 const request=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
 export class IndexedSaves {
-  constructor(factory=globalThis.indexedDB,name='sails-flags-wasm-v1'){this.factory=factory;this.name=name;}
+  constructor(factory=globalThis.indexedDB,name='sails-flags-wasm-v2'){this.factory=factory;this.name=name;}
   async open(){
     if(this.db)return this.db;
     if(!this.factory)throw new Error('IndexedDB is unavailable. Export a save file.');

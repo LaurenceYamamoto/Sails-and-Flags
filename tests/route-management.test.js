@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 
 test('route management: safe renewal, eligibility, automatic creation and budget priorities',async t=>{
  const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));
@@ -71,18 +71,18 @@ test('route management: safe renewal, eligibility, automatic creation and budget
  });
  await t.test('new routes are nearest first, duplicate-free, licensed, funded and persisted',()=>{
   reset();const kyoto=city('kyoto');let g=save();g.companies[0].licenses=[data.cities[kyoto].nation];load(g);
-  policy(['sloop'],[{min:0,max:1,kind:'caravan'}],false);cmd({action:'autoRoutes',city:kyoto,enabled:true});
+  cmd({action:'buildPost',city:kyoto});policy(['sloop'],[{min:0,max:1,kind:'caravan'}],false);cmd({action:'autoRoutes',city:kyoto,enabled:true});
   const saved=save();load(saved);assert.deepEqual(save(),saved);tick();let p=save().companies[0];assert.ok(p.routes.length>0);
   const distances=p.routes.map(r=>query({query:'opening',kind:r.auto_type,stops:r.stops}).longest*(r.mode==='sea'?1.852:1));assert.deepEqual(distances,[...distances].sort((a,b)=>a-b));
   assert.ok(p.routes.every(r=>r.stops.includes(kyoto)));const count=p.routes.length;tick();assert.equal(save().companies[0].routes.length,count);
   cmd({action:'autoRoutes',city:kyoto,enabled:false});assert.deepEqual(save().companies[0].auto_route_cities,undefined);
-  load(saved);g=save();g.companies[0].licenses=[];load(g);tick();assert.equal(save().companies[0].routes.length,0);
+  load(saved);g=save();g.companies[0].licenses=[];g.companies[0].posts={};load(g);tick();assert.equal(save().companies[0].routes.length,0);
   load(saved);g=save();fund(g,1000);load(g);tick();assert.equal(save().companies[0].routes.length,0);
  });
  await t.test('automatic creation prefers sea for dual-mode pairs and deduplicates two enabled origins',()=>{
   reset();const road=data.roads.find(r=>!r.retired&&query({query:'connection',stops:[r.a,r.b]}).types.includes('sloop'));
   assert.ok(road);policy(['sloop'],[{min:0,max:1,kind:'caravan'}],false);
-  cmd({action:'autoRoutes',city:road.a,enabled:true});cmd({action:'autoRoutes',city:road.b,enabled:true});tick();
+  cmd({action:'buildPost',city:road.a});cmd({action:'autoRoutes',city:road.a,enabled:true});cmd({action:'autoRoutes',city:road.b,enabled:true});tick();
   const matches=save().companies[0].routes.filter(r=>r.stops.includes(road.a)&&r.stops.includes(road.b));assert.equal(matches.length,1);assert.equal(matches[0].mode,'sea');
  });
  await t.test('scaling purchases precede new routes, then roads and development rights; all preserve reserve',()=>{
@@ -91,7 +91,7 @@ test('route management: safe renewal, eligibility, automatic creation and budget
   const p=query({query:'investmentPlan'}).plan;p.reserve=1000;p.roads=true;p.cities=true;p.route_only=true;p.budgets.forEach(b=>b.value=0);
   cmd({action:'investmentPlan',plan:p,automation:{enabled:true,replaceLost:true,budget:1e7,expand:0,shrink:100}});cmd({action:'autoRoutes',city:city('cairo'),enabled:true});g=save();
   tick();let co=save().companies[0];assert.ok(co.routes.length>1);assert.equal(co.ships.filter(s=>s.route===co.routes[0].id).length,2);
-  let log=co.ledger.filter(l=>l.day===1);const ship=log.map((l,i)=>l.category==='shipPurchase'?i:-1).filter(i=>i>=0),road=log.findIndex(l=>l.category==='roadPurchase'),development=log.findIndex(l=>l.category==='developmentPurchase');
+  let log=co.ledger.filter(l=>l.day===1);const ship=log.map((l,i)=>l.category==='shipPurchase'?i:-1).filter(i=>i>=0),road=log.findIndex(l=>l.category==='roadPurchase'),development=log.findIndex(l=>l.category==='postConstruction');
   assert.ok(ship.length>1);assert.ok(Math.max(...ship)<road);assert.ok(road<development);assert.ok(co.cash>=1000);
   // With only one hull affordable, the lost-vessel claim wins over every new route.
   load(g);const off=structuredClone(g);off.companies[0].automation.enabled=false;off.companies[0].auto_route_cities=[];off.companies[0].investment_plan.roads=false;off.companies[0].investment_plan.cities=false;load(off);tick();const operating=off.companies[0].cash-save().companies[0].cash;
@@ -101,7 +101,7 @@ test('route management: safe renewal, eligibility, automatic creation and budget
   reset();open('ningbo','shanghai');open('shanghai','yangzhou');open('cairo','suez','caravan');let before=save();cmd({action:'route',route:before.companies[0].routes[1].id,active:false});before=save();
   cmd({action:'bulkEscorts',mode:'sea',escorts:3});cmd({action:'bulkEscorts',mode:'land',escorts:2});let g=save();assert.equal(g.day,before.day);assert.equal(g.companies[0].cash,before.companies[0].cash);assert.deepEqual(g.companies.slice(1),before.companies.slice(1));
   assert.ok(g.companies[0].routes.every(r=>r.escorts===(r.mode==='sea'?3:2)));assert.deepEqual(g.companies[0].route_escorts,[3,2]);load(g);assert.deepEqual(save(),g);
-  g.companies[0].licenses=[data.cities[city('kyoto')].nation,data.cities[city('shanghai')].nation,data.cities[city('cairo')].nation];load(g);policy(['sloop'],[{min:0,max:1,kind:'caravan'}],false);cmd({action:'autoRoutes',city:city('kyoto'),enabled:true});cmd({action:'autoRoutes',city:city('shanghai'),enabled:true});tick();
+  g.companies[0].licenses=[data.cities[city('kyoto')].nation,data.cities[city('shanghai')].nation,data.cities[city('cairo')].nation];load(g);cmd({action:'buildPost',city:city('kyoto')});policy(['sloop'],[{min:0,max:1,kind:'caravan'}],false);cmd({action:'autoRoutes',city:city('kyoto'),enabled:true});cmd({action:'autoRoutes',city:city('shanghai'),enabled:true});tick();
   const fresh=save().companies[0].routes.filter(r=>!before.companies[0].routes.some(old=>old.id===r.id));assert.ok(fresh.some(r=>r.mode==='sea'));assert.ok(fresh.some(r=>r.mode==='land'));assert.ok(fresh.every(r=>r.escorts===(r.mode==='sea'?3:2)));
   const valid=save(),bad=structuredClone(valid);bad.companies[0].route_escorts=[4,0];assert.throws(()=>load(bad));assert.deepEqual(save(),valid);
  });

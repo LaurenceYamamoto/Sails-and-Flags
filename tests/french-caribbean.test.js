@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import {CITIES,GOODS} from '../src/data.js';
 import {FRENCH_CARIBBEAN_PORTS as ports,FRENCH_CARIBBEAN_APPROACHES as approaches,FRENCH_CARIBBEAN_ROADS as roads} from '../src/french-caribbean-data.js';
 import {PORT_APPROACHES,seaRoute,waterSegment,onLand} from '../src/sea-routing.js';
-import {bridge} from '../src/wasm-bridge.js';
+import {bridgeWithPosts as bridge} from './post-fixture.js';
 const w=JSON.parse(fs.readFileSync('wasm-core/data/world.json'));
 async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFileSync('assets/wasm/engine.wasm'));const call=bridge(instance);return {call,cmd:command=>call({op:'command',command}),save:()=>JSON.parse(call({op:'save'})),load:g=>call({op:'load',text:JSON.stringify(g)}),data:call({op:'catalog'})};}
 

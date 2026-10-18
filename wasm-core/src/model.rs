@@ -240,6 +240,10 @@ pub fn legacy_handling_rate() -> f64 {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Route {
+    #[serde(default)]
+    pub buy_below: f64,
+    #[serde(default)]
+    pub sell_above: f64,
     pub id: u32,
     pub stops: Vec<usize>,
     pub mode: String,
@@ -275,6 +279,12 @@ pub struct Cargo {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Voyage {
+    // Delivery mode is fixed at loading; a newly built warehouse must not
+    // redirect cargo that was purchased for an immediate market sale.
+    #[serde(default)]
+    pub direct_sale: bool,
+    #[serde(default)]
+    pub warehouse_units: Option<usize>,
     pub from: usize,
     pub to: usize,
     pub total: f64,
@@ -304,6 +314,11 @@ pub struct Ship {
     pub handling: Option<Handling>,
     pub cargo: Vec<Cargo>,
     pub voyages: u32,
+}
+impl Ship {
+    pub fn can_sell(&self)->bool {
+        self.route.is_none() && self.voyage.is_none() && self.handling.is_none() && self.cargo.is_empty()
+    }
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Automation {
@@ -346,6 +361,10 @@ pub struct FriendshipChange {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Company {
+    #[serde(default)]
+    pub posts: BTreeMap<usize, crate::posts::TradingPost>,
+    #[serde(default)]
+    pub facility_policy: crate::facility_management::FacilityPolicy,
     pub id: String,
     pub name: String,
     pub kind: String,
@@ -382,6 +401,8 @@ pub struct Company {
     pub auto_route_cities: Vec<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub route_escorts: Option<[u32;2]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub route_prices: Option<[f64;2]>,
     pub ledger: Vec<Ledger>,
     pub totals: BTreeMap<String, f64>,
     pub history: Vec<[f64; 3]>,
@@ -390,6 +411,8 @@ pub struct Company {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Game {
+    #[serde(default)]
+    pub post_version: u32,
     pub format: String,
     pub version: u32,
     #[serde(default)]
@@ -532,7 +555,7 @@ impl Engine {
         let factor = 1.0 + (60.0 - f) / 100.0;
         let base = &self.data.nations[n];
         (
-            base.fee * 3_f64.powi(count as i32) * factor,
+            base.fee * 2_f64.powi(count as i32) * factor,
             base.daily * 10.0 * factor,
             (15.0 - f * 0.1) / 100.0,
         )
@@ -651,6 +674,7 @@ impl Engine {
     pub fn assets(&self, c: usize) -> f64 {
         let co = &self.game.companies[c];
         co.cash
+            + co.posts.values().map(|p|p.value()).sum::<f64>()
             + co.yard_value
             + co.ships
                 .iter()
@@ -747,7 +771,8 @@ impl Game {
         }
         Self {
             format: "sails-flags-wasm".into(),
-            version: 1,
+            version: 2,
+            post_version: 1,
             cargo_time_version: 1,
             route_pair_version: 1,
             land_path_version: 1,
@@ -764,13 +789,8 @@ impl Game {
             development: d
                 .cities
                 .iter()
-                .map(|c| Development {
-                    owner: if ["havana", "nantes"].contains(&c.id.as_str()) {
-                        "private"
-                    } else {
-                        "state"
-                    }
-                    .into(),
+                .map(|_| Development {
+                    owner: "state".into(),
                     basis: 0.0,
                     size: 0.0,
                     production: vec![0.0; d.goods.len()],
@@ -808,6 +828,8 @@ impl Game {
 impl Company {
     fn new(id: &str, name: &str, kind: &str, cash: f64, n: usize, first_license: bool) -> Self {
         Self {
+            posts: BTreeMap::new(),
+            facility_policy: Default::default(),
             id: id.into(),
             name: name.into(),
             kind: kind.into(),
@@ -824,8 +846,8 @@ impl Company {
             default_vehicle: default_vehicle(),
             accounts: None,
             routes: vec![],
-            technology: vec![0.0; 6],
-            tech_budget: vec![0.0; 6],
+            technology: vec![0.0; 8],
+            tech_budget: vec![0.0; 8],
             yard_value: 0.0,
             designs: vec![],
             road_auto: RoadAuto::default(),
@@ -833,6 +855,7 @@ impl Company {
             route_policy: None,
             auto_route_cities: vec![],
             route_escorts: None,
+            route_prices: None,
             automation: Automation {
                 enabled: false,
                 replace_lost: false,

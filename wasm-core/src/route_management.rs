@@ -40,7 +40,7 @@ impl Engine {
         let pass=roads.iter().map(|&r|self.road_passability(r)*self.data.roads[r].km).sum::<f64>()/distance;
         p.vehicles.iter().find(|r|r.min<=pass && pass<=r.max && eligible(&r.kind)).map(|r|r.kind.clone())
     }
-    fn cash_reserve(&self)->f64 { let c=&self.game.companies[0];c.investment_plan.as_ref().map_or(c.automation.reserve.max(c.road_auto.reserve),|p|p.reserve) }
+    pub(crate) fn cash_reserve(&self)->f64 { let c=&self.game.companies[0];c.investment_plan.as_ref().map_or(c.automation.reserve.max(c.road_auto.reserve),|p|p.reserve) }
     // Called also with a vessel temporarily removed by the movement loop.
     pub fn maintenance_target(&self, ship:&Ship)->Option<(String,Option<u32>,f64)> {
         let co=&self.game.companies[0];
@@ -99,6 +99,7 @@ impl Engine {
             for b in 0..self.data.cities.len() {
                 if a==b || existing.contains(&pair(a,b)) || !seen.insert(pair(a,b))
                     || !co.licenses.contains(&self.data.cities[b].nation) {continue;}
+                if !self.has_post(0,&[a,b]){continue;}
                 for mode in ["sea","land"] {
                     let Some(kind)=self.policy_kind(mode,&[a,b]) else {continue;};
                     if !self.nations_for(&kind,&[a,b]).iter().all(|n|co.licenses.contains(n)) {continue;}
