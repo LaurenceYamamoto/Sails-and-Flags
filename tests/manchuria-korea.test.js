@@ -1,3 +1,4 @@
+import {assertDetour} from './land-detour-assert.js';
 import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -38,10 +39,10 @@ test('Nine inland cities and eleven roads connect Beijing, Manchuria and Korea o
 test('The direct Pyongyang–Hanseong road cannot reopen, receive investment or be resurrected by current saves',async()=>{
  const e=await engine();fund(e);e.cmd({action:'license',nation:nation('joseon')});const i=w.roads.findIndex(r=>r.id==='hanseong_pyongyang');assert.equal(w.roads[i].retired_since,16);
  assert.ok(!e.call({op:'view'}).roads.some(r=>r.index===i));
- for(const ids of [['hanseong','pyongyang'],['pyongyang','hanseong']]){assert.equal(roadBetween(...ids),undefined);assert.deepEqual(roadPoints(...ids),[]);assert.throws(()=>open(e,ids));}
+ for(const ids of [['hanseong','pyongyang'],['pyongyang','hanseong']]){assert.equal(roadBetween(...ids),undefined);assert.deepEqual(roadPoints(...ids),[]);assertDetour(request=>e.call({op:'query',request}),ids.map(city));}
  assert.throws(()=>e.cmd({action:'buyRoad',road:i}));assert.throws(()=>e.cmd({action:'roadInvestment',road:i,roadBudget:1,securityBudget:1}));
  const g=e.save(),bad=structuredClone(g);bad.roads[i].owner='player';assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),g);
- open(e,['pyongyang','kaesong']);const forged=e.save();forged.companies[0].routes[0].stops=['pyongyang','hanseong'].map(city);assert.throws(()=>e.load(forged));
+ open(e,['pyongyang','kaesong']);const forged=e.save();forged.land_path_version=0;forged.companies[0].routes[0].stops=['pyongyang','hanseong'].map(city);assert.throws(()=>e.load(forged));
 });
 
 test('Version 15 migration preserves idle/loading/travelling/unloading vehicles and refunds the retired road exactly once',async()=>{

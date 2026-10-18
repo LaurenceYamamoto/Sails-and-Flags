@@ -1,3 +1,4 @@
+import {assertDetour} from './land-detour-assert.js';
 import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,7 +16,7 @@ test('Six Asian roads are retired in both directions; Bombay coastal land routes
  const e=await engine();fund(e);assert.equal(e.data.roads.length,356);assert.equal(e.view().roads.length,330);
  assert.equal(roadBetween('ahmedabad','delhi'),undefined);assert.equal(roadBetween('ahmedabad','agra'),undefined);
  for(const id of ASIA_RETIRED_ROADS){const i=e.data.roads.findIndex(r=>r.id===id),r=e.data.roads[i];assert.equal(r.retired_since,11);assert.equal(r.retired,true);assert.ok(!e.view().roads.some(r=>r.index===i));
-  for(const [a,b]of [[r.a,r.b],[r.b,r.a]]){const from=e.data.cities[a].id,to=e.data.cities[b].id;assert.equal(roadBetween(from,to),undefined);assert.deepEqual(roadPoints(from,to),[]);assert.throws(()=>open(e,from,to));}
+  for(const [a,b]of [[r.a,r.b],[r.b,r.a]]){const from=e.data.cities[a].id,to=e.data.cities[b].id;assert.equal(roadBetween(from,to),undefined);assert.deepEqual(roadPoints(from,to),[]);assertDetour(request=>e.call({op:'query',request}),[a,b]);}
   assert.throws(()=>e.cmd({action:'buyRoad',road:i}));assert.throws(()=>e.cmd({action:'roadInvestment',road:i,roadBudget:1,securityBudget:0}));
  }
  for(const [id,r]of Object.entries(ASIA_ADDED_ROADS)){
@@ -55,7 +56,7 @@ test('Nanchang–Jingdezhen is straight and version 11 saves retire Ahmedabad–
  const rd=e.data.roads.find(r=>r.id==='nanchang_jingdezhen');assert.equal(rd.km,220);assert.equal(rd.penalty,.8);assert.deepEqual(rd.points,points);
  const old=oldAsia(e.save());old.city_version=11;const co=old.companies[0],template=structuredClone(co.routes[0]),ship=co.ships[0];let refund=0;
  for(const id of ASIA_FURTHER_RETIRED_ROADS){const i=e.data.roads.findIndex(r=>r.id===id),d=e.data.roads[i];assert.equal(d.retired_since,12);assert.equal(d.retired,true);
-  for(const [a,b]of [[d.a,d.b],[d.b,d.a]]){assert.equal(roadBetween(e.data.cities[a].id,e.data.cities[b].id),undefined);assert.throws(()=>open(e,e.data.cities[a].id,e.data.cities[b].id));}
+  for(const [a,b]of [[d.a,d.b],[d.b,d.a]]){assert.equal(roadBetween(e.data.cities[a].id,e.data.cities[b].id),undefined);assertDetour(request=>e.call({op:'query',request}),[a,b]);}
   assert.ok(!e.view().roads.some(r=>r.index===i));assert.throws(()=>e.cmd({action:'buyRoad',road:i}));
   const r=structuredClone(template);r.id=old.next_id++;r.stops=[d.a,d.b];co.routes.push(r);co.ships.push({...structuredClone(ship),id:old.next_id++,route:r.id,cargo:[],voyage:null,handling:null,next:0});
   Object.assign(old.roads[i],{owner:'player',basis:1800,pool:23,road_budget:2,security_budget:1,quality:3,security:1});refund+=1823;

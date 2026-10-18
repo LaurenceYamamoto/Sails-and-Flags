@@ -14,7 +14,7 @@ const reversed=lines=>[...lines].reverse().map(l=>[...l].reverse());
 test('ocean-river and river-ocean-river through services use summed distances and continuous geometry',async()=>{
  const e=await engine();
  for(const [a,b,nm,via]of [[johns,montreal,world.distances[johns][quebec]+stlawrence.nm,[quebec]],[albany,montreal,hudson.nm+world.distances[newyork][quebec]+stlawrence.nm,[newyork,quebec]]]){
-  for(const stops of [[a,b],[b,a]]){const q=e.query({query:'connection',stops});assert.equal(q.waterway,true);assert.deepEqual(q.types,['sloop']);const quote=e.query({query:'opening',kind:'sloop',stops});assert.ok(Math.abs(quote.longest-nm)<1e-8);assert.deepEqual(quote.travelDays,[Math.ceil(nm/150),Math.ceil(nm/150)]);for(const kind of ['brig','fluyt','galleon','wagon','caravan'])assert.throws(()=>e.query({query:'opening',kind,stops}));}
+  for(const stops of [[a,b],[b,a]]){const q=e.query({query:'connection',stops});assert.equal(q.waterway,true);assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop']);const quote=e.query({query:'opening',kind:'sloop',stops});assert.ok(Math.abs(quote.longest-nm)<1e-8);assert.deepEqual(quote.travelDays,[Math.ceil(nm/150),Math.ceil(nm/150)]);for(const kind of ['brig','fluyt','galleon'])assert.throws(()=>e.query({query:'opening',kind,stops}));}
   open(e,[a,b]);const v=e.view(),forward=v.paths[`sea:${a}:${b}`];assert.ok(forward.length);assert.deepEqual(v.paths[`sea:${b}:${a}`],reversed(forward));
   for(const i of [a,...via,b])assert.ok(forward.flat().some(p=>p.x===world.cities[i].x&&p.y===world.cities[i].y),'path includes '+world.cities[i].id);
   const riverPoints=stlawrence.points;for(const p of riverPoints)assert.ok(forward.flat().some(q=>q.x===p.x&&q.y===p.y));

@@ -1,3 +1,4 @@
+import {assertDetour} from './land-detour-assert.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -9,10 +10,10 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 async function ready(){const e=await engine(),g=e.save();g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);e.cmd({action:'license',nation:w.nations.findIndex(n=>n.id==='spain')});return e;}
 const open=(e,ids)=>e.cmd({action:'openRoute',kind:'caravan',stops:ids.map(city),allowed:w.goods.map((_,i)=>i),margin:0});
 
-test('Mexico City–Guadalajara is unavailable in either direction; Guanajuato connections remain usable',async()=>{
+test('Mexico City–Guadalajara direct road stays retired while active-road detours remain usable',async()=>{
  const e=await ready();assert.equal(w.roads.length,356);assert.equal(w.roads.filter(r=>!r.retired).length,330);assert.equal(w.roads[road].retired_since,23);
  assert.ok(!e.call({op:'view'}).roads.some(r=>r.index===road));
- for(const [a,b]of [['mexicocity','guadalajara'],['guadalajara','mexicocity']]){assert.equal(roadBetween(a,b),undefined);assert.deepEqual(roadPoints(a,b),[]);assert.throws(()=>open(e,[a,b]));}
+ for(const [a,b]of [['mexicocity','guadalajara'],['guadalajara','mexicocity']]){assert.equal(roadBetween(a,b),undefined);assert.deepEqual(roadPoints(a,b),[]);assertDetour(request=>e.call({op:'query',request}),[a,b].map(city));}
  assert.throws(()=>e.cmd({action:'buyRoad',road}));assert.throws(()=>e.cmd({action:'roadInvestment',road,roadBudget:1,securityBudget:0}));
  open(e,['mexicocity','guanajuato']);open(e,['guanajuato','guadalajara']);e.cmd({action:'tick',days:31});const g=e.save();e.load(g);assert.deepEqual(e.save(),g);
 });

@@ -113,15 +113,13 @@ impl Engine {
                         continue;
                     }
                     let points = if r.mode == "land" {
-                        let idx = self.road(a, b).unwrap();
-                        let mut p = self.graphics["roads"][idx]["points"]
-                            .as_array()
-                            .unwrap()
-                            .clone();
-                        if self.data.roads[idx].a != a {
-                            p.reverse();
+                        let mut points=Vec::new();
+                        for (from,_,idx) in self.land_legs(a,b) {
+                            let mut p=self.graphics["roads"][idx]["points"].as_array().unwrap().clone();
+                            if self.data.roads[idx].a!=from {p.reverse();}
+                            if points.last()==p.first() {points.extend(p.into_iter().skip(1));} else {points.extend(p);}
                         }
-                        json!([p])
+                        json!([points])
                     } else {
                         self.water_path(a, b)
 
@@ -188,6 +186,7 @@ impl Engine {
                 && g.transport_version <= 1
                 && g.roster_version <= 5
                 && g.route_pair_version <= 1
+                && g.land_path_version <= 1
                 && (g.city_version <= 23 || [26,27,28,29,30].contains(&g.city_version))
                 && (loading || g.city_version == 30)
                 && (loading || g.transport_version == 1)
@@ -436,9 +435,13 @@ impl Engine {
                             a != b
                                 && c.licenses.contains(&d.cities[a].nation)
                                 && if r.mode == "land" {
-                                    road(a, b).is_some_and(|j| {
-                                        d.roads[j].nations.iter().all(|n| c.licenses.contains(n))
-                                    })
+                                    if loading && (g.land_path_version==0 || g.city_version<30) {
+                                        road(a,b).is_some_and(|j|d.roads[j].nations.iter().all(|n|c.licenses.contains(n)))
+                                    } else {
+                                        self.land_connection(a,b).is_some() && self.land_legs(a,b).iter().all(|&(from,to,j)|
+                                            c.licenses.contains(&d.cities[from].nation) && c.licenses.contains(&d.cities[to].nation)
+                                            && d.roads[j].nations.iter().all(|n|c.licenses.contains(n)))
+                                    }
                                 } else {
                                     if loading && g.city_version < 24 && d.distances[a][b].is_some() { true }
                                     else { self.water_distance(spec(&r.auto_type).unwrap(),a,b).is_finite()
@@ -501,7 +504,8 @@ impl Engine {
                             && r.stops.iter().enumerate().all(|(i, &a)| {
                                 let b = r.stops[(i + 1) % r.stops.len()];
                                 let distance = if r.mode == "land" {
-                                    d.roads[road(a, b).unwrap()].km
+                                    if loading && (g.land_path_version==0 || g.city_version<30) {d.roads[road(a,b).unwrap()].km}
+                                    else {self.land_connection(a,b).map_or(f64::INFINITY,|p|p.km)}
                                 } else {
                                     if loading && g.city_version < 24 && d.distances[a][b].is_some() { d.distances[a][b].unwrap() }
                                     else { self.water_distance(spec,a,b) }

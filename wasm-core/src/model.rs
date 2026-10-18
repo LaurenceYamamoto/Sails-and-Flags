@@ -125,6 +125,7 @@ pub struct Engine {
     pub waterway_index: BTreeMap<(usize, usize), usize>,
     pub water_access_index: BTreeMap<(usize, usize), usize>,
     pub water_connections: BTreeMap<(usize, usize), crate::water_connections::WaterConnection>,
+    pub land_connections: BTreeMap<(usize, usize), crate::land_connections::LandConnection>,
     pub game: Game,
 }
 
@@ -396,6 +397,8 @@ pub struct Game {
     #[serde(default)]
     pub route_pair_version: u32,
     #[serde(default)]
+    pub land_path_version: u32,
+    #[serde(default)]
     pub transport_version: u32,
     #[serde(default)]
     pub roster_version: u32,
@@ -469,6 +472,7 @@ impl Engine {
         let data: Data = serde_json::from_value(raw.clone()).unwrap();
         let game = Game::new(&data, 1700, true);
         Self {
+            land_connections: crate::land_connections::connections(&data),
             water_connections: crate::water_connections::connections(&data),
             water_access_index: data.water_access.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
@@ -516,8 +520,8 @@ impl Engine {
     }
     pub fn distance(&self, kind: &str, a: usize, b: usize) -> f64 {
         if self.spec(kind).is_ok_and(|s| s.mode == "land") {
-            self.road(a, b)
-                .map(|i| self.data.roads[i].km)
+            self.land_connection(a, b)
+                .map(|p| p.km)
                 .unwrap_or(f64::INFINITY)
         } else {
             self.spec(kind).map(|s| self.water_distance(s,a,b)).unwrap_or(f64::INFINITY)
@@ -553,14 +557,12 @@ impl Engine {
     }
     pub fn days(&self, kind: &str, a: usize, b: usize) -> u32 {
         let s = self.spec(kind).unwrap();
-        let mut speed = s.speed;
         if s.mode == "land" {
-            let Some(i) = self.road(a, b) else {
-                return u32::MAX;
-            };
-            speed *= self.road_speed_factor(kind, i);
+            let Some(p)=self.land_connection(a,b) else {return u32::MAX;};
+            return p.roads.iter().map(|&i|self.data.roads[i].km/(s.speed*self.road_speed_factor(kind,i)))
+                .sum::<f64>().ceil().max(1.0) as u32;
         }
-        (self.distance(kind, a, b) / speed).ceil().max(1.0) as u32
+        (self.distance(kind, a, b) / s.speed).ceil().max(1.0) as u32
     }
     pub fn can_serve(&self, kind: &str, stops: &[usize]) -> bool {
         self.spec(kind).is_ok_and(|s| {
@@ -575,8 +577,9 @@ impl Engine {
         let mut n: Vec<usize> = stops.iter().map(|&a| self.data.cities[a].nation).collect();
         if self.spec(kind).unwrap().mode == "land" {
             for (i, &a) in stops.iter().enumerate() {
-                if let Some(j) = self.road(a, stops[(i + 1) % stops.len()]) {
+                for (from,to,j) in self.land_legs(a,stops[(i+1)%stops.len()]) {
                     n.extend(&self.data.roads[j].nations);
+                    n.extend([self.data.cities[from].nation,self.data.cities[to].nation]);
                 }
             }
         }
@@ -747,6 +750,7 @@ impl Game {
             version: 1,
             cargo_time_version: 1,
             route_pair_version: 1,
+            land_path_version: 1,
             transport_version: 1,
             roster_version: 5,
             city_version: 30,

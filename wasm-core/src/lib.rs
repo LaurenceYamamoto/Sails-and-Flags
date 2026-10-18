@@ -13,6 +13,7 @@ mod trade;
 mod view;
 mod waterway_rollback;
 mod water_connections;
+mod land_connections;
 pub use model::Engine;
 use model::{Game, Result};
 use serde_json::{Value, json};
@@ -31,7 +32,7 @@ impl Engine {
                     || r.replacements.iter().any(|s|!compatible(s))
                     || r.stops.iter().enumerate().any(|(i,&a)| self.waterway(a,r.stops[(i+1)%r.stops.len()]).is_some_and(|j|
                         self.data.waterways[j].nations.iter().any(|n|!c.licenses.contains(n))))
-            }) || r.mode == "land" &&
+            }) || r.mode == "land" && (g.land_path_version==0 || g.city_version<30) &&
                 r.stops.iter().enumerate().any(|(i, &a)| {
                     let b = r.stops[(i + 1) % r.stops.len()];
                     self.data.roads.iter().any(|d| d.retired &&
@@ -232,6 +233,7 @@ impl Engine {
                 }
                 g.city_version = 30;
                 let pair_refunds=self.split_routes(&mut g)?;
+                g.land_path_version=1;
                 // Previously the UI could enable unlicensed origins. Do not arm them for later purchases.
                 for co in &mut g.companies {co.auto_route_cities.retain(|&i|co.licenses.contains(&self.data.cities[i].nation));}
                 self.validate(&g, false)?;

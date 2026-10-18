@@ -1,3 +1,4 @@
+import {assertDetour} from './land-detour-assert.js';
 import {trimLegacyNations} from './legacy-nations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,17 +11,20 @@ async function engine(){const {instance}=await WebAssembly.instantiate(fs.readFi
 function fund(e){const g=e.save();g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);}
 function open(e,ids){const stops=ids.map(id=>e.data.cities.findIndex(c=>c.id===id));const q=e.call({op:'query',request:{query:'opening',kind:'caravan',stops}});for(const nation of q.missing)e.cmd({action:'license',nation});return e.cmd({action:'openRoute',kind:'caravan',stops,allowed:e.data.goods.map((_,i)=>i),margin:0});}
 
-test('Deleted roads cannot be selected, opened or invested in; new Spanish links work in both directions',async()=>{
+test('Deleted road assets stay retired while detours and new Spanish links remain usable',async()=>{
  const e=await engine();fund(e);assert.equal(Object.keys(ROADS).length,330);assert.equal(e.view().roads.length,330);assert.equal(e.data.roads.length,356);
  for(const id of RETIRED_ROADS){const r=ROAD_SLOTS[id],i=e.data.roads.findIndex(d=>d.id===id);assert.ok(e.data.roads[i].retired);assert.ok(!e.view().roads.some(d=>d.index===i));assert.equal(ROADS[id],undefined);
-  for(const [a,b] of [[r.a,r.b],[r.b,r.a]]){assert.equal(roadBetween(a,b),undefined);assert.deepEqual(roadPoints(a,b),[]);assert.throws(()=>open(e,[a,b]));}
+  for(const [a,b] of [[r.a,r.b],[r.b,r.a]]){assert.equal(roadBetween(a,b),undefined);assert.deepEqual(roadPoints(a,b),[]);assertDetour(request=>e.call({op:'query',request}),[a,b].map(id=>e.data.cities.findIndex(c=>c.id===id)));}
   assert.throws(()=>e.cmd({action:'buyRoad',road:i}));assert.throws(()=>e.cmd({action:'roadInvestment',road:i,roadBudget:10,securityBudget:0}));
  }
  assert.equal(roadBetween('madrid','bordeaux'),undefined);assert.equal(roadBetween('madrid','paris'),undefined);
  for(const [id,r]of Object.entries(ADDED_ROADS)){assert.equal(roadBetween(r.b,r.a)[0],id);assert.deepEqual(roadPoints(r.b,r.a),roadPoints(r.a,r.b).toReversed());const route=open(e,[r.a,r.b]);assert.equal(open(e,[r.b,r.a]),route);const i=e.data.roads.findIndex(d=>d.id===id);e.cmd({action:'buyRoad',road:i});e.cmd({action:'roadInvestment',road:i,roadBudget:1,securityBudget:1});}
  for(const ids of [['quito','guayaquil','trujillo','lima','trujillo','guayaquil'],['lima','cusco','arequipa','cusco'],['lisbon','coimbra','porto','coimbra'],['cadiz','seville','madrid','seville']])for(let i=1;i<ids.length;i++)open(e,[ids[i-1],ids[i]]);
  for(let i=0;i<4;i++)e.cmd({action:'tick',days:31});const g=e.save();assert.equal(g.city_version,30);e.load(g);assert.deepEqual(e.save(),g);
- for(const c of g.companies)for(const r of c.routes)if(r.mode==='land')for(let i=0;i<r.stops.length;i++)assert.ok(roadBetween(e.data.cities[r.stops[i]].id,e.data.cities[r.stops[(i+1)%r.stops.length]].id));
+ for(const c of g.companies)for(const r of c.routes)if(r.mode==='land'){
+  const q=e.call({op:'query',request:{query:'opening',kind:r.auto_type,stops:r.stops}});
+  assert.ok(q.roads.legs.every(l=>!e.data.roads[l.road].retired));
+ }
 });
 
 test('Old roads migrate for player and rivals: idle, loading, traveling and unloading vehicles are retained and refunded once',async()=>{

@@ -15,7 +15,7 @@ test('Allowlisted sailing waterways preserve converted road slots and admit only
  const e=await engine();assert.equal(e.data.waterways.length,10);assert.deepEqual(e.data.waterways.map(w=>w.id),Object.keys(WATERWAYS));
  for(const w of e.data.waterways){
   const r=e.data.roads.find(r=>r.id===w.id);if(r){assert.ok(r.retired&&r.retired_since===(WATERWAYS[w.id].since??24));assert.deepEqual([w.a,w.b],[r.a,r.b]);}else assert.ok(WATERWAYS[w.id].a);assert.ok(w.nm>0&&w.points.length>=3);
-  for(const stops of [[w.a,w.b],[w.b,w.a]]){const q=e.query({query:'connection',stops});assert.equal(q.waterway,true);assert.deepEqual(q.types,['sloop']);assert.equal(q.default,'sloop');for(const kind of ['wagon','caravan','brig','fluyt','galleon'])assert.throws(()=>e.query({query:'opening',stops,kind}));}
+  for(const stops of [[w.a,w.b],[w.b,w.a]]){const q=e.query({query:'connection',stops});assert.equal(q.waterway,true);assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop']);assert.equal(q.default,'sloop');for(const kind of ['brig','fluyt','galleon'])assert.throws(()=>e.query({query:'opening',stops,kind}));}
  }
  assert.ok(e.query({query:'connection',stops:['cairo','suez'].map(e.city)}).types.includes('caravan'));
  assert.ok(e.query({query:'connection',stops:['detroit','albany'].map(e.city)}).types.includes('caravan'));
@@ -57,7 +57,7 @@ test('renamed legacy sea designs recover their original base using the retained 
  const e=await engine();fund(e);for(const kind of ['sloop','brig','fluyt','galleon','corvette'])e.cmd({action:'research',kind,budgets:[500,500,500,500,500]});
  const g=legacy(e,e.save()),origins=Object.values(g.designs).map(s=>[s.id,s.baseHull]);for(const s of Object.values(g.designs)){delete s.baseHull;s.name='Custom';s.nameEn='Custom';}
  e.load(g);for(const [id,base]of origins)assert.equal(e.save().designs[id].baseHull,base);
- const q=e.query({query:'connection',stops:['newyork','albany'].map(e.city)});assert.deepEqual(q.types,['sloop',origins.find(([,b])=>b==='sloop')[0]]);
+ const q=e.query({query:'connection',stops:['newyork','albany'].map(e.city)});assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop',origins.find(([,b])=>b==='sloop')[0]]);
 });
 
 test('regional rivals retain their 3.3.10 land fleets and the 50 route cap',async()=>{

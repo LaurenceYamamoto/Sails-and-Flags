@@ -144,7 +144,7 @@ impl Engine {
                     .stops
                     .iter()
                     .enumerate()
-                    .filter_map(|(i, &a)| self.road(a, r.stops[(i + 1) % r.stops.len()]))
+                    .flat_map(|(i,&a)|self.land_legs(a,r.stops[(i+1)%r.stops.len()]).into_iter().map(|(_,_,j)|j))
                     .collect::<BTreeSet<_>>();
                 for road in ids {
                     *roads.entry(road).or_default() += traffic;

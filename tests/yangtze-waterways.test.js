@@ -89,8 +89,8 @@ test('all requested river links and ocean connections allow only Sloop hulls and
  const e=await engine();fund(e);
  const links=w.waterways.filter(r=>Object.hasOwn(YANGTZE_WATERWAYS,r.id)).map(r=>[r.a,r.b]);
  for(const stops of [...links,...ids.filter(id=>id!=='shanghai').map(id=>[city('ningbo'),city(id)])])for(const points of [stops,stops.toReversed()]){
-  const q=e.query({query:'connection',stops:points});assert.equal(q.waterway,true);assert.deepEqual(q.types,['sloop']);
-  for(const kind of ['brig','fluyt','galleon','caravan','wagon'])assert.throws(()=>e.query({query:'opening',kind,stops:points}));
+  const q=e.query({query:'connection',stops:points});assert.equal(q.waterway,true);assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop']);
+  for(const kind of ['brig','fluyt','galleon'])assert.throws(()=>e.query({query:'opening',kind,stops:points}));
   open(e,points);const paths=e.view().paths,forward=paths[`sea:${points[0]}:${points[1]}`];assert.ok(forward.length);assert.deepEqual(paths[`sea:${points[1]}:${points[0]}`],forward.toReversed().map(p=>p.toReversed()));
  }
  assert.ok(e.query({query:'connection',stops:['yichang','chongqing'].map(city)}).types.includes('caravan'));assert.ok(!e.query({query:'connection',stops:['yichang','chongqing'].map(city)}).types.includes('sloop'));
@@ -157,7 +157,7 @@ test('Shanghai admits every sea hull from the ocean, while upstream legs remain 
  e.cmd({action:'research',kind:'brig',budgets:[1000,1000,1000,1000,1000]});const design=Object.values(e.save().designs).find(s=>s.baseHull==='brig').id;
  assert.ok(e.query({query:'connection',stops}).types.includes(design));
  const combined=['ningbo','shanghai','nanjing'].map(city);
- assert.throws(()=>e.query({query:'connection',stops:combined}));assert.deepEqual(e.query({query:'connection',stops:['ningbo','nanjing'].map(city)}).types,['sloop']);
+ assert.throws(()=>e.query({query:'connection',stops:combined}));assert.deepEqual(e.query({query:'connection',stops:['ningbo','nanjing'].map(city)}).types.filter(k=>!['wagon','caravan'].includes(k)),['sloop']);
  for(const points of [combined,combined.toReversed()])for(const kind of ['brig','galleon',design])assert.throws(()=>e.query({query:'opening',kind,stops:points}));
  const current=e.save();e.load(current);assert.deepEqual(e.save(),current);
  e.cmd({action:'tick',days:31});e.load(e.save());

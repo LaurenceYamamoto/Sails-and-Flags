@@ -395,10 +395,10 @@ impl Engine {
         let s = self.spec(kind).unwrap();
         let escort = 1.0 + r.escorts as f64 * 0.8;
         if s.mode == "land" {
-            let i = self.road(a, b).unwrap();
-            let road = &self.data.roads[i];
-            let level = self.game.roads[i].security;
-            let safety = road.safety + (1.0 - road.safety) * 0.9 * level / (5.0 + level);
+            let safety = self.land_average(a,b,|i| {
+                let road=&self.data.roads[i];let level=self.game.roads[i].security;
+                road.safety+(1.0-road.safety)*0.9*level/(5.0+level)
+            });
             return ((1.0 - safety) * 0.015 / escort, 0.6 / escort, 0.02 / escort);
         }
         let hostile = self.data.cities.iter().enumerate().any(|(i, city)| {

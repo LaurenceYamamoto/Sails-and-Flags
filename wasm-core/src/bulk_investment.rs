@@ -25,8 +25,8 @@ impl Engine {
     // Registered routes count even while paused. Shared and repeated legs count once.
     fn used_roads(&self) -> BTreeSet<usize> {
         self.game.companies[0].routes.iter().filter(|r| r.mode == "land")
-            .flat_map(|r| r.stops.iter().enumerate().filter_map(|(i, &a)|
-                self.road(a, r.stops[(i + 1) % r.stops.len()])))
+            .flat_map(|r| r.stops.iter().enumerate().flat_map(|(i,&a)|
+                self.land_legs(a,r.stops[(i+1)%r.stops.len()]).into_iter().map(|(_,_,j)|j)))
             .collect()
     }
 

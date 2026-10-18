@@ -21,7 +21,7 @@ test('allowlist preserves the restored world and explicitly enabled river corrid
   const road=world.roads[i],allowed=world.waterways.some(w=>w.id===road.id);if(road.retired_since===27||road.retired_since===28)continue;
   assert.equal(road.retired===true,allowed,road.id);
   const q=e.query({query:'connection',stops:[road.a,road.b]});
-  if(allowed)assert.deepEqual(q.types,['sloop']);
+  if(allowed)assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop']);
   else {assert.ok(q.types.some(k=>['wagon','caravan'].includes(k)),road.id);assert.ok(!q.types.includes('sloop'),road.id);assert.equal(q.waterway,false);}
  }
  for(const ids of [['dresden','hamburg']])assert.ok(!e.query({query:'connection',stops:ids.map(city)}).types.includes('sloop'));

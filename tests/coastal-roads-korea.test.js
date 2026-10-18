@@ -48,6 +48,6 @@ test('3.3.3 saves preserve existing routes, cargo, cash, investments and RNG whi
 });
 
 test('Pyongyang–Kaesong can open with a Joseon license, trade and restore',async()=>{
- const e=await engine(),initial=e.save();initial.events_enabled=false;initial.companies[0].cash+=1e8;initial.companies[0].initial_cash+=1e8;e.load(initial);const route=open(e,'pyongyang','kaesong','wagon');assert.throws(()=>open(e,'pyongyang','kaesong','sloop'));assert.throws(()=>open(e,'hanseong','pyongyang','wagon'));
+ const e=await engine(),initial=e.save();initial.events_enabled=false;initial.companies[0].cash+=1e8;initial.companies[0].initial_cash+=1e8;e.load(initial);const route=open(e,'pyongyang','kaesong','wagon');assert.throws(()=>open(e,'pyongyang','kaesong','sloop'));open(e,'hanseong','pyongyang','wagon');
  for(let i=0;i<6;i++)e.cmd({action:'tick',days:31});const g=e.save(),r=g.companies[0].routes.find(r=>r.id===route);assert.ok(r.deliveries>0);assert.deepEqual(g.companies[0].licenses,[w.nations.findIndex(n=>n.id==='joseon')]);e.load(g);assert.deepEqual(e.save(),g);
 });

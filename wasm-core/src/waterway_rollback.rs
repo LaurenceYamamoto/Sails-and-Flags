@@ -52,7 +52,7 @@ impl Engine {
         let waterway_index = data.waterways.iter().enumerate()
             .map(|(i, w)| ((w.a.min(w.b), w.a.max(w.b)), i)).collect();
         data.water_access.clear();
-        let checker = Engine { data, graphics: Value::Null, waterway_index, water_access_index: Default::default(),
+        let checker = Engine { land_connections: crate::land_connections::connections(&data), data, graphics: Value::Null, waterway_index, water_access_index: Default::default(),
             water_connections: Default::default(), game: g.clone() };
         let mut prior = g.clone();
         prior.city_version = 30; // Validate as a complete save in its own catalog.
@@ -112,7 +112,7 @@ impl Engine {
         data.waterways = old.waterways; data.water_access = old.water_access;
         let waterway_index = data.waterways.iter().enumerate().map(|(i,w)|((w.a.min(w.b),w.a.max(w.b)),i)).collect();
         let water_connections = crate::water_connections::connections(&data);
-        let checker = Engine {data,graphics:Value::Null,waterway_index,water_access_index:Default::default(),water_connections,game:g.clone()};
+        let checker = Engine {land_connections: crate::land_connections::connections(&data),data,graphics:Value::Null,waterway_index,water_access_index:Default::default(),water_connections,game:g.clone()};
         let mut prior = g.clone(); prior.city_version = 30;
         checker.validate(&prior,true)
     }

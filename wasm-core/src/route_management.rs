@@ -32,8 +32,9 @@ impl Engine {
         let p=self.game.companies[0].route_policy.as_ref()?;
         let eligible=|s:&str|self.producible(0,s)&&self.can_serve(s,stops);
         if mode=="sea" { return p.ships.iter().find(|s|eligible(s)).cloned(); }
-        let roads=stops.iter().enumerate().map(|(i,&a)|self.road(a,stops[(i+1)%stops.len()]))
+        let paths=stops.iter().enumerate().map(|(i,&a)|self.land_connection(a,stops[(i+1)%stops.len()]))
             .collect::<Option<Vec<_>>>()?;
+        let roads:Vec<_>=paths.iter().flat_map(|p|p.roads.iter().copied()).collect();
         let distance:f64=roads.iter().map(|&r|self.data.roads[r].km).sum();
         if distance<=0.0 {return None;}
         let pass=roads.iter().map(|&r|self.road_passability(r)*self.data.roads[r].km).sum::<f64>()/distance;

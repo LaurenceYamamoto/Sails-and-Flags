@@ -149,12 +149,10 @@ impl Engine {
     }
     fn opening_roads(&self, c: usize, kind: &str, stops: &[usize]) -> Value {
         if self.spec(kind).unwrap().mode != "land" { return Value::Null; }
-        let legs = stops.iter().enumerate().map(|(i, &a)| {
-            let b = stops[(i + 1) % stops.len()];
-            let road = self.road(a, b).unwrap();
-            json!({"from":a,"to":b,"passability":self.road_passability(road),
-                "speedFactor":self.road_speed_factor(kind, road),"days":self.days(kind,a,b)})
-        }).collect::<Vec<_>>();
+        let legs = stops.iter().enumerate().flat_map(|(i,&a)|self.land_legs(a,stops[(i+1)%stops.len()]))
+            .map(|(a,b,road)|json!({"from":a,"to":b,"road":road,"distance":self.data.roads[road].km,
+                "passability":self.road_passability(road),"speedFactor":self.road_speed_factor(kind,road),
+                "days":self.days(kind,a,b)})).collect::<Vec<_>>();
         let vehicles = self.data.specs.iter().chain(self.game.designs.values())
             .filter(|s| s.mode == "land" && self.producible(c,&s.id) && self.check_stops(&s.id,stops).is_ok())
             .map(|s| json!({"kind":s.id,"roughness":s.roughness,"capacity":s.capacity,
@@ -390,7 +388,9 @@ impl Engine {
         Ok(())
     }
     pub fn toll(&self, c: usize, a: usize, b: usize) -> f64 {
-        let Some(i) = self.road(a, b) else { return 0.0 };
+        self.land_connection(a,b).map_or(0.0,|p|p.roads.iter().map(|&i|self.road_toll(c,i)).sum())
+    }
+    pub fn road_toll(&self,c:usize,i:usize)->f64 {
         if self.game.roads[i].owner == self.game.companies[c].id {
             return 0.0;
         }

@@ -7,10 +7,7 @@ impl Engine {
         let land = spec.mode == "land";
         let level = self.game.companies[c].technology[if land { 4 } else { 1 }];
         let base = if land {
-            let pass = self
-                .road(a, b)
-                .map(|i| self.road_passability(i))
-                .unwrap_or(1.0);
+            let pass = self.land_average(a,b,|i|self.road_passability(i));
             0.0002 + 0.0008 * (1.0 - pass) * (1.0 - spec.roughness)
         } else {
             0.0003
@@ -363,9 +360,12 @@ impl Engine {
         if toll > 0.0 {
             self.entry(c, "roadToll", -toll, ship.route, String::new());
             self.game.companies[c].routes[ri].transport.costs += toll;
-            let j = self.road(a, b).unwrap();
-            if !["state", "private"].contains(&self.game.roads[j].owner.as_str()) {
-                self.game.roads[j].pool += toll * 0.2;
+            let fees:Vec<_>=self.land_connection(a,b).unwrap().roads.iter()
+                .map(|&j|(j,self.road_toll(c,j))).collect();
+            for (j,fee) in fees {
+                if !["state", "private"].contains(&self.game.roads[j].owner.as_str()) {
+                    self.game.roads[j].pool += fee * 0.2;
+                }
             }
         }
         let mut original_cost = toll;
