@@ -33,7 +33,7 @@ pub fn key(stops: &[usize]) -> Vec<usize> {
 impl Engine {
     pub fn initialize(&mut self, seed: u32, events: bool) {
         self.game = Game::new(&self.data, seed, events);
-        for (i, start) in self.data.starts.clone().iter().enumerate() {
+        for (i, start) in self.data.starts.clone().iter().filter(|s| !s.reserve).enumerate() {
             let city=start.posts[(self.random()*start.posts.len() as f64) as usize];
             self.game.companies[i+1].posts.insert(city,crate::posts::TradingPost::new(self.data.goods.len()));
         }

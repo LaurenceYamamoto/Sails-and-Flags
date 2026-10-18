@@ -41,7 +41,7 @@ impl Engine {
         let co=&self.game.companies[c];
         let Some(start)=self.data.starts.iter().find(|s|s.id==co.id) else{return 1.0;};
         let dest=&self.data.cities[city];
-        let nation=if start.licenses.first()==Some(&dest.nation){3.0}else if co.licenses.contains(&dest.nation){1.5}else{1.0};
+        let nation=if self.rival_home(c)==Some(dest.nation){3.0}else if co.licenses.contains(&dest.nation){1.5}else{1.0};
         let mediterranean=start.preferred_regions.iter().any(|r|r=="mediterranean")
             && (-6.0..=37.0).contains(&dest.lon)&&(30.0..=46.0).contains(&dest.lat);
         nation*if start.preferred_regions.contains(&dest.region)||mediterranean{3.0}else{1.0}
@@ -174,7 +174,7 @@ impl Engine {
         // Voluntary surrender is shared with the player. AI never surrenders
         // its original home charter, or a charter still supporting a service/post.
         let used=self.game.companies[c].routes.iter().flat_map(|r|self.nations_for(&r.auto_type,&r.stops)).chain(self.game.companies[c].posts.keys().map(|&i|self.data.cities[i].nation)).collect::<BTreeSet<_>>();
-        let home=self.data.starts.iter().find(|s|s.id==self.game.companies[c].id).and_then(|s|s.licenses.first()).copied();
+        let home=self.rival_home(c);
         let unused=self.game.companies[c].licenses.iter().copied().filter(|n|Some(*n)!=home&&!used.contains(n)).collect::<Vec<_>>();
         if day>=30||self.game.companies[c].cash<14.0*fixed {for n in unused {let _=self.return_license(c,n);}}
     }
@@ -183,6 +183,7 @@ impl Engine {
         for c in 1..self.game.companies.len() {
             if !self.game.companies[c].bankrupt || self.game.companies[c].acquired {continue;}
             let co=&mut self.game.companies[c];
+            co.bankrupt_since.get_or_insert(self.game.day);
             co.routes.clear();co.ships.clear();co.posts.clear();co.licenses.clear();co.designs.clear();
             co.tech_budget.fill(0.0);co.diplomacy_budget.fill(0.0);co.technology.fill(0.0);
             co.auto_route_cities.clear();co.route_policy=None;co.rival_state=None;co.investment_plan=None;

@@ -49,8 +49,10 @@ impl Engine {
         (production, requested, consumed, stock - consumed)
     }
     pub fn tick(&mut self) {
+        let previous_day=self.game.day;
         self.tick_day();
         self.clear_bankrupt_rivals();
+        if self.game.day>previous_day && !self.game.companies[0].bankrupt {self.maybe_enter_rival();}
         self.capture_accounts();
     }
     fn tick_day(&mut self) {
@@ -63,7 +65,7 @@ impl Engine {
             if self.game.companies[c].acquired || self.game.companies[c].bankrupt {
                 continue;
             }
-            if c>0 {self.rival_retreat(c); if self.game.day==1 {self.rival(c);}}
+            if c>0 {self.rival_retreat(c); if self.game.day==1 || self.game.companies[c].entered_day==Some(self.game.day-1) {self.rival(c);}}
             self.advance_posts(c);
             if self.game.companies[c].bankrupt {if c==0{return;}else{continue;}}
             self.advance_diplomacy(c);

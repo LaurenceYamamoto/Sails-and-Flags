@@ -14,7 +14,7 @@ impl Engine {
             let stock=self.game.markets[city*self.data.goods.len()+good].stock;
             stock_sale+=crate::trade::integrated(self.data.goods[good].base,stock,stock+quantity as f64)*(1.0-self.post_tax(c,city));
         }}
-        let eligible=c==0||self.data.starts.iter().find(|s|s.id==co.id).is_none_or(|s|s.licenses.first()!=Some(&n));
+        let eligible=c==0||self.rival_home(c)!=Some(n);
         Ok(json!({"eligible":eligible,"routes":routes,"posts":posts,"ships":ships.len(),"cargoRefund":ships.iter().flat_map(|s|&s.cargo).map(|x|x.cost).sum::<f64>(),"stockSale":stock_sale}))
     }
     pub fn return_license(&mut self,c:usize,n:usize)->Result<()> {

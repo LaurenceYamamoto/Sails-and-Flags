@@ -30,6 +30,7 @@ export function diagnostic(message){
  return /[\u3040-\u9fff]/.test(text)?errorMessage({message:text}):text;
 }
 export function eventText(event,catalog){
+ if(event.kind==='rivalEntry')return tx('新たな競合会社が参入しました：{company}','A new rival has entered: {company}',{company:nameOf(catalog.rivals.find(r=>r.id===event.message)??{name:event.message})});
  const nation=id=>nameOf(catalog.nations.find(n=>n.id===id)??{name:id});
  if(event.kind==='firstRank')return tx('初めて資産総額1位になりました。','First place in total assets achieved.');
  if(['war','peace'].includes(event.kind)){

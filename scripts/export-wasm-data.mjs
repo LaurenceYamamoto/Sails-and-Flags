@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import {CITIES,NATIONS,GOODS,SHIPS} from '../src/data.js';
 import {ROADS,ROAD_SLOTS,WAGONS,roadPoints} from '../src/land-data.js';
 import {HULLS,HULL_LEVELS} from '../src/industry.js';
-import {RIVAL_STARTS} from '../src/rival-starts.js';
+import {RIVAL_CANDIDATES} from '../src/rival-starts.js';
 import {SHIP_NAMES} from '../src/identity.js';
 import {DEMAND_REGIONS,DEMAND_CLIMATES,demandProfile} from '../src/demand-data.js';
 import {seaRoute,seaLines,seaFromGateway} from '../src/sea-routing.js';
@@ -91,7 +91,7 @@ for(const mouth of riverMouths)for(let b=0;b<cities.length;b++){
  waterAccess.push({a:mouth.a,b,allShips:mouth.allShips,nm,nations:[...new Set([...mouth.nations,cities[b].nation])],lines});
 }
 const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},caravan:{name:'キャラバン',nameEn:'Caravan',mode:'land',price:900,capacity:22,speed:30,range:2500,daily:1.6,guns:0,roughness:.8},corvette:HULLS.corvette}).map(([id,s])=>({id,baseHull:id,...s,nameEn:s.nameEn??({sloop:'Sloop',brig:'Brig',fluyt:'Fluyt'})[id],level:HULL_LEVELS[id]??0}));
-const starts=RIVAL_STARTS.map(c=>{
+const starts=RIVAL_CANDIDATES.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));
  if(licenses.some(n=>n<0)||new Set(licenses).size!==licenses.length)throw Error('Invalid starting licenses: '+c.id);
  const posts=c.posts.map(index);

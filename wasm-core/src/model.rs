@@ -93,6 +93,8 @@ impl Spec {
 }
 #[derive(Clone, Deserialize)]
 pub struct Start {
+    #[serde(default)]
+    pub reserve: bool,
     pub name: String,
     pub kind: String,
     pub id: String,
@@ -360,6 +362,12 @@ pub struct FriendshipChange {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Company {
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub entered_day: Option<u32>,
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub bankrupt_since: Option<u32>,
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub home_nation: Option<usize>,
     #[serde(default, skip_serializing_if="Option::is_none")]
     pub rival_state: Option<crate::rival_strategy::RivalState>,
     #[serde(default)]
@@ -737,7 +745,7 @@ impl Game {
             d.nations.len(),
             true,
         )];
-        for c in &d.starts {
+        for c in d.starts.iter().filter(|s| !s.reserve) {
             let mut co = Company::new(&c.id, &c.name, &c.kind, c.capital, d.nations.len(), false);
             co.licenses = c.licenses.clone();
             // Starting licenses are granted; only the home country starts at 100.
@@ -827,8 +835,11 @@ impl Game {
     }
 }
 impl Company {
-    fn new(id: &str, name: &str, kind: &str, cash: f64, n: usize, first_license: bool) -> Self {
+    pub(crate) fn new(id: &str, name: &str, kind: &str, cash: f64, n: usize, first_license: bool) -> Self {
         Self {
+            entered_day: None,
+            bankrupt_since: None,
+            home_nation: None,
             rival_state: None,
             posts: BTreeMap::new(),
             facility_policy: Default::default(),

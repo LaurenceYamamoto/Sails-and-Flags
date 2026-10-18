@@ -83,7 +83,7 @@ test('emergency liquidation sells extra services before upkeep and old 4.0.0 sav
  const old=bridge((await WebAssembly.instantiate(execFileSync('git',['show','4.0.0:assets/wasm/engine.wasm'],{maxBuffer:30e6}))).instance);const before=JSON.parse(old({op:'save'}));e.load(before);assert.deepEqual(e.save(),before);advance(e,31);e.load(e.save());
 });
 
-test('bankruptcy removes all private assets and the company from views without refunds or resurrection',async()=>{
+test('bankruptcy removes all private assets and the company from views without refunds or resurrection during the cooldown',async()=>{
  for(const alreadyBankrupt of [false,true]) {
   const {e,g,c}=await withdrawalFixture();c.cash=alreadyBankrupt?-1:1;c.initial_cash=1;c.totals=alreadyBankrupt?{upkeep:-2}:{};c.bankrupt=alreadyBankrupt;
   for(const key of Object.keys(c.posts))c.rival_state.posts[key]=200;
@@ -95,7 +95,7 @@ test('bankruptcy removes all private assets and the company from views without r
   assert.equal(dead.totals.shipSale,undefined);assert.equal(dead.totals.routeReorganization,undefined);assert.equal(end.roads[road].owner,'state');assert.equal(end.roads[road].basis,0);assert.equal(end.roads[road].pool,0);assert.equal(end.roads[road].quality,2);
   assert.equal(end.companies[0].cash,playerCash+(end.companies[0].totals.licenseDaily??0));assert.deepEqual(end.companies[9].posts,otherPosts);assert.equal(end.companies.length,15);
   assert.ok(!e.call({op:'view'}).companies.some(x=>x.id===dead.id));assert.throws(()=>e.call({op:'query',request:{query:'acquisition',company:8}}));
-  e.load(end);assert.deepEqual(e.save(),end);advance(e,62);dead=e.save().companies[8];assert.ok(dead.bankrupt);assert.deepEqual(dead.routes,[]);assert.deepEqual(dead.posts,{});
+  e.load(end);assert.deepEqual(e.save(),end);advance(e,29);dead=e.save().companies[8];assert.ok(dead.bankrupt);assert.deepEqual(dead.routes,[]);assert.deepEqual(dead.posts,{});
  }
 });
 
@@ -128,9 +128,9 @@ test('six three-year campaigns retain active competition, bounded state and vali
  const e=await engine();
  for(const events of [false,true])for(const seed of [1700,1701,1702]){
   e.cmd({action:'new',seed,events});advance(e,1080);const g=e.save(),live=g.companies.slice(1).filter(c=>!c.bankrupt);
-  assert.equal(g.day,1080);assert.ok(live.length>=12,`${seed}/${events}: ${live.length}`);assert.ok(live.filter(c=>c.routes.some(r=>r.deliveries>0)).length>=12);
+  assert.equal(g.day,1080);assert.ok(live.length>=12&&live.length<=20,`${seed}/${events}: ${live.length}`);assert.ok(live.filter(c=>c.routes.some(r=>r.deliveries>0)).length>=12);
   for(const c of g.companies){assert.ok(Math.abs(c.cash-c.initial_cash-Object.values(c.totals).reduce((n,v)=>n+v,0))<1e-5);assert.ok(Number.isFinite(c.cash));}
-  assert.ok(live.every(c=>c.routes.length<=50&&c.ships.length<=150&&c.rival_state.closed.length<=100));e.load(g);assert.deepEqual(e.save(),g);
+  assert.ok(live.every(c=>c.routes.length<=50&&c.ships.length<=150&&(c.rival_state?.closed.length??0)<=100));e.load(g);assert.deepEqual(e.save(),g);
  }
 });
 

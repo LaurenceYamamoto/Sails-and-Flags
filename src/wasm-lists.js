@@ -19,7 +19,7 @@ export function visibleRoutes(routes,cities,sort,filter){
 }
 
 export function sortedCompanies(companies,nations,rivals){
- const home=c=>rivals.find(r=>r.id===c.id)?.homeNation??c.homeNation;
- const size=c=>rivals.find(r=>r.id===c.id)?.initialScale??5000;
+ const home=c=>c.entryHome??rivals.find(r=>r.id===c.id)?.homeNation??c.homeNation;
+ const size=c=>c.entryScale??rivals.find(r=>r.id===c.id)?.initialScale??5000;
  return [...companies].sort((a,b)=>Number(b.id==='player')-Number(a.id==='player')||(nations[home(a)]?.order??999)-(nations[home(b)]?.order??999)||size(b)-size(a)||a.index-b.index);
 }

@@ -371,7 +371,7 @@ test('fourteen regional rivals start with one chartered post and their entire ca
   assert.deepEqual(co.licenses.map(n=>e.data.nations[n].id),start.licenses);assert.equal(co.friendship[co.licenses[0]],100);assert.ok(co.licenses.slice(1).every(n=>co.friendship[n]===60));
   assert.deepEqual(co.routes,[]);assert.deepEqual(co.ships,[]);assert.equal(Object.keys(co.posts).length,1);assert.ok(start.posts.includes(e.data.cities[Object.keys(co.posts)[0]].id));
  }
- assert.equal(e.data.rivals.length,14);assert.equal(e.data.rivals[3].nameEn,'Dutch East India Company');e.load(g);assert.deepEqual(e.save(),g);
+ assert.equal(e.data.rivals.length,26);assert.equal(e.data.rivals[3].nameEn,'Dutch East India Company');e.load(g);assert.deepEqual(e.save(),g);
 });
 
 test('new roster trades on both continents and retains bounded deterministic saves',async()=>{
@@ -384,7 +384,7 @@ test('new roster trades on both continents and retains bounded deterministic sav
 test('legacy three-rival saves retain their roster while invalid roster versions and counts are rejected',async()=>{
  const e=await engine(),fresh=e.save();const g=structuredClone(fresh);delete g.roster_version;g.companies.length=4;for(const [i,name]of ['Channel Company','Antilles Company','Ligurian Company'].entries())g.companies[i+1].name=name;
  e.load(g);const legacy=e.save();assert.equal(legacy.roster_version,0);assert.equal(legacy.companies.length,4);assert.equal(legacy.companies[1].name,'Channel Company');e.cmd({action:'tick',days:31});e.load(e.save());const before=e.save();
- for(const mutate of [g=>g.roster_version=7,g=>g.companies.pop(),g=>g.companies[1].id='unexpected',g=>g.roster_version=1]){const bad=structuredClone(before);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),before);}
+ for(const mutate of [g=>g.roster_version=8,g=>g.companies.pop(),g=>g.companies[1].id='unexpected',g=>g.roster_version=1]){const bad=structuredClone(before);mutate(bad);assert.throws(()=>e.load(bad));assert.deepEqual(e.save(),before);}
  e.cmd({action:'new',seed:1700,events:false});assert.equal(e.save().companies.length,15);
 });
 

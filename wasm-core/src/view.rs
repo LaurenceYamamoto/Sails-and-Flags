@@ -141,7 +141,7 @@ impl Engine {
             .chain(co.designs.iter().filter_map(|id| self.game.designs.get(id)))
             .collect::<Vec<_>>();
         catalog.sort_by(|a, b| a.price.total_cmp(&b.price));
-        let companies=self.game.companies.iter().enumerate().filter(|(ci,c)|!c.acquired&&(*ci==0||!c.bankrupt)).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["waterway"]=json!(r.mode=="sea" && self.has_waterway(&r.stops));v["cycle"]=json!(cycle);v["handlingRate"]=json!(self.handling_rate(ci,&r.mode));v["disasterRates"]=json!(r.stops.iter().enumerate().map(|(i,&a)| self.disaster_chance(ci,&r.auto_type,a,r.stops[(i+1)%r.stops.len()])*100.0).collect::<Vec<_>>());v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["idleRatio"]=json!(r.activity.idle_ratio());v["observing"]=json!(((self.game.day-r.activity.since) as f64)<cycle);v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"homeNation":c.licenses.first(),"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.can_sell());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"posts":self.posts_summary(ci),"fixed":self.post_fixed(ci)+c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
+        let companies=self.game.companies.iter().enumerate().filter(|(ci,c)|!c.acquired&&(*ci==0||!c.bankrupt)).map(|(ci,c)|{let routes=c.routes.iter().map(|r|{let(cycle,offsets,fleet)=self.schedule(ci,r);let mut v=serde_json::to_value(r).unwrap();v["waterway"]=json!(r.mode=="sea" && self.has_waterway(&r.stops));v["cycle"]=json!(cycle);v["handlingRate"]=json!(self.handling_rate(ci,&r.mode));v["disasterRates"]=json!(r.stops.iter().enumerate().map(|(i,&a)| self.disaster_chance(ci,&r.auto_type,a,r.stops[(i+1)%r.stops.len()])*100.0).collect::<Vec<_>>());v["interval"]=json!(cycle as f64/fleet.len().max(1) as f64);v["fleet"]=json!(fleet.iter().map(|&i|c.ships[i].id).collect::<Vec<_>>());v["offsets"]=json!(offsets);v["margin"]=json!(r.transport.margin());v["idleRatio"]=json!(r.activity.idle_ratio());v["observing"]=json!(((self.game.day-r.activity.since) as f64)<cycle);v["available"]=json!(c.ships.iter().filter(|s|s.route.is_none()&&s.voyage.is_none()&&s.handling.is_none()&&s.cargo.is_empty()&&self.spec(&s.kind).unwrap().mode==r.mode&&self.can_serve(&s.kind,&r.stops)).map(|s|s.id).collect::<Vec<_>>());v["types"]=json!(catalog.iter().filter(|s|s.mode==r.mode&&self.can_serve(&s.id,&r.stops)).map(|s|s.id.clone()).collect::<Vec<_>>());v});json!({"entryHome":c.home_nation,"entryScale":c.entered_day.map(|_|c.initial_cash),"homeNation":c.licenses.first(),"index":ci,"id":c.id,"name":c.name,"cash":c.cash,"assets":self.assets(ci),"bankrupt":c.bankrupt,"ships":c.ships.iter().map(|s| {let mut ship=serde_json::to_value(s).unwrap();ship["canSell"]=json!(ci==0&&s.can_sell());ship["salePrice"]=json!(self.spec(&s.kind).unwrap().price);ship}).collect::<Vec<_>>(),"routes":routes.collect::<Vec<_>>(),"posts":self.posts_summary(ci),"fixed":self.post_fixed(ci)+c.ships.iter().map(|s|self.daily(ci,&s.kind)).sum::<f64>()+c.licenses.iter().map(|&n|self.terms(ci,n,0).1).sum::<f64>()+c.routes.iter().map(|r|r.escorts as f64*4.0).sum::<f64>(),"technology":c.technology,"techBudget":c.tech_budget,"licenses":c.licenses,"investments":self.investments(ci),"history":c.history})}).collect::<Vec<_>>();
         let licenses=self.data.nations.iter().enumerate().map(|(n,_)|{let(fee,daily,tax)=self.terms(0,n,co.licenses.len());json!({"nation":n,"friendship":co.friendship[n],"fee":fee,"daily":daily,"tax":tax*100.0,"owned":co.licenses.contains(&n),"eligible":co.friendship[n]>=30.0&&co.cash>=fee,"budget":co.diplomacy_budget[n],"changes":co.friendship_history.iter().rev().filter(|h|h.nation==n).collect::<Vec<_>>()})}).collect::<Vec<_>>();
         let market=self.data.goods.iter().enumerate().map(|(g,good)|{let(production,demand,consumption,_)=self.market_flow(city,g);let stock=self.game.markets[city*self.data.goods.len()+g].stock;json!({"good":g,"stock":stock,"price":good.base*ratio(stock),"production":production,"demand":demand,"consumption":consumption,"unmet":(demand-consumption).max(0.0),"details":self.demand_details(city,g),"baseProduction":self.data.cities[city].supply[g],"budget":co.posts.get(&city).map_or(0.0,|p|p.production_budget[g]),"level":self.game.development[city].production[g]})}).collect::<Vec<_>>();
         let roads = self
@@ -185,7 +185,7 @@ impl Engine {
                 && (g.version == 2 && g.post_version == 1)
                 && g.cargo_time_version <= 1
                 && g.transport_version <= 1
-                && g.roster_version <= 6
+                && g.roster_version <= 7
                 && g.route_pair_version <= 1
                 && g.land_path_version <= 1
                 && (g.city_version <= 23 || [26,27,28,29,30].contains(&g.city_version))
@@ -227,15 +227,15 @@ impl Engine {
             g.day <= 3650000
                 && g.fraction.is_finite()
                 && (0.0..1.0).contains(&g.fraction)
-                && g.companies.len()
+                && if g.roster_version==7 { (2..=d.starts.len()+1).contains(&g.companies.len()) && g.companies.iter().any(|c|c.entered_day.is_some()) && g.companies.iter().skip(1).filter(|c|!c.bankrupt&&!c.acquired).count()<=crate::rival_entry::RIVAL_LIMIT } else { g.companies.len()
                     == match g.roster_version {
                         0 => 4,
                         1 => 11,
                         2 => 12,
                         3 => 13,
                         4 => 14,
-                        _ => d.starts.len() + 1,
-                    }
+                        _ => 15,
+                    }}
                 && g.companies[0].id == "player"
                 && g.markets.len() == city_count * d.goods.len()
                 && g.development.len() == city_count
@@ -344,11 +344,12 @@ impl Engine {
                 "保存データの友好度履歴が不正です。",
             )?;
             ensure(
-                c.id == if ci == 0 {
-                    "player"
-                } else {
-                    &d.starts[ci - 1].id
-                } && !c.name.trim().is_empty()
+                (if ci==0 {c.id=="player"} else if g.roster_version==7 {d.starts.iter().any(|s|s.id==c.id)} else {c.id==d.starts[ci-1].id}) &&
+                    g.companies.iter().filter(|other|other.id==c.id).count()==1 &&
+                    c.entered_day.is_none_or(|day|ci>0&&g.roster_version==7&&day<=g.day&&c.home_nation.is_some()) &&
+                    (ci==0 || d.starts.iter().find(|s|s.id==c.id).is_none_or(|s|!s.reserve||c.entered_day.is_some())) &&
+                    c.bankrupt_since.is_none_or(|day|ci>0&&c.bankrupt&&day<=g.day&&c.entered_day.is_none_or(|born|born<=day)) &&
+                    c.home_nation.is_none_or(|n|ci>0&&n<nation_count&&d.starts.iter().any(|s|s.id==c.id&&s.licenses.contains(&n))) && !c.name.trim().is_empty()
                     && c.name.chars().count() <= 80
                     && c.trade.iter().all(|&x| amount(x))
                     && c.designs.iter().all(|id| g.designs.contains_key(id))

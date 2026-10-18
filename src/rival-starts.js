@@ -257,3 +257,233 @@ export const RIVAL_STARTS = [
     ]
   }
 ];
+
+// These templates enter later; capital is supplied by the entry ranking rules.
+export const RIVAL_RESERVES = [
+  {
+    "id": "company-15",
+    "name": "フランス商業組合",
+    "nameEn": "French Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "france"
+    ],
+    "routes": [],
+    "posts": [
+      "bordeaux",
+      "nantes",
+      "rouen"
+    ],
+    "preferredRegions": [
+      "westEurope"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-16",
+    "name": "イギリス商業組合",
+    "nameEn": "English Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "england"
+    ],
+    "routes": [],
+    "posts": [
+      "london"
+    ],
+    "preferredRegions": [
+      "northEurope"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-17",
+    "name": "オランダ商業組合",
+    "nameEn": "Dutch Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "netherlands"
+    ],
+    "routes": [],
+    "posts": [
+      "amsterdam"
+    ],
+    "preferredRegions": [
+      "westEurope"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-18",
+    "name": "ドイツ商業組合",
+    "nameEn": "German Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "hamburg"
+    ],
+    "routes": [],
+    "posts": [
+      "hamburg"
+    ],
+    "preferredRegions": [
+      "centralEurope"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-19",
+    "name": "ラグーザ商人",
+    "nameEn": "Ragusan Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "ragusa"
+    ],
+    "routes": [],
+    "posts": [
+      "ragusa"
+    ],
+    "preferredRegions": [
+      "mediterranean",
+      "balkans"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-20",
+    "name": "満州商人",
+    "nameEn": "Manchurian Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "qing"
+    ],
+    "routes": [],
+    "posts": [
+      "tianjin"
+    ],
+    "preferredRegions": [
+      "eastAsia"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-21",
+    "name": "朝鮮商人",
+    "nameEn": "Korean Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "joseon"
+    ],
+    "routes": [],
+    "posts": [
+      "busan"
+    ],
+    "preferredRegions": [
+      "eastAsia"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-22",
+    "name": "スカンジナビア商業組合",
+    "nameEn": "Scandinavian Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "sweden",
+      "denmark"
+    ],
+    "routes": [],
+    "posts": [
+      "stockholm",
+      "riga",
+      "copenhagen"
+    ],
+    "preferredRegions": [
+      "scandinavia"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-23",
+    "name": "ナポリ商人",
+    "nameEn": "Neapolitan Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "spain"
+    ],
+    "routes": [],
+    "posts": [
+      "naples"
+    ],
+    "preferredRegions": [
+      "mediterranean"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-24",
+    "name": "北アフリカ商業組合",
+    "nameEn": "North African Merchants Guild",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "ottoman"
+    ],
+    "routes": [],
+    "posts": [
+      "tunis",
+      "tripoli"
+    ],
+    "preferredRegions": [
+      "mediterranean"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-25",
+    "name": "ロシア商人",
+    "nameEn": "Russian Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "russia"
+    ],
+    "routes": [],
+    "posts": [
+      "moscow",
+      "kyiv"
+    ],
+    "preferredRegions": [
+      "centralEurope",
+      "siberia"
+    ],
+    "reserve": true
+  },
+  {
+    "id": "company-26",
+    "name": "ペルシア商人",
+    "nameEn": "Persian Merchants",
+    "kind": "medium",
+    "capital": 25000,
+    "licenses": [
+      "safavid"
+    ],
+    "routes": [],
+    "posts": [
+      "bandarabbas"
+    ],
+    "preferredRegions": [
+      "westAsia"
+    ],
+    "reserve": true
+  }
+];
+export const RIVAL_CANDIDATES = [...RIVAL_STARTS, ...RIVAL_RESERVES];

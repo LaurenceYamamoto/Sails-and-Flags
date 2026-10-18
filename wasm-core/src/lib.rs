@@ -12,6 +12,7 @@ mod movement;
 mod rivals;
 mod licenses;
 mod rival_strategy;
+mod rival_entry;
 mod simulation;
 mod trade;
 mod view;
