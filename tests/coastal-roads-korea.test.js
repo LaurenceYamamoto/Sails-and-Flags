@@ -38,7 +38,10 @@ test('Pyongyang remains a Joseon inland city with a retired direct Hanseong road
 });
 
 test('3.3.3 saves preserve existing routes, cargo, cash, investments and RNG while adding Pyongyang',async()=>{
- const e=await engine();let g=e.save();g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);
+ const e=await engine();let g=e.save();
+ // Keep current AI from purchasing nations absent from this historical fixture.
+ for(const c of g.companies.slice(1))c.acquired=true;
+ g.companies[0].cash+=1e8;g.companies[0].initial_cash+=1e8;e.load(g);
  for(const id of Object.keys(COASTAL_ROAD_VIA)){const r=ROADS[id];open(e,r.a,r.b);}
  const road=w.roads.findIndex(r=>r.id==='bilbao_bordeaux');e.cmd({action:'buyRoad',road});e.cmd({action:'roadInvestment',road,roadBudget:1,securityBudget:1});e.cmd({action:'tick',days:7});
  const old=e.save();old.city_version=8;trimLegacyNations(old);old.markets.length=227*w.goods.length;old.development.length=227;old.roads.length=224;e.load(old);const after=e.save();assert.equal(after.city_version,30);assert.equal(after.markets.length,323*w.goods.length);assert.equal(after.roads.length,356);const back=structuredClone(after);back.city_version=8;trimLegacyNations(back);back.markets.length=old.markets.length;back.development.length=227;back.roads.length=224;assert.deepEqual(back,old);

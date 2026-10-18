@@ -1,4 +1,5 @@
-// New-game roster for the WebAssembly engine; capital includes the initial fleet.
+// New campaigns start with one seeded-random post, no fleet or routes.
+// Stable IDs, capital tiers and starting licenses also identify existing saved rivals.
 export const RIVAL_STARTS = [
   {
     "id": "company-1",
@@ -9,15 +10,12 @@ export const RIVAL_STARTS = [
     "licenses": [
       "netherlands"
     ],
-    "routes": [
-      {
-        "kind": "brig",
-        "fleet": 2,
-        "stops": [
-          "amsterdam",
-          "willemstad"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "willemstad"
+    ],
+    "preferredRegions": [
+      "caribbean"
     ]
   },
   {
@@ -29,24 +27,14 @@ export const RIVAL_STARTS = [
     "licenses": [
       "spain"
     ],
-    "routes": [
-      {
-        "kind": "fluyt",
-        "fleet": 2,
-        "stops": [
-          "cadiz",
-          "havana"
-        ]
-      },
-      {
-        "kind": "sloop",
-        "fleet": 2,
-        "stops": [
-          "havana",
-          "santiago",
-          "sanjuan"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "cadiz"
+    ],
+    "preferredRegions": [
+      "caribbean",
+      "centralAmerica",
+      "southAmerica"
     ]
   },
   {
@@ -58,15 +46,13 @@ export const RIVAL_STARTS = [
     "licenses": [
       "england"
     ],
-    "routes": [
-      {
-        "kind": "brig",
-        "fleet": 2,
-        "stops": [
-          "bombay",
-          "madras"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "bombay",
+      "madras"
+    ],
+    "preferredRegions": [
+      "southAsia"
     ]
   },
   {
@@ -78,20 +64,12 @@ export const RIVAL_STARTS = [
     "licenses": [
       "netherlands"
     ],
-    "routes": [
-      {
-        "kind": "fluyt",
-        "fleet": 3,
-        "stops": [
-          "amsterdam",
-          "elmina",
-          "capetown",
-          "batavia",
-          "colombo",
-          "capetown",
-          "elmina"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "batavia"
+    ],
+    "preferredRegions": [
+      "southeastAsia"
     ]
   },
   {
@@ -103,23 +81,15 @@ export const RIVAL_STARTS = [
     "licenses": [
       "ottoman"
     ],
-    "routes": [
-      {
-        "kind": "caravan",
-        "fleet": 2,
-        "stops": [
-          "izmir",
-          "ankara"
-        ]
-      },
-      {
-        "kind": "caravan",
-        "fleet": 2,
-        "stops": [
-          "aleppo",
-          "damascus"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "istanbul",
+      "alexandria"
+    ],
+    "preferredRegions": [
+      "mediterranean",
+      "westAsia",
+      "africa"
     ]
   },
   {
@@ -131,23 +101,12 @@ export const RIVAL_STARTS = [
     "licenses": [
       "mughal"
     ],
-    "routes": [
-      {
-        "kind": "caravan",
-        "fleet": 2,
-        "stops": [
-          "surat",
-          "ahmedabad"
-        ]
-      },
-      {
-        "kind": "caravan",
-        "fleet": 2,
-        "stops": [
-          "agra",
-          "delhi"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "surat"
+    ],
+    "preferredRegions": [
+      "southAsia"
     ]
   },
   {
@@ -159,23 +118,17 @@ export const RIVAL_STARTS = [
     "licenses": [
       "qing"
     ],
-    "routes": [
-      {
-        "kind": "caravan",
-        "fleet": 2,
-        "stops": [
-          "xian",
-          "hankou"
-        ]
-      },
-      {
-        "kind": "wagon",
-        "fleet": 2,
-        "stops": [
-          "suzhou",
-          "hangzhou"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "tianjin",
+      "shanghai",
+      "ningbo",
+      "fuzhou",
+      "xiamen",
+      "guangzhou"
+    ],
+    "preferredRegions": [
+      "eastAsia"
     ]
   },
   {
@@ -187,23 +140,14 @@ export const RIVAL_STARTS = [
     "licenses": [
       "japan"
     ],
-    "routes": [
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "osaka",
-          "nagasaki"
-        ]
-      },
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "osaka",
-          "edo"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "osaka",
+      "edo",
+      "nagasaki"
+    ],
+    "preferredRegions": [
+      "eastAsia"
     ]
   },
   {
@@ -216,15 +160,12 @@ export const RIVAL_STARTS = [
       "genoa",
       "tuscany"
     ],
-    "routes": [
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "genoa",
-          "livorno"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "genoa"
+    ],
+    "preferredRegions": [
+      "mediterranean"
     ]
   },
   {
@@ -237,15 +178,12 @@ export const RIVAL_STARTS = [
       "venice",
       "ottoman"
     ],
-    "routes": [
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "venice",
-          "istanbul"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "venice"
+    ],
+    "preferredRegions": [
+      "mediterranean"
     ]
   },
   {
@@ -257,15 +195,13 @@ export const RIVAL_STARTS = [
     "licenses": [
       "england"
     ],
-    "routes": [
-      {
-        "kind": "brig",
-        "fleet": 2,
-        "stops": [
-          "london",
-          "kingston"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "kingston",
+      "bridgetown"
+    ],
+    "preferredRegions": [
+      "caribbean"
     ]
   },
   {
@@ -277,23 +213,12 @@ export const RIVAL_STARTS = [
     "licenses": [
       "portugal"
     ],
-    "routes": [
-      {
-        "kind": "brig",
-        "fleet": 1,
-        "stops": [
-          "lisbon",
-          "luanda"
-        ]
-      },
-      {
-        "kind": "brig",
-        "fleet": 1,
-        "stops": [
-          "luanda",
-          "mozambique"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "lisbon"
+    ],
+    "preferredRegions": [
+      "southAmerica"
     ]
   },
   {
@@ -305,23 +230,12 @@ export const RIVAL_STARTS = [
     "licenses": [
       "oman"
     ],
-    "routes": [
-      {
-        "kind": "brig",
-        "fleet": 1,
-        "stops": [
-          "muscat",
-          "mombasa"
-        ]
-      },
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "mombasa",
-          "zanzibar"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "muscat"
+    ],
+    "preferredRegions": [
+      "africa"
     ]
   },
   {
@@ -334,15 +248,12 @@ export const RIVAL_STARTS = [
       "france",
       "mughal"
     ],
-    "routes": [
-      {
-        "kind": "sloop",
-        "fleet": 1,
-        "stops": [
-          "pondicherry",
-          "hughli"
-        ]
-      }
+    "routes": [],
+    "posts": [
+      "pondicherry"
+    ],
+    "preferredRegions": [
+      "southAsia"
     ]
   }
 ];

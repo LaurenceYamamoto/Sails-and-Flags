@@ -50,6 +50,7 @@ impl Engine {
     }
     pub fn tick(&mut self) {
         self.tick_day();
+        self.clear_bankrupt_rivals();
         self.capture_accounts();
     }
     fn tick_day(&mut self) {
@@ -62,7 +63,7 @@ impl Engine {
             if self.game.companies[c].acquired || self.game.companies[c].bankrupt {
                 continue;
             }
-            if c>0 {self.consolidate_rival_posts(c);}
+            if c>0 {self.rival_retreat(c); if self.game.day==1 {self.rival(c);}}
             self.advance_posts(c);
             if self.game.companies[c].bankrupt {if c==0{return;}else{continue;}}
             self.advance_diplomacy(c);
@@ -136,7 +137,7 @@ impl Engine {
                     }
                     self.advance_industry(0);
                 }
-                if c > 0 && self.calendar().1 == 1 {
+                if c > 0 && self.game.day>1 && (self.calendar().1 == 1 || self.game.companies[c].routes.is_empty() && self.game.day % 7 == c as u32 % 7) {
                     self.rival(c);
                 }
             }
@@ -153,7 +154,7 @@ impl Engine {
         if self.game.first_rank.is_none()
             && !self.game.companies[0].bankrupt
             && (1..self.game.companies.len())
-                .filter(|&c| !self.game.companies[c].acquired)
+                .filter(|&c| !self.game.companies[c].acquired && !self.game.companies[c].bankrupt)
                 .all(|c| self.assets(0) > self.assets(c))
         {
             self.game.first_rank = Some(self.game.day);

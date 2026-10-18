@@ -10,6 +10,8 @@ mod loading;
 mod model;
 mod movement;
 mod rivals;
+mod licenses;
+mod rival_strategy;
 mod simulation;
 mod trade;
 mod view;
@@ -258,6 +260,7 @@ impl Engine {
                         self.entry(c, "shipyardRefund", refund, None, String::new());
                     }
                 }
+                self.clear_bankrupt_rivals();
                 self.capture_accounts();
 
                 Ok(json!(true))

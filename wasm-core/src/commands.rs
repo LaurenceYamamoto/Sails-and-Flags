@@ -137,7 +137,7 @@ impl Engine {
     }
     pub fn acquisition(&self, c: usize) -> Result<Value> {
         ensure(
-            c > 0 && c < self.game.companies.len() && !self.game.companies[c].acquired,
+            c > 0 && c < self.game.companies.len() && !self.game.companies[c].acquired && !self.game.companies[c].bankrupt,
             "買収対象がありません。",
         )?;
         let target = &self.game.companies[c];
@@ -300,6 +300,7 @@ impl Engine {
                     reserve: number(v, "reserve")?,
                 };
             }
+            "returnLicense" => {self.return_license(0,index(v,"nation",self.data.nations.len())?)?;}
             "license" => {
                 self.buy_license(0, index(v, "nation", self.data.nations.len())?)?;
             }
@@ -625,6 +626,7 @@ impl Engine {
                 )
             }
 
+            "returnLicense" => self.license_return_quote(0,index(v,"nation",self.data.nations.len())?),
             "acquisition" => self.acquisition(index(v, "company", self.game.companies.len())?),
             _ => Err("不明な照会です。".into()),
         }

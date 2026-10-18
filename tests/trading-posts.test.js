@@ -18,7 +18,7 @@ test('trading posts, inventory transfers, handling and migration',async t=>{
   const cash=save().companies[0].cash;build(a);assert.equal(save().companies[0].cash,cash-500);assert.throws(()=>build(a));
   let p=save().companies[0].posts[a];assert.equal(p.warehouse,0);assert.equal(p.handling,0);const before=view().posts[0].tax;upgrade(a,'post');assert.ok(view().posts[0].tax<before);
   const id=open();assert.ok(save().companies[0].routes.some(r=>r.id===id));
-  const shared=city('osaka');build(shared);assert.ok(save().companies.slice(1).some(c=>c.posts[shared]));
+  const shared=Number(Object.keys(save().companies[8].posts)[0]);build(shared);assert.ok(save().companies.slice(1).some(c=>c.posts[shared]));
   const state=save();state.companies[0].initial_cash-=state.companies[0].cash;state.companies[0].cash=0;load(state);const snapshot=save();assert.throws(()=>upgrade(a,'warehouse'));assert.deepEqual(save(),snapshot);
  });
  await t.test('post count scales opening prices and every base fee, while facilities stay separate',()=>{

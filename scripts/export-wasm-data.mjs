@@ -94,21 +94,11 @@ const specs=Object.entries({...SHIPS,wagon:{...WAGONS.wagon,roughness:.1},carava
 const starts=RIVAL_STARTS.map(c=>{
  const licenses=c.licenses.map(id=>nations.findIndex(n=>n.id===id));
  if(licenses.some(n=>n<0)||new Set(licenses).size!==licenses.length)throw Error('Invalid starting licenses: '+c.id);
- let fleetCost=0;
- const routes=c.routes.map(r=>{
-  const stops=r.stops.map(index),spec=specs.find(s=>s.id===r.kind);
-  if(!spec||stops.length<2||stops.length>12||stops.some(i=>i<0)||!Number.isInteger(r.fleet)||r.fleet<1)throw Error('Invalid starting fleet: '+c.id);
-  for(let i=0;i<stops.length;i++){
-   const a=stops[i],b=stops[(i+1)%stops.length],road=roads.find(r=>!r.retired&&((r.a===a&&r.b===b)||(r.a===b&&r.b===a)));
-   const waterway=waterways.find(w=>(w.a===a&&w.b===b)||(w.a===b&&w.b===a));
-   const distance=spec.mode==='land'?road?.km:waterway?(spec.id==='sloop'?waterway.nm:null):distances[a][b];
-   const required=spec.mode==='land'?road?.nations:waterway?.nations??[cities[a].nation,cities[b].nation];
-   if(a===b||distance==null||distance>spec.range||!required?.every(n=>licenses.includes(n)))throw Error('Unserviceable starting route: '+c.id+' '+cities[a].id+' / '+cities[b].id);
-  }
-  fleetCost+=spec.price*r.fleet;return {...r,stops};
- });
- if(!Number.isFinite(c.capital)||fleetCost>=c.capital)throw Error('Insufficient starting capital: '+c.id);
- return {...c,licenses,routes};
+ const posts=c.posts.map(index);
+ if(!posts.length||posts.some(i=>i<0||!licenses.includes(cities[i].nation))||new Set(posts).size!==posts.length)throw Error('Invalid starting posts: '+c.id);
+ if(!c.preferredRegions.length||c.preferredRegions.some(id=>!DISPLAY_REGIONS.some(r=>r.id===id)))throw Error('Invalid rival regions: '+c.id);
+ if(!Number.isFinite(c.capital)||c.capital<=0||c.routes.length)throw Error('Invalid starting capital or fleet: '+c.id);
+ return {...c,licenses,posts,routes:[]};
 });
 applyCatalogOrder(cities,nations);
 const land=LAND.map(poly=>poly.map(ring=>ring.map(([lon,lat],i)=>{const p=project(lon,lat);return `${i?'L':'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`;}).join('')+'Z').join('')).join('');

@@ -34,34 +34,9 @@ impl Engine {
     pub fn initialize(&mut self, seed: u32, events: bool) {
         self.game = Game::new(&self.data, seed, events);
         for (i, start) in self.data.starts.clone().iter().enumerate() {
-            // Cover every adjacent pair, including pairs produced by circuit splitting,
-            // with shared hubs instead of charging for a post at every endpoint.
-            let mut pairs = start.routes.iter().flat_map(|r| r.stops.iter().enumerate()
-                .map(|(j,&a)| (a,r.stops[(j+1)%r.stops.len()])))
-                .collect::<Vec<_>>();
-            while !pairs.is_empty() {
-                let mut degree = std::collections::BTreeMap::<usize,usize>::new();
-                for &(a,b) in &pairs { *degree.entry(a).or_default()+=1; *degree.entry(b).or_default()+=1; }
-                let city = *degree.iter().max_by(|a,b|a.1.cmp(b.1).then_with(||b.0.cmp(a.0))).unwrap().0;
-                self.game.companies[i+1].posts.insert(city,crate::posts::TradingPost::new(self.data.goods.len()));
-                pairs.retain(|&(a,b)|a!=city&&b!=city);
-            }
-            for route in &start.routes {
-                for _ in 0..route.fleet {
-                    self.open(
-                        i + 1,
-                        &route.kind,
-                        route.stops.clone(),
-                        (0..self.data.goods.len()).collect(),
-                        10.0,
-                    )
-                    .expect("validated starting route must be affordable and serviceable");
-                }
-            }
+            let city=start.posts[(self.random()*start.posts.len() as f64) as usize];
+            self.game.companies[i+1].posts.insert(city,crate::posts::TradingPost::new(self.data.goods.len()));
         }
-        let mut g=self.game.clone();
-        self.split_routes(&mut g).expect("valid initial routes");
-        self.game=g;
         self.capture_accounts();
     }
     pub fn sell_ship(&mut self,c:usize,id:u32)->Result<f64> {

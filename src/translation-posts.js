@@ -1,4 +1,10 @@
 export const postTranslations={
+ 'Surrender license':['交还许可证','면허 반납','Restituer la licence','Devolver licencia'],
+ 'Cargo cost refund':['货物成本退款','화물 원가 환급','Remboursement du coût de la cargaison','Reembolso del coste de la carga'],
+ 'Estimated warehouse proceeds':['预计仓库库存出售收入','창고 재고 예상 매각 대금','Produit estimé du stock vendu','Ingresos estimados del almacén'],
+ 'A trading license is required.':['需要交易许可证。','교역 면허가 필요합니다.','Une licence commerciale est requise.','Se requiere una licencia comercial.'],
+ 'The home nation license cannot be surrendered.':['不能交还本国许可证。','본국 면허는 반납할 수 없습니다.','La licence du pays d’origine ne peut pas être restituée.','No se puede devolver la licencia del país de origen.'],
+ 'Surrender closes routes and posts that require this license. Cargo is refunded at cost, warehouse stock is sold at market prices, and vessels become idle. License and facility costs are not refunded.':['交还许可证会关闭依赖该许可证的路线和商馆。货物按购入成本退款，仓库库存按市价出售，船舶和车辆转为空闲。许可证和设施费用不退还。','반납하면 해당 면허가 필요한 경로와 상관이 폐쇄됩니다. 화물은 원가로 환급하고 창고 재고는 시장 가격에 판매하며 선박과 차량은 미사용 상태가 됩니다. 면허와 시설 비용은 환급하지 않습니다.','La restitution ferme les routes et comptoirs nécessitant cette licence. La cargaison est remboursée au coût d’achat, le stock vendu au prix du marché et les véhicules deviennent disponibles. Les frais de licence et d’installation ne sont pas remboursés.','La devolución cierra las rutas y factorías que necesitan esta licencia. La carga se reembolsa al coste, el inventario se vende a precio de mercado y los vehículos quedan libres. No se reembolsan licencias ni instalaciones.'],
  "Action":["操作","작업","Action","Acción"],
  "Enabled":["启用","활성화","Activé","Activado"],
  "Reduce level":["降低等级", "레벨 낮추기", "Réduire le niveau", "Reducir nivel"],

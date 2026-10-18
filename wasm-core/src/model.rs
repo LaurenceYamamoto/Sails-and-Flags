@@ -31,6 +31,8 @@ pub struct Spec {
 #[derive(Clone, Deserialize)]
 pub struct City {
     pub id: String,
+    #[serde(default)]
+    pub region: String,
     #[serde(default)] // Migration-only catalogs predate display ranks.
     pub order: usize,
     pub nation: usize,
@@ -96,13 +98,10 @@ pub struct Start {
     pub id: String,
     pub capital: f64,
     pub licenses: Vec<usize>,
-    pub routes: Vec<StartRoute>,
-}
-#[derive(Clone, Deserialize)]
-pub struct StartRoute {
-    pub kind: String,
-    pub stops: Vec<usize>,
-    pub fleet: usize,
+    #[serde(default)]
+    pub posts: Vec<usize>,
+    #[serde(default, rename="preferredRegions")]
+    pub preferred_regions: Vec<String>,
 }
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -361,6 +360,8 @@ pub struct FriendshipChange {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Company {
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub rival_state: Option<crate::rival_strategy::RivalState>,
     #[serde(default)]
     pub posts: BTreeMap<usize, crate::posts::TradingPost>,
     #[serde(default)]
@@ -777,7 +778,7 @@ impl Game {
             route_pair_version: 1,
             land_path_version: 1,
             transport_version: 1,
-            roster_version: 5,
+            roster_version: 6,
             city_version: 30,
             seed,
             rng,
@@ -828,6 +829,7 @@ impl Game {
 impl Company {
     fn new(id: &str, name: &str, kind: &str, cash: f64, n: usize, first_license: bool) -> Self {
         Self {
+            rival_state: None,
             posts: BTreeMap::new(),
             facility_policy: Default::default(),
             id: id.into(),

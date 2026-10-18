@@ -2,6 +2,8 @@ import {tx,nameOf,cityName,errorMessage} from './i18n.js';
 
 // Translate at display time so saved records also follow language changes.
 const storageJapanese={
+ 'A trading license is required.':'交易免許が必要です。',
+ 'The home nation license cannot be surrendered.':'母国の交易免許は返上できません。',
  'Invalid facility settings':'施設の設定を確認してください。日数は1～30、使用率は0～100で、拡張閾値を縮小閾値より高くしてください。',
  'A trading post is required at either endpoint of a route.':'交易路の片端に自社の商館が必要です。',
  'A trading post already exists.':'商館は設置済みです。',

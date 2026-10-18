@@ -60,7 +60,7 @@ test('renamed legacy sea designs recover their original base using the retained 
  const q=e.query({query:'connection',stops:['newyork','albany'].map(e.city)});assert.deepEqual(q.types.filter(k=>!['wagon','caravan'].includes(k)),['sloop',origins.find(([,b])=>b==='sloop')[0]]);
 });
 
-test('regional rivals retain their 3.3.10 land fleets and the 50 route cap',async()=>{
- const e=await engine();for(const id of ['company-6','company-7']){const c=e.view().companies.find(c=>c.id===id);assert.ok(c.routes.some(r=>r.mode==='land'));assert.ok(c.routes.every(r=>!r.waterway));}
+test('regional rivals start without fleets and retain the 50 route cap after opening services',async()=>{
+ const e=await engine();for(const id of ['company-6','company-7']){const c=e.save().companies.find(c=>c.id===id);assert.deepEqual(c.routes,[]);assert.deepEqual(c.ships,[]);assert.equal(Object.keys(c.posts).length,1);}
  e.cmd({action:'tick',days:31});const g=e.save();assert.ok(g.companies.slice(1).every(c=>c.routes.length<=50));e.load(g);assert.deepEqual(e.save(),g);
 });
