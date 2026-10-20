@@ -274,6 +274,11 @@ impl Engine {
             .filter(|(_, s)| s.route == Some(r.id))
             .map(|(i, _)| i)
             .collect();
+        self.schedule_fleet(c, r, fleet)
+    }
+    // Callers that visit every route can group the fleet once instead of
+    // rescanning all ships for each route. Indices preserve original order.
+    pub fn schedule_fleet(&self, c: usize, r: &Route, fleet: Vec<usize>) -> (f64, Vec<f64>, Vec<usize>) {
         let mut cycle = 0.0;
         let mut offsets = vec![];
         for (i, &a) in r.stops.iter().enumerate() {

@@ -68,6 +68,25 @@ test('trading posts, inventory transfers, handling and migration',async t=>{
   assert.equal(qty,80);assert.ok(co.posts[b].stock.some(s=>s.good===0));assert.equal(co.totals.sale,baseline.totals.sale);assert.equal(co.totals.purchase,baseline.totals.purchase);assert.ok(co.totals.handlingFee<0);
   assert.ok(!co.posts[a].stock.some(s=>s.from===b));
  });
+ await t.test('fractional cargo basis cannot create negative route costs when unloaded into a warehouse',()=>{
+  for(const room of [3,1,0]){
+   reset();build(a);build(b);upgrade(b,'warehouse');upgrade(b,'handling');noMarket(b);open();
+   const g=save(),co=g.companies[0],r=co.routes[0],s=co.ships[0];
+   r.active=false;r.transport.costs=0;
+   co.posts[b].stock=room===3?[]:[{good:1,quantity:100-room,cost:100,from:null}];
+   s.cargo=[{good:0,quantity:3,cost:0.1}];s.voyage=null;s.next=r.stops.indexOf(b);
+   s.handling={unloading:true,rate:5,total:.6,remaining:.1,trip:{from:a,to:b,total:10,remaining:0,original_cost:.1,upkeep:0,direct_sale:false,warehouse_units:room}};
+   load(g);cmd({action:'tick',days:1});const result=save(),route=result.companies[0].routes[0];
+   assert.ok(route.transport.costs>=0);
+   const stored=result.companies[0].posts[b].stock.find(s=>s.good===0);
+   if(room===3){assert.equal(stored.cost,.1);assert.equal(route.transport.costs,0);}
+   else if(room===1){assert.equal(stored.quantity,1);assert.ok(Math.abs(stored.cost-.1/3)<1e-15);assert.ok(route.transport.costs>=.1-stored.cost);}
+   else {assert.equal(stored,undefined);assert.ok(route.transport.costs>=.1);}
+   load(result);assert.deepEqual(save(),result);
+   const corrupt=structuredClone(result);corrupt.companies[0].routes[0].transport.costs=-1;
+   assert.throws(()=>load(corrupt),/経路・収支/);assert.deepEqual(save(),result,'real negative costs remain invalid');
+  }
+ });
  await t.test('warehouse construction accepts oversized ongoing deliveries and preserves their market sale through reload',()=>{
   reset();build(a);build(b);const id=open();
   for(let i=0;i<5;i++){cmd({action:'buyShip',kind:'caravan'});cmd({action:'assign',route:id,ship:save().companies[0].ships.at(-1).id});}

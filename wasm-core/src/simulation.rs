@@ -17,6 +17,11 @@ impl Engine {
     }
 
     pub fn market_flow(&self, city: usize, g: usize) -> (f64, f64, f64, f64) {
+        let (_, _, ordinal, length) = self.calendar();
+        let season=(std::f64::consts::TAU * ordinal as f64 / length as f64).cos();
+        self.market_flow_factors(city,g,season,self.city_demand_multiplier(city))
+    }
+    fn market_flow_factors(&self, city:usize, g:usize, season:f64, city_multiplier:f64) -> (f64,f64,f64,f64) {
         let c = &self.data.cities[city];
         let d = &self.game.development[city];
         let apt = c.supply[g] / c.supply.iter().copied().fold(1.0, f64::max);
@@ -36,13 +41,9 @@ impl Engine {
         };
         let requested = c.demand[g]
             * c.market_size
-            * self.city_demand_multiplier(city)
+            * city_multiplier
             * c.modifiers[g]
-            * (1.0
-                + c.seasons[g] * {
-                    let (_, _, ordinal, length) = self.calendar();
-                    (std::f64::consts::TAU * ordinal as f64 / length as f64).cos()
-                })
+            * (1.0 + c.seasons[g] * season)
             * war
             * (1.0 / ratio(stock)).clamp(0.25, 3.0);
         let consumed = stock.min(requested);
@@ -71,10 +72,13 @@ impl Engine {
             self.advance_diplomacy(c);
             if c != 0 { self.advance_industry(c); }
             if c == 0 {
+                let (_,_,ordinal,length)=self.calendar();
+                let season=(std::f64::consts::TAU * ordinal as f64 / length as f64).cos();
                 for city in 0..self.data.cities.len() {
+                    let multiplier=self.city_demand_multiplier(city);
                     for g in 0..self.data.goods.len() {
                         self.game.markets[city * self.data.goods.len() + g].stock =
-                            self.market_flow(city, g).3;
+                            self.market_flow_factors(city, g,season,multiplier).3;
                     }
                 }
             }

@@ -9,6 +9,34 @@ pub fn ensure(ok: bool, msg: &str) -> Result<()> {
 pub fn amount(v: f64) -> bool {
     v.is_finite() && v >= 0.0 && v <= 1e14
 }
+// Preserve the exact remaining basis when moving an entire lot. Multiplying
+// then dividing by its quantity can otherwise return slightly more than cost.
+pub fn cargo_basis(cost: f64, total: usize, quantity: usize) -> f64 {
+    if quantity == 0 || total == 0 { 0.0 }
+    else if quantity >= total { cost }
+    else { (cost * quantity as f64 / total as f64).clamp(0.0, cost) }
+}
+#[cfg(test)]
+mod cargo_basis_tests {
+    use super::cargo_basis;
+    #[test]
+    fn full_and_partial_lots_preserve_nonnegative_basis() {
+        // The previous multiply/divide expression is greater than 0.1 here.
+        assert!(0.1_f64 * 3.0 / 3.0 > 0.1);
+        for cost in [0.0, 0.1, 1234.567891234, 1e14] {
+            for total in [1, 3, 17, 10000] {
+                assert_eq!(cargo_basis(cost,total,total),cost);
+                assert_eq!(cargo_basis(cost,total,0),0.0);
+                for quantity in [1,total/2,total] {
+                    let moved=cargo_basis(cost,total,quantity);
+                    assert!(moved>=0.0 && moved<=cost);
+                    assert!(cost-moved>=0.0);
+                }
+            }
+        }
+        assert_eq!(cargo_basis(0.1,3,1),0.1/3.0);
+    }
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Spec {
@@ -121,6 +149,8 @@ pub struct Data {
     pub distances: Vec<Vec<Option<f64>>>,
 }
 pub struct Engine {
+    // Presentation-only cache, never part of a saved game.
+    pub runtime_paths: Option<Vec<(String,Vec<usize>)>>,
     pub data: Data,
     pub graphics: Value,
     pub waterway_index: BTreeMap<(usize, usize), usize>,
@@ -505,6 +535,7 @@ impl Engine {
         let game = Game::new(&data, 1700, true);
         Self {
             land_connections: crate::land_connections::connections(&data),
+            runtime_paths: None,
             water_connections: crate::water_connections::connections(&data),
             water_access_index: data.water_access.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),

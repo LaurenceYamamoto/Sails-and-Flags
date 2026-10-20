@@ -87,9 +87,9 @@ test('worker boot uses the locale default only when no save can be restored',asy
   const core=request=>{
    if(request.op==='load'){if(request.text==='broken')throw Error('invalid');name=request.text;}
    if(request.op==='command'){name=request.command.name;resets++;}
-   return request.op==='view'?{companies:[{name}]}:{};
+   return request.op==='runtimeView'?{companies:[{name}]}:{};
   };
-  const context=vm.createContext({bridge:()=>core,IndexedSaves:class{async list(){return saves;}async read(id){return saves.find(s=>s.id===id).text;}},fetch:()=>{},WebAssembly:{instantiateStreaming:async()=>({instance:{}})},postMessage:m=>messages.push(m)});
+  const context=vm.createContext({bridge:()=>core,SaveClient:class{async list(){return saves;}async read(id){return saves.find(s=>s.id===id).text;}},fetch:()=>{},WebAssembly:{instantiateStreaming:async()=>({instance:{}})},postMessage:m=>messages.push(m)});
   vm.runInContext(fs.readFileSync('src/game-worker.js','utf8').replace(/^import .*;\r?\n/gm,''),context);
   context.onmessage({data:{id:1,op:'boot',name:'Votre compagnie'}});
   await vm.runInContext('queue',context);

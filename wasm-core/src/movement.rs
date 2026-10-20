@@ -61,11 +61,15 @@ impl Engine {
         for id in revise {
             self.reschedule(c, id);
         }
+        let mut fleets: BTreeMap<u32, Vec<usize>> = BTreeMap::new();
+        for (i,s) in self.game.companies[c].ships.iter().enumerate() {
+            if let Some(id)=s.route {fleets.entry(id).or_default().push(i);}
+        }
         let schedules: BTreeMap<_, _> = self.game.companies[c]
             .routes
             .iter()
             .map(|r| {
-                let (cycle, offsets, fleet) = self.schedule(c, r);
+                let (cycle, offsets, fleet) = self.schedule_fleet(c, r, fleets.remove(&r.id).unwrap_or_default());
                 (
                     r.id,
                     (
@@ -73,8 +77,9 @@ impl Engine {
                         offsets,
                         fleet
                             .iter()
-                            .map(|&i| self.game.companies[c].ships[i].id)
-                            .collect::<Vec<_>>(),
+                            .enumerate()
+                            .map(|(phase,&i)| (self.game.companies[c].ships[i].id,phase as f64 * cycle / fleet.len() as f64))
+                            .collect::<BTreeMap<_,_>>(),
                     ),
                 )
             })
@@ -173,8 +178,7 @@ impl Engine {
                         break;
                     }
                     let (cycle, offsets, fleet) = &schedules[&route.id];
-                    let phase = fleet.iter().position(|&x| x == id).unwrap() as f64 * cycle
-                        / fleet.len() as f64;
+                    let phase = fleet[&id];
                     let first = route.epoch + phase + offsets[ship.next];
                     let earliest = now.max(ship.ready as f64);
                     let next = first + ((earliest - first - 1e-9) / cycle).ceil().max(0.0) * cycle;
@@ -201,14 +205,17 @@ impl Engine {
     }
 
     fn finish_delivery(&mut self, c: usize, ri: usize, ship: &mut Ship, v: Voyage) {
-        let cost = ship.cargo.iter().map(|x| x.cost).sum::<f64>();
         let mut revenue = 0.0;
         let deposit=!v.direct_sale&&self.warehouse(c,v.to);
         let mut room=if deposit{v.warehouse_units.unwrap_or(usize::MAX).min(self.warehouse_room(c,v.to))}else{0};
         let mut stored_cost=0.0;
+        let mut sold_cost=0.0;
         for cargo in &ship.cargo {
             let q=room.min(cargo.quantity);room-=q;
-            let value=cargo.cost*q as f64/cargo.quantity.max(1) as f64;stored_cost+=value;
+            let value=cargo_basis(cargo.cost,cargo.quantity,q);stored_cost+=value;
+            // Sum each lot's nonnegative sold basis instead of subtracting two
+            // independently rounded totals after a warehouse-only delivery.
+            sold_cost+=cargo.cost-value;
             if q>0{self.put_stock(c,v.to,Cargo{good:cargo.good,quantity:q,cost:value},Some(v.from));}
             if cargo.quantity>q{revenue+=self.trade(c,v.to,cargo.good,cargo.quantity-q,false,ship.route).1;}
         }
@@ -219,7 +226,7 @@ impl Engine {
         r.deliveries += 1;
         r.transport.deliveries += 1;
         r.transport.sales += revenue + tax;
-        r.transport.costs += cost-stored_cost+tax;
+        r.transport.costs += sold_cost+tax;
         r.actual = Some((stored_cost+revenue) - v.original_cost - v.upkeep);
     }
 
@@ -246,11 +253,7 @@ impl Engine {
                 ((item.quantity as f64 * fraction * (0.5 + severity / 2.0)).ceil() as usize)
                     .min(item.quantity)
             };
-            let value = if item.quantity > 0 {
-                item.cost * q as f64 / item.quantity as f64
-            } else {
-                0.0
-            };
+            let value = cargo_basis(item.cost,item.quantity,q);
             item.quantity -= q;
             item.cost -= value;
             cost += value;

@@ -1,11 +1,12 @@
 import {bridge} from './wasm-bridge.js';
-import {IndexedSaves} from './indexed-saves.js';
-const storage=new IndexedSaves();
+import {SaveClient} from './save-client.js';
+const storage=new SaveClient();
 const ready=WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm')).then(r=>bridge(r.instance));
-let queue=Promise.resolve(),selectedCity=0,lastAutoDay=0;
+let queue=Promise.resolve(),selectedCity=0,lastAutoDay=0,lastViewDay=-1,autosaving=null;
 onmessage=({data})=>{queue=queue.then(async()=>{
   try{
     const core=await ready;let value;
+    const view=(paths=false)=>{const v=core({op:'runtimeView',city:selectedCity,company:data.company,route:data.route,paths});lastViewDay=v.day;return v;};
     if(data.op==='boot'){
       let restored=false;
       try {
@@ -13,23 +14,32 @@ onmessage=({data})=>{queue=queue.then(async()=>{
         for(const row of rows){try{core({op:'load',text:await storage.read(row.id)});lastAutoDay=row.day;restored=true;break;}catch{postMessage({notice:'A save could not be loaded; trying the next most recent save.'});}}
       } catch(e){postMessage({notice:'Save storage unavailable: '+e.message});}
       if(!restored)core({op:'command',command:{action:'new',name:data.name}});
-      value={catalog:core({op:'catalog'}),view:core({op:'view'})};
+      value={catalog:core({op:'catalog'}),view:view(true)};
     }
     else if(data.op==='save'){
-      const view=core({op:'view',city:selectedCity});
-      value=await storage.write(data.slot,core({op:'save'}),{day:view.day,name:view.companies[0].name});
+      const snapshot=core({op:'save'}),info=core({op:'saveInfo'});
+      value=await storage.write(data.slot,snapshot,info);
     }else if(data.op==='saves')value=await storage.list();
-    else if(data.op==='loadSlot'){core({op:'load',text:await storage.read(data.slot)});lastAutoDay=0;value=core({op:'view',city:selectedCity});}
+    else if(data.op==='loadSlot'){if(autosaving)await autosaving;core({op:'load',text:await storage.read(data.slot)});lastAutoDay=0;value=view(true);}
     else if(data.op==='export')value=core({op:'save'});
     else{
       if(data.op==='view')selectedCity=data.city??0;
-      value=core(data);
-      if(['command','load','advance'].includes(data.op))value=core({op:'view',city:selectedCity});
+      if(data.op==='view')value=view();
+      else {
+        if(data.op==='load'||data.command?.action==='new'){if(autosaving)await autosaving;}
+        value=core(data);
+        if(data.op==='advance'){
+          const clock=core({op:'clock'});
+          value=clock.day===lastViewDay?{...clock,frame:true}:view();
+        }else if(['command','load'].includes(data.op))value=view(data.op==='load'||data.command?.action==='new');
+      }
       if(data.op==='load'||data.command?.action==='new')lastAutoDay=value.day;
-      if(data.op==='advance'&&value.day-lastAutoDay>=30){
-        lastAutoDay=value.day;
-        try{await storage.write(null,core({op:'save'}),{day:value.day,name:value.companies[0].name});}
-        catch(e){postMessage({notice:'Autosave failed: '+e.message});}
+      if(data.op==='advance'&&!autosaving&&value.day-lastAutoDay>=30){
+        const day=value.day,snapshot=core({op:'save'}),info=core({op:'saveInfo'});
+        // At most one autosave in flight. Encoding/IndexedDB proceed on the IO
+        // worker while simulation can answer the next request.
+        lastAutoDay=day;
+        autosaving=storage.write(null,snapshot,info).catch(e=>postMessage({notice:'Autosave failed: '+e.message})).finally(()=>{autosaving=null;});
       }
     }
     postMessage({id:data.id,ok:true,value});

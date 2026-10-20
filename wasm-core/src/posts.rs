@@ -95,7 +95,7 @@ impl Engine {
  pub fn take_stock(&mut self,c:usize,city:usize,good:usize,quantity:usize,to:Option<usize>)->Cargo{
   let mut cargo=Cargo{good,quantity:0,cost:0.0};let p=self.game.companies[c].posts.get_mut(&city).unwrap();
   for s in &mut p.stock {if s.good!=good||to.is_some_and(|t|s.from==Some(t)){continue;}
-   let q=s.quantity.min(quantity-cargo.quantity);let cost=s.cost*q as f64/s.quantity.max(1) as f64;
+   let q=s.quantity.min(quantity-cargo.quantity);let cost=cargo_basis(s.cost,s.quantity,q);
    s.quantity-=q;s.cost-=cost;cargo.quantity+=q;cargo.cost+=cost;if cargo.quantity==quantity{break;}
   }p.stock.retain(|s|s.quantity>0);cargo
  }

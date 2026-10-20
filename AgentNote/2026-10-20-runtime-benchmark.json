@@ -1,0 +1,86 @@
+{
+  "baselineCommit": "efbb57dbb4478320ccfc6cea691d5d001631c984",
+  "date": "2026-10-20",
+  "scope": "Local Node measurements, sequential before/after runs; no target Threadripper measurement",
+  "before": {
+    "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+    "logicalCpus": 12,
+    "binary": "runtime-baseline.wasm",
+    "initialRoutes": 60,
+    "initialShips": 600,
+    "day": 180,
+    "totalRoutes": 138,
+    "totalShips": 687,
+    "tickMs": {
+      "mean": 2.1515483333333525,
+      "p95": 2.5523999999995794,
+      "max": 25.877199999999903
+    },
+    "viewMs": {
+      "mean": 7.117090000000068,
+      "p95": 8.641700000000128,
+      "max": 9.617099999999482
+    },
+    "lateViewMs": {
+      "mean": 14.852009999999973,
+      "p95": 16.54820000000018,
+      "max": 17.63550000000032
+    },
+    "viewBytes": 654358,
+    "saveMs": {
+      "mean": 5.396580000000176,
+      "p95": 7.853100000000268,
+      "max": 7.853100000000268
+    }
+  },
+  "after": {
+    "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+    "logicalCpus": 12,
+    "binary": "assets/wasm/engine.wasm",
+    "initialRoutes": 60,
+    "initialShips": 600,
+    "day": 180,
+    "totalRoutes": 138,
+    "totalShips": 687,
+    "tickMs": {
+      "mean": 2.0342461111111234,
+      "p95": 2.3611000000000786,
+      "max": 26.446399999999812
+    },
+    "viewMs": {
+      "mean": 6.98103666666669,
+      "p95": 9.174399999999878,
+      "max": 9.42489999999998
+    },
+    "lateViewMs": {
+      "mean": 15.154403333333327,
+      "p95": 16.638699999999517,
+      "max": 18.04659999999967
+    },
+    "viewBytes": 654358,
+    "saveMs": {
+      "mean": 5.609789999999975,
+      "p95": 8.047900000000482,
+      "max": 8.047900000000482
+    },
+    "runtime": {
+      "viewMs": {
+        "mean": 10.558553333333323,
+        "p95": 12.369299999999384,
+        "max": 12.427200000000084
+      },
+      "clockMs": {
+        "mean": 0.003536999999969339,
+        "p95": 0.003299999999399006,
+        "max": 0.15239999999994325
+      },
+      "viewBytes": 551289
+    }
+  },
+  "browserOverlaySubmissionMs": {
+    "vessels": 600,
+    "webgl": 0.091,
+    "svg": 0.311,
+    "note": "100 changing-fraction submissions; excludes end-to-end painting/FPS"
+  }
+}

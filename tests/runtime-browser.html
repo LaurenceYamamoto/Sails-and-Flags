@@ -1,0 +1,45 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local performance verification</title>
+<link rel="stylesheet" href="../wasm-style.css">
+<h1>Local performance verification</h1>
+<p>Use a dedicated local port. This page writes a test save in that origin.</p>
+<pre id="result">Loading…</pre>
+<button id="fallback">Test SVG fallback</button>
+<button id="advance">Advance 60 days and save</button>
+<section class="map-panel">
+ <div class="map-navigation"><button data-map-nav="in">Zoom in</button><button data-map-nav="out">Zoom out</button><button data-map-nav="right">Pan right</button><button data-map-nav="reset">Reset</button><span data-map-scale></span></div>
+ <div id="map-host" style="width:100%;height:450px"></div>
+</section>
+<script type="module">
+import {WorldMap} from '../src/wasm-map.js';
+const out=document.querySelector('#result');
+try{
+ if(!['localhost','127.0.0.1'].includes(location.hostname))throw Error('Local-only verification');
+ const worker=new Worker('../src/game-worker.js',{type:'module'}),pending=new Map();let serial=0;
+ worker.onmessage=({data})=>{if(data.notice){out.textContent+='\n'+data.notice;return;}const p=pending.get(data.id);pending.delete(data.id);data.ok?p.resolve(data.value):p.reject(Error(data.error));};
+ const rpc=q=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});worker.postMessage({...q,id});});
+ const boot=await rpc({op:'boot',name:'Performance test'});
+ const fixture=new URLSearchParams(location.search).get('fixture');
+ let view=fixture?await rpc({op:'load',text:await(await fetch(fixture)).text()}):boot.view;
+ const map=new WorldMap(document.querySelector('#map-host'),boot.catalog,{pause(){},city:i=>out.textContent+='\nSelected city: '+boot.catalog.cities[i].id,connect:ids=>out.textContent+='\nConnected cities: '+ids.join(','),route(){},companyName:c=>c.name});
+ map.update(view,null,0);
+ const describe=()=>`Day ${view.day}; ships ${map.samples.length}; renderer ${map.host.dataset.renderer}; paths ${Object.keys(map.paths).length}`;
+ const bench=()=>{const frames=[],fraction=map.view.fraction;for(let i=0;i<100;i++){map.view.fraction=i/100;const t=performance.now();map.animate(false,1);frames.push(performance.now()-t);}map.view.fraction=fraction;map.lastFrame=null;map.animate(false,1);return (frames.reduce((a,b)=>a+b)/frames.length).toFixed(3);};
+ out.textContent=describe()+'\nOverlay submission average ms: '+bench();
+ const saved=await rpc({op:'export'});await rpc({op:'save',slot:5});
+ await rpc({op:'loadSlot',slot:'manual-5'});
+ if(await rpc({op:'export'})!==saved)throw Error('IndexedDB round trip mismatch');
+ out.textContent+='\nSave worker / IndexedDB round trip PASS';
+ document.querySelector('#fallback').onclick=()=>{if(map.gpu)map.gpu.failed=true;map.lastFrame=null;map.animate(false,1);out.textContent=describe()+'\nSVG fallback PASS; overlay submission average ms: '+bench();};
+ document.querySelector('#advance').onclick=async()=>{
+  try{const day=view.day;
+   for(let i=0;i<30;i++){const next=await rpc({op:'advance',ms:500,speed:4,running:true});if(next.frame)view.fraction=next.fraction;else view=next;}
+   map.update(view,null,0);await rpc({op:'save',slot:5});
+   out.textContent=describe()+`\nSimulation and IO worker PASS: ${view.day-day} days; manual save completed`;
+  }catch(e){out.textContent='FAIL: '+e.stack;}
+ };
+ const animate=()=>{map.animate(false,1);requestAnimationFrame(animate);};animate();
+}catch(e){out.textContent='FAIL: '+e.stack;}
+</script>

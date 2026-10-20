@@ -28,7 +28,7 @@ impl Engine {
             if q==0{continue;}
             if stored {
                 let mut left=q;
-                for lot in &self.game.companies[c].posts[&from].stock {if lot.good==good&&lot.from!=Some(to){let n=left.min(lot.quantity);value+=lot.cost*n as f64/lot.quantity as f64;left-=n;if left==0{break;}}}
+                for lot in &self.game.companies[c].posts[&from].stock {if lot.good==good&&lot.from!=Some(to){let n=left.min(lot.quantity);value+=cargo_basis(lot.cost,lot.quantity,n);left-=n;if left==0{break;}}}
             }else{let amount=cost(q);paid+=amount;value+=amount;}
             sales+=if deposit{base*q as f64}else{integrated(base,target,target+q as f64)*(1.0-self.post_tax(c,to))};
             result.push((good,q));room-=q;

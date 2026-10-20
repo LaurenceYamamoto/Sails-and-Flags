@@ -75,6 +75,16 @@ impl Engine {
     }
     pub fn dispatch(&mut self, v: Value) -> Result<Value> {
         match v["op"].as_str().unwrap_or("") {
+            "clock" => Ok(json!({"day":self.game.day,"fraction":self.game.fraction})),
+            "saveInfo" => Ok(json!({"day":self.game.day,"name":self.game.companies[0].name})),
+            "runtimeView" => {
+                let topology=self.game.companies.iter().filter(|c|!c.acquired&&!c.bankrupt)
+                    .flat_map(|c|c.routes.iter().map(|r|(r.mode.clone(),r.stops.clone()))).collect::<Vec<_>>();
+                let with_paths=v["paths"]==true || self.runtime_paths.as_ref()!=Some(&topology);
+                self.runtime_paths=Some(topology);
+                Ok(self.view_for(v["city"].as_u64().unwrap_or(0) as usize,
+                    Some((v["company"].as_u64().unwrap_or(0) as usize,v["route"].as_u64().unwrap_or(0) as u32)),with_paths))
+            }
             "advance" => {
                 let ms = v["ms"].as_f64().unwrap_or(0.0);
                 let speed = v["speed"].as_u64().unwrap_or(1);
