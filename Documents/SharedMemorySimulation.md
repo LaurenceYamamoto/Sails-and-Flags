@@ -21,6 +21,8 @@ Rustが論理CPU数から最大4スレッドを選ぶ。小さな仕事は逐次
 - `assets/wasm/shared/`にWASM、JS、およびWorker初期化コードを同梱する。Rayonのno-bundler起動コードを元に、同一オリジンからの読込、起動失敗時の終了処理、30秒の待機上限を追加した。変更と元のApache-2.0通知を明示する。
 - ブラウザでは安全なコンテキストとcross-origin isolationが必要。通常の配信では`Cross-Origin-Opener-Policy: same-origin`と`Cross-Origin-Embedder-Policy: require-corp`をHTML・Worker等に設定し、全アセットを同一オリジンから配信する。
 - ローカルサーバーは上記ヘッダーを既定で返す。`ISOLATION=0`で非対応時の検証ができる。公開用の`_headers`にも同じ設定を同梱し、公開時に配信ヘッダーを確認する。ヘッダーなしでは通常版が動き、共有並列にはならない。
+- 4.1.4公開時にSitesの静的配信では`_headers`が反映されないと確認した。そのため`isolation-worker.js`を同梱し、Service Workerで同一オリジンの取得応答にCOOP/COEPを追加する。キャッシュ・保存データ・ゲームロジックは扱わない。`src/isolation-bootstrap.js`はゲームWorker生成前に登録し、必要なら一度だけ再読込する。4秒で準備できなければ通常版で開始し、後から再読込して進行を失うことはない。登録拒否・ストレージ拒否・非対応ブラウザ・別Service Workerの存在時は通常版を使う。サーバーで直接ヘッダーを設定できる環境ではこの補助を使わない。
+- Service Workerはブラウザの標準機能を使う独自実装であり、新たなOSS依存はない。参照: [MDN Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)、[ヘッダー補完方式の参考実装](https://github.com/gzuidhof/coi-serviceworker)。参考実装のコードは取り込んでいない。
 
 ## 失敗と保存
 

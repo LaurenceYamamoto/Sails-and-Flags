@@ -6,10 +6,12 @@
 <script type="module">
 import {bridge} from '../src/wasm-bridge.js';
 import {fleetFixture} from './helpers/fleet-fixture.js';
+import {prepareIsolation} from '../src/isolation-bootstrap.js';
 const out=document.querySelector('#result');
 let worker;
 try{
   if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Local-only test');
+  if(new URLSearchParams(location.search).has('bootstrap')&&await prepareIsolation())await new Promise(()=>{});
   worker=new Worker('../src/game-worker.js',{type:'module'});
   const pending=new Map();let serial=0;
   worker.onmessage=({data})=>{

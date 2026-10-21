@@ -1,4 +1,5 @@
 import {marketQuantity} from './market-format.js';
+import {prepareIsolation} from './isolation-bootstrap.js';
 import {diagnostic,eventText,ledgerDetail} from './wasm-messages.js';
 import {LanguagePreference,chooseLanguage} from './language-preference.js';
 import {cityLabel,cityOrder,sortedCities,roadPair,sortedRoads,visibleRoutes,sortedCompanies} from './wasm-lists.js';
@@ -11,6 +12,7 @@ const numberFormat=digits=>{const key=locale()+':'+digits;if(!numberFormats.has(
 const money=n=>numberFormat(1).format(n??0);
 const quantity=n=>marketQuantity(n,locale());
 const postMoney=n=>numberFormat(4).format(n??0);
+if(await prepareIsolation())await new Promise(()=>{});
 const worker=new Worker(new URL('./game-worker.js',import.meta.url),{type:'module'}),pending=new Map();let serial=0,lastPaths=null;
 const rpc=data=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});worker.postMessage({...data,id,company:selectedCompany,route:selectedRoute});});
 worker.onmessage=({data})=>{if(data.notice){notify(data.notice,true);return;}const p=pending.get(data.id);if(!p)return;pending.delete(data.id);const snapshot=data.value?.view??data.value;if(data.ok&&snapshot?.companies&&Object.hasOwn(snapshot,'paths')){if(snapshot.paths)lastPaths=snapshot.paths;else snapshot.paths=lastPaths;}data.ok?p.resolve(data.value):p.reject(new Error(data.error));};
