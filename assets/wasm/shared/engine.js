@@ -127,7 +127,7 @@ function __wbg_get_imports(memory) {
             const ret = result;
             return ret;
         },
-        __wbg_now_70e1c5bcfa99b57a: function() {
+        __wbg_now_ad1a464e02cdb14e: function() {
             const ret = performance.now();
             return ret;
         },

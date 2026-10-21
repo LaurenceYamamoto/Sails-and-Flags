@@ -1,6 +1,6 @@
 {
   "name": "sails-and-flags",
-  "version": "4.1.7",
+  "version": "4.1.8",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -29,7 +29,11 @@
     "test:warehouse-optimization": "node --test tests/warehouse-optimization.test.js",
     "benchmark:warehouse": "node scripts/benchmark-warehouse.mjs",
     "test:rival-copy": "node --test tests/rival-copy.test.js",
-    "benchmark:rival-copy": "node scripts/benchmark-rival-copy.mjs"
+    "benchmark:rival-copy": "node scripts/benchmark-rival-copy.mjs",
+    "test:retreat": "node --test tests/retreat-optimization.test.js",
+    "benchmark:retreat": "node scripts/benchmark-retreat.mjs",
+    "test:adaptive": "node --test tests/adaptive-policy.test.js",
+    "benchmark:adaptive": "node scripts/benchmark-adaptive.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -125,12 +125,13 @@ impl Engine {
         state.posts.retain(|i,_|co.posts.contains_key(i));
         state.closed.retain(|r|r.until>day);state.closed_posts.retain(|_,d|*d>day);state.released_licenses.retain(|_,d|*d>day);
         for &city in co.posts.keys(){state.posts.entry(city).or_insert(day);}
-        let routes=co.routes.clone();
         let mut retire=vec![];
-        for r in routes {
-            let cycle=self.schedule(c,&r).0;
-            let window=(2.0*cycle).ceil().clamp(60.0,730.0) as u32;
-            let state=self.game.companies[c].rival_state.as_mut().unwrap();
+        // Routes and fleets are not changed until the review pass finishes.
+        // Borrow each route instead of cloning all settings and histories.
+        for i in 0..co.routes.len() {
+            let co=&mut self.game.companies[c];
+            let r=&co.routes[i];
+            let state=co.rival_state.as_mut().unwrap();
             // Existing saves begin a fresh observation interval: past profits must
             // not conceal new losses. New routes retain their first day's costs.
             let new_route=r.transport.since>=day.saturating_sub(1);
@@ -139,7 +140,17 @@ impl Engine {
             if review.since!=r.transport.since||r.transport.sales<review.sales||r.transport.costs<review.costs||r.transport.upkeep<review.upkeep{
                 *review=RouteReview{day,since:r.transport.since,sales:r.transport.sales,costs:r.transport.costs,upkeep:r.transport.upkeep,daily:None};
             }
-            if day-review.day>=window {
+            // Every window is at least 60 days. Initialize/reset the review
+            // first, and skip only this route, never the remaining retreat logic.
+            let elapsed=day-review.day;
+            if elapsed<60 {continue;}
+            // Do not cache this across days: fleet, roads and handling can change.
+            let cycle=self.schedule(c,&self.game.companies[c].routes[i]).0;
+            let window=(2.0*cycle).ceil().clamp(60.0,730.0) as u32;
+            let co=&mut self.game.companies[c];
+            let r=&co.routes[i];
+            let review=co.rival_state.as_mut().unwrap().routes.get_mut(&r.id).unwrap();
+            if elapsed>=window {
                 let income=(r.transport.sales-review.sales)-(r.transport.costs-review.costs)-(r.transport.upkeep-review.upkeep);
                 let profit=income/(day-review.day) as f64-r.escorts as f64*4.0;
                 review.day=day;review.sales=r.transport.sales;review.costs=r.transport.costs;review.upkeep=r.transport.upkeep;review.daily=Some(profit);
@@ -471,3 +482,7 @@ mod tests {
         assert_eq!(e.game.companies[9].posts.len(),1);
     }
 }
+
+#[cfg(test)]
+#[path = "retreat_tests.rs"]
+mod retreat_tests;

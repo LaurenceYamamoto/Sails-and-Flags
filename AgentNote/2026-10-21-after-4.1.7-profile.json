@@ -1,0 +1,1955 @@
+{
+  "release": "4.1.7",
+  "commit": "3caebca71690f1aa72da3f4a7696fe6aa41629b0",
+  "sourceFilesVerified": 33,
+  "releaseWasm": "1437830598ef2e8061004832269f4f92b0ceb7899e1b6f2218e0cfc93c316f21",
+  "profileWasm": "5c2685947aa3a3f9262885a367b472bd7068851754911b4e41377e7bf4526359",
+  "scenarios": [
+    {
+      "scenario": "fleet",
+      "days": 720,
+      "mode": "shared serial fixed",
+      "profileSha256": "d0fff81ab9cc32635b18c2f74f3c6bd4d26d57b8dee9a8cadb7c617af77bdbd4",
+      "samples": 4267,
+      "totalMicros": 2433372,
+      "exactReleaseStateMatch": true,
+      "saveHash": "a0b4bf999ba4f7e8fda05b77f2d3d54085f6b136b98fc7c6d9567b4d33768716",
+      "selfFrames": [
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 767,
+          "micros": 430427,
+          "percent": 17.975158190766347,
+          "timePercent": 17.688499744387624
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 374,
+          "micros": 214294,
+          "percent": 8.764940239043824,
+          "timePercent": 8.80646280141302
+        },
+        {
+          "name": "__rustc::__rdl_dealloc",
+          "samples": 216,
+          "micros": 120047,
+          "percent": 5.062104523084134,
+          "timePercent": 4.933359963047162
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 153,
+          "micros": 86235,
+          "percent": 3.585657370517928,
+          "timePercent": 3.5438477963911805
+        },
+        {
+          "name": "__rustc::__rdl_alloc",
+          "samples": 152,
+          "micros": 85685,
+          "percent": 3.562221701429576,
+          "timePercent": 3.521245415826269
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::record_account",
+          "samples": 137,
+          "micros": 77058,
+          "percent": 3.210686665104289,
+          "timePercent": 3.1667168028562833
+        },
+        {
+          "name": "core::slice::sort::unstable::quicksort::quicksort::<sails_flags_core::phase_jobs::VesselDay, <[sails_flags_core::phase_jobs::VesselDay]>::sort_unstable_by_key<(usize, usize), <sails_flags_core::model::Engine>::start_fleet_day::{closure#1}>::{closure#0}>",
+          "samples": 127,
+          "micros": 71313,
+          "percent": 2.976329974220764,
+          "timePercent": 2.930624664046434
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 120,
+          "micros": 66476,
+          "percent": 2.812280290602297,
+          "timePercent": 2.731847000787385
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 111,
+          "micros": 62742,
+          "percent": 2.6013592688071245,
+          "timePercent": 2.5783973843703305
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 105,
+          "micros": 59681,
+          "percent": 2.4607452542770094,
+          "timePercent": 2.45260486271725
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 100,
+          "micros": 56550,
+          "percent": 2.343566908835247,
+          "timePercent": 2.323935674446817
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::malloc",
+          "samples": 85,
+          "micros": 49508,
+          "percent": 1.9920318725099602,
+          "timePercent": 2.0345430127411674
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::insert_large_chunk",
+          "samples": 84,
+          "micros": 48851,
+          "percent": 1.9685962034216078,
+          "timePercent": 2.0075434417754456
+        },
+        {
+          "name": "memcmp",
+          "samples": 81,
+          "micros": 46094,
+          "percent": 1.8982891961565502,
+          "timePercent": 1.8942438722891526
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::risk",
+          "samples": 77,
+          "micros": 43634,
+          "percent": 1.8045465198031403,
+          "timePercent": 1.7931495883079118
+        },
+        {
+          "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::price_plan::{closure#0}>::{closure#0}>",
+          "samples": 69,
+          "micros": 39691,
+          "percent": 1.6170611670963206,
+          "timePercent": 1.6311110672761913
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::assets",
+          "samples": 63,
+          "micros": 35745,
+          "percent": 1.4764471525662057,
+          "timePercent": 1.4689492605322985
+        },
+        {
+          "name": "<std::alloc::System as core::alloc::global::GlobalAlloc>::realloc",
+          "samples": 61,
+          "micros": 34317,
+          "percent": 1.4295758143895008,
+          "timePercent": 1.4102652615383098
+        },
+        {
+          "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::load_input::{closure#1}>::{closure#0}>",
+          "samples": 61,
+          "micros": 34889,
+          "percent": 1.4295758143895008,
+          "timePercent": 1.4337717373258179
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 58,
+          "micros": 32535,
+          "percent": 1.3592688071244434,
+          "timePercent": 1.3370335485079963
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_city_weight",
+          "samples": 53,
+          "micros": 30710,
+          "percent": 1.2420904616826811,
+          "timePercent": 1.2620347402698806
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::calendar_at",
+          "samples": 50,
+          "micros": 29621,
+          "percent": 1.1717834544176235,
+          "timePercent": 1.2172820267513558
+        },
+        {
+          "name": "<alloc::vec::Vec<sails_flags_core::phase_jobs::Moved> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<sails_flags_core::phase_jobs::Moved, core::iter::adapters::map::Map<core::slice::iter::Iter<sails_flags_core::phase_jobs::Motion>, <sails_flags_core::phase_jobs::Motion>::evaluate>>>::from_iter",
+          "samples": 49,
+          "micros": 27125,
+          "percent": 1.1483477853292712,
+          "timePercent": 1.114708314224048
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 46,
+          "micros": 26233,
+          "percent": 1.0780407780642138,
+          "timePercent": 1.0780513624715005
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 44,
+          "micros": 24465,
+          "percent": 1.0311694398875089,
+          "timePercent": 1.0053949827646573
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::free",
+          "samples": 44,
+          "micros": 25438,
+          "percent": 1.0311694398875089,
+          "timePercent": 1.0453806487458555
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_motion",
+          "samples": 43,
+          "micros": 24028,
+          "percent": 1.0077337707991563,
+          "timePercent": 0.9874363640249004
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 42,
+          "micros": 23501,
+          "percent": 0.9842981017108039,
+          "timePercent": 0.965779173919976
+        },
+        {
+          "name": "<alloc::string::String as core::clone::Clone>::clone",
+          "samples": 41,
+          "micros": 23356,
+          "percent": 0.9608624326224514,
+          "timePercent": 0.9598203644983175
+        },
+        {
+          "name": "<sails_flags_core::loading::LoadInput>::evaluate",
+          "samples": 38,
+          "micros": 21543,
+          "percent": 0.890555425357394,
+          "timePercent": 0.8853146991088908
+        }
+      ],
+      "inclusiveGameFrames": [
+        {
+          "name": "sails_flags_core::request",
+          "samples": 4193,
+          "micros": 2369902,
+          "percent": 98.26576048746192,
+          "timePercent": 97.3916852828092
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::dispatch",
+          "samples": 4188,
+          "micros": 2367040,
+          "percent": 98.14858214202016,
+          "timePercent": 97.27407071339688
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::tick",
+          "samples": 4185,
+          "micros": 2365280,
+          "percent": 98.0782751347551,
+          "timePercent": 97.20174309558917
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::command",
+          "samples": 4185,
+          "micros": 2365280,
+          "percent": 98.0782751347551,
+          "timePercent": 97.20174309558917
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 2585,
+          "micros": 1462339,
+          "percent": 60.58120459339114,
+          "timePercent": 60.095168350749496
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 1585,
+          "micros": 894324,
+          "percent": 37.145535505038666,
+          "timePercent": 36.752457084243595
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 626,
+          "micros": 353355,
+          "percent": 14.670728849308647,
+          "timePercent": 14.52120760820787
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 400,
+          "micros": 225647,
+          "percent": 9.374267635340988,
+          "timePercent": 9.273017031510184
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 388,
+          "micros": 222249,
+          "percent": 9.09303960628076,
+          "timePercent": 9.133375414856422
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 268,
+          "micros": 151607,
+          "percent": 6.280759315678463,
+          "timePercent": 6.230325655099179
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 264,
+          "micros": 148837,
+          "percent": 6.187016639325052,
+          "timePercent": 6.116491847526807
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 210,
+          "micros": 119270,
+          "percent": 4.921490508554019,
+          "timePercent": 4.901428963594551
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_motion",
+          "samples": 196,
+          "micros": 110970,
+          "percent": 4.593391141317085,
+          "timePercent": 4.56033849325134
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::record_account",
+          "samples": 190,
+          "micros": 107639,
+          "percent": 4.45277712678697,
+          "timePercent": 4.423450257502758
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 182,
+          "micros": 100682,
+          "percent": 4.26529177408015,
+          "timePercent": 4.1375506909753215
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 167,
+          "micros": 93476,
+          "percent": 3.9137567377548628,
+          "timePercent": 3.8414184103375892
+        },
+        {
+          "name": "core::slice::sort::unstable::quicksort::quicksort::<sails_flags_core::phase_jobs::VesselDay, <[sails_flags_core::phase_jobs::VesselDay]>::sort_unstable_by_key<(usize, usize), <sails_flags_core::model::Engine>::start_fleet_day::{closure#1}>::{closure#0}>",
+          "samples": 132,
+          "micros": 74113,
+          "percent": 3.093508319662526,
+          "timePercent": 3.0456913287405296
+        },
+        {
+          "name": "core::slice::sort::unstable::ipnsort::<sails_flags_core::phase_jobs::VesselDay, <[sails_flags_core::phase_jobs::VesselDay]>::sort_unstable_by_key<(usize, usize), <sails_flags_core::model::Engine>::start_fleet_day::{closure#1}>::{closure#0}>",
+          "samples": 132,
+          "micros": 74113,
+          "percent": 3.093508319662526,
+          "timePercent": 3.0456913287405296
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::price_plan",
+          "samples": 126,
+          "micros": 71642,
+          "percent": 2.9528943051324115,
+          "timePercent": 2.9441449971479905
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::days",
+          "samples": 121,
+          "micros": 67758,
+          "percent": 2.835715959690649,
+          "timePercent": 2.784531095122324
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 120,
+          "micros": 66476,
+          "percent": 2.812280290602297,
+          "timePercent": 2.731847000787385
+        },
+        {
+          "name": "core::slice::sort::stable::drift::sort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 110,
+          "micros": 63124,
+          "percent": 2.577923599718772,
+          "timePercent": 2.5940957650535963
+        },
+        {
+          "name": "core::slice::sort::stable::driftsort_main::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}, alloc::vec::Vec<usize>>",
+          "samples": 110,
+          "micros": 63124,
+          "percent": 2.577923599718772,
+          "timePercent": 2.5940957650535963
+        },
+        {
+          "name": "core::slice::sort::stable::quicksort::quicksort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 109,
+          "micros": 62586,
+          "percent": 2.5544879306304193,
+          "timePercent": 2.5719865273373737
+        },
+        {
+          "name": "<alloc::vec::Vec<(u32, f64, alloc::vec::Vec<f64>)> as alloc::vec::spec_from_iter::SpecFromIter<(u32, f64, alloc::vec::Vec<f64>), core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, alloc::vec::Vec<usize>)>, <sails_flags_core::model::Engine>::finish_work::{closure#2}::{closure#0}>>>::from_iter",
+          "samples": 106,
+          "micros": 58787,
+          "percent": 2.4841809233653622,
+          "timePercent": 2.4158657204899208
+        },
+        {
+          "name": "<[usize]>::sort_by::<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}",
+          "samples": 105,
+          "micros": 60661,
+          "percent": 2.4607452542770094,
+          "timePercent": 2.4928781953601833
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 100,
+          "micros": 56550,
+          "percent": 2.343566908835247,
+          "timePercent": 2.323935674446817
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::load_input",
+          "samples": 100,
+          "micros": 57364,
+          "percent": 2.343566908835247,
+          "timePercent": 2.357387197682886
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::assets",
+          "samples": 90,
+          "micros": 50636,
+          "percent": 2.1092102179517225,
+          "timePercent": 2.0808984405179314
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule",
+          "samples": 89,
+          "micros": 49307,
+          "percent": 2.08577454886337,
+          "timePercent": 2.026282870025627
+        }
+      ],
+      "allocationSelfByNearestGameCaller": [
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 224,
+          "micros": 125978,
+          "percent": 5.249589875790954,
+          "timePercent": 5.177095816011691
+        },
+        {
+          "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+          "samples": 43,
+          "micros": 24589,
+          "percent": 1.0077337707991563,
+          "timePercent": 1.0104907922011102
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 34,
+          "micros": 18680,
+          "percent": 0.796812749003984,
+          "timePercent": 0.7676590344591785
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 29,
+          "micros": 16165,
+          "percent": 0.6796344035622217,
+          "timePercent": 0.6643045124214465
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 27,
+          "micros": 15454,
+          "percent": 0.6327630653855167,
+          "timePercent": 0.6350857986366244
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 22,
+          "micros": 12869,
+          "percent": 0.5155847199437544,
+          "timePercent": 0.52885460998154
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::model::Route>",
+          "samples": 19,
+          "micros": 10412,
+          "percent": 0.445277712678697,
+          "timePercent": 0.4278836117124714
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::load_input",
+          "samples": 16,
+          "micros": 9393,
+          "percent": 0.3749707054136396,
+          "timePercent": 0.3860075648112989
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 16,
+          "micros": 9153,
+          "percent": 0.3749707054136396,
+          "timePercent": 0.3761447078375193
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 11,
+          "micros": 5969,
+          "percent": 0.2577923599718772,
+          "timePercent": 0.24529747198537666
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_items",
+          "samples": 8,
+          "micros": 4682,
+          "percent": 0.1874853527068198,
+          "timePercent": 0.1924079014634836
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::charge_handling",
+          "samples": 7,
+          "micros": 3964,
+          "percent": 0.1640496836184673,
+          "timePercent": 0.16290152101692632
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::phase_jobs::CityJob>",
+          "samples": 7,
+          "micros": 3823,
+          "percent": 0.1640496836184673,
+          "timePercent": 0.1571070925448308
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>",
+          "samples": 6,
+          "micros": 3218,
+          "percent": 0.14061401453011482,
+          "timePercent": 0.13224447392342806
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::city_job",
+          "samples": 6,
+          "micros": 3356,
+          "percent": 0.14061401453011482,
+          "timePercent": 0.13791561668335134
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::apply_fill",
+          "samples": 5,
+          "micros": 3022,
+          "percent": 0.11717834544176237,
+          "timePercent": 0.1241898073948414
+        },
+        {
+          "name": "<alloc::vec::Vec<sails_flags_core::loading::Offer> as core::clone::Clone>::clone",
+          "samples": 5,
+          "micros": 2886,
+          "percent": 0.11717834544176237,
+          "timePercent": 0.11860085510969963
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 5,
+          "micros": 3009,
+          "percent": 0.11717834544176237,
+          "timePercent": 0.12365556930876168
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::land_legs",
+          "samples": 5,
+          "micros": 2769,
+          "percent": 0.11717834544176237,
+          "timePercent": 0.11379271233498207
+        },
+        {
+          "name": "<sails_flags_core::model::Company as core::clone::Clone>::clone",
+          "samples": 4,
+          "micros": 2162,
+          "percent": 0.0937426763534099,
+          "timePercent": 0.08884790323879785
+        },
+        {
+          "name": "(no game caller visible)",
+          "samples": 4,
+          "micros": 2353,
+          "percent": 0.0937426763534099,
+          "timePercent": 0.09669709358043077
+        },
+        {
+          "name": "<alloc::raw_vec::RawVec<sails_flags_core::phase_jobs::VesselDay>>::grow_one",
+          "samples": 3,
+          "micros": 1637,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.06727290360865498
+        },
+        {
+          "name": "<core::iter::adapters::chain::Chain<core::iter::adapters::flatten::FlatMap<core::slice::iter::Iter<sails_flags_core::model::Route>, alloc::vec::Vec<usize>, <sails_flags_core::model::Engine>::rival_retreat::{closure#14}>, core::iter::adapters::map::Map<alloc::collections::btree::map::Keys<usize, sails_flags_core::posts::TradingPost>, <sails_flags_core::model::Engine>::rival_retreat::{closure#15}>> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 3,
+          "micros": 1772,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.07282076065640601
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::opening",
+          "samples": 3,
+          "micros": 1760,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.07232761780771703
+        },
+        {
+          "name": "<alloc::vec::Vec<sails_flags_core::model::Route> as core::clone::Clone>::clone",
+          "samples": 3,
+          "micros": 1746,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.07175228448424655
+        },
+        {
+          "name": "<alloc::raw_vec::RawVec<sails_flags_core::phase_jobs::BuyContext>>::grow_one",
+          "samples": 3,
+          "micros": 1605,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.06595785601215104
+        },
+        {
+          "name": "<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>> as core::iter::traits::iterator::Iterator>::fold::<(), <core::iter::adapters::enumerate::Enumerate<_> as core::iter::traits::iterator::Iterator>::fold::enumerate<sails_flags_core::model::Ledger, (), core::iter::traits::iterator::Iterator::for_each::call<(usize, sails_flags_core::model::Ledger), <alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>::write_iter<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>>>::{closure#0}>::{closure#0}>::{closure#0}>",
+          "samples": 3,
+          "micros": 1751,
+          "percent": 0.07030700726505741,
+          "timePercent": 0.0719577606712003
+        },
+        {
+          "name": "<core::iter::adapters::flatten::FlatMap<alloc::vec::into_iter::IntoIter<sails_flags_core::phase_jobs::CityResult>, alloc::vec::Vec<(usize, alloc::vec::Vec<sails_flags_core::phase_jobs::Fill>)>, <sails_flags_core::model::Engine>::finish_sales::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 2,
+          "micros": 1112,
+          "percent": 0.04687133817670495,
+          "timePercent": 0.045697903978512124
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::load_batch::LoadRequest>",
+          "samples": 2,
+          "micros": 1212,
+          "percent": 0.04687133817670495,
+          "timePercent": 0.049807427717586956
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 2,
+          "micros": 1151,
+          "percent": 0.04687133817670495,
+          "timePercent": 0.04730061823675131
+        }
+      ]
+    },
+    {
+      "scenario": "warehouse",
+      "days": 720,
+      "mode": "shared serial fixed",
+      "profileSha256": "6e535ecc10f56a58eb4018e6598bc7d852acf8b8e6097d3c54c6ae2bf6fba658",
+      "samples": 3380,
+      "totalMicros": 1952976,
+      "exactReleaseStateMatch": true,
+      "saveHash": "ab136dc5b73aadd9a860ac3af98f5c929d589f23dfd0172de855b622b0dcce7d",
+      "selfFrames": [
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 706,
+          "micros": 399883,
+          "percent": 20.88757396449704,
+          "timePercent": 20.475571640409303
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 385,
+          "micros": 220880,
+          "percent": 11.390532544378699,
+          "timePercent": 11.309918811086261
+        },
+        {
+          "name": "__rustc::__rdl_dealloc",
+          "samples": 142,
+          "micros": 79300,
+          "percent": 4.201183431952662,
+          "timePercent": 4.060469765117441
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 108,
+          "micros": 61270,
+          "percent": 3.195266272189349,
+          "timePercent": 3.137263335545342
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_city_weight",
+          "samples": 101,
+          "micros": 57141,
+          "percent": 2.9881656804733727,
+          "timePercent": 2.9258424066655198
+        },
+        {
+          "name": "__rustc::__rdl_alloc",
+          "samples": 84,
+          "micros": 46990,
+          "percent": 2.485207100591716,
+          "timePercent": 2.4060715543867413
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 80,
+          "micros": 45488,
+          "percent": 2.366863905325444,
+          "timePercent": 2.329163287208855
+        },
+        {
+          "name": "memcmp",
+          "samples": 77,
+          "micros": 48027,
+          "percent": 2.2781065088757395,
+          "timePercent": 2.459170005161354
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::malloc",
+          "samples": 75,
+          "micros": 42369,
+          "percent": 2.2189349112426036,
+          "timePercent": 2.169458303635068
+        },
+        {
+          "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::price_plan::{closure#0}>::{closure#0}>",
+          "samples": 70,
+          "micros": 39208,
+          "percent": 2.0710059171597632,
+          "timePercent": 2.0076027559990495
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 70,
+          "micros": 39599,
+          "percent": 2.0710059171597632,
+          "timePercent": 2.027623483340297
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 66,
+          "micros": 38314,
+          "percent": 1.952662721893491,
+          "timePercent": 1.9618264638172718
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::risk",
+          "samples": 65,
+          "micros": 36686,
+          "percent": 1.9230769230769231,
+          "timePercent": 1.8784665044526916
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 64,
+          "micros": 35997,
+          "percent": 1.893491124260355,
+          "timePercent": 1.8431870130508516
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 56,
+          "micros": 32202,
+          "percent": 1.6568047337278107,
+          "timePercent": 1.6488681888563914
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 46,
+          "micros": 25731,
+          "percent": 1.3609467455621302,
+          "timePercent": 1.3175277115540591
+        },
+        {
+          "name": "hypot",
+          "samples": 44,
+          "micros": 24532,
+          "percent": 1.301775147928994,
+          "timePercent": 1.2561342279679832
+        },
+        {
+          "name": "core::slice::sort::unstable::quicksort::quicksort::<sails_flags_core::phase_jobs::VesselDay, <[sails_flags_core::phase_jobs::VesselDay]>::sort_unstable_by_key<(usize, usize), <sails_flags_core::model::Engine>::start_fleet_day::{closure#1}>::{closure#0}>",
+          "samples": 44,
+          "micros": 24389,
+          "percent": 1.301775147928994,
+          "timePercent": 1.2488120693751485
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::price_plan",
+          "samples": 43,
+          "micros": 23499,
+          "percent": 1.272189349112426,
+          "timePercent": 1.203240592818345
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::record_account",
+          "samples": 41,
+          "micros": 23543,
+          "percent": 1.21301775147929,
+          "timePercent": 1.2054935646930633
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 39,
+          "micros": 22214,
+          "percent": 1.1538461538461537,
+          "timePercent": 1.1374435732953196
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::assets",
+          "samples": 38,
+          "micros": 21473,
+          "percent": 1.1242603550295858,
+          "timePercent": 1.0995014787688122
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::free",
+          "samples": 37,
+          "micros": 21106,
+          "percent": 1.0946745562130178,
+          "timePercent": 1.0807096451774112
+        },
+        {
+          "name": "<alloc::string::String as core::clone::Clone>::clone",
+          "samples": 36,
+          "micros": 20780,
+          "percent": 1.0650887573964498,
+          "timePercent": 1.064017171741998
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 31,
+          "micros": 18635,
+          "percent": 0.9171597633136095,
+          "timePercent": 0.9541847928494769
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 28,
+          "micros": 16106,
+          "percent": 0.8284023668639053,
+          "timePercent": 0.8246901139594137
+        },
+        {
+          "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::load_input::{closure#1}>::{closure#0}>",
+          "samples": 28,
+          "micros": 16240,
+          "percent": 0.8284023668639053,
+          "timePercent": 0.8315514373960561
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::calendar_at",
+          "samples": 26,
+          "micros": 14644,
+          "percent": 0.7692307692307693,
+          "timePercent": 0.7498300030312712
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_nations",
+          "samples": 26,
+          "micros": 14762,
+          "percent": 0.7692307692307693,
+          "timePercent": 0.755872063968016
+        },
+        {
+          "name": "<[usize]>::sort_by::<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}",
+          "samples": 26,
+          "micros": 15276,
+          "percent": 0.7692307692307693,
+          "timePercent": 0.7821908717772261
+        }
+      ],
+      "inclusiveGameFrames": [
+        {
+          "name": "sails_flags_core::request",
+          "samples": 3325,
+          "micros": 1893214,
+          "percent": 98.37278106508876,
+          "timePercent": 96.93995215507
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::dispatch",
+          "samples": 3318,
+          "micros": 1889255,
+          "percent": 98.16568047337279,
+          "timePercent": 96.7372358902516
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::command",
+          "samples": 3316,
+          "micros": 1888043,
+          "percent": 98.10650887573965,
+          "timePercent": 96.67517675588435
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::tick",
+          "samples": 3314,
+          "micros": 1886926,
+          "percent": 98.04733727810651,
+          "timePercent": 96.61798199261025
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 2114,
+          "micros": 1205318,
+          "percent": 62.544378698224854,
+          "timePercent": 61.71698986572287
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 1190,
+          "micros": 675756,
+          "percent": 35.20710059171598,
+          "timePercent": 34.60134686754983
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 420,
+          "micros": 238654,
+          "percent": 12.42603550295858,
+          "timePercent": 12.220017040659998
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 397,
+          "micros": 227733,
+          "percent": 11.745562130177515,
+          "timePercent": 11.660819180573647
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 244,
+          "micros": 139883,
+          "percent": 7.218934911242603,
+          "timePercent": 7.16255601707343
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 233,
+          "micros": 131256,
+          "percent": 6.893491124260355,
+          "timePercent": 6.720819917909897
+        },
+        {
+          "name": "core::slice::sort::stable::drift::sort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 204,
+          "micros": 118985,
+          "percent": 6.035502958579881,
+          "timePercent": 6.092496784394688
+        },
+        {
+          "name": "core::slice::sort::stable::driftsort_main::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}, alloc::vec::Vec<usize>>",
+          "samples": 204,
+          "micros": 118985,
+          "percent": 6.035502958579881,
+          "timePercent": 6.092496784394688
+        },
+        {
+          "name": "core::slice::sort::stable::quicksort::quicksort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 203,
+          "micros": 118418,
+          "percent": 6.005917159763314,
+          "timePercent": 6.063464169554567
+        },
+        {
+          "name": "<[usize]>::sort_by::<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}",
+          "samples": 195,
+          "micros": 113896,
+          "percent": 5.769230769230769,
+          "timePercent": 5.83192010552101
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 181,
+          "micros": 103163,
+          "percent": 5.355029585798817,
+          "timePercent": 5.282348579808456
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 172,
+          "micros": 98183,
+          "percent": 5.088757396449704,
+          "timePercent": 5.027353126715331
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_city_weight",
+          "samples": 137,
+          "micros": 80934,
+          "percent": 4.053254437869822,
+          "timePercent": 4.144136947919483
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::price_plan",
+          "samples": 134,
+          "micros": 74520,
+          "percent": 3.964497041420118,
+          "timePercent": 3.8157150932730355
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 130,
+          "micros": 73382,
+          "percent": 3.8461538461538463,
+          "timePercent": 3.757445047967819
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 129,
+          "micros": 73569,
+          "percent": 3.8165680473372783,
+          "timePercent": 3.7670201784353723
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 108,
+          "micros": 61270,
+          "percent": 3.195266272189349,
+          "timePercent": 3.137263335545342
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_motion",
+          "samples": 104,
+          "micros": 58124,
+          "percent": 3.076923076923077,
+          "timePercent": 2.976175846502978
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::days",
+          "samples": 103,
+          "micros": 59460,
+          "percent": 3.0473372781065087,
+          "timePercent": 3.044584265244427
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 99,
+          "micros": 56982,
+          "percent": 2.9289940828402368,
+          "timePercent": 2.9177009855727873
+        },
+        {
+          "name": "<alloc::vec::Vec<(u32, f64, alloc::vec::Vec<f64>)> as alloc::vec::spec_from_iter::SpecFromIter<(u32, f64, alloc::vec::Vec<f64>), core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, alloc::vec::Vec<usize>)>, <sails_flags_core::model::Engine>::finish_work::{closure#2}::{closure#0}>>>::from_iter",
+          "samples": 72,
+          "micros": 40986,
+          "percent": 2.1301775147928996,
+          "timePercent": 2.0986433013001697
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::risk",
+          "samples": 71,
+          "micros": 39937,
+          "percent": 2.100591715976331,
+          "timePercent": 2.0449304036506337
+        },
+        {
+          "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::price_plan::{closure#0}>::{closure#0}>",
+          "samples": 70,
+          "micros": 39208,
+          "percent": 2.0710059171597632,
+          "timePercent": 2.0076027559990495
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 70,
+          "micros": 39599,
+          "percent": 2.0710059171597632,
+          "timePercent": 2.027623483340297
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule",
+          "samples": 68,
+          "micros": 38989,
+          "percent": 2.0118343195266273,
+          "timePercent": 1.9963891005317014
+        },
+        {
+          "name": "<core::iter::adapters::chain::Chain<core::iter::adapters::flatten::FlatMap<core::slice::iter::Iter<sails_flags_core::model::Route>, alloc::vec::Vec<usize>, <sails_flags_core::model::Engine>::rival_retreat::{closure#14}>, core::iter::adapters::map::Map<alloc::collections::btree::map::Keys<usize, sails_flags_core::posts::TradingPost>, <sails_flags_core::model::Engine>::rival_retreat::{closure#15}>> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 60,
+          "micros": 33935,
+          "percent": 1.7751479289940828,
+          "timePercent": 1.7376045583765494
+        }
+      ],
+      "allocationSelfByNearestGameCaller": [
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 107,
+          "micros": 59817,
+          "percent": 3.165680473372781,
+          "timePercent": 3.062864059773392
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 38,
+          "micros": 21329,
+          "percent": 1.1242603550295858,
+          "timePercent": 1.092128116269734
+        },
+        {
+          "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+          "samples": 35,
+          "micros": 19740,
+          "percent": 1.0355029585798816,
+          "timePercent": 1.0107651092486543
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 28,
+          "micros": 16001,
+          "percent": 0.8284023668639053,
+          "timePercent": 0.8193137038038358
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 19,
+          "micros": 10834,
+          "percent": 0.5621301775147929,
+          "timePercent": 0.5547431202431571
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::model::Route>",
+          "samples": 18,
+          "micros": 9773,
+          "percent": 0.5325443786982249,
+          "timePercent": 0.500415775718698
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 17,
+          "micros": 9795,
+          "percent": 0.5029585798816568,
+          "timePercent": 0.5015422616560572
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 15,
+          "micros": 8471,
+          "percent": 0.4437869822485207,
+          "timePercent": 0.43374828978953145
+        },
+        {
+          "name": "<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>> as core::iter::traits::iterator::Iterator>::fold::<(), <core::iter::adapters::enumerate::Enumerate<_> as core::iter::traits::iterator::Iterator>::fold::enumerate<sails_flags_core::model::Ledger, (), core::iter::traits::iterator::Iterator::for_each::call<(usize, sails_flags_core::model::Ledger), <alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>::write_iter<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>>>::{closure#0}>::{closure#0}>::{closure#0}>",
+          "samples": 10,
+          "micros": 5726,
+          "percent": 0.2958579881656805,
+          "timePercent": 0.2931935671508508
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::land_legs",
+          "samples": 7,
+          "micros": 3951,
+          "percent": 0.20710059171597633,
+          "timePercent": 0.20230663356846168
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 7,
+          "micros": 3916,
+          "percent": 0.20710059171597633,
+          "timePercent": 0.2005144968499357
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::charge_handling",
+          "samples": 6,
+          "micros": 3707,
+          "percent": 0.17751479289940827,
+          "timePercent": 0.1898128804450234
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::load_input",
+          "samples": 4,
+          "micros": 2227,
+          "percent": 0.11834319526627218,
+          "timePercent": 0.11403109920449611
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 4,
+          "micros": 2308,
+          "percent": 0.11834319526627218,
+          "timePercent": 0.11817861561022767
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 4,
+          "micros": 2269,
+          "percent": 0.11834319526627218,
+          "timePercent": 0.1161816632667273
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_items",
+          "samples": 3,
+          "micros": 1679,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.08597135858300357
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>",
+          "samples": 3,
+          "micros": 1735,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.08883877733264516
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::apply_fill",
+          "samples": 3,
+          "micros": 1619,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.0828991242083876
+        },
+        {
+          "name": "<alloc::raw_vec::RawVec<sails_flags_core::investment::InvestmentTarget>>::grow_one",
+          "samples": 3,
+          "micros": 1493,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.07644743202169407
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::phase_jobs::CityJob>",
+          "samples": 3,
+          "micros": 1614,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.08264310467716961
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::phase_jobs::Purchase>",
+          "samples": 3,
+          "micros": 1669,
+          "percent": 0.08875739644970414,
+          "timePercent": 0.08545931952056758
+        },
+        {
+          "name": "<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<alloc::vec::into_iter::IntoIter<sails_flags_core::phase_jobs::CityResult>, alloc::vec::Vec<(usize, sails_flags_core::loading::LoadPlan, bool, alloc::vec::Vec<sails_flags_core::phase_jobs::Fill>)>, <sails_flags_core::model::Engine>::finish_purchases::{closure#0}>, <sails_flags_core::model::Engine>::finish_purchases::{closure#1}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 2,
+          "micros": 1096,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05611948124298506
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::load_batch::LoadRequest>",
+          "samples": 2,
+          "micros": 1246,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.063800067179525
+        },
+        {
+          "name": "<alloc::raw_vec::RawVec<core::option::Option<sails_flags_core::rival_strategy::Candidate>>>::grow_one",
+          "samples": 2,
+          "micros": 1087,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05565864608679267
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::collections::btree::map::BTreeMap<usize, alloc::vec::Vec<sails_flags_core::posts::StoredCargo>>>",
+          "samples": 2,
+          "micros": 1108,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.056733928117908256
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::vec::Vec<sails_flags_core::phase_jobs::InvestmentJob>>",
+          "samples": 2,
+          "micros": 1077,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05514660702435668
+        },
+        {
+          "name": "sails_flags_core::trade::key",
+          "samples": 2,
+          "micros": 1121,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05739957889907505
+        },
+        {
+          "name": "<alloc::vec::Vec<(u32, f64, alloc::vec::Vec<f64>)> as alloc::vec::spec_from_iter::SpecFromIter<(u32, f64, alloc::vec::Vec<f64>), core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, alloc::vec::Vec<usize>)>, <sails_flags_core::model::Engine>::finish_work::{closure#2}::{closure#0}>>>::from_iter",
+          "samples": 2,
+          "micros": 1002,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05130631405608671
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::city_job",
+          "samples": 2,
+          "micros": 1163,
+          "percent": 0.05917159763313609,
+          "timePercent": 0.05955014296130623
+        },
+        {
+          "name": "<alloc::vec::Vec<sails_flags_core::loading::Offer> as core::clone::Clone>::clone",
+          "samples": 1,
+          "micros": 563,
+          "percent": 0.029585798816568046,
+          "timePercent": 0.028827799215146527
+        }
+      ]
+    },
+    {
+      "scenario": "provided",
+      "days": 720,
+      "mode": "shared serial fixed",
+      "profileSha256": "de750d27904543f1163f72b373398cd0cae45fbf2f2c9ac465669972e3ade258",
+      "samples": 6613,
+      "totalMicros": 3784135,
+      "exactReleaseStateMatch": true,
+      "saveHash": "c5bc7348eda1a72551a7064e2eb985772c0b25aa616121160a1ae063a5245464",
+      "selfFrames": [
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 901,
+          "micros": 516306,
+          "percent": 13.624678663239074,
+          "timePercent": 13.643963547812115
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 432,
+          "micros": 246288,
+          "percent": 6.532587327990322,
+          "timePercent": 6.508435877684068
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 355,
+          "micros": 203157,
+          "percent": 5.368214123695751,
+          "timePercent": 5.3686509598626895
+        },
+        {
+          "name": "__rustc::__rdl_dealloc",
+          "samples": 353,
+          "micros": 198273,
+          "percent": 5.337970663843944,
+          "timePercent": 5.239585797018341
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 335,
+          "micros": 188536,
+          "percent": 5.06577952517768,
+          "timePercent": 4.982274681003717
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::risk",
+          "samples": 204,
+          "micros": 116026,
+          "percent": 3.0848329048843186,
+          "timePercent": 3.0661168272273582
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 175,
+          "micros": 98799,
+          "percent": 2.6463027370331167,
+          "timePercent": 2.6108740835091773
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::malloc",
+          "samples": 169,
+          "micros": 96990,
+          "percent": 2.5555723574776956,
+          "timePercent": 2.5630692351092126
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 166,
+          "micros": 94035,
+          "percent": 2.510207167699985,
+          "timePercent": 2.484980054887048
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::days",
+          "samples": 160,
+          "micros": 91087,
+          "percent": 2.419476788144564,
+          "timePercent": 2.4070758574945135
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 148,
+          "micros": 82881,
+          "percent": 2.2380160290337217,
+          "timePercent": 2.190223128931711
+        },
+        {
+          "name": "<alloc::string::String as core::clone::Clone>::clone",
+          "samples": 145,
+          "micros": 82912,
+          "percent": 2.192650839256011,
+          "timePercent": 2.1910423386057842
+        },
+        {
+          "name": "__rustc::__rdl_alloc",
+          "samples": 141,
+          "micros": 79318,
+          "percent": 2.1321639195523967,
+          "timePercent": 2.0960668686502992
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 127,
+          "micros": 72839,
+          "percent": 1.9204597005897475,
+          "timePercent": 1.9248520467689445
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 110,
+          "micros": 64607,
+          "percent": 1.6633902918493875,
+          "timePercent": 1.7073122391246613
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 106,
+          "micros": 60024,
+          "percent": 1.6029033721457735,
+          "timePercent": 1.5862013379543807
+        },
+        {
+          "name": "<alloc::collections::btree::map::BTreeMap<(usize, usize), alloc::collections::btree::set_val::SetValZST>>::insert",
+          "samples": 97,
+          "micros": 55431,
+          "percent": 1.4668078028126417,
+          "timePercent": 1.464826175598915
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 94,
+          "micros": 54232,
+          "percent": 1.4214426130349311,
+          "timePercent": 1.4331412594952346
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_city_weight",
+          "samples": 87,
+          "micros": 49320,
+          "percent": 1.3155905035536066,
+          "timePercent": 1.3033361653323678
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule",
+          "samples": 79,
+          "micros": 45361,
+          "percent": 1.1946166641463782,
+          "timePercent": 1.1987151621176306
+        },
+        {
+          "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+          "samples": 78,
+          "micros": 44645,
+          "percent": 1.1794949342204748,
+          "timePercent": 1.1797940612583853
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::policy_kind",
+          "samples": 76,
+          "micros": 43456,
+          "percent": 1.1492514743686677,
+          "timePercent": 1.14837340633989
+        },
+        {
+          "name": "<dlmalloc::dlmalloc::Dlmalloc<dlmalloc::sys::System>>::free",
+          "samples": 70,
+          "micros": 41097,
+          "percent": 1.0585210948132466,
+          "timePercent": 1.086034192754751
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::auto_create_routes",
+          "samples": 69,
+          "micros": 39360,
+          "percent": 1.0433993648873432,
+          "timePercent": 1.0401320248881185
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::assets",
+          "samples": 65,
+          "micros": 36863,
+          "percent": 0.982912445183729,
+          "timePercent": 0.9741460069474266
+        },
+        {
+          "name": "core::slice::sort::unstable::quicksort::quicksort::<sails_flags_core::phase_jobs::VesselDay, <[sails_flags_core::phase_jobs::VesselDay]>::sort_unstable_by_key<(usize, usize), <sails_flags_core::model::Engine>::start_fleet_day::{closure#1}>::{closure#0}>",
+          "samples": 61,
+          "micros": 34672,
+          "percent": 0.9224255254801149,
+          "timePercent": 0.9162463812733954
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 60,
+          "micros": 34142,
+          "percent": 0.9073037955542114,
+          "timePercent": 0.902240538458591
+        },
+        {
+          "name": "memcmp",
+          "samples": 59,
+          "micros": 33240,
+          "percent": 0.8921820656283079,
+          "timePercent": 0.8784041795549049
+        },
+        {
+          "name": "<std::alloc::System as core::alloc::global::GlobalAlloc>::realloc",
+          "samples": 58,
+          "micros": 32847,
+          "percent": 0.8770603357024044,
+          "timePercent": 0.8680187149771348
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 57,
+          "micros": 32399,
+          "percent": 0.8619386057765008,
+          "timePercent": 0.8561798138808473
+        }
+      ],
+      "inclusiveGameFrames": [
+        {
+          "name": "sails_flags_core::request",
+          "samples": 6513,
+          "micros": 3708586,
+          "percent": 98.48782700740965,
+          "timePercent": 98.00353317204592
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::dispatch",
+          "samples": 6500,
+          "micros": 3700686,
+          "percent": 98.2912445183729,
+          "timePercent": 97.79476683574978
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::command",
+          "samples": 6497,
+          "micros": 3698830,
+          "percent": 98.2458793285952,
+          "timePercent": 97.74571995977945
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::tick",
+          "samples": 6495,
+          "micros": 3697761,
+          "percent": 98.21563586874339,
+          "timePercent": 97.71747043908317
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 4404,
+          "micros": 2514412,
+          "percent": 66.59609859367912,
+          "timePercent": 66.44614951633596
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 2073,
+          "micros": 1173014,
+          "percent": 31.347346136398002,
+          "timePercent": 30.99820698785852
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 982,
+          "micros": 559929,
+          "percent": 14.84953878723726,
+          "timePercent": 14.796750115944596
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 672,
+          "micros": 382550,
+          "percent": 10.161802510207167,
+          "timePercent": 10.109311639251771
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::distance",
+          "samples": 620,
+          "micros": 351727,
+          "percent": 9.375472554060185,
+          "timePercent": 9.294779388156078
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 612,
+          "micros": 343469,
+          "percent": 9.254498714652957,
+          "timePercent": 9.076552501430314
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::days",
+          "samples": 497,
+          "micros": 281948,
+          "percent": 7.515499773174051,
+          "timePercent": 7.45079126405374
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::automate",
+          "samples": 472,
+          "micros": 270459,
+          "percent": 7.137456525026463,
+          "timePercent": 7.147181588394706
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule",
+          "samples": 467,
+          "micros": 266732,
+          "percent": 7.061847875396945,
+          "timePercent": 7.04869144467626
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::water_distance",
+          "samples": 432,
+          "micros": 246288,
+          "percent": 6.532587327990322,
+          "timePercent": 6.508435877684068
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 400,
+          "micros": 227644,
+          "percent": 6.04869197036141,
+          "timePercent": 6.015747324025173
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+          "samples": 372,
+          "micros": 212799,
+          "percent": 5.625283532436111,
+          "timePercent": 5.623451594618056
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::policy_kind",
+          "samples": 349,
+          "micros": 198540,
+          "percent": 5.27748374414033,
+          "timePercent": 5.2466415706627805
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::spec",
+          "samples": 335,
+          "micros": 188536,
+          "percent": 5.06577952517768,
+          "timePercent": 4.982274681003717
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 304,
+          "micros": 173553,
+          "percent": 4.597005897474671,
+          "timePercent": 4.586332147241047
+        },
+        {
+          "name": "<alloc::vec::Vec<(u32, f64, alloc::vec::Vec<f64>)> as alloc::vec::spec_from_iter::SpecFromIter<(u32, f64, alloc::vec::Vec<f64>), core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, alloc::vec::Vec<usize>)>, <sails_flags_core::model::Engine>::finish_work::{closure#2}::{closure#0}>>>::from_iter",
+          "samples": 296,
+          "micros": 168119,
+          "percent": 4.476032058067443,
+          "timePercent": 4.442732619211524
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::auto_create_routes",
+          "samples": 289,
+          "micros": 165261,
+          "percent": 4.370179948586118,
+          "timePercent": 4.367206772485654
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 268,
+          "micros": 152692,
+          "percent": 4.052623620142144,
+          "timePercent": 4.035056888826641
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_sales",
+          "samples": 221,
+          "micros": 125007,
+          "percent": 3.341902313624679,
+          "timePercent": 3.3034497976419974
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::maintain_routes",
+          "samples": 214,
+          "micros": 121998,
+          "percent": 3.236050204143354,
+          "timePercent": 3.223933607019834
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::risk",
+          "samples": 211,
+          "micros": 119822,
+          "percent": 3.1906850143656436,
+          "timePercent": 3.1664303731235806
+        },
+        {
+          "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+          "samples": 210,
+          "micros": 119777,
+          "percent": 3.17556328443974,
+          "timePercent": 3.165241197790248
+        },
+        {
+          "name": "core::slice::sort::stable::drift::sort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 173,
+          "micros": 96265,
+          "percent": 2.6160592771813094,
+          "timePercent": 2.5439102991833007
+        },
+        {
+          "name": "core::slice::sort::stable::driftsort_main::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}, alloc::vec::Vec<usize>>",
+          "samples": 173,
+          "micros": 96265,
+          "percent": 2.6160592771813094,
+          "timePercent": 2.5439102991833007
+        },
+        {
+          "name": "core::slice::sort::stable::quicksort::quicksort::<usize, <[usize]>::sort_by<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}>",
+          "samples": 172,
+          "micros": 95699,
+          "percent": 2.600937547255406,
+          "timePercent": 2.5289531161018304
+        },
+        {
+          "name": "<[usize]>::sort_by::<<sails_flags_core::model::Engine>::rival_pairs::{closure#3}>::{closure#0}",
+          "samples": 167,
+          "micros": 92847,
+          "percent": 2.5253288976258883,
+          "timePercent": 2.4535858260870715
+        }
+      ],
+      "allocationSelfByNearestGameCaller": [
+        {
+          "name": "<sails_flags_core::model::Engine>::entry",
+          "samples": 155,
+          "micros": 86429,
+          "percent": 2.343868138515046,
+          "timePercent": 2.2839829974353454
+        },
+        {
+          "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+          "samples": 132,
+          "micros": 75132,
+          "percent": 1.996068350219265,
+          "timePercent": 1.9854471365318627
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::finish_work",
+          "samples": 103,
+          "micros": 58142,
+          "percent": 1.557538182368063,
+          "timePercent": 1.5364673829025657
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_retreat",
+          "samples": 67,
+          "micros": 39580,
+          "percent": 1.013155905035536,
+          "timePercent": 1.0459457709621882
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::model::Route>",
+          "samples": 65,
+          "micros": 37370,
+          "percent": 0.982912445183729,
+          "timePercent": 0.9875440490363055
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_timing",
+          "samples": 41,
+          "micros": 22704,
+          "percent": 0.6199909269620445,
+          "timePercent": 0.5999785948440001
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::maintain_routes",
+          "samples": 37,
+          "micros": 21359,
+          "percent": 0.5595040072584304,
+          "timePercent": 0.5644354654366189
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::day_step",
+          "samples": 33,
+          "micros": 18757,
+          "percent": 0.4990170875548163,
+          "timePercent": 0.4956747050514847
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+          "samples": 21,
+          "micros": 11949,
+          "percent": 0.31755632844397397,
+          "timePercent": 0.31576569017754386
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::charge_handling",
+          "samples": 19,
+          "micros": 10791,
+          "percent": 0.2873128685921669,
+          "timePercent": 0.2851642449331221
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::auto_create_routes",
+          "samples": 16,
+          "micros": 9308,
+          "percent": 0.24194767881445636,
+          "timePercent": 0.24597431117018817
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::land_legs",
+          "samples": 16,
+          "micros": 8995,
+          "percent": 0.24194767881445636,
+          "timePercent": 0.237702936073898
+        },
+        {
+          "name": "<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>> as core::iter::traits::iterator::Iterator>::fold::<(), <core::iter::adapters::enumerate::Enumerate<_> as core::iter::traits::iterator::Iterator>::fold::enumerate<sails_flags_core::model::Ledger, (), core::iter::traits::iterator::Iterator::for_each::call<(usize, sails_flags_core::model::Ledger), <alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>::write_iter<core::iter::adapters::cloned::Cloned<alloc::collections::vec_deque::iter::Iter<sails_flags_core::model::Ledger>>>::{closure#0}>::{closure#0}>::{closure#0}>",
+          "samples": 15,
+          "micros": 8407,
+          "percent": 0.22682594888855284,
+          "timePercent": 0.22216437838502062
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::nations_for",
+          "samples": 13,
+          "micros": 7696,
+          "percent": 0.1965824890367458,
+          "timePercent": 0.20337540811836788
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::load_input",
+          "samples": 12,
+          "micros": 6557,
+          "percent": 0.18146075911084228,
+          "timePercent": 0.17327605912579758
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::apply_fill",
+          "samples": 10,
+          "micros": 5647,
+          "percent": 0.15121729925903524,
+          "timePercent": 0.14922829127396353
+        },
+        {
+          "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+          "samples": 10,
+          "micros": 5721,
+          "percent": 0.15121729925903524,
+          "timePercent": 0.15118382404433245
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule_items",
+          "samples": 7,
+          "micros": 3939,
+          "percent": 0.10585210948132466,
+          "timePercent": 0.10409248084436734
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::policy_kind",
+          "samples": 7,
+          "micros": 4416,
+          "percent": 0.10585210948132466,
+          "timePercent": 0.11669773937769133
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::schedule",
+          "samples": 7,
+          "micros": 4013,
+          "percent": 0.10585210948132466,
+          "timePercent": 0.10604801361473626
+        },
+        {
+          "name": "<alloc::vec::Vec<sails_flags_core::model::Route> as core::clone::Clone>::clone",
+          "samples": 6,
+          "micros": 3633,
+          "percent": 0.09073037955542114,
+          "timePercent": 0.09600608857770666
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::automate",
+          "samples": 6,
+          "micros": 3300,
+          "percent": 0.09073037955542114,
+          "timePercent": 0.08720619111104651
+        },
+        {
+          "name": "core::ptr::drop_in_place::<sails_flags_core::phase_jobs::CityJob>",
+          "samples": 5,
+          "micros": 2821,
+          "percent": 0.07560864962951762,
+          "timePercent": 0.07454808034068552
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::vec::Vec<sails_flags_core::phase_jobs::InvestmentJob>>",
+          "samples": 5,
+          "micros": 2982,
+          "percent": 0.07560864962951762,
+          "timePercent": 0.07880268542216386
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::maintenance_target",
+          "samples": 5,
+          "micros": 2735,
+          "percent": 0.07560864962951762,
+          "timePercent": 0.0722754341480946
+        },
+        {
+          "name": "<sails_flags_core::model::Engine>::prepare_investment",
+          "samples": 4,
+          "micros": 2323,
+          "percent": 0.06048691970361409,
+          "timePercent": 0.06138787331847305
+        },
+        {
+          "name": "<sails_flags_core::phase_jobs::CityJob>::evaluate",
+          "samples": 4,
+          "micros": 2322,
+          "percent": 0.06048691970361409,
+          "timePercent": 0.061361447199954545
+        },
+        {
+          "name": "(no game caller visible)",
+          "samples": 3,
+          "micros": 1660,
+          "percent": 0.04536518977771057,
+          "timePercent": 0.04386735674070825
+        },
+        {
+          "name": "core::ptr::drop_in_place::<alloc::collections::vec_deque::VecDeque<sails_flags_core::model::Ledger>>",
+          "samples": 3,
+          "micros": 1626,
+          "percent": 0.04536518977771057,
+          "timePercent": 0.04296886871107928
+        },
+        {
+          "name": "<sails_flags_core::model::Company as core::clone::Clone>::clone",
+          "samples": 3,
+          "micros": 1654,
+          "percent": 0.04536518977771057,
+          "timePercent": 0.043708800029597254
+        }
+      ]
+    }
+  ],
+  "caveats": [
+    "Local Node CPU sampling, not a browser end-to-end benchmark.",
+    "Sample count is not allocation count or a direct measure of lock waits.",
+    "Inclusive rows overlap; do not add them.",
+    "Inlining can attribute work to callers.",
+    "Profiler overhead and a symbol-bearing build affect absolute timings.",
+    "Profiles cover the coordinating thread in serial mode, not every Rayon worker."
+  ]
+}

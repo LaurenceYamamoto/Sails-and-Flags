@@ -1,0 +1,3352 @@
+{
+  "date": "2026-10-21T06:45:39.034Z",
+  "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+  "node": "v24.15.0",
+  "days": 360,
+  "trials": 3,
+  "warmDays": 360,
+  "modes": [
+    "adaptive",
+    "serial"
+  ],
+  "packages": {
+    "release": "sites/retreat-before",
+    "retreat": "sites/adaptive-before"
+  },
+  "binaries": {
+    "release": "1437830598ef2e8061004832269f4f92b0ceb7899e1b6f2218e0cfc93c316f21",
+    "retreat": "0faeb00498e6ecffaad9ea318c3c3afc586612ef82826718c31436dfb7182642"
+  },
+  "results": [
+    {
+      "scenario": "600",
+      "exact": true,
+      "rows": [
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.2466749999999998,
+          "p95Ms": 1.5958000000000538,
+          "maxMs": 21.516700000000128,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009300000000621367
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03150000000005093
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999997991836
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010900000000219734
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.24430000000029395,
+                "serialMs": 0.2536000000000058
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.2685208333333295,
+          "p95Ms": 1.6010000000005675,
+          "maxMs": 21.067299999999705,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009900000000016007
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03179999999974825
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0010000000002037268
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.021000000000640284
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.31300000000010186,
+                "serialMs": 0.4084999999995489
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.2503800000000385,
+          "p95Ms": 1.386899999999514,
+          "maxMs": 26.431300000000192,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.00889999999981228
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0316000000002532
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999997991836
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.011000000000422006
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.24510000000009313,
+                "serialMs": 0.2573000000002139
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.26140305555556,
+          "p95Ms": 1.4453999999996086,
+          "maxMs": 21.523699999999735,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010199999999713327
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03139999999984866
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0009000000000014552
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010900000000219734
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.23150000000077853,
+                "serialMs": 0.2536000000000058
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.280704999999984,
+          "p95Ms": 1.591099999999642,
+          "maxMs": 21.188600000000406,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009500000000116415
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.031199999999444117
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0009000000000014552
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010900000000219734
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.34020000000055006,
+                "serialMs": 0.254399999999805
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.29571583333329,
+          "p95Ms": 1.441500000000815,
+          "maxMs": 22.52440000000024,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010200000000622822
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03179999999974825
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0010000000002037268
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010800000000017462
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.3161000000000058,
+                "serialMs": 0.26199999999971624
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.2193474999999632,
+          "p95Ms": 1.2355999999999767,
+          "maxMs": 20.889100000000326,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.1965616666666696,
+          "p95Ms": 1.1586999999999534,
+          "maxMs": 21.301699999999983,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.2400022222221903,
+          "p95Ms": 1.4755999999997584,
+          "maxMs": 21.832000000000335,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.2320247222222356,
+          "p95Ms": 1.2443999999995867,
+          "maxMs": 23.662399999999252,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 1.2256161111110486,
+          "p95Ms": 1.2864000000008673,
+          "maxMs": 21.523400000000038,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 1.200616944444442,
+          "p95Ms": 1.1648999999997613,
+          "maxMs": 21.125200000000405,
+          "saveHash": "866feb9f069c5ff7fb2f499775453420fba4774572a1e5697388ac80879ce11d",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "2400",
+      "exact": true,
+      "rows": [
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.8807363888888833,
+          "p95Ms": 2.1930999999985943,
+          "maxMs": 15.283400000000256,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0352999999995518
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03149999999914144
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0008999999990919605
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.018900000000940054
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.29720000000088476,
+                "serialMs": 0.2558999999982916
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.8818394444443787,
+          "p95Ms": 2.080500000000029,
+          "maxMs": 16.64100000000144,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03400000000146974
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.031899999999950523
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0009000000009109499
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01870000000053551
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.48179999999956635,
+                "serialMs": 0.2584000000006199
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.8815080555555648,
+          "p95Ms": 2.166900000000169,
+          "maxMs": 16.30789999999979,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01809999999932188
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.031899999999950523
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0010000000002037268
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01959999999962747
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.3650999999990745,
+                "serialMs": 0.2617000000009284
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.9103674999999687,
+          "p95Ms": 2.4398999999975786,
+          "maxMs": 15.297500000000582,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.015299999999115244
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03299999999944703
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999997991836
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.019099999999525608
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.19989999999961583,
+                "serialMs": 0.28170000000136497
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.868608611111136,
+          "p95Ms": 2.0463999999992666,
+          "maxMs": 16.713900000002468,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01689999999871361
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.031299999998736894
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.000800000001618173
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.019199999998818384
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.30209999999715365,
+                "serialMs": 0.29349999999976717
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.9394808333334166,
+          "p95Ms": 2.4680000000007567,
+          "maxMs": 15.505699999997887,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.015800000001036096
+              },
+              {
+                "batches": 1,
+                "items": 5,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03139999999984866
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007000000005064066
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01929999999993015
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.5475000000005821,
+                "serialMs": 0.2596000000012282
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.8705616666667084,
+          "p95Ms": 2.0467999999964377,
+          "maxMs": 15.487100000002101,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.870888888888668,
+          "p95Ms": 2.22099999999773,
+          "maxMs": 15.304299999999785,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.9234594444443953,
+          "p95Ms": 2.4292999999997846,
+          "maxMs": 18.117300000001705,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.8911083333333307,
+          "p95Ms": 2.265000000003056,
+          "maxMs": 15.369800000000396,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 2.0258924999999484,
+          "p95Ms": 2.8673999999991793,
+          "maxMs": 17.072700000000623,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 1.8966019444444404,
+          "p95Ms": 2.284800000001269,
+          "maxMs": 15.649099999998725,
+          "saveHash": "2620316357a0e09f4f7f5bd460963e88bad62964e294847ad839c816d598ce80",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "warehouse",
+      "exact": true,
+      "rows": [
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.4255961111110789,
+          "p95Ms": 1.408899999998539,
+          "maxMs": 22.77479999999923,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004199999999400461
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0389000000031956
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999979801942
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010699999998905696
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.22340000000258442,
+                "serialMs": 0.2544999999990978
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 1.4307638888888505,
+          "p95Ms": 1.5452000000004773,
+          "maxMs": 23.67370000000301,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004600000000209548
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03660000000309083
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.000800000001618173
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010800000000017462
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.29609999999956926,
+                "serialMs": 0.25799999999799184
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.4131600000000313,
+          "p95Ms": 1.4768000000003667,
+          "maxMs": 21.405099999999948,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004499999999097781
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03589999999894644
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007000000005064066
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.011099999999714782
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.2551999999996042,
+                "serialMs": 0.26299999999901047
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 1.4676136111111595,
+          "p95Ms": 1.7494000000006054,
+          "maxMs": 21.563600000001315,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004499999999097781
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03499999999985448
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007000000005064066
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010600000001431908
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.63379999999961,
+                "serialMs": 0.26059999999779393
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.4873011111112342,
+          "p95Ms": 1.6301000000021304,
+          "maxMs": 22.34979999999996,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004499999999097781
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03509999999732827
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007000000005064066
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.015800000001036096
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.2180999999982305,
+                "serialMs": 0.2989000000015949
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 1.4251772222221613,
+          "p95Ms": 1.5526000000027125,
+          "maxMs": 21.940300000002026,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 614,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004600000000209548
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03629999999975553
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999979801942
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.011300000001938315
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.22290000000066357,
+                "serialMs": 0.25979999999981374
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.468643611111232,
+          "p95Ms": 1.7461000000002969,
+          "maxMs": 21.46519999999873,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 1.4240216666665724,
+          "p95Ms": 1.7344999999986612,
+          "maxMs": 21.227600000001985,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.4075063888889214,
+          "p95Ms": 1.5449999999982538,
+          "maxMs": 21.771899999999732,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 1.475752500000029,
+          "p95Ms": 1.648300000000745,
+          "maxMs": 22.583999999998923,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 1.457006111111069,
+          "p95Ms": 1.4612000000015541,
+          "maxMs": 21.735399999997753,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 1.4130700000002132,
+          "p95Ms": 1.4094000000040978,
+          "maxMs": 21.70060000000376,
+          "saveHash": "4b8f908dc72d09e4c54e9e87f3d83c287c92ad0be72d224ef39f9cf9a11af8ea",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "warehouse2400",
+      "exact": true,
+      "rows": [
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 2.3398011111110057,
+          "p95Ms": 2.5754000000015367,
+          "maxMs": 22.98859999999695,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.015200000001641456
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.036399999997229315
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.000800000001618173
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.018599999995785765
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.22239999999874271,
+                "serialMs": 0.25930000000516884
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 2.3002894444448327,
+          "p95Ms": 2.4985000000015134,
+          "maxMs": 24.055899999999383,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.017100000004575122
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03779999999824213
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.000800000001618173
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.019499999994877726
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.4948999999978696,
+                "serialMs": 0.26000000000203727
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 2.331365555555203,
+          "p95Ms": 2.8931999999986147,
+          "maxMs": 22.197299999999814,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.016799999997601844
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.046699999998963904
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0019000000029336661
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01929999999993015
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.2834000000002561,
+                "serialMs": 0.2591000000029453
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 2.421280833333448,
+          "p95Ms": 3.018100000001141,
+          "maxMs": 25.09019999999873,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.016899999995075632
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03670000000420259
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.000800000001618173
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01870000000053551
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.22899999999935972,
+                "serialMs": 0.29020000000309665
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 2.4932308333332913,
+          "p95Ms": 3.956400000002759,
+          "maxMs": 22.194100000000617,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01600000000325963
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.04550000000017462
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.001600000003236346
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.018799999998009298
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.5314999999973224,
+                "serialMs": 0.2551000000021304
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 2.397327222222157,
+          "p95Ms": 2.9311999999990803,
+          "maxMs": 22.9887000000017,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 2414,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.017299999999522697
+              },
+              {
+                "batches": 2,
+                "items": 7,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.03770000000076834
+              },
+              {
+                "batches": 1,
+                "items": 15,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0007999999943422154
+              },
+              {
+                "batches": 1,
+                "items": 60,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.019800000001851004
+              },
+              {
+                "batches": 1,
+                "items": 322,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.2834000000002561,
+                "serialMs": 0.25879999999597203
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 2.2921650000002853,
+          "p95Ms": 2.4416999999957625,
+          "maxMs": 22.928700000004028,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 2.340684999999899,
+          "p95Ms": 2.637800000004063,
+          "maxMs": 23.072800000001735,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 2.3106444444443697,
+          "p95Ms": 2.750500000001921,
+          "maxMs": 23.716099999997823,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 2.2646697222220813,
+          "p95Ms": 2.353900000001886,
+          "maxMs": 22.231299999999464,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 2.2987755555555243,
+          "p95Ms": 2.5881999999983236,
+          "maxMs": 22.1079000000027,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 2.3052902777778703,
+          "p95Ms": 2.617899999997462,
+          "maxMs": 22.931700000001,
+          "saveHash": "507c6b001f4d4ee93639a6aaec533b03b5c12fa53cb2567d873301b9bba2ea76",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "provided",
+      "exact": true,
+      "rows": [
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 3.092667777777751,
+          "p95Ms": 3.0503000000026077,
+          "maxMs": 26.32209999999759,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.013500000000931323
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01660000000265427
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0031999999991967343
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.9513000000006286,
+                "serialMs": 0.4232999999949243
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 0,
+          "meanMs": 3.0119938888890627,
+          "p95Ms": 2.952899999996589,
+          "maxMs": 26.334999999999127,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009599999997590203
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.018499999998311978
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0034999999988940544
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.36490000000048894,
+                "serialMs": 0.43029999999998836
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 3.0237138888887176,
+          "p95Ms": 3.144399999997404,
+          "maxMs": 26.747999999999593,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.010399999999208376
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.024000000004889444
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004399999997986015
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.3752999999996973,
+                "serialMs": 0.43260000000009313
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 1,
+          "meanMs": 3.090844722222351,
+          "p95Ms": 3.2096999999994296,
+          "maxMs": 27.104699999996228,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009500000000116415
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.016199999998207204
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.004099999998288695
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.757499999999709,
+                "serialMs": 0.4257999999972526
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 3.0919069444444784,
+          "p95Ms": 3.1983999999938533,
+          "maxMs": 26.39979999999923,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.00990000000456348
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.01660000000265427
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0036000000036437996
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.9569999999948777,
+                "serialMs": 0.417699999998149
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "adaptive",
+          "trial": 2,
+          "meanMs": 3.001410000000235,
+          "p95Ms": 3.014599999994971,
+          "maxMs": 26.40160000000469,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 1,
+                "items": 836,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.009899999997287523
+              },
+              {
+                "batches": 5,
+                "items": 64,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.016799999997601844
+              },
+              {
+                "batches": 1,
+                "items": 21,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0.0036000000036437996
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 2,
+                "items": 1285,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0.5365000000019791,
+                "serialMs": 0.4241000000038184
+              }
+            ],
+            "mode": 0,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 3.039300277777794,
+          "p95Ms": 2.970099999998638,
+          "maxMs": 26.16240000000107,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 0,
+          "meanMs": 2.974965833333408,
+          "p95Ms": 3.0901000000012573,
+          "maxMs": 26.162199999998847,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 2.986918611111206,
+          "p95Ms": 3.075299999996787,
+          "maxMs": 26.317800000004354,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 1,
+          "meanMs": 3.080745555555667,
+          "p95Ms": 3.2569000000003143,
+          "maxMs": 26.379300000000512,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "release",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 3.100233888889064,
+          "p95Ms": 3.65400000000227,
+          "maxMs": 26.588000000003376,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        },
+        {
+          "key": "retreat",
+          "mode": "serial",
+          "trial": 2,
+          "meanMs": 2.993382499999906,
+          "p95Ms": 3.090299999996205,
+          "maxMs": 26.490499999999884,
+          "saveHash": "ce6fd5146e46cf2f8c5faba1a650694d68f91e20e4dde1aea3dbc17211dcf293",
+          "status": {
+            "kinds": [
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "movement",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "cities",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "investments",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "schedules",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              },
+              {
+                "batches": 0,
+                "items": 0,
+                "kind": "rival",
+                "parallel": false,
+                "parallelMs": 0,
+                "serialMs": 0
+              }
+            ],
+            "mode": 1,
+            "workers": 4
+          }
+        }
+      ]
+    }
+  ]
+}
