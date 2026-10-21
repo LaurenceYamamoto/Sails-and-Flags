@@ -161,7 +161,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "sails-flags-core"
-version = "4.1.6"
+version = "4.1.7"
 dependencies = [
  "rayon",
  "serde",

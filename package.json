@@ -1,6 +1,6 @@
 {
   "name": "sails-and-flags",
-  "version": "4.1.6",
+  "version": "4.1.7",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -27,7 +27,9 @@
     "test:ledger-motion": "node --test tests/ledger-motion.test.js",
     "benchmark:ledger-motion": "node scripts/benchmark-ledger-motion.mjs",
     "test:warehouse-optimization": "node --test tests/warehouse-optimization.test.js",
-    "benchmark:warehouse": "node scripts/benchmark-warehouse.mjs"
+    "benchmark:warehouse": "node scripts/benchmark-warehouse.mjs",
+    "test:rival-copy": "node --test tests/rival-copy.test.js",
+    "benchmark:rival-copy": "node scripts/benchmark-rival-copy.mjs"
   },
   "engines": {
     "node": ">=22"

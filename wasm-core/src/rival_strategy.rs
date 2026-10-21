@@ -295,15 +295,23 @@ impl Engine {
         }
         best
     }
+    // Only for license/post/route purchases: these mutate this company and the
+    // shared ID counter, not markets, roads, other companies, RNG or caches.
+    // Keep this boundary audited if the purchase operations gain side effects.
+    fn rival_open_transaction(&mut self,c:usize,action:impl FnOnce(&mut Self)->Result<()>)->Result<()> {
+        let before=self.game.companies[c].clone();
+        let next_id=self.game.next_id;
+        let result=action(self);
+        if result.is_err(){self.game.companies[c]=before;self.game.next_id=next_id;}
+        result
+    }
     pub(crate) fn apply_rival_candidate(&mut self,c:usize,best:Candidate) {
-        let before=self.game.clone();
-        let result=(||->Result<()>{
-            for nation in best.missing{self.buy_license(c,nation)?;}
-            if let Some(city)=best.post{self.build_post(c,city)?;}
-            self.open(c,&best.kind,vec![best.a,best.b],(0..self.data.goods.len()).collect(),0.0)?;
+        let _=self.rival_open_transaction(c,|e|{
+            for nation in best.missing{e.buy_license(c,nation)?;}
+            if let Some(city)=best.post{e.build_post(c,city)?;}
+            e.open(c,&best.kind,vec![best.a,best.b],(0..e.data.goods.len()).collect(),0.0)?;
             Ok(())
-        })();
-        if result.is_err(){self.game=before;}
+        });
     }
     #[cfg(test)]
     pub fn rival_expand(&mut self,c:usize) {
@@ -313,6 +321,105 @@ impl Engine {
         }
     }
 
+}
+
+#[cfg(test)]
+mod transaction_tests {
+    use super::*;
+    const C:usize=9;
+    fn fixture()->(Engine,Candidate) {
+        let mut e=Engine::new_planner();
+        let a=e.data.cities.iter().position(|x|x.id=="genoa").unwrap();
+        let b=e.data.cities.iter().position(|x|x.id=="livorno").unwrap();
+        let co=&mut e.game.companies[C];
+        co.cash=1e9;co.bankrupt=false;co.licenses.clear();co.posts.clear();co.routes.clear();co.ships.clear();
+        co.friendship.fill(60.0);co.first_license=true;co.technology.fill(60.0);
+        let best=Candidate{a,b,kind:"sloop".into(),missing:vec![e.data.cities[a].nation,e.data.cities[b].nation],post:Some(a),score:1.0};
+        e.runtime_paths=Some(vec![("unchanged".into(),vec![a,b])]);e.parallel_token=17;
+        (e,best)
+    }
+    // The 4.1.6 transaction, retaining the entire game on failure.
+    fn reference(e:&mut Engine,best:Candidate)->(bool,usize) {
+        let before=e.game.clone();let mut completed=0;
+        let result=(||->Result<()>{
+            for n in best.missing{e.buy_license(C,n)?;completed+=1;}
+            if let Some(city)=best.post{e.build_post(C,city)?;completed+=1;}
+            e.open(C,&best.kind,vec![best.a,best.b],(0..e.data.goods.len()).collect(),0.0)?;completed+=1;Ok(())
+        })();
+        if result.is_err(){e.game=before;}
+        (result.is_ok(),completed)
+    }
+    fn compare(e:&mut Engine,best:Candidate,success:bool)->usize {
+        let before=e.game.clone();let cache=e.runtime_paths.clone();
+        let (ok,completed)=reference(e,best.clone());assert_eq!(ok,success);
+        let expected=serde_json::to_string(&e.game).unwrap();
+        if !success {assert_eq!(expected,serde_json::to_string(&before).unwrap());}
+        e.game=before;e.apply_rival_candidate(C,best);
+        assert_eq!(serde_json::to_string(&e.game).unwrap(),expected);
+        assert_eq!(e.runtime_paths,cache);assert_eq!(e.parallel_token,17);assert!(e.day_fleets.is_empty());
+        completed
+    }
+    #[test]
+    fn rival_transaction_partial_purchase_failures_match_whole_game_rollback() {
+        let (mut e,best)=fixture();let initial=e.game.clone();
+        // First license succeeded (including initial friendship), duplicate fails.
+        let mut duplicate=best.clone();duplicate.missing[1]=duplicate.missing[0];
+        assert_eq!(compare(&mut e,duplicate,false),1);
+        e.game=initial.clone();
+        e.game.companies[C].cash=e.terms(C,best.missing[0],0).0+1.0;
+        assert_eq!(compare(&mut e,best.clone(),false),1);
+        // Both licenses succeed; an already present post rejects construction.
+        e.game=initial.clone();e.game.companies[C].posts.insert(best.a,crate::posts::TradingPost::new(e.data.goods.len()));
+        assert_eq!(compare(&mut e,best.clone(),false),2);
+        // Post is built before opening rejects an invalid ship or missing license.
+        e.game=initial.clone();let mut invalid=best.clone();invalid.kind="not-a-ship".into();
+        assert_eq!(compare(&mut e,invalid,false),3);
+        e.game=initial.clone();let mut missing=best.clone();missing.missing.pop();
+        assert_eq!(compare(&mut e,missing,false),2);
+        // Enough for the licenses and post, but not for a vessel.
+        e.game=initial.clone();let fees=e.terms(C,best.missing[0],0).0+e.terms(C,best.missing[1],1).0+e.post_open_cost(C);
+        e.game.companies[C].cash=fees+1.0;
+        assert_eq!(compare(&mut e,best,false),3);
+    }
+    #[test]
+    fn rival_transaction_success_matches_new_reused_and_existing_route_ids() {
+        let (mut e,best)=fixture();let initial=e.game.clone();let id=e.game.next_id;
+        compare(&mut e,best.clone(),true);assert_eq!(e.game.next_id,id+2);
+        let mut existing=best.clone();existing.missing.clear();existing.post=None;
+        compare(&mut e,existing,true);assert_eq!(e.game.companies[C].routes.len(),1);assert_eq!(e.game.next_id,id+3);
+        e.game=initial;e.buy_ship(C,"sloop").unwrap();let id=e.game.next_id;let ship=e.game.companies[C].ships[0].id;
+        compare(&mut e,best,true);assert_eq!(e.game.next_id,id+1);
+        assert_eq!(e.game.companies[C].ships.len(),1);assert_eq!(e.game.companies[C].ships[0].id,ship);
+    }
+    #[test]
+    fn rival_transaction_late_error_restores_ids_and_all_game_fields() {
+        let (mut e,best)=fixture();let before=serde_json::to_string(&e.game).unwrap();let id=e.game.next_id;
+        let result=e.rival_open_transaction(C,|e|{
+            for n in best.missing{e.buy_license(C,n)?;}
+            e.build_post(C,best.a)?;
+            e.open(C,&best.kind,vec![best.a,best.b],vec![0],0.0)?;
+            assert_eq!(e.game.next_id,id+2);assert_eq!(e.game.companies[C].ships.len(),1);
+            // Deliberate failure after ID allocation/assignment. No production
+            // failure hook is needed; exercise the actual rollback boundary.
+            Err("test failure after completed purchases".into())
+        });
+        assert!(result.is_err());assert_eq!(serde_json::to_string(&e.game).unwrap(),before);
+        assert_eq!(e.parallel_token,17);assert!(e.runtime_paths.is_some());
+    }
+    #[test]
+    fn rival_transaction_route_limit_rejects_new_but_allows_existing_routes() {
+        let (mut e,mut best)=fixture();e.game.companies[C].licenses=(0..e.data.nations.len()).collect();
+        e.build_post(C,best.a).unwrap();best.missing.clear();best.post=None;best.kind="galleon".into();
+        for city in 0..e.data.cities.len(){
+            if city==best.a||city==best.b{continue;}
+            let _=e.open(C,"galleon",vec![best.a,city],vec![0],0.0);
+            if e.game.companies[C].routes.len()==50{break;}
+        }
+        assert_eq!(e.game.companies[C].routes.len(),50);
+        assert_eq!(compare(&mut e,best.clone(),false),0);
+        best.b=*e.game.companies[C].routes[0].stops.iter().find(|&&city|city!=best.a).unwrap();
+        compare(&mut e,best,true);assert_eq!(e.game.companies[C].routes.len(),50);
+    }
 }
 
 #[cfg(test)]
