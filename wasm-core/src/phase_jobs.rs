@@ -9,6 +9,82 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+#[cfg(test)]
+mod warehouse_tests {
+    use super::*;
+    fn fixture() -> (Engine,Vec<VesselDay>,usize,usize) {
+        let mut e=Engine::new_planner();
+        let a=e.data.cities.iter().position(|c|c.id=="london").unwrap();
+        let b=e.data.cities.iter().position(|c|c.id=="nantes").unwrap();
+        e.game.companies[0].cash=1e8;
+        e.game.companies[0].licenses=(0..e.data.nations.len()).collect();
+        for city in [a,b] {
+            let mut p=crate::posts::TradingPost::new(e.data.goods.len());p.warehouse=2;
+            p.stock.push(crate::posts::StoredCargo{good:0,quantity:if city==a{70}else{120},cost:500.0,from:None});
+            e.game.companies[0].posts.insert(city,p);
+        }
+        e.open(0,"sloop",vec![a,b],vec![0],0.0).unwrap();
+        let template=e.game.companies[0].ships[0].clone();
+        e.game.companies[0].ships.clear();
+        // Voyage, loading, unloading, direct sale, no reservation and zero cap.
+        for (i,(to,units,cap,mode,direct)) in [(a,40,None,0,false),(a,30,Some(10),1,false),
+            (b,60,None,2,false),(b,40,None,0,true),(a,14,None,3,false),(a,15,Some(0),0,false)].into_iter().enumerate() {
+            let mut s=template.clone();s.id=i as u32+10;
+            s.cargo=vec![Cargo{good:0,quantity:units,cost:units as f64*10.0}];
+            let trip=Voyage{from:if to==a{b}else{a},to,total:10.0,remaining:5.0,original_cost:100.0,upkeep:0.0,direct_sale:direct,warehouse_units:cap};
+            match mode {
+                0=>s.voyage=Some(trip),
+                1|2=>s.handling=Some(Handling{trip,unloading:mode==2,rate:5.0,total:6.0,remaining:3.0}),
+                _=>{}
+            }
+            e.game.companies[0].ships.push(s);
+        }
+        let policy=&mut e.game.companies[0].facility_policy;
+        policy.warehouse_up.enabled=true;policy.warehouse_up.days=1;policy.warehouse_up.percent=95.0;
+        policy.warehouse_down.enabled=true;policy.warehouse_down.days=1;policy.warehouse_down.percent=90.0;
+        let vessels=(0..6).map(|i|VesselDay{c:0,i,ri:0,left:1.0,cycle:20.0,schedule:0,phase:0.0,daily:1.0,lost:i==5}).collect();
+        (e,vessels,a,b)
+    }
+    #[test]
+    fn warehouse_batch_matches_repeated_checks_and_preserves_first_visit_order() {
+        let (mut e,ships,a,b)=fixture();
+        let totals=e.reserved_stocks(0);
+        assert_eq!((totals[a],totals[b]),(50,60));
+        for city in 0..e.data.cities.len(){assert_eq!(totals[city],e.reserved_stock(0,city));}
+        // Exercise both visitation orders, including stock liquidation and
+        // capping in-flight reservations. Compare every game field and ledger.
+        for stops in [vec![a,b],vec![b,a]] {
+            e.game.companies[0].routes[0].stops=stops;
+            let before=e.game.clone();
+            for v in &ships {for city in e.game.companies[v.c].routes[v.ri].stops.clone(){e.facility_immediate(v.c,city,0);}}
+            let expected=serde_json::to_string(&e.game).unwrap();
+            e.game=before.clone();e.fleet_warehouse_checks(ships.iter());
+            assert_eq!(serde_json::to_string(&e.game).unwrap(),expected);
+            assert_eq!(e.game.companies[0].posts[&a].warehouse,1);
+            assert_eq!(e.game.companies[0].posts[&b].quantity(),100);
+            assert_eq!((e.reserved_stock(0,a),e.reserved_stock(0,b)),(30,0));
+            let once=serde_json::to_string(&e.game).unwrap();e.fleet_warehouse_checks(ships.iter());
+            assert_eq!(serde_json::to_string(&e.game).unwrap(),once);
+            e.game=before;
+        }
+    }
+    #[test]
+    fn warehouse_snapshot_is_rebuilt_after_reservations_change_between_phases() {
+        let (mut e,ships,a,_)=fixture();
+        e.game.companies[0].facility_policy.warehouse_down.enabled=false;
+        e.fleet_warehouse_checks(ships.iter());
+        assert!(!e.game.companies[0].posts[&a].monitoring[0].expansion_pending);
+        e.game.companies[0].ships[0].cargo[0].quantity=120;
+        e.fleet_warehouse_checks(ships.iter());
+        assert!(e.game.companies[0].posts[&a].monitoring[0].expansion_pending);
+        // A removed trip releases its reservation immediately, as does loss
+        // of cargo. Neither survives into a later read-only batch.
+        e.game.companies[0].ships[0].voyage=None;
+        e.game.companies[0].ships[1].cargo.clear();
+        assert_eq!(e.reserved_stocks(0)[a],0);
+    }
+}
+
 pub(crate) struct FleetDay {
     pub ships: Vec<VesselDay>,
     pub buyers: Vec<usize>,
@@ -694,6 +770,7 @@ impl Engine {
             if count == 0 {
                 continue;
             }
+            let reserved = self.reserved_stocks(c);
             let budget = (co.cash - co.automation.reserve).max(0.0) / count as f64;
             for (&city, p) in &co.posts {
                 if p.warehouse == 0 {
@@ -705,8 +782,8 @@ impl Engine {
                     company: c,
                     tax: self.post_tax(c, city),
                     budget,
-                    room: self.warehouse_room(c, city),
-                    limit: (p.warehouse as usize * crate::posts::WAREHOUSE_UNITS).saturating_sub(self.reserved_stock(c,city)),
+                    room: (p.warehouse as usize * crate::posts::WAREHOUSE_UNITS).saturating_sub(p.quantity()+reserved[city]),
+                    limit: (p.warehouse as usize * crate::posts::WAREHOUSE_UNITS).saturating_sub(reserved[city]),
                     rules: p.rules.clone(),
                 });
             }
@@ -763,14 +840,28 @@ impl Engine {
             r.transport.costs += d.sold + tax;
             r.actual = Some(d.stored + revenue - d.trip.original_cost - d.trip.upkeep);
         }
-        for d in &day.ships {
-            let r = &self.game.companies[d.c].routes[d.ri];
-            let stops = r.stops.clone();
-            for city in stops {
-                self.facility_immediate(d.c, city, 0);
+        self.fleet_warehouse_checks(day.ships.iter());
+        self.purchase_work(day)
+    }
+    // All fills have been committed. Keep the first-visit order, including
+    // destinations of inactive/lost vessels as before. Warehouse reduction
+    // only changes that city's inventory and inbound reservations; no city is
+    // revisited with the snapshot. The next phase always builds fresh totals.
+    fn fleet_warehouse_checks<'a>(&mut self, ships: impl Iterator<Item=&'a VesselDay>) {
+        if !self.immediate_warehouses_enabled() { return; }
+        let mut seen=vec![false;self.data.cities.len()];
+        let mut cities=Vec::new();
+        for d in ships.filter(|d|d.c==0) {
+            for &city in &self.game.companies[0].routes[d.ri].stops {
+                if !seen[city] {seen[city]=true;cities.push(city);}
             }
         }
-        self.purchase_work(day)
+        // Avoid scanning the fleet if no eligible warehouse can change.
+        cities.retain(|city| self.game.companies[0].posts.get(city).is_some_and(|p|
+            p.warehouse>0&&p.monitoring[0].changed!=Some(self.game.day)));
+        if cities.is_empty() { return; }
+        let reserved=self.reserved_stocks(0);
+        for city in cities {self.facility_immediate_reserved(0,city,0,Some(reserved[city]));}
     }
     fn purchase_work(&self, mut day: FleetDay) -> Stage {
         let mut budgets: BTreeMap<usize, (f64, usize)> = BTreeMap::new();
@@ -812,6 +903,7 @@ impl Engine {
             budgets.get_mut(&day.ships[key].c).unwrap().0 -= toll;
         }
         let mut rooms: BTreeMap<(usize, usize), usize> = BTreeMap::new();
+        let mut reservations: BTreeMap<usize, Vec<usize>> = BTreeMap::new();
         let mut jobs: BTreeMap<usize, CityJob> = BTreeMap::new();
         let mut context = vec![];
         for (key, a, b, capacity, rate, days, toll, reserve) in requests {
@@ -821,9 +913,14 @@ impl Engine {
             let r = &co.routes[v.ri];
             let (budget, count) = budgets[&v.c];
             let budget = budget.max(0.0) / count as f64;
+            let warehouse_room = |city:usize, reservations:&mut BTreeMap<usize, Vec<usize>>| {
+                let reserved=reservations.entry(v.c).or_insert_with(||self.reserved_stocks(v.c));
+                let p=&co.posts[&city];
+                (p.warehouse as usize*crate::posts::WAREHOUSE_UNITS).saturating_sub(p.quantity()+reserved[city])
+            };
             let room = rooms.entry((v.c, b)).or_insert_with(|| {
                 if self.warehouse(v.c, b) {
-                    self.warehouse_room(v.c, b)
+                    warehouse_room(b,&mut reservations)
                 } else {
                     usize::MAX
                 }
@@ -850,7 +947,9 @@ impl Engine {
                 &r.allowed,
                 r.buy_below,
                 r.sell_above,
-                None,
+                // Reverse quotes use the actual snapshot, not forward orders'
+                // provisional reservations in rooms. Preserve reposition logic.
+                if self.warehouse(v.c,a) {Some(warehouse_room(a,&mut reservations))} else {None},
             );
             let job = jobs.entry(a).or_insert_with(|| self.city_job(a));
             if forward.stored {
@@ -994,13 +1093,7 @@ impl Engine {
                 s.voyage = Some(trip);
             }
         }
-        for ctx in &day.buyers {
-            let v = &day.ships[*ctx];
-            let stops = self.game.companies[v.c].routes[v.ri].stops.clone();
-            for city in stops {
-                self.facility_immediate(v.c, city, 0);
-            }
-        }
+        self.fleet_warehouse_checks(day.buyers.iter().map(|&i|&day.ships[i]));
         if day
             .ships
             .iter()

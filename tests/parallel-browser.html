@@ -6,12 +6,14 @@
 <script type="module">
 import {bridge} from '../src/wasm-bridge.js';
 import {fleetFixture} from './helpers/fleet-fixture.js';
+import {warehouseFixture} from './helpers/warehouse-fleet-fixture.js';
 import {prepareIsolation} from '../src/isolation-bootstrap.js';
 const out=document.querySelector('#result');
 let worker;
 try{
   if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Local-only test');
   if(new URLSearchParams(location.search).has('bootstrap')&&await prepareIsolation())await new Promise(()=>{});
+  out.textContent='Booting game worker…';
   worker=new Worker('../src/game-worker.js',{type:'module'});
   const pending=new Map();let serial=0;
   worker.onmessage=({data})=>{
@@ -22,8 +24,10 @@ try{
   worker.onerror=e=>{for(const p of pending.values())p.reject(Error(e.message));pending.clear();};
   const rpc=data=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});worker.postMessage({...data,id});});
   await rpc({op:'boot',name:'Parallel verification'});
+  out.textContent='Preparing reference Wasm and fixture…';
   const core=bridge((await WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm'))).instance);
-  const fixture=fleetFixture(core,{routes:60,shipsPerRoute:10});
+  const fleet=fleetFixture(core,{routes:60,shipsPerRoute:10});
+  const fixture=new URLSearchParams(location.search).has('warehouse')?warehouseFixture(core,fleet):fleet;
   await rpc({op:'load',text:fixture});
   const deadline=performance.now()+60000;
   let status;

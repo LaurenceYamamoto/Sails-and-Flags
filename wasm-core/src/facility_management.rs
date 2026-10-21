@@ -95,14 +95,16 @@ impl Engine {
   for city in cities{self.facility_immediate(0,city,0);self.facility_immediate(0,city,1);}
   Ok(())
  }
- fn facility_usage(&self,c:usize,city:usize,kind:usize)->Option<(u32,f64)>{
+ fn facility_usage_reserved(&self,c:usize,city:usize,kind:usize,reserved:Option<usize>)->Option<(u32,f64)>{
   let p=self.game.companies[c].posts.get(&city)?;
   let level=if kind==0{p.warehouse}else{p.handling};
   if level==0{return None;}
-  Some((level,if kind==0{100.0*(p.quantity()+self.reserved_stock(c,city)) as f64/(level as f64*WAREHOUSE_UNITS as f64)}else{100.0*p.handling_demand/(level as f64*HANDLING_UNITS)}))
+  Some((level,if kind==0{100.0*(p.quantity()+reserved.unwrap_or_else(||self.reserved_stock(c,city))) as f64/(level as f64*WAREHOUSE_UNITS as f64)}else{100.0*p.handling_demand/(level as f64*HANDLING_UNITS)}))
  }
  fn adjust_facility(&mut self,city:usize,kind:usize,up:bool){
-  let Some((level,_))=self.facility_usage(0,city,kind) else{return;};
+  let Some(p)=self.game.companies[0].posts.get(&city) else{return;};
+  let level=if kind==0{p.warehouse}else{p.handling};
+  if level==0{return;}
   let facility=if kind==0{"warehouse"}else{"handling"};
   let result=if up {
    if level>=10000||self.game.companies[0].cash-500.0<self.cash_reserve(){return;}
@@ -111,12 +113,20 @@ impl Engine {
   if result.is_ok(){self.game.companies[0].posts.get_mut(&city).unwrap().monitoring[kind]=FacilityMonitor{changed:Some(self.game.day),..Default::default()};}
  }
  pub fn facility_immediate(&mut self,c:usize,city:usize,kind:usize){
+  self.facility_immediate_reserved(c,city,kind,None);
+ }
+ pub(crate) fn immediate_warehouses_enabled(&self)->bool {
+  let co=&self.game.companies[0];let p=&co.facility_policy;
+  !co.bankrupt&&(p.warehouse_up.enabled&&p.warehouse_up.days==1||p.warehouse_down.enabled&&p.warehouse_down.days==1)
+ }
+ pub(crate) fn facility_immediate_reserved(&mut self,c:usize,city:usize,kind:usize,reserved:Option<usize>){
   if c!=0||self.game.companies[c].bankrupt{return;}
   let policy=&self.game.companies[c].facility_policy;
   let (up,down)=if kind==0{(&policy.warehouse_up,&policy.warehouse_down)}else{(&policy.handling_up,&policy.handling_down)};
   if !(up.enabled&&up.days==1||kind==0&&down.enabled&&down.days==1){return;}
-  let Some((_,usage))=self.facility_usage(c,city,kind) else{return;};
-  if self.game.companies[c].posts[&city].monitoring[kind].changed==Some(self.game.day){return;}
+  let Some(p)=self.game.companies[c].posts.get(&city) else{return;};
+  if p.monitoring[kind].changed==Some(self.game.day){return;}
+  let Some((_,usage))=self.facility_usage_reserved(c,city,kind,reserved) else{return;};
   let policy=&self.game.companies[c].facility_policy;
   let (up,down)=if kind==0{(&policy.warehouse_up,&policy.warehouse_down)}else{(&policy.handling_up,&policy.handling_down)};
   if up.enabled&&up.days==1&&usage>=up.percent{
@@ -131,11 +141,18 @@ impl Engine {
   let policy=self.game.companies[0].facility_policy.clone();
   if ![&policy.warehouse_up,&policy.warehouse_down,&policy.handling_up,&policy.handling_down].iter().any(|r|r.enabled){return;}
   let cities=self.game.companies[0].posts.keys().copied().collect::<Vec<_>>();
+  // Other cities' reservations cannot change when this city's facility is
+  // resized. Each warehouse is evaluated once; handling needs no reservations.
+  let mut reserved=None;
   for city in cities{for kind in 0..2{
-   let Some((_,usage))=self.facility_usage(0,city,kind) else{continue;};
+   let monitor=&self.game.companies[0].posts[&city].monitoring[kind];
+   if monitor.changed==Some(self.game.day)||monitor.sampled==Some(self.game.day){continue;}
+   let inbound=if kind==0&&self.game.companies[0].posts[&city].warehouse>0 {
+    Some(reserved.get_or_insert_with(||self.reserved_stocks(0))[city])
+   }else{None};
+   let Some((_,usage))=self.facility_usage_reserved(0,city,kind,inbound) else{continue;};
    let (up,down)=if kind==0{(&policy.warehouse_up,&policy.warehouse_down)}else{(&policy.handling_up,&policy.handling_down)};
    let m=&mut self.game.companies[0].posts.get_mut(&city).unwrap().monitoring[kind];
-   if m.changed==Some(self.game.day)||m.sampled==Some(self.game.day){continue;}
    if m.sampled.is_some_and(|d|d+1!=self.game.day){m.up=0;m.down=0;}
    m.sampled=Some(self.game.day);
    m.up=if up.enabled&&(usage>=up.percent||(up.days==1&&m.expansion_pending)){(m.up+1).min(up.days)}else{0};

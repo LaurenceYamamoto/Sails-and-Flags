@@ -80,6 +80,17 @@ impl Engine {
   self.game.companies[c].ships.iter().filter(|s|s.voyage.as_ref().or(s.handling.as_ref().map(|h|&h.trip)).is_some_and(|v|v.to==city&&!v.direct_sale))
    .map(crate::facility_management::reserved_units).sum()
  }
+ // A local snapshot for a read-only phase or a batch that visits each city
+ // once. Never retain across cargo changes, arrivals, losses or commands.
+ pub(crate) fn reserved_stocks(&self,c:usize)->Vec<usize>{
+  let mut totals=vec![0;self.data.cities.len()];
+  for s in &self.game.companies[c].ships {
+   if let Some(v)=s.voyage.as_ref().or(s.handling.as_ref().map(|h|&h.trip)) {
+    if !v.direct_sale {totals[v.to]+=crate::facility_management::reserved_units(s);}
+   }
+  }
+  totals
+ }
  pub fn warehouse_room(&self,c:usize,city:usize)->usize{
   self.game.companies[c].posts.get(&city).map_or(0,|p|(p.warehouse as usize*WAREHOUSE_UNITS).saturating_sub(p.quantity()+self.reserved_stock(c,city)))
  }
