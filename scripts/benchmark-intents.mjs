@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import {performance} from 'node:perf_hooks';
-import {ParallelSimulation} from '../src/simulation-parallel.js';
+import {ParallelSimulation} from '../tests/helpers/legacy-simulation-parallel.js';
 import {coreFrom,fleetFixture,nodeComputeWorker} from '../tests/helpers/parallel-fixture.js';
 const days=Number(process.env.BENCH_DAYS??180),trials=Number(process.env.BENCH_TRIALS??3);
 const baseline=await WebAssembly.compile(fs.readFileSync('sites/local-intents-baseline.wasm'));

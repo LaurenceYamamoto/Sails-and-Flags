@@ -2,10 +2,10 @@ use crate::model::*;
 use crate::trade::key;
 use serde_json::{Value, json};
 pub fn string<'a>(v: &'a Value, k: &str) -> Result<&'a str> {
-    v[k].as_str().ok_or(format!("{}を指定してください。", k))
+    v[k].as_str().ok_or_else(|| format!("{}を指定してください。", k))
 }
 pub fn number(v: &Value, k: &str) -> Result<f64> {
-    let n = v[k].as_f64().ok_or(format!("{}を指定してください。", k))?;
+    let n = v[k].as_f64().ok_or_else(|| format!("{}を指定してください。", k))?;
     ensure(amount(n), "金額が不正です。")?;
     Ok(n)
 }

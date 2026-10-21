@@ -1,4 +1,12 @@
-# 外部ライブラリ・ライセンス一覧 — 4.1.2
+# 外部ライブラリ・ライセンス一覧
+
+共有メモリ移行後の性能最適化（2026-10-21）は既存RustコードとNode標準の診断機能を使用し、外部依存やライセンスの追加・変更はない。
+
+## 共有メモリ並列実行の追加（2026-10-21）
+
+Rayon / rayon-core（MIT OR Apache-2.0）、wasm-bindgen（MIT OR Apache-2.0）、wasm-bindgen-rayon（Apache-2.0）と推移依存を追加した。版と全通知は[機械可読一覧](assets/licenses/rust-crates.json)および[英語OSS表記](legal/en/licenses.html)に収録する。`collect-rust-licenses.mjs`は任意機能も含めて収集する。wasm-bindgen-cli 0.2.129はビルド時のみ使用。生成JSを同梱し、RayonのWorker起動コードを同一オリジン・起動失敗処理用に変更したことをソース内に明示する。以下の「追加なし」は各過去作業時点の記録。
+
+現在のCargo依存一覧はビルド時依存を含め36件。通常版の標準ライブラリ通知に加え、共有メモリ版の固定nightly標準ライブラリの通知も同梱する。wasm_syncの原典の宣言と、採用したApache-2.0本文を収録している。
 
 2026-10-21のゲーム計算並列化は既存Rustコードと標準Web Workers／WebAssemblyを使用する。外部ライブラリ・ランタイム・スレッドライブラリの追加はなく、第三者ライセンス表示に追加はない。
 

@@ -41,7 +41,8 @@ try{
   await rpc({op:'loadSlot',slot:'manual-5'});
   if(await rpc({op:'export'})!==core({op:'save'}))throw Error('Save round-trip mismatch');
   status=await rpc({op:'parallelStatus'});
-  if(!status.rival||!status.schedules||!status.movement||!status.cities||!status.investments)throw Error('Expected compute jobs were not distributed');
+  if(status.backend!=='rust-shared-memory')throw Error('Shared backend not active');
+  for(const kind of ['rival','schedules','movement','cities','investments'])if(!status.kinds.find(s=>s.kind===kind)?.batches)throw Error('Expected Rust jobs: '+kind);
   out.textContent='PASS: 30 days exactly match synchronous Wasm; IndexedDB save round trip passed.\n'+JSON.stringify(status,null,2);
 }catch(e){out.textContent='FAIL: '+e.stack;}
 finally{worker?.terminate();}

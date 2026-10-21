@@ -9,4 +9,4 @@ copyFileSync('wasm-core/target/wasm32-unknown-unknown/release/sails_flags_core.w
 const files=['wasm-core/Cargo.toml','wasm-core/Cargo.lock',...readdirSync('wasm-core/data').filter(f=>f.endsWith('.json')).map(f=>'wasm-core/data/'+f),...readdirSync('wasm-core/src').filter(f=>f.endsWith('.rs')).map(f=>'wasm-core/src/'+f)].sort();
 const hash=file=>createHash('sha256').update(readFileSync(file)).digest('hex');
 const sourceHash=file=>createHash('sha256').update(readFileSync(file,'utf8').replace(/^\uFEFF/,'').replace(/\r\n/g,'\n')).digest('hex');
-writeFileSync('assets/wasm/build.json',JSON.stringify({version:'4.1.3',binary:hash('assets/wasm/engine.wasm'),sources:Object.fromEntries(files.map(f=>[f,sourceHash(f)]))},null,2)+'\n');
+writeFileSync('assets/wasm/build.json',JSON.stringify({version:'4.1.4',binary:hash('assets/wasm/engine.wasm'),sources:Object.fromEntries(files.map(f=>[f,sourceHash(f)]))},null,2)+'\n');

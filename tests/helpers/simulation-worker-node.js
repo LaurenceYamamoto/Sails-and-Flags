@@ -2,5 +2,5 @@
 import {parentPort} from 'node:worker_threads';
 globalThis.onmessage=null;
 globalThis.postMessage=data=>parentPort.postMessage(data);
-await import('../../src/simulation-compute-worker.js');
+await import('./legacy-simulation-compute-worker.js');
 parentPort.on('message',data=>globalThis.onmessage({data}));

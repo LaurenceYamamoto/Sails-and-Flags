@@ -137,10 +137,10 @@ impl Engine {
                             && offsets.iter().all(|v|v.is_finite()&&*v>=0.0&&*v<*cycle)
                             && offsets.windows(2).all(|v|v[0]<v[1])
                     }));
-                let rows=parsed.unwrap_or_else(||items.into_iter().map(|(i,fleet)|{
-                    let r=&self.game.companies[c].routes[i];
-                    let (cycle,offsets,_)=self.schedule_fleet(c,r,fleet);(r.id,cycle,offsets)
-                }).collect());
+                let rows=parsed.unwrap_or_else(||crate::thread_pool::map(crate::thread_pool::Kind::Schedules, &items, self.game.companies[c].ships.len(), |(i,fleet)|{
+                    let r=&self.game.companies[c].routes[*i];
+                    let (cycle,offsets)=self.schedule_timing(c,r,fleet);(r.id,cycle,offsets)
+                }));
                 self.day_fleets.push((c,rows));
                 Ok(Stage::Start(c+1))
             }
@@ -148,7 +148,7 @@ impl Engine {
                 let parsed=result.and_then(|v|serde_json::from_value::<Vec<Option<Candidate>>>(v).ok())
                     .filter(|rows|rows.len()==pairs.len() && rows.iter().zip(&pairs).all(|(candidate,&(a,b))|
                         candidate.as_ref().is_none_or(|v|v.matches(a,b))));
-                let candidates=parsed.unwrap_or_else(||pairs.into_iter().map(|(a,b)|self.rival_pair_best(c,a,b)).collect());
+                let candidates=parsed.unwrap_or_else(||crate::thread_pool::map(crate::thread_pool::Kind::Rival, &pairs, pairs.len(), |&(a,b)|self.rival_pair_best(c,a,b)));
                 if let Some(best)=Self::rival_best(candidates) {
                     // All spending still uses the original transactional path.
                     self.apply_rival_candidate(c,best);

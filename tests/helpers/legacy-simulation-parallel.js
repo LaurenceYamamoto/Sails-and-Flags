@@ -1,8 +1,9 @@
+// Historical 4.1.3 transport, retained only for regression and before/after measurements.
 // Transport only. Eligibility, inputs, evaluation and committing results live
 // in Rust. No game rule or mutable game state is owned by this worker pool.
 export class ParallelSimulation {
   constructor(core,module,{concurrency=globalThis.navigator?.hardwareConcurrency??1,
-    createWorker=()=>new Worker(new URL('./simulation-compute-worker.js',import.meta.url),{type:'module'}),
+    createWorker=()=>new Worker(new URL('./legacy-simulation-compute-worker.js',import.meta.url),{type:'module'}),
     timeout=30000,initTimeout=120000,maxWorkers=4,adaptive=true}={}) {
     this.core=core;this.module=module;this.createWorker=createWorker;this.timeout=timeout;this.initTimeout=initTimeout;
     this.count=Math.min(maxWorkers,Math.max(0,Math.floor(concurrency)-2));

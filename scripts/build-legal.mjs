@@ -19,6 +19,7 @@ for(const page of ['terms','licenses']){
  const oss=`<p>${esc(c.oss)}</p><h2>${esc(c.project)}</h2><p>${esc(c.notice)}</p>
  <h2>${esc(c.runtime)}</h2>${crates.map(p=>`<section><h3>${link(p.repository,p.name)} <small>${esc(p.version)}</small></h3><p>${esc(p.license)}</p>${p.files.map(f=>text(`assets/licenses/${p.name}-${p.version}`,f)).join('')}</section>`).join('')}
  <h2>${esc(c.standard)}</h2><p>Rust 1.95.0 · MIT OR Apache-2.0</p><p>${link('../../assets/licenses/rust-standard-library.html',c.standard)}</p>
+ <p>Shared-memory build: Rust 1.97.0-nightly (2026-04-15) · MIT OR Apache-2.0</p><p>${link('../../assets/licenses/threaded-rust/standard-library.html','Shared-memory Rust standard library notices')}</p>
  <h2>${esc(c.build)}</h2><h3>${link('https://github.com/nk2028/opencc-js','opencc-js')} 1.4.2 · MIT</h3>${text('assets/licenses/opencc-js-1.4.2','LICENSE')}
  <h3>${link('https://github.com/nk2028/opencc-data','opencc-data')} · Apache-2.0</h3>${text('assets/licenses/opencc-js-1.4.2','THIRD_PARTY_LICENSES.md')}${text('assets/licenses/opencc-js-1.4.2','Apache-2.0.txt')}
  <h2>${esc(c.map)}</h2><p>Made with Natural Earth · 1:50m Land v5.1.2 · Public Domain</p><p>${link('https://www.naturalearthdata.com/about/terms-of-use/', 'Natural Earth — Terms of Use')} · ${link('../../assets/maps/README.md','Natural Earth — Data provenance')}</p>`;

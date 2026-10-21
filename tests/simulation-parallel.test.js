@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {bridge} from '../src/wasm-bridge.js';
-import {ParallelSimulation} from '../src/simulation-parallel.js';
+import {ParallelSimulation} from '../tests/helpers/legacy-simulation-parallel.js';
 import {coreFrom,fleetFixture,nodeComputeWorker} from './helpers/parallel-fixture.js';
 const module=await WebAssembly.compile(fs.readFileSync('assets/wasm/engine.wasm'));
 

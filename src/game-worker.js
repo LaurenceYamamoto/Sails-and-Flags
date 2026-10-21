@@ -1,11 +1,8 @@
-import {bridge} from './wasm-bridge.js';
 import {SaveClient} from './save-client.js';
-import {ParallelSimulation} from './simulation-parallel.js';
+import {createSimulation} from './simulation-runtime.js';
 const storage=new SaveClient();
 let simulation;
-const ready=WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm')).then(r=>{
-  const core=bridge(r.instance);simulation=new ParallelSimulation(core,r.module);return core;
-});
+const ready=createSimulation().then(runtime=>{simulation=runtime;return runtime.core;});
 let queue=Promise.resolve(),selectedCity=0,lastAutoDay=0,lastViewDay=-1,autosaving=null;
 onmessage=({data})=>{queue=queue.then(async()=>{
   try{

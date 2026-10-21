@@ -562,7 +562,7 @@ impl Engine {
             .iter()
             .find(|s| s.id == kind)
             .or_else(|| self.game.designs.get(kind))
-            .ok_or("船種が不正です。".into())
+            .ok_or_else(|| "船種が不正です。".into())
     }
     pub fn road(&self, a: usize, b: usize) -> Option<usize> {
         self.data

@@ -1,0 +1,5 @@
+# Shared build manifests hash generated files byte for byte.
+# Preserve wasm-bindgen output and copied worker bootstrap across checkouts.
+assets/wasm/shared/** -text
+# Upstream license copies are intentionally preserved, including whitespace.
+assets/licenses/** -whitespace

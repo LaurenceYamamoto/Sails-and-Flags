@@ -12,6 +12,8 @@ use std::collections::BTreeMap;
 pub(crate) struct FleetDay {
     pub ships: Vec<VesselDay>,
     pub buyers: Vec<usize>,
+    // One offset array per route, instead of one heap allocation per vessel.
+    pub schedules: Vec<Vec<f64>>,
 }
 pub(crate) struct VesselDay {
     c: usize,
@@ -19,7 +21,7 @@ pub(crate) struct VesselDay {
     ri: usize,
     left: f64,
     cycle: f64,
-    offsets: Vec<f64>,
+    schedule: usize,
     phase: f64,
     daily: f64,
     lost: bool,
@@ -369,8 +371,9 @@ impl Engine {
     pub(crate) fn start_fleet_day(&mut self) -> Stage {
         let fleets = std::mem::take(&mut self.day_fleets);
         let mut ships = vec![];
+        let mut route_offsets = vec![];
         for (c, schedules) in fleets {
-            let schedules: BTreeMap<_, _> = schedules
+            let mut schedules: BTreeMap<_, _> = schedules
                 .into_iter()
                 .map(|(id, cycle, offsets)| (id, (cycle, offsets)))
                 .collect();
@@ -388,15 +391,17 @@ impl Engine {
                 let Some(fleet) = members.get(&r.id) else {
                     continue;
                 };
-                let (cycle, offsets) = &schedules[&r.id];
+                let (cycle, offsets) = schedules.remove(&r.id).unwrap();
+                let schedule = route_offsets.len();
+                route_offsets.push(offsets);
                 for (phase, &i) in fleet.iter().enumerate() {
                     ships.push(VesselDay {
                         c,
                         i,
                         ri,
                         left: 1.0,
-                        cycle: *cycle,
-                        offsets: offsets.clone(),
+                        cycle,
+                        schedule,
                         phase: phase as f64 * cycle / fleet.len() as f64,
                         daily: self.daily(c, &co.ships[i].kind),
                         lost: false,
@@ -404,10 +409,13 @@ impl Engine {
                 }
             }
         }
-        ships.sort_by_key(|s| (s.c, s.i));
+        // Company/vessel keys are unique, so unstable sorting preserves the
+        // same canonical order without allocating a merge buffer.
+        ships.sort_unstable_by_key(|s| (s.c, s.i));
         Stage::Motion(FleetDay {
             ships,
             buyers: vec![],
+            schedules: route_offsets,
         })
     }
     pub(crate) fn motion_work(&self, day: FleetDay) -> Work {
@@ -432,7 +440,7 @@ impl Engine {
                 };
                 let risks = if let Some(t) = &s.voyage {
                     *hazards
-                        .entry((v.c, r.id, s.kind.clone(), t.from, t.to))
+                        .entry((v.c, r.id, s.kind.as_str(), t.from, t.to))
                         .or_insert_with(|| {
                             let (chance, fraction, sink) = self.risk(v.c, r, &s.kind, t.from, t.to);
                             [
@@ -457,7 +465,7 @@ impl Engine {
                     left: v.left,
                     now: self.game.day as f64 - v.left,
                     ready: s.ready as f64,
-                    first: r.epoch + v.phase + v.offsets[s.next],
+                    first: r.epoch + v.phase + day.schedules[v.schedule][s.next],
                     cycle: v.cycle,
                     blocked: !r.active
                         || s.ready >= self.game.day
@@ -490,7 +498,7 @@ impl Engine {
                                 .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
                     })
             });
-        let rows = rows.unwrap_or_else(|| requests.iter().map(Motion::evaluate).collect());
+        let rows = rows.unwrap_or_else(|| crate::thread_pool::map(crate::thread_pool::Kind::Movement, &requests, requests.len(), Motion::evaluate));
         day.buyers.clear();
         let mut deliveries = vec![];
         let mut jobs: BTreeMap<usize, CityJob> = BTreeMap::new();
@@ -649,7 +657,7 @@ impl Engine {
             .filter(|rows| {
                 rows.len() == jobs.len() && rows.iter().zip(jobs).all(|(r, j)| j.accepts(r))
             })
-            .unwrap_or_else(|| jobs.iter().map(CityJob::evaluate).collect())
+            .unwrap_or_else(|| crate::thread_pool::map(crate::thread_pool::Kind::Cities, jobs, jobs.iter().map(CityJob::weight).sum(), CityJob::evaluate))
     }
     fn apply_fill(&mut self, c: usize, city: usize, route: Option<u32>, buy: bool, f: &Fill) {
         self.game.markets[city * self.data.goods.len() + f.good].stock += if buy {
@@ -1379,7 +1387,7 @@ impl Engine {
                             })
                     })
             });
-        for row in rows.unwrap_or_else(|| jobs.iter().map(InvestmentJob::evaluate).collect()) {
+        for row in rows.unwrap_or_else(|| crate::thread_pool::map(crate::thread_pool::Kind::Investments, &jobs, jobs.iter().map(InvestmentJob::weight).sum(), InvestmentJob::evaluate)) {
             let c = row.company;
             for (kind, i, g, cost, delta) in row.changes {
                 let (category, detail) = match kind {

@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>Local serial fallback verification</title>
+<h1>Local serial fallback verification</h1><pre id="result">Starting…</pre>
+<script type="module">
+const out=document.querySelector('#result');let worker;
+try{
+ if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Local only');
+ if(crossOriginIsolated)throw Error('Use the local server with ISOLATION=0');
+ worker=new Worker('../src/game-worker.js',{type:'module'});
+ let serial=0;const pending=new Map();
+ worker.onmessage=({data})=>{const p=pending.get(data.id);if(!p)return;pending.delete(data.id);data.ok?p.resolve(data.value):p.reject(Error(data.error));};
+ const rpc=data=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});worker.postMessage({...data,id});});
+ await rpc({op:'boot',name:'Fallback verification'});
+ const status=await rpc({op:'parallelStatus'});
+ if(status.backend!=='rust-serial'||status.workers!==0)throw Error('Fallback not selected');
+ const before=await rpc({op:'export'});
+ await rpc({op:'advance',ms:250,speed:4,running:true});
+ const after=await rpc({op:'export'});
+ if(JSON.parse(after).day!==JSON.parse(before).day+1)throw Error('Clock failed');
+ await rpc({op:'save',slot:5});await rpc({op:'loadSlot',slot:'manual-5'});
+ if(await rpc({op:'export'})!==after)throw Error('Save mismatch');
+ out.textContent='PASS: non-isolated browser uses serial Rust; progression and IndexedDB save round trip passed.\n'+JSON.stringify(status,null,2);
+}catch(e){out.textContent='FAIL: '+e.stack;}finally{worker?.terminate();}
+</script>

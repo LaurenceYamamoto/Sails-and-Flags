@@ -4,7 +4,7 @@ use serde_json::{json, Value};
 use std::collections::BTreeSet;
 
 fn flag(v: &Value, k: &str) -> Result<bool> {
-    v[k].as_bool().ok_or("対象が不正です。".into())
+    v[k].as_bool().ok_or_else(|| "対象が不正です。".into())
 }
 
 // JavaScript serializes 0.0 as 0. Compare JSON numbers numerically, allowing

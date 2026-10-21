@@ -12,6 +12,7 @@ http.createServer(async (req, res) => {
     const target = path.resolve(root, `.${name}`);
     if (!target.startsWith(root) || !types[path.extname(target)]) { res.writeHead(403); res.end('Forbidden'); return; }
     const data = await readFile(target);
-    res.writeHead(200, { 'Content-Type': types[path.extname(target)], 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(data);
+    const isolation=process.env.ISOLATION==='0'?{}:{'Cross-Origin-Opener-Policy':'same-origin','Cross-Origin-Embedder-Policy':'require-corp'};
+    res.writeHead(200, { 'Content-Type': types[path.extname(target)], 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...isolation }); res.end(data);
   } catch { res.writeHead(404); res.end('Not found'); }
 }).listen(port, '127.0.0.1', () => console.log(`Sails and Flags: http://127.0.0.1:${port}`));

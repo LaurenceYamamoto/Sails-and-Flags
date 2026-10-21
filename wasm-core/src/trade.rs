@@ -1,6 +1,41 @@
 use crate::model::*;
 use serde_json::{Value, json};
 
+#[cfg(test)]
+mod schedule_tests {
+    use super::*;
+    #[test]
+    fn mixed_fleet_timing_ignores_duplicate_hulls_but_tracks_design_and_handling_changes() {
+        let mut e=Engine::new_planner();
+        let london=e.data.cities.iter().position(|c|c.id=="london").unwrap();
+        let nantes=e.data.cities.iter().position(|c|c.id=="nantes").unwrap();
+        e.game.companies[0].cash=1e9;
+        e.game.companies[0].licenses=(0..e.data.nations.len()).collect();
+        e.game.companies[0].technology.fill(60.0);
+        e.game.companies[0].posts.insert(london,crate::posts::TradingPost::new(e.data.goods.len()));
+        e.open(0,"sloop",vec![london,nantes],vec![0],0.0).unwrap();
+        let mut design=e.spec("galleon").unwrap().clone();
+        design.id="custom-timing".into();
+        e.game.designs.insert(design.id.clone(),design);
+        let mut ship=e.game.companies[0].ships[0].clone();
+        ship.kind="custom-timing".into();
+        e.game.companies[0].ships.push(ship);
+        let r=e.game.companies[0].routes[0].clone();
+        let mixed=e.schedule_timing(0,&r,&[0,1]);
+        assert_eq!(mixed,e.schedule_timing(0,&r,&[1,0,1,0,1]));
+        assert!(mixed.0>e.schedule_timing(0,&r,&[0]).0);
+        assert_eq!(e.schedule_timing(0,&r,&[]),e.schedule_timing(0,&r,&[0]));
+        let (_,_,fleet)=e.schedule_fleet(0,&r,vec![1,0]);
+        assert_eq!(fleet,vec![1,0]);
+        e.game.designs.get_mut("custom-timing").unwrap().capacity+=100;
+        let changed=e.schedule_timing(0,&r,&[0,1]);
+        assert!(changed.0>mixed.0);
+        let mut improved=r;improved.handling_rate*=2.0;
+        assert!(e.schedule_timing(0,&improved,&[0,1]).0<changed.0);
+        assert_eq!(e.spec("not-a-ship").err().unwrap(),"船種が不正です。");
+    }
+}
+
 pub fn ratio(stock: f64) -> f64 {
     0.35 + 180.0 / (stock + 60.0)
 }
@@ -279,8 +314,19 @@ impl Engine {
     // Callers that visit every route can group the fleet once instead of
     // rescanning all ships for each route. Indices preserve original order.
     pub fn schedule_fleet(&self, c: usize, r: &Route, fleet: Vec<usize>) -> (f64, Vec<f64>, Vec<usize>) {
+        let (cycle, offsets) = self.schedule_timing(c, r, &fleet);
+        (cycle, offsets, fleet)
+    }
+    pub(crate) fn schedule_timing(&self, c: usize, r: &Route, fleet: &[usize]) -> (f64, Vec<f64>) {
+        // Timing depends on the types present, not the number of identical
+        // hulls. Keep the original fleet order for phase assignment elsewhere.
+        let mut kinds: Vec<&str> = fleet.iter()
+            .map(|&j| self.game.companies[c].ships[j].kind.as_str()).collect();
+        kinds.sort_unstable();
+        kinds.dedup();
+        if kinds.is_empty() { kinds.push(&r.auto_type); }
         let mut cycle = 0.0;
-        let mut offsets = vec![];
+        let mut offsets = Vec::with_capacity(r.stops.len());
         for (i, &a) in r.stops.iter().enumerate() {
             offsets.push(cycle);
             let b = r.stops[(i + 1) % r.stops.len()];
@@ -288,14 +334,12 @@ impl Engine {
                 self.days(kind, a, b) as f64
                     + 2.0 * self.spec(kind).unwrap().capacity as f64 / r.handling_rate
             };
-            let days = fleet
-                .iter()
-                .map(|&j| leg(&self.game.companies[c].ships[j].kind))
+            let days = kinds.iter().map(|kind| leg(kind))
                 .reduce(f64::max)
-                .unwrap_or_else(|| leg(&r.auto_type));
+                .unwrap();
             cycle += days;
         }
-        (cycle.max(1.0), offsets, fleet)
+        (cycle.max(1.0), offsets)
     }
     pub fn reschedule(&mut self, c: usize, id: u32) {
         let Some(i) = self.game.companies[c]

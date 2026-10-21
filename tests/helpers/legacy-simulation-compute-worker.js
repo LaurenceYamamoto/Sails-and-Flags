@@ -1,4 +1,4 @@
-import {bridge} from './wasm-bridge.js';
+import {bridge} from '../../src/wasm-bridge.js';
 let compute;
 onmessage=async({data})=>{
   try{
