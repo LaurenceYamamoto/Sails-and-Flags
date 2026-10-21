@@ -1,0 +1,322 @@
+{
+  "release": "4.1.4",
+  "commit": "ded4837e6742e4b0bf88322c8958734a07095f25",
+  "profileSha256": "db95bb274a8b01c9560b87e9c80ab54618b2af652e7398147fd1024d58aee183",
+  "samples": 8489,
+  "provenance": "Existing post-optimization 2400-ship / 720-day shared-serial profile; all Rust source hashes match 4.1.4. Not a fresh speed comparison.",
+  "sourceChecks": [
+    {
+      "path": "wasm-core/src/accounts.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/bulk_investment.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/commands.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/facility_management.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/investment.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/land_connections.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/lib.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/licenses.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/load_batch.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/loading.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/model.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/movement.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/parallel.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/phase_jobs.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/posts.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/rival_entry.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/rival_strategy.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/rivals.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/route_management.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/route_pairs.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/simulation.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/thread_pool.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/trade.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/view.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/water_connections.rs",
+      "match": true
+    },
+    {
+      "path": "wasm-core/src/waterway_rollback.rs",
+      "match": true
+    }
+  ],
+  "allocationAndStringSelfSamplesByNearestGameCaller": [
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_motion",
+      "samples": 374,
+      "percent": 4.405701496053717
+    },
+    {
+      "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+      "samples": 321,
+      "percent": 3.7813641182707034
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::entry",
+      "samples": 269,
+      "percent": 3.168806691011898
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::record_account",
+      "samples": 233,
+      "percent": 2.744728472140417
+    },
+    {
+      "name": "<sails_flags_core::model::Company as core::clone::Clone>::clone",
+      "samples": 211,
+      "percent": 2.4855695606078454
+    },
+    {
+      "name": "core::ptr::drop_in_place::<sails_flags_core::model::Company>",
+      "samples": 102,
+      "percent": 1.2015549534691954
+    },
+    {
+      "name": "core::ptr::drop_in_place::<alloc::vec::Vec<sails_flags_core::model::Ship>>",
+      "samples": 44,
+      "percent": 0.5183178230651432
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_sales",
+      "samples": 43,
+      "percent": 0.5065378725409353
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_work",
+      "samples": 33,
+      "percent": 0.38873836729885736
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+      "samples": 28,
+      "percent": 0.32983861467781833
+    },
+    {
+      "name": "core::ptr::drop_in_place::<sails_flags_core::model::Route>",
+      "samples": 27,
+      "percent": 0.31805866415361056
+    },
+    {
+      "name": "<sails_flags_core::model::Game as core::clone::Clone>::clone",
+      "samples": 22,
+      "percent": 0.2591589115325716
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::load_input",
+      "samples": 21,
+      "percent": 0.24737896100836376
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::day_step",
+      "samples": 18,
+      "percent": 0.21203910943574036
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::rival_retreat",
+      "samples": 16,
+      "percent": 0.18847920838732476
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::schedule_items",
+      "samples": 15,
+      "percent": 0.17669925786311697
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::schedule_timing",
+      "samples": 15,
+      "percent": 0.17669925786311697
+    },
+    {
+      "name": "core::ptr::drop_in_place::<alloc::vec::Vec<sails_flags_core::model::Development>>",
+      "samples": 12,
+      "percent": 0.14135940629049357
+    },
+    {
+      "name": "core::ptr::drop_in_place::<sails_flags_core::phase_jobs::CityJob>",
+      "samples": 10,
+      "percent": 0.11779950524207798
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::land_legs",
+      "samples": 9,
+      "percent": 0.10601955471787018
+    }
+  ],
+  "inclusiveGameFrames": [
+    {
+      "name": "sails_flags_core::request",
+      "samples": 8405,
+      "percent": 99.01048415596655
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::dispatch",
+      "samples": 8394,
+      "percent": 98.88090470020026
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::command",
+      "samples": 8390,
+      "percent": 98.83378489810343
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::tick",
+      "samples": 8389,
+      "percent": 98.82200494757922
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_work",
+      "samples": 4692,
+      "percent": 55.27152785958299
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::day_step",
+      "samples": 3675,
+      "percent": 43.29131817646366
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_motion",
+      "samples": 1736,
+      "percent": 20.449994110024736
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::entry",
+      "samples": 1345,
+      "percent": 15.844033455059488
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::finish_sales",
+      "samples": 780,
+      "percent": 9.188361408882082
+    },
+    {
+      "name": "<sails_flags_core::model::Route as core::clone::Clone>::clone",
+      "samples": 494,
+      "percent": 5.819295558958652
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::record_account",
+      "samples": 469,
+      "percent": 5.524796795853457
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::rival_pair_best",
+      "samples": 457,
+      "percent": 5.383437389562964
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::market_flow_factors",
+      "samples": 443,
+      "percent": 5.218518082224055
+    },
+    {
+      "name": "<sails_flags_core::model::Game as core::clone::Clone>::clone",
+      "samples": 409,
+      "percent": 4.817999764400989
+    },
+    {
+      "name": "<sails_flags_core::model::Company as core::clone::Clone>::clone",
+      "samples": 354,
+      "percent": 4.1701024855695605
+    },
+    {
+      "name": "core::ptr::drop_in_place::<sails_flags_core::model::Game>",
+      "samples": 336,
+      "percent": 3.95806337613382
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::rival_retreat",
+      "samples": 314,
+      "percent": 3.6989044646012488
+    },
+    {
+      "name": "core::ptr::drop_in_place::<sails_flags_core::model::Company>",
+      "samples": 310,
+      "percent": 3.6517846625044177
+    },
+    {
+      "name": "<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<sails_flags_core::phase_jobs::VesselDay>>, <sails_flags_core::model::Engine>::motion_work::{closure#0}> as core::iter::traits::iterator::Iterator>::next",
+      "samples": 307,
+      "percent": 3.616444810931794
+    },
+    {
+      "name": "<sails_flags_core::model::Engine>::distance",
+      "samples": 218,
+      "percent": 2.5680292142773
+    }
+  ],
+  "caveats": [
+    "Sample counts are not allocation counts.",
+    "Inclusive rows overlap and must not be added.",
+    "Inlining may attribute work to callers. Lock wait time is not measured."
+  ]
+}

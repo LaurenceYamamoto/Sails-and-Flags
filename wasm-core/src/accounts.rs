@@ -2,6 +2,52 @@ use crate::model::*;
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn bounded_ledger_preserves_array_order_and_period_totals_across_wraps() {
+        let mut e=Engine::new_planner();
+        e.game.companies[0].ledger.clear();
+        e.game.companies[0].totals.clear();
+        e.game.companies[0].accounts=None;
+        e.game.companies[0].cash=1e9;
+        let mut rows=Vec::new();
+        let mut periods:BTreeMap<(bool,u32,bool),f64>=BTreeMap::new();
+        for i in 0..650 {
+            e.game.day=350+i;
+            let value=if i%2==0 {0.1*(i+1) as f64} else {-0.3*(i+1) as f64};
+            e.entry(0,"test",value,None,i.to_string());
+            rows.push(json!({"day":350+i,"category":"test","amount":value,"route":null,"detail":i.to_string()}));
+            if rows.len()>200 {rows.remove(0);}
+            assert_eq!(serde_json::to_value(&e.game.companies[0].ledger).unwrap(),json!(rows));
+            let month=Engine::calendar_at(350+i).0;
+            for (annual,id) in [(false,month),(true,month/12)] {
+                *periods.entry((annual,id,value>=0.0)).or_default()+=value.abs();
+            }
+        }
+        let a=e.game.companies[0].accounts.as_ref().unwrap();
+        for ((annual,id,income),expected) in periods {
+            let p=if annual {&a.years.as_ref().unwrap()[&id]} else {&a.months[&id]};
+            let actual=if income {p.income["test"]} else {p.expense["test"]};
+            assert_eq!(actual.to_bits(),expected.to_bits());
+        }
+        let text=serde_json::to_string(&e.game.companies[0].ledger).unwrap();
+        let legacy:Vec<Ledger>=serde_json::from_str(&text).unwrap();
+        e.game.companies[0].ledger=serde_json::from_str(&serde_json::to_string(&legacy).unwrap()).unwrap();
+        assert_eq!(serde_json::to_string(&e.game.companies[0].ledger).unwrap(),text);
+        e.entry(0,"negativeZero",-0.0,None,String::new());
+        assert_eq!(e.game.companies[0].totals["negativeZero"].to_bits(),0.0f64.to_bits());
+    }
+    #[test]
+    fn legacy_long_ledger_keeps_the_latest_two_hundred_records() {
+        let mut e=Engine::new_planner();
+        e.game.companies[0].ledger=(0..600).map(|i|Ledger{day:i,category:"sale".into(),amount:1.0,route:None,detail:String::new()}).collect();
+        Engine::normalize_account_history(&mut e.game);
+        assert_eq!(e.game.companies[0].ledger.iter().map(|l|l.day).collect::<Vec<_>>(),(400..600).collect::<Vec<_>>());
+    }
+}
+
 impl Accounts {
     fn new(day: u32) -> Self {
         Self {
@@ -74,7 +120,11 @@ impl Engine {
             } else {
                 &mut period.expense
             };
-            *bucket.entry(category.into()).or_default() += value.abs();
+            if let Some(total) = bucket.get_mut(category) {
+                *total += value.abs();
+            } else {
+                bucket.insert(category.into(), 0.0 + value.abs());
+            }
             period.as_of = day;
         }
     }

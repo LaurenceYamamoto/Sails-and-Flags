@@ -509,16 +509,14 @@ impl Engine {
                 continue;
             }
             let (c, ri) = (v.c, v.ri);
-            let mut ship = self.game.companies[c].ships[v.i].clone();
-            let route = self.game.companies[c].routes[ri].clone();
             v.left = row.left;
             let mut delivery = None;
             match row.mode {
                 1 => {
-                    let mut h = ship.handling.take().unwrap();
+                    let mut h = self.game.companies[c].ships[v.i].handling.take().unwrap();
                     h.remaining = row.remaining;
                     let city = if h.unloading { h.trip.to } else { h.trip.from };
-                    let fee = self.charge_handling(c, city, row.elapsed * h.rate, ship.route);
+                    let fee = self.charge_handling(c, city, row.elapsed * h.rate, self.game.companies[c].ships[v.i].route);
                     h.trip.original_cost += fee;
                     h.trip.upkeep += v.daily * row.elapsed;
                     let r = &mut self.game.companies[c].routes[ri];
@@ -529,24 +527,22 @@ impl Engine {
                         r.activity.loading += row.elapsed;
                     }
                     if h.remaining > 1e-9 {
-                        ship.handling = Some(h);
+                        self.game.companies[c].ships[v.i].handling = Some(h);
                     } else if h.unloading {
                         delivery = Some(h.trip);
                     } else {
-                        ship.voyage = Some(h.trip);
+                        self.game.companies[c].ships[v.i].voyage = Some(h.trip);
                     }
                 }
                 2 => {
-                    let mut trip = ship.voyage.take().unwrap();
+                    let mut trip = self.game.companies[c].ships[v.i].voyage.take().unwrap();
                     trip.upkeep += v.daily * row.elapsed;
                     self.game.companies[c].routes[ri].activity.moving += row.elapsed;
-                    v.lost = self.disaster_in_transit(c, ri, &mut ship, &trip, row.risks[0])
+                    v.lost = self.disaster_in_transit(c, ri, v.i, row.risks[0])
                         || self.raid_in_transit(
                             c,
                             ri,
-                            &route,
-                            &mut ship,
-                            &trip,
+                            v.i,
                             row.risks[1],
                             row.risks[2],
                             row.risks[3],
@@ -554,12 +550,15 @@ impl Engine {
                     trip.remaining = row.remaining;
                     if v.lost {
                         v.left = 0.0;
-                        ship.cargo.clear();
+                        self.game.companies[c].ships[v.i].cargo.clear();
                     } else if trip.remaining > 1e-9 {
-                        ship.voyage = Some(trip);
+                        self.game.companies[c].ships[v.i].voyage = Some(trip);
                     } else {
-                        ship.next = (ship.next + 1) % route.stops.len();
+                        let route = &self.game.companies[c].routes[ri];
+                        let stop_count = route.stops.len();
                         let rate = self.handling_rate(c, &route.mode);
+                        let ship = &mut self.game.companies[c].ships[v.i];
+                        ship.next = (ship.next + 1) % stop_count;
                         let duration =
                             ship.cargo.iter().map(|x| x.quantity).sum::<usize>() as f64 / rate;
                         if duration > 0.0 {
@@ -582,8 +581,8 @@ impl Engine {
                     }
                 }
             }
-            // Exclude this vessel's own reservation before depositing its cargo.
-            self.game.companies[c].ships[v.i] = ship.clone();
+            // Completed trips are already removed from the live vessel, so its
+            // reservation is excluded. Cargo stays in place until finish_sales.
             if let Some(trip) = delivery {
                 let deposit = !trip.direct_sale && self.warehouse(c, trip.to);
                 let mut room = if deposit {
@@ -595,26 +594,28 @@ impl Engine {
                 };
                 let (mut stored, mut sold) = (0.0, 0.0);
                 let mut lots = vec![];
-                for cargo in &ship.cargo {
-                    let q = room.min(cargo.quantity);
+                for i in 0..self.game.companies[c].ships[v.i].cargo.len() {
+                    let cargo = &self.game.companies[c].ships[v.i].cargo[i];
+                    let (good, quantity, cost) = (cargo.good, cargo.quantity, cargo.cost);
+                    let q = room.min(quantity);
                     room -= q;
-                    let value = cargo_basis(cargo.cost, cargo.quantity, q);
+                    let value = cargo_basis(cost, quantity, q);
                     stored += value;
-                    sold += cargo.cost - value;
+                    sold += cost - value;
                     if q > 0 {
                         self.put_stock(
                             c,
                             trip.to,
                             Cargo {
-                                good: cargo.good,
+                                good,
                                 quantity: q,
                                 cost: value,
                             },
                             Some(trip.from),
                         );
                     }
-                    if cargo.quantity > q {
-                        lots.push((cargo.good, cargo.quantity - q));
+                    if quantity > q {
+                        lots.push((good, quantity - q));
                     }
                 }
                 let city = trip.to;

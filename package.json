@@ -1,6 +1,6 @@
 {
   "name": "sails-and-flags",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -23,7 +23,9 @@
     "build:shared": "node scripts/build-shared-wasm.mjs",
     "build:all": "npm run build:wasm && npm run build:shared",
     "benchmark:shared": "node scripts/benchmark-shared.mjs",
-    "benchmark:shared-optimization": "node scripts/benchmark-shared-optimization.mjs"
+    "benchmark:shared-optimization": "node scripts/benchmark-shared-optimization.mjs",
+    "test:ledger-motion": "node --test tests/ledger-motion.test.js",
+    "benchmark:ledger-motion": "node scripts/benchmark-ledger-motion.mjs"
   },
   "engines": {
     "node": ">=22"

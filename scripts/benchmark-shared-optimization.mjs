@@ -9,10 +9,11 @@ import path from 'node:path';
 import {Session} from 'node:inspector/promises';
 import {installHost,liveWorkers,messages} from '../tests/helpers/shared-node-worker.js';
 import {fleetFixture} from '../tests/helpers/fleet-fixture.js';
+import {warehouseFixture} from '../tests/helpers/warehouse-fleet-fixture.js';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const days=+(process.env.BENCH_DAYS??360),trials=+(process.env.BENCH_TRIALS??3);
 const ships=+(process.env.BENCH_SHIPS_PER_ROUTE??10),input=process.env.BENCH_SAVE;
-const packages={before:'sites/shared-optimization-before',after:'assets/wasm/shared',profile:'sites/shared-profile'};
+const packages={before:process.env.BENCH_BEFORE??'sites/shared-optimization-before',after:'assets/wasm/shared',profile:'sites/shared-profile'};
 if(process.argv[2]==='--mode'){
  const label=process.argv[3], [version,mode]=label.split('/');
  installHost();let profiler;
@@ -21,7 +22,8 @@ if(process.argv[2]==='--mode'){
   await pkg.default({module_or_path:fs.readFileSync(dir+'/engine_bg.wasm')});
   await pkg.initThreadPool(4);pkg.threads_ready(4);
   const core=q=>{const r=JSON.parse(pkg.request(JSON.stringify(q)));if(!r.ok)throw Error(r.error);return r.value;};
-  const fixture=input?fs.readFileSync(input,'utf8'):fleetFixture(core,{routes:60,shipsPerRoute:ships});
+  const base=input?fs.readFileSync(input,'utf8'):fleetFixture(core,{routes:60,shipsPerRoute:ships});
+  const fixture=process.env.BENCH_WAREHOUSE==='1'?warehouseFixture(core,base):base;
   const reset=()=>{core({op:'load',text:fixture});core({op:'threadMode',mode:mode==='serial'?1:mode==='forced'?2:0});};
   reset();for(let i=0;i<30;i++)core({op:'command',command:{action:'tick',days:1}});reset();
   if(process.env.CPU_PROFILE){profiler=new Session();profiler.connect();await profiler.post('Profiler.enable');await profiler.post('Profiler.setSamplingInterval',{interval:100});await profiler.post('Profiler.start');}
@@ -42,7 +44,7 @@ if(process.argv[2]==='--mode'){
   if(result.saveHash!==rows[0].saveHash)throw Error('Before/after state mismatch: '+label);
  }
  console.log(JSON.stringify({date:new Date().toISOString(),cpu:os.cpus()[0].model,node:process.version,days,trials,
-  fixture:input?'provided day 1408 save':`60 routes / ${60*ships} player ships`,
+  fixture:(input?'provided day 1408 save':`60 routes / ${60*ships} player ships`)+(process.env.BENCH_WAREHOUSE==='1'?' / immediate warehouse policy':''),
   binaries:Object.fromEntries(['before','after'].map(k=>[k,hash(fs.readFileSync(packages[k]+'/engine_bg.wasm'))])),
   exactAllModesMatch:true,rows},null,2));
 }

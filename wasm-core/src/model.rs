@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 pub type Result<T> = std::result::Result<T, String>;
 pub fn ensure(ok: bool, msg: &str) -> Result<()> {
@@ -445,7 +445,7 @@ pub struct Company {
     pub route_escorts: Option<[u32;2]>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub route_prices: Option<[f64;2]>,
-    pub ledger: Vec<Ledger>,
+    pub ledger: VecDeque<Ledger>,
     pub totals: BTreeMap<String, f64>,
     pub history: Vec<[f64; 3]>,
     pub bankrupt: bool,
@@ -680,8 +680,12 @@ impl Engine {
         }
         let co = &mut self.game.companies[c];
         co.cash += value;
-        *co.totals.entry(category.into()).or_default() += value;
-        co.ledger.push(Ledger {
+        if let Some(total) = co.totals.get_mut(category) {
+            *total += value;
+        } else {
+            co.totals.insert(category.into(), 0.0 + value);
+        }
+        co.ledger.push_back(Ledger {
             day: self.game.day,
             category: category.into(),
             amount: value,
@@ -689,7 +693,7 @@ impl Engine {
             detail,
         });
         if co.ledger.len() > LEDGER_RETAINED {
-            co.ledger.remove(0);
+            co.ledger.pop_front();
         }
         if let Some(r) = co.routes.iter_mut().find(|r| Some(r.id) == route) {
             r.profit += value;
@@ -922,7 +926,7 @@ impl Company {
                 spent: 0.0,
                 month: 0,
             },
-            ledger: vec![],
+            ledger: VecDeque::new(),
             totals: BTreeMap::new(),
             history: vec![],
             bankrupt: false,
