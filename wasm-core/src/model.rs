@@ -149,6 +149,9 @@ pub struct Data {
     pub distances: Vec<Vec<Option<f64>>>,
 }
 pub struct Engine {
+    pub(crate) parallel_run: Option<crate::parallel::Run>,
+    pub(crate) parallel_token: u64,
+    pub(crate) day_fleets: Vec<(usize,Vec<crate::parallel::Schedule>)>,
     // Presentation-only cache, never part of a saved game.
     pub runtime_paths: Option<Vec<(String,Vec<usize>)>>,
     pub data: Data,
@@ -529,14 +532,23 @@ impl Engine {
             if leap { 366 } else { 365 },
         )
     }
-    pub fn new() -> Self {
-        let raw: Value = serde_json::from_str(include_str!("../data/world.json")).unwrap();
-        let data: Data = serde_json::from_value(raw.clone()).unwrap();
+    pub fn new() -> Self {Self::new_engine(true)}
+    pub(crate) fn new_planner() -> Self {Self::new_engine(false)}
+    fn new_engine(topology:bool) -> Self {
+        let (data,raw): (Data,Value) = if topology {
+            let raw:Value=serde_json::from_str(include_str!("../data/world.json")).unwrap();
+            (serde_json::from_value(raw.clone()).unwrap(),raw)
+        } else {
+            // Compute workers never render. Deserialize only typed game data,
+            // skipping the large drawing tree and its temporary Value clone.
+            (serde_json::from_str(include_str!("../data/world.json")).unwrap(),Value::Null)
+        };
         let game = Game::new(&data, 1700, true);
         Self {
-            land_connections: crate::land_connections::connections(&data),
+            land_connections: if topology{crate::land_connections::connections(&data)}else{BTreeMap::new()},
             runtime_paths: None,
-            water_connections: crate::water_connections::connections(&data),
+            parallel_run: None, parallel_token: 0, day_fleets:vec![],
+            water_connections: if topology{crate::water_connections::connections(&data)}else{BTreeMap::new()},
             water_access_index: data.water_access.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             waterway_index: data.waterways.iter().enumerate().map(|(i,w)| ((w.a.min(w.b),w.a.max(w.b)),i)).collect(),
             data,

@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Local simulation parallelism verification</title>
+<h1>Local simulation parallelism verification</h1>
+<pre id="result">Starting…</pre>
+<script type="module">
+import {bridge} from '../src/wasm-bridge.js';
+import {fleetFixture} from './helpers/fleet-fixture.js';
+const out=document.querySelector('#result');
+let worker;
+try{
+  if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Local-only test');
+  worker=new Worker('../src/game-worker.js',{type:'module'});
+  const pending=new Map();let serial=0;
+  worker.onmessage=({data})=>{
+    if(data.notice){out.textContent+='\n'+data.notice;return;}
+    const p=pending.get(data.id);pending.delete(data.id);
+    data.ok?p.resolve(data.value):p.reject(Error(data.error));
+  };
+  worker.onerror=e=>{for(const p of pending.values())p.reject(Error(e.message));pending.clear();};
+  const rpc=data=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});worker.postMessage({...data,id});});
+  await rpc({op:'boot',name:'Parallel verification'});
+  const core=bridge((await WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm'))).instance);
+  const fixture=fleetFixture(core,{routes:60,shipsPerRoute:10});
+  await rpc({op:'load',text:fixture});
+  const deadline=performance.now()+60000;
+  let status;
+  while(!(status=await rpc({op:'parallelStatus'})).workers){
+    if(status.disabled||performance.now()>deadline)throw Error('Worker pool unavailable: '+JSON.stringify(status));
+    out.textContent='Waiting for compute workers…';
+    await new Promise(r=>setTimeout(r,200));
+  }
+  out.textContent='Compute workers ready: '+status.workers;
+  for(let i=0;i<30;i++){
+    core({op:'command',command:{action:'tick',days:1}});
+    await rpc({op:'advance',ms:250,speed:4,running:true});
+    if(await rpc({op:'export'})!==core({op:'save'}))throw Error('State mismatch at day '+(i+1));
+    out.textContent=`Exact match: ${i+1}/30 days`;
+  }
+  await rpc({op:'save',slot:5});
+  await rpc({op:'loadSlot',slot:'manual-5'});
+  if(await rpc({op:'export'})!==core({op:'save'}))throw Error('Save round-trip mismatch');
+  status=await rpc({op:'parallelStatus'});
+  if(!status.rival||!status.schedules||!status.movement||!status.cities||!status.investments)throw Error('Expected compute jobs were not distributed');
+  out.textContent='PASS: 30 days exactly match synchronous Wasm; IndexedDB save round trip passed.\n'+JSON.stringify(status,null,2);
+}catch(e){out.textContent='FAIL: '+e.stack;}
+finally{worker?.terminate();}
+</script>

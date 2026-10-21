@@ -1,12 +1,12 @@
 {
   "name": "sails-and-flags",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test --test-concurrency=2 tests/runtime-performance.test.js tests/facility-management.test.js tests/bulk-fleet-sale.test.js tests/rival-solvency.test.js tests/rival-entry.test.js tests/license-return.test.js tests/trading-posts.test.js tests/land-connections.test.js tests/catalog-order-pairs.test.js tests/route-management.test.js tests/opening-roads.test.js tests/map-hit-test.test.js tests/bulk-escorts.test.js tests/investment-plan.test.js tests/bulk-investment.test.js tests/city-market-size.test.js tests/yangtze-waterways.test.js tests/water-connections.test.js tests/waterways.test.js tests/limited-waterways.test.js tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js tests/wasm-lists.test.js tests/port-expansion.test.js tests/europe-expansion.test.js tests/atlantic-expansion.test.js tests/siberian-expansion.test.js tests/french-caribbean.test.js tests/road-revisions.test.js tests/taranto.test.js tests/coastal-roads-korea.test.js tests/asia-expansion.test.js tests/asia-road-revisions.test.js tests/indochina.test.js tests/central-asia.test.js tests/silk-road.test.js tests/manchuria-korea.test.js tests/japan-expansion.test.js tests/trade-hubs.test.js tests/regional-links.test.js tests/caspian.test.js tests/american-interior.test.js tests/north-america.test.js tests/mexico-road-retirement.test.js tests/i18n.test.js tests/language-preference.test.js",
+    "test": "node --test --test-concurrency=2 tests/simulation-parallel.test.js tests/runtime-performance.test.js tests/facility-management.test.js tests/bulk-fleet-sale.test.js tests/rival-solvency.test.js tests/rival-entry.test.js tests/license-return.test.js tests/trading-posts.test.js tests/land-connections.test.js tests/catalog-order-pairs.test.js tests/route-management.test.js tests/opening-roads.test.js tests/map-hit-test.test.js tests/bulk-escorts.test.js tests/investment-plan.test.js tests/bulk-investment.test.js tests/city-market-size.test.js tests/yangtze-waterways.test.js tests/water-connections.test.js tests/waterways.test.js tests/limited-waterways.test.js tests/wasm-core.test.js tests/indexed-saves.test.js tests/wasm-boundary.test.js tests/wasm-lists.test.js tests/port-expansion.test.js tests/europe-expansion.test.js tests/atlantic-expansion.test.js tests/siberian-expansion.test.js tests/french-caribbean.test.js tests/road-revisions.test.js tests/taranto.test.js tests/coastal-roads-korea.test.js tests/asia-expansion.test.js tests/asia-road-revisions.test.js tests/indochina.test.js tests/central-asia.test.js tests/silk-road.test.js tests/manchuria-korea.test.js tests/japan-expansion.test.js tests/trade-hubs.test.js tests/regional-links.test.js tests/caspian.test.js tests/american-interior.test.js tests/north-america.test.js tests/mexico-road-retirement.test.js tests/i18n.test.js tests/language-preference.test.js",
     "build:wasm": "node scripts/build-wasm.mjs",
     "licenses:wasm": "node scripts/collect-rust-licenses.mjs",
     "benchmark:wasm": "node scripts/benchmark-wasm.mjs",
@@ -16,7 +16,10 @@
     "benchmark:scale": "node scripts/benchmark-scale.mjs",
     "build:translations": "node scripts/build-translations.mjs",
     "build:legal": "node scripts/build-legal.mjs",
-    "benchmark:runtime": "node scripts/benchmark-runtime.mjs"
+    "benchmark:runtime": "node scripts/benchmark-runtime.mjs",
+    "benchmark:parallel": "node scripts/benchmark-parallel.mjs",
+    "benchmark:city-phases": "node scripts/benchmark-city-phases.mjs",
+    "benchmark:intents": "node scripts/benchmark-intents.mjs"
   },
   "engines": {
     "node": ">=22"

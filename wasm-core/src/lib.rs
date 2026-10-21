@@ -1,4 +1,6 @@
 mod accounts;
+mod phase_jobs;
+mod parallel;
 mod posts;
 mod facility_management;
 mod bulk_investment;
@@ -7,6 +9,7 @@ mod route_management;
 mod route_pairs;
 mod commands;
 mod loading;
+mod load_batch;
 mod model;
 mod movement;
 mod rivals;
@@ -74,7 +77,14 @@ impl Engine {
         Ok(refunds)
     }
     pub fn dispatch(&mut self, v: Value) -> Result<Value> {
+        if self.parallel_run.is_some() && v["op"]!="parallelResume" && v["op"]!="parallelProbe" {
+            return Err("Simulation in progress".into());
+        }
         match v["op"].as_str().unwrap_or("") {
+            "planningTopology" => Ok(self.planning_topology()),
+            "parallelBegin" => self.parallel_begin(&v),
+            "parallelResume" => self.parallel_resume(&v),
+            "parallelProbe" => self.parallel_probe(&v),
             "clock" => Ok(json!({"day":self.game.day,"fraction":self.game.fraction})),
             "saveInfo" => Ok(json!({"day":self.game.day,"name":self.game.companies[0].name})),
             "runtimeView" => {
@@ -292,6 +302,15 @@ pub extern "C" fn allocate(len: usize) -> *mut u8 {
 /// `ptr` must be a live allocation returned by allocate(len), exactly once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn execute(ptr: *mut u8, len: usize) -> *const u8 {
+    unsafe { execute_impl(ptr,len,false) }
+}
+/// # Safety
+/// Same allocation contract as execute; for isolated read-only planning workers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn compute_execute(ptr:*mut u8,len:usize)->*const u8 {
+    unsafe { execute_impl(ptr,len,true) }
+}
+unsafe fn execute_impl(ptr:*mut u8,len:usize,compute:bool)->*const u8 {
     let bytes = unsafe { Vec::from_raw_parts(ptr, len, len) };
     let result = serde_json::from_slice::<Value>(&bytes)
         .map_err(|e| e.to_string())
@@ -299,11 +318,11 @@ pub unsafe extern "C" fn execute(ptr: *mut u8, len: usize) -> *const u8 {
             ENGINE.with(|slot| {
                 let mut slot = slot.borrow_mut();
                 let engine = slot.get_or_insert_with(|| {
-                    let mut e = Engine::new();
-                    e.initialize(1700, true);
+                    let mut e = if compute{Engine::new_planner()}else{Engine::new()};
+                    if !compute{e.initialize(1700, true);}
                     e
                 });
-                engine.dispatch(v)
+                if compute {engine.compute_planning(&v)} else {engine.dispatch(v)}
             })
         });
     let response = match result {

@@ -1,0 +1,3157 @@
+{
+  "cases": [
+    {
+      "case": "provided",
+      "summary": {
+        "before-serial": {
+          "medianMeanMs": 4.017874999999872,
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 925,
+            "playerCash": 324872.4930212987,
+            "playerSales": 4602400.522061477
+          }
+        },
+        "phases-serial": {
+          "medianMeanMs": 3.980997777777844,
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        "phases-2-workers": {
+          "medianMeanMs": 15.908340555555656,
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        "phases-4-workers": {
+          "medianMeanMs": 16.59066722222237,
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        "phases-4-adaptive": {
+          "medianMeanMs": 4.176828333333914,
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        }
+      },
+      "date": "2026-10-21",
+      "node": "v24.15.0",
+      "baselineSha256": "5a0d3b3def242afa5fb52577f22e0a9a0f4838498a16b53a17d3ce0c222df7e7",
+      "currentSha256": "0df381ef82e20cad1772826ea145627461ea5198a21bdc62f0ed8097b97122c8",
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 180,
+      "trials": 3,
+      "fixture": "provided-save",
+      "notes": [
+        "Startup and 30 warmup days excluded; mode order rotated between trials.",
+        "New-rule serial/parallel states must match exactly. Old/new trading rules may produce different results."
+      ],
+      "exactPhaseStateMatch": true,
+      "oldAndNewStateMatch": false,
+      "rows": [
+        {
+          "trial": 0,
+          "mode": "before-serial",
+          "meanMs": 4.031773888888908,
+          "p95Ms": 4.292199999999866,
+          "maxMs": 34.40859999999975,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 925,
+            "playerCash": 324872.4930212987,
+            "playerSales": 4602400.522061477
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-serial",
+          "meanMs": 4.78235944444447,
+          "p95Ms": 7.644000000000233,
+          "maxMs": 45.89720000000307,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-2-workers",
+          "meanMs": 15.944328333333438,
+          "p95Ms": 21.81920000000173,
+          "maxMs": 43.6872000000003,
+          "stats": {
+            "workers": 2,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 489.14419999997335,
+              "movement": 543.2503000000033,
+              "investments": 72.99089999998614
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 104.80669999998281,
+              "movement": 97.3051999999916,
+              "investments": 13.357099999993807
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-workers",
+          "meanMs": 16.59964833333312,
+          "p95Ms": 22.27429999999731,
+          "maxMs": 46.15220000000045,
+          "stats": {
+            "workers": 4,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 540.2994000000363,
+              "movement": 524.6505000000252,
+              "investments": 80.2397000000019
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 74.28610000001572,
+              "movement": 72.5724000000082,
+              "investments": 10.914300000004005
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-adaptive",
+          "meanMs": 4.20116222222237,
+          "p95Ms": 9.016499999997905,
+          "maxMs": 32.92209999999977,
+          "stats": {
+            "workers": 4,
+            "batches": 19,
+            "schedules": 0,
+            "rival": 1288,
+            "movement": 3344,
+            "cities": 72,
+            "investments": 84,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 6.101500000000669,
+              "movement": 8.008900000000722,
+              "investments": 1.8103999999984808,
+              "rival": 13.924099999996542
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 5152,
+              "movement": 3344,
+              "cities": 7040,
+              "investments": 3272
+            },
+            "samples": {
+              "cities": {
+                "weight": 1760,
+                "localMs": 0.06389999999737483,
+                "parallelMs": 2.263599999998405,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 836,
+                "localMs": 0.20969999999942956,
+                "parallelMs": 1.870200000001205,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 818,
+                "localMs": 0.01659999999901629,
+                "parallelMs": 0.2727999999988242,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 1288,
+                "localMs": 0.39140000000043074,
+                "parallelMs": 3.053300000003219,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 9,
+            "schedules": 0,
+            "rival": 644,
+            "movement": 1672,
+            "cities": 19,
+            "investments": 42,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 2.1661000000021886,
+              "movement": 3.8044000000008964,
+              "investments": 0.9739999999983411,
+              "rival": 7.126000000000204
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-serial",
+          "meanMs": 3.980997777777844,
+          "p95Ms": 4.335999999999331,
+          "maxMs": 34.17209999999977,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-2-workers",
+          "meanMs": 15.615839444444564,
+          "p95Ms": 18.202400000001944,
+          "maxMs": 43.91509999999835,
+          "stats": {
+            "workers": 2,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 446.1280000000188,
+              "movement": 507.11880000006204,
+              "investments": 66.91860000006272
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 61.65419999998994,
+              "movement": 66.95189999999275,
+              "investments": 9.194000000006781
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-workers",
+          "meanMs": 16.59066722222237,
+          "p95Ms": 19.193200000001525,
+          "maxMs": 44.02130000000034,
+          "stats": {
+            "workers": 4,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 542.5877000000619,
+              "movement": 515.7993999999744,
+              "investments": 87.13600000005681
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 72.29470000001311,
+              "movement": 70.56969999997091,
+              "investments": 12.685699999987264
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-adaptive",
+          "meanMs": 4.176828333333914,
+          "p95Ms": 7.849099999999453,
+          "maxMs": 33.89530000000377,
+          "stats": {
+            "workers": 4,
+            "batches": 19,
+            "schedules": 0,
+            "rival": 1288,
+            "movement": 3344,
+            "cities": 72,
+            "investments": 84,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 6.147799999998824,
+              "movement": 8.58020000000397,
+              "investments": 2.800100000000384,
+              "rival": 13.2528999999995
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 5152,
+              "movement": 3344,
+              "cities": 7040,
+              "investments": 3272
+            },
+            "samples": {
+              "cities": {
+                "weight": 1760,
+                "localMs": 0.05899999999382999,
+                "parallelMs": 2.271500000002561,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 836,
+                "localMs": 0.19389999999839347,
+                "parallelMs": 2.0507999999972526,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 818,
+                "localMs": 0.028299999998125713,
+                "parallelMs": 0.8849000000045635,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 1288,
+                "localMs": 0.4245999999984633,
+                "parallelMs": 3.441500000000815,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 9,
+            "schedules": 0,
+            "rival": 644,
+            "movement": 1672,
+            "cities": 19,
+            "investments": 42,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 1.562100000002829,
+              "movement": 4.055500000002212,
+              "investments": 1.350800000000163,
+              "rival": 6.467799999998533
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "before-serial",
+          "meanMs": 4.014185555555539,
+          "p95Ms": 5.225900000004913,
+          "maxMs": 33.22119999999995,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 925,
+            "playerCash": 324872.4930212987,
+            "playerSales": 4602400.522061477
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-2-workers",
+          "meanMs": 15.908340555555656,
+          "p95Ms": 21.27850000000035,
+          "maxMs": 48.0708999999988,
+          "stats": {
+            "workers": 2,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 440.76180000008753,
+              "movement": 536.517199999973,
+              "investments": 68.6300999999512
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 59.66540000001987,
+              "movement": 69.05649999996967,
+              "investments": 11.275399999976798
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-workers",
+          "meanMs": 16.547942222222144,
+          "p95Ms": 19.535900000002584,
+          "maxMs": 46.64089999999851,
+          "stats": {
+            "workers": 4,
+            "batches": 1369,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 187831,
+            "cities": 10096,
+            "investments": 4410,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 530.4068000001207,
+              "movement": 507.64089999998396,
+              "investments": 78.75600000005215
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 193,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 25653,
+            "cities": 1443,
+            "investments": 630,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 61.421500000062224,
+              "movement": 66.44869999997172,
+              "investments": 8.458500000022468
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-adaptive",
+          "meanMs": 4.1477650000001125,
+          "p95Ms": 4.124000000003434,
+          "maxMs": 35.78889999999956,
+          "stats": {
+            "workers": 4,
+            "batches": 19,
+            "schedules": 0,
+            "rival": 1288,
+            "movement": 3344,
+            "cities": 72,
+            "investments": 84,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 6.147299999996903,
+              "movement": 8.249700000007579,
+              "investments": 1.5075999999971827,
+              "rival": 13.675199999997858
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 5152,
+              "movement": 3344,
+              "cities": 7040,
+              "investments": 3272
+            },
+            "samples": {
+              "cities": {
+                "weight": 1760,
+                "localMs": 0.062300000005052425,
+                "parallelMs": 2.614400000005844,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 836,
+                "localMs": 0.1886000000013155,
+                "parallelMs": 1.8617000000012922,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 818,
+                "localMs": 0.0239000000001397,
+                "parallelMs": 0.22880000000441214,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 1288,
+                "localMs": 0.39839999999821885,
+                "parallelMs": 2.8972999999969034,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 9,
+            "schedules": 0,
+            "rival": 644,
+            "movement": 1672,
+            "cities": 19,
+            "investments": 42,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "cities": 1.4874999999956344,
+              "movement": 4.032600000005914,
+              "investments": 0.6128999999928055,
+              "rival": 6.81079999999929
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "before-serial",
+          "meanMs": 4.017874999999872,
+          "p95Ms": 5.667399999998452,
+          "maxMs": 33.86160000000382,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 925,
+            "playerCash": 324872.4930212987,
+            "playerSales": 4602400.522061477
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-serial",
+          "meanMs": 3.9804933333337735,
+          "p95Ms": 4.207699999999022,
+          "maxMs": 34.954100000002654,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 1588,
+            "companies": 21,
+            "ships": 928,
+            "playerCash": 92976.96604241397,
+            "playerSales": 4163029.588429767
+          }
+        }
+      ]
+    },
+    {
+      "case": "600",
+      "summary": {
+        "before-serial": {
+          "medianMeanMs": 2.2356588888889544,
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 682,
+            "playerCash": 9998108848.466715,
+            "playerSales": 1253738.99841559
+          }
+        },
+        "phases-serial": {
+          "medianMeanMs": 1.7728350000000621,
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        "phases-2-workers": {
+          "medianMeanMs": 9.059494444444418,
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        "phases-4-workers": {
+          "medianMeanMs": 9.316322222222496,
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        "phases-4-adaptive": {
+          "medianMeanMs": 1.9680394444444471,
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        }
+      },
+      "date": "2026-10-21",
+      "node": "v24.15.0",
+      "baselineSha256": "5a0d3b3def242afa5fb52577f22e0a9a0f4838498a16b53a17d3ce0c222df7e7",
+      "currentSha256": "0df381ef82e20cad1772826ea145627461ea5198a21bdc62f0ed8097b97122c8",
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 180,
+      "trials": 3,
+      "fixture": "60 routes / 600 ships",
+      "notes": [
+        "Startup and 30 warmup days excluded; mode order rotated between trials.",
+        "New-rule serial/parallel states must match exactly. Old/new trading rules may produce different results."
+      ],
+      "exactPhaseStateMatch": true,
+      "oldAndNewStateMatch": false,
+      "rows": [
+        {
+          "trial": 0,
+          "mode": "before-serial",
+          "meanMs": 2.340945000000046,
+          "p95Ms": 2.8221000000003187,
+          "maxMs": 21.640400000000227,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 682,
+            "playerCash": 9998108848.466715,
+            "playerSales": 1253738.99841559
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-serial",
+          "meanMs": 1.9218405555554556,
+          "p95Ms": 2.1810000000004948,
+          "maxMs": 25.868099999999686,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-2-workers",
+          "meanMs": 9.22337111111115,
+          "p95Ms": 13.69629999999961,
+          "maxMs": 34.216700000000856,
+          "stats": {
+            "workers": 2,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 420.1237000000074,
+              "cities": 257.43639999998777,
+              "investments": 48.30639999996856
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 67.06280000001061,
+              "cities": 30.2925000000032,
+              "investments": 13.850899999993999
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-workers",
+          "meanMs": 9.316322222222496,
+          "p95Ms": 14.439500000000407,
+          "maxMs": 33.610499999998865,
+          "stats": {
+            "workers": 4,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 397.9578999999867,
+              "cities": 240.43359999998574,
+              "investments": 44.03500000002168
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 53.97380000000339,
+              "cities": 24.50289999999586,
+              "investments": 6.0275000000074215
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-adaptive",
+          "meanMs": 1.9772261111111018,
+          "p95Ms": 1.880300000000716,
+          "maxMs": 38.83169999999882,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 2456,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 8.256700000005367,
+              "rival": 14.000899999999092,
+              "movement": 6.230099999997037,
+              "cities": 16.993500000004133,
+              "investments": 1.4748000000035972
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 2400,
+              "rival": 1288,
+              "movement": 2456,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 600,
+                "localMs": 0.10829999999987194,
+                "parallelMs": 1.8227000000006228,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.3679000000011001,
+                "parallelMs": 4.515800000001036,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 614,
+                "localMs": 0.13520000000062282,
+                "parallelMs": 1.1361000000033528,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.05830000000059954,
+                "parallelMs": 4.3584999999984575,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.012200000001030276,
+                "parallelMs": 0.12780000000202563,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 1228,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 4.4386000000013155,
+              "rival": 6.29859999999826,
+              "movement": 3.7704999999987194,
+              "cities": 8.429400000000896,
+              "investments": 1.0314000000034866
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-serial",
+          "meanMs": 1.7728350000000621,
+          "p95Ms": 1.700700000001234,
+          "maxMs": 26.51599999999962,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-2-workers",
+          "meanMs": 9.059494444444418,
+          "p95Ms": 13.506600000000617,
+          "maxMs": 32.705800000003364,
+          "stats": {
+            "workers": 2,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 411.80410000000484,
+              "cities": 244.96529999998165,
+              "investments": 37.52960000001622
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 58.399800000013784,
+              "cities": 24.570799999990413,
+              "investments": 5.73080000000482
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-workers",
+          "meanMs": 9.204545555555624,
+          "p95Ms": 13.036800000001676,
+          "maxMs": 33.23159999999916,
+          "stats": {
+            "workers": 4,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 396.51200000000244,
+              "cities": 238.51650000003065,
+              "investments": 38.61219999999594
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 51.9062999999951,
+              "cities": 24.61300000000483,
+              "investments": 4.579800000003161
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-adaptive",
+          "meanMs": 1.9680394444444471,
+          "p95Ms": 1.8544000000001688,
+          "maxMs": 41.282100000000355,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 2456,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 9.004899999999907,
+              "rival": 13.914299999996729,
+              "movement": 6.566599999998289,
+              "cities": 16.858500000002095,
+              "investments": 1.6758000000008906
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 2400,
+              "rival": 1288,
+              "movement": 2456,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 600,
+                "localMs": 0.13580000000001746,
+                "parallelMs": 1.9069999999992433,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.3813000000009197,
+                "parallelMs": 4.086999999999534,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 614,
+                "localMs": 0.12450000000171713,
+                "parallelMs": 1.7416999999986729,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.05800000000090222,
+                "parallelMs": 4.169499999999971,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.007499999999708962,
+                "parallelMs": 0.3709000000017113,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 1228,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 4.344900000000052,
+              "rival": 6.236199999999371,
+              "movement": 2.972299999997631,
+              "cities": 8.587000000003172,
+              "investments": 0.8210000000035507
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "before-serial",
+          "meanMs": 2.171590555555566,
+          "p95Ms": 2.121999999999389,
+          "maxMs": 19.67829999999958,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 682,
+            "playerCash": 9998108848.466715,
+            "playerSales": 1253738.99841559
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-2-workers",
+          "meanMs": 8.84418388888872,
+          "p95Ms": 14.149399999998423,
+          "maxMs": 34.05409999999756,
+          "stats": {
+            "workers": 2,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 398.8571000000047,
+              "cities": 235.53290000002016,
+              "investments": 36.34750000002532
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 74.80370000000039,
+              "cities": 23.61710000000312,
+              "investments": 4.8708000000005995
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-workers",
+          "meanMs": 9.558860555555738,
+          "p95Ms": 14.246499999997468,
+          "maxMs": 34.93080000000191,
+          "stats": {
+            "workers": 4,
+            "batches": 888,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 134461,
+            "cities": 3387,
+            "investments": 3150,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 400.84300000000803,
+              "cities": 251.68219999999928,
+              "investments": 43.42930000002525
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 105,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 18420,
+            "cities": 214,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 61.25369999999748,
+              "cities": 31.875300000006973,
+              "investments": 7.702200000006997
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-adaptive",
+          "meanMs": 1.9571388888890295,
+          "p95Ms": 1.6247999999977765,
+          "maxMs": 40.00430000000051,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 2456,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 8.855600000009872,
+              "rival": 14.316099999996368,
+              "movement": 6.595000000001164,
+              "cities": 16.941099999996368,
+              "investments": 1.2983000000022002
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 2400,
+              "rival": 1288,
+              "movement": 2456,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 600,
+                "localMs": 0.10599999999976717,
+                "parallelMs": 1.9556000000011409,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.36819999999715947,
+                "parallelMs": 3.793599999997241,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 614,
+                "localMs": 0.12800000000424916,
+                "parallelMs": 1.6438000000052853,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.05829999999696156,
+                "parallelMs": 4.0164999999979045,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.007300000004761387,
+                "parallelMs": 0.2404000000024098,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 1228,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 4.3796000000002095,
+              "rival": 6.919099999999162,
+              "movement": 3.126800000001822,
+              "cities": 8.592899999999645,
+              "investments": 0.7604000000028464
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "before-serial",
+          "meanMs": 2.2356588888889544,
+          "p95Ms": 2.503900000003341,
+          "maxMs": 19.918299999997544,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 682,
+            "playerCash": 9998108848.466715,
+            "playerSales": 1253738.99841559
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-serial",
+          "meanMs": 1.7585522222226346,
+          "p95Ms": 1.5084999999962747,
+          "maxMs": 25.42160000000149,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 674,
+            "playerCash": 9998068732.356245,
+            "playerSales": 2331553.1605507843
+          }
+        }
+      ]
+    },
+    {
+      "case": "2400",
+      "summary": {
+        "before-serial": {
+          "medianMeanMs": 11.171471111111007,
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 2477,
+            "playerCash": 9995296362.310545,
+            "playerSales": 1400387.792626894
+          }
+        },
+        "phases-serial": {
+          "medianMeanMs": 3.2567033333330375,
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        "phases-2-workers": {
+          "medianMeanMs": 29.78732722222234,
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        "phases-4-workers": {
+          "medianMeanMs": 27.63583111111099,
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        "phases-4-adaptive": {
+          "medianMeanMs": 3.5387072222223246,
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        }
+      },
+      "date": "2026-10-21",
+      "node": "v24.15.0",
+      "baselineSha256": "5a0d3b3def242afa5fb52577f22e0a9a0f4838498a16b53a17d3ce0c222df7e7",
+      "currentSha256": "0df381ef82e20cad1772826ea145627461ea5198a21bdc62f0ed8097b97122c8",
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 180,
+      "trials": 3,
+      "fixture": "60 routes / 2400 ships",
+      "notes": [
+        "Startup and 30 warmup days excluded; mode order rotated between trials.",
+        "New-rule serial/parallel states must match exactly. Old/new trading rules may produce different results."
+      ],
+      "exactPhaseStateMatch": true,
+      "oldAndNewStateMatch": false,
+      "rows": [
+        {
+          "trial": 0,
+          "mode": "before-serial",
+          "meanMs": 11.173454444444541,
+          "p95Ms": 12.800500000001193,
+          "maxMs": 30.824099999999817,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 2477,
+            "playerCash": 9995296362.310545,
+            "playerSales": 1400387.792626894
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-serial",
+          "meanMs": 3.397569999999885,
+          "p95Ms": 4.243500000000495,
+          "maxMs": 23.844199999999546,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-2-workers",
+          "meanMs": 29.78732722222234,
+          "p95Ms": 34.52320000000327,
+          "maxMs": 53.91420000000289,
+          "stats": {
+            "workers": 2,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1795.7561999999925,
+              "cities": 794.4046000000126,
+              "investments": 57.351099999956205
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 248.54169999998703,
+              "cities": 96.51850000001286,
+              "investments": 16.33899999998539
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-workers",
+          "meanMs": 27.390573888888785,
+          "p95Ms": 31.430099999997765,
+          "maxMs": 48.159300000002986,
+          "stats": {
+            "workers": 4,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1252.6453000000693,
+              "cities": 761.0169999999125,
+              "investments": 50.78330000000278
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 158.63640000001033,
+              "cities": 88.00739999999132,
+              "investments": 6.760100000014063
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 0,
+          "mode": "phases-4-adaptive",
+          "meanMs": 3.5387072222223246,
+          "p95Ms": 3.3487999999997555,
+          "maxMs": 62.70679999999993,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 9656,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 22.294199999996636,
+              "rival": 13.785900000002584,
+              "movement": 20.288399999997637,
+              "cities": 16.98880000000645,
+              "investments": 1.7831999999907566
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9600,
+              "rival": 1288,
+              "movement": 9656,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 2400,
+                "localMs": 0.3635999999969499,
+                "parallelMs": 5.622400000000198,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.41999999999825377,
+                "parallelMs": 2.5619000000006054,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 2414,
+                "localMs": 0.466999999996915,
+                "parallelMs": 5.820400000004156,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.06650000000081491,
+                "parallelMs": 4.04139999999461,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.007799999999406282,
+                "parallelMs": 0.5573000000003958,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 4828,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 9.687599999997474,
+              "rival": 8.103500000004715,
+              "movement": 9.553800000001502,
+              "cities": 8.692699999999604,
+              "investments": 0.8725999999951455
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-serial",
+          "meanMs": 3.2567033333330375,
+          "p95Ms": 3.133799999995972,
+          "maxMs": 22.779899999994086,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-2-workers",
+          "meanMs": 27.408397222222547,
+          "p95Ms": 33.76510000000417,
+          "maxMs": 48.27730000000156,
+          "stats": {
+            "workers": 2,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1439.1512000000293,
+              "cities": 758.9171999999453,
+              "investments": 42.35360000003129
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 220.31560000002355,
+              "cities": 88.90500000000611,
+              "investments": 8.412600000025122
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-workers",
+          "meanMs": 28.479002777777794,
+          "p95Ms": 38.521600000000035,
+          "maxMs": 62.33340000000317,
+          "stats": {
+            "workers": 4,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1232.4823999999935,
+              "cities": 768.2656000000861,
+              "investments": 44.463799999983166
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 164.33490000002348,
+              "cities": 87.64980000002834,
+              "investments": 7.285299999988638
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "phases-4-adaptive",
+          "meanMs": 5.838797777777775,
+          "p95Ms": 7.418600000004517,
+          "maxMs": 93.53639999999723,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 9656,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 25.303300000014133,
+              "rival": 26.802999999999884,
+              "movement": 38.01029999999446,
+              "cities": 48.33540000001085,
+              "investments": 4.70070000000851
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9600,
+              "rival": 1288,
+              "movement": 9656,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 2400,
+                "localMs": 0.4657000000006519,
+                "parallelMs": 5.989299999993818,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.5048000000024331,
+                "parallelMs": 4.071300000003248,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 2414,
+                "localMs": 0.6838999999963562,
+                "parallelMs": 7.915099999998347,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.1859000000040396,
+                "parallelMs": 8.267999999996391,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.024299999997310806,
+                "parallelMs": 0.27590000000054715,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 4828,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 11.787300000003597,
+              "rival": 18.4429999999993,
+              "movement": 23.121800000000803,
+              "cities": 31.372400000007474,
+              "investments": 3.9422000000049593
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 1,
+          "mode": "before-serial",
+          "meanMs": 11.171471111111007,
+          "p95Ms": 12.220200000003388,
+          "maxMs": 30.691200000001118,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 2477,
+            "playerCash": 9995296362.310545,
+            "playerSales": 1400387.792626894
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-2-workers",
+          "meanMs": 33.20113777777826,
+          "p95Ms": 48.383600000001024,
+          "maxMs": 69.11849999999686,
+          "stats": {
+            "workers": 2,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1900.176399999982,
+              "cities": 870.0606999999873,
+              "investments": 50.334499999982654
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 2,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 244.64569999999367,
+              "cities": 95.51569999998901,
+              "investments": 7.677999999999884
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-workers",
+          "meanMs": 27.63583111111099,
+          "p95Ms": 31.65639999999985,
+          "maxMs": 49.63779999999679,
+          "stats": {
+            "workers": 4,
+            "batches": 1131,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 527909,
+            "cities": 8385,
+            "investments": 3231,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 1269.6047999999573,
+              "cities": 765.4762000000555,
+              "investments": 53.154199999982666
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 125,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 72840,
+            "cities": 615,
+            "investments": 450,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "movement": 155.69010000000708,
+              "cities": 87.015500000045,
+              "investments": 8.223000000005413
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9007199254740991,
+              "rival": 9007199254740991,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-4-adaptive",
+          "meanMs": 3.5075972222232346,
+          "p95Ms": 3.621899999998277,
+          "maxMs": 57.44679999999062,
+          "stats": {
+            "workers": 4,
+            "batches": 20,
+            "schedules": 240,
+            "rival": 1288,
+            "movement": 9656,
+            "cities": 20,
+            "investments": 60,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 20.081500000000233,
+              "rival": 13.213100000022678,
+              "movement": 19.66809999999532,
+              "cities": 17.162300000010873,
+              "investments": 1.3013999999966472
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 9600,
+              "rival": 1288,
+              "movement": 9656,
+              "cities": 9600,
+              "investments": 1740
+            },
+            "samples": {
+              "schedules": {
+                "weight": 2400,
+                "localMs": 0.43980000000738073,
+                "parallelMs": 4.573300000003655,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.4048999999940861,
+                "parallelMs": 3.0951999999961117,
+                "batches": 0
+              },
+              "movement": {
+                "weight": 2414,
+                "localMs": 0.4706999999907566,
+                "parallelMs": 4.345999999990454,
+                "batches": 0
+              },
+              "cities": {
+                "weight": 2400,
+                "localMs": 0.05869999999413267,
+                "parallelMs": 4.1098000000056345,
+                "batches": 0
+              },
+              "investments": {
+                "weight": 435,
+                "localMs": 0.013500000000931323,
+                "parallelMs": 0.17170000000623986,
+                "batches": 0
+              }
+            }
+          },
+          "warmupStats": {
+            "workers": 4,
+            "batches": 10,
+            "schedules": 120,
+            "rival": 644,
+            "movement": 4828,
+            "cities": 10,
+            "investments": 30,
+            "fallbacks": 0,
+            "roundtripMs": {
+              "schedules": 10.17500000000291,
+              "rival": 7.479900000005728,
+              "movement": 10.919200000003912,
+              "cities": 8.555800000016461,
+              "investments": 0.8647999999957392
+            },
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "before-serial",
+          "meanMs": 11.099023888889255,
+          "p95Ms": 12.14539999999397,
+          "maxMs": 30.39429999999993,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 15,
+            "ships": 2477,
+            "playerCash": 9995296362.310545,
+            "playerSales": 1400387.792626894
+          }
+        },
+        {
+          "trial": 2,
+          "mode": "phases-serial",
+          "meanMs": 3.2498405555553393,
+          "p95Ms": 3.599499999996624,
+          "maxMs": 23.101799999989453,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "warmupStats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "movement": 0,
+            "cities": 0,
+            "investments": 0,
+            "fallbacks": 0,
+            "roundtripMs": {},
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0,
+              "movement": 0,
+              "cities": 0,
+              "investments": 0
+            },
+            "samples": {}
+          },
+          "final": {
+            "day": 180,
+            "companies": 16,
+            "ships": 2464,
+            "playerCash": 9995084186.31989,
+            "playerSales": 3248245.755891493
+          }
+        }
+      ]
+    }
+  ]
+}

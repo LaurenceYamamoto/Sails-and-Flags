@@ -1,0 +1,236 @@
+{
+  "date": "2026-10-21",
+  "notes": [
+    "Local Node/Wasm measurements; no public site tested.",
+    "Worker initialization excluded. Sequential runs in fixed 0/2/4 order; JIT warmup and run variance prevent attributing small mean differences to parallel speedup.",
+    "Adaptive modes rejected parallel execution after calibration on these workloads.",
+    "Provided save not included and not modified."
+  ],
+  "measurements": {
+    "always_parallel_provided": {
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 360,
+      "fixture": "provided-save",
+      "exactStateMatch": true,
+      "runs": [
+        {
+          "workers": 0,
+          "meanMs": 4.254686666666675,
+          "p95Ms": 5.670500000000175,
+          "maxMs": 39.94130000000041,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "fallbacks": 0,
+            "disabled": false
+          }
+        },
+        {
+          "workers": 2,
+          "meanMs": 6.811520555555644,
+          "p95Ms": 4.735199999999168,
+          "maxMs": 116.42299999999886,
+          "stats": {
+            "workers": 2,
+            "batches": 242,
+            "schedules": 0,
+            "rival": 97763,
+            "fallbacks": 0,
+            "disabled": false
+          }
+        },
+        {
+          "workers": 4,
+          "meanMs": 7.612722222222278,
+          "p95Ms": 4.676199999999881,
+          "maxMs": 143.4447,
+          "stats": {
+            "workers": 4,
+            "batches": 242,
+            "schedules": 0,
+            "rival": 97763,
+            "fallbacks": 0,
+            "disabled": false
+          }
+        }
+      ]
+    },
+    "adaptive_provided": {
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 360,
+      "fixture": "provided-save",
+      "adaptive": true,
+      "exactStateMatch": true,
+      "runs": [
+        {
+          "workers": 0,
+          "meanMs": 4.25011027777775,
+          "p95Ms": 5.8004000000000815,
+          "maxMs": 39.73739999999998,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0
+            },
+            "samples": {}
+          }
+        },
+        {
+          "workers": 2,
+          "meanMs": 4.080068055555628,
+          "p95Ms": 4.360599999999977,
+          "maxMs": 33.32600000000093,
+          "stats": {
+            "workers": 2,
+            "batches": 2,
+            "schedules": 0,
+            "rival": 644,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 5152
+            },
+            "samples": {
+              "rival": {
+                "weight": 1288,
+                "localMs": 0.8180000000011205,
+                "parallelMs": 2.2541000000001077,
+                "batches": 0
+              }
+            }
+          }
+        },
+        {
+          "workers": 4,
+          "meanMs": 4.040438333333385,
+          "p95Ms": 4.346199999999953,
+          "maxMs": 33.89209999999912,
+          "stats": {
+            "workers": 4,
+            "batches": 2,
+            "schedules": 0,
+            "rival": 644,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 5152
+            },
+            "samples": {
+              "rival": {
+                "weight": 1288,
+                "localMs": 0.4150000000008731,
+                "parallelMs": 3.153199999998833,
+                "batches": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "adaptive_600_vessels": {
+      "cpu": "AMD Ryzen AI 5 PRO 340 w/ Radeon 840M          ",
+      "logicalCpus": 12,
+      "days": 180,
+      "fixture": "60 routes / 600 ships",
+      "adaptive": true,
+      "exactStateMatch": true,
+      "runs": [
+        {
+          "workers": 0,
+          "meanMs": 2.791384999999946,
+          "p95Ms": 3.0671999999995023,
+          "maxMs": 28.632300000000214,
+          "stats": {
+            "workers": 0,
+            "batches": 0,
+            "schedules": 0,
+            "rival": 0,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 0,
+              "rival": 0
+            },
+            "samples": {}
+          }
+        },
+        {
+          "workers": 2,
+          "meanMs": 2.5157233333333653,
+          "p95Ms": 2.790899999999965,
+          "maxMs": 26.683099999998376,
+          "stats": {
+            "workers": 2,
+            "batches": 4,
+            "schedules": 120,
+            "rival": 644,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 2400,
+              "rival": 1288
+            },
+            "samples": {
+              "schedules": {
+                "weight": 600,
+                "localMs": 0.267600000001039,
+                "parallelMs": 2.1502999999993335,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.6328999999986991,
+                "parallelMs": 2.9107999999996537,
+                "batches": 0
+              }
+            }
+          }
+        },
+        {
+          "workers": 4,
+          "meanMs": 2.4787399999999655,
+          "p95Ms": 2.4673000000002503,
+          "maxMs": 27.906199999999444,
+          "stats": {
+            "workers": 4,
+            "batches": 4,
+            "schedules": 120,
+            "rival": 644,
+            "fallbacks": 0,
+            "disabled": false,
+            "minimum": {
+              "schedules": 2400,
+              "rival": 1288
+            },
+            "samples": {
+              "schedules": {
+                "weight": 600,
+                "localMs": 0.15760000000045693,
+                "parallelMs": 2.2567000000017288,
+                "batches": 0
+              },
+              "rival": {
+                "weight": 322,
+                "localMs": 0.5631999999986874,
+                "parallelMs": 3.4927999999999884,
+                "batches": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

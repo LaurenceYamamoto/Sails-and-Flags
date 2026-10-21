@@ -1,5 +1,4 @@
 use crate::model::*;
-use crate::trade::{integrated,ratio};
 use serde::{Deserialize,Serialize};
 use serde_json::{json,Value};
 
@@ -76,7 +75,7 @@ impl Engine {
   self.entry(c,"postConstruction",-cost,None,format!("{} {facility}",self.data.cities[city].id));Ok(())
  }
  // Warehouse-bound cargo, including loading/unloading, reserves space. Removed
- // ships in sail() are excluded while unloading, so their own reservation is released.
+ // Completed unloading clears the trip before depositing its own reservation.
  pub fn reserved_stock(&self,c:usize,city:usize)->usize {
   self.game.companies[c].ships.iter().filter(|s|s.voyage.as_ref().or(s.handling.as_ref().map(|h|&h.trip)).is_some_and(|v|v.to==city&&!v.direct_sale))
    .map(crate::facility_management::reserved_units).sum()
@@ -113,20 +112,6 @@ impl Engine {
    let fees=[("postUpkeep",base+p.level as f64*0.5),("warehouseUpkeep",p.warehouse as f64),("handlingUpkeep",p.handling as f64*4.0)];
    for (kind,fee) in fees {if fee>0.0{self.entry(c,kind,-fee,None,self.data.cities[city].id.clone());}}
    if self.game.companies[c].bankrupt{return;}
-  }
-  for city in cities {if !self.warehouse(c,city){continue;}
-   for good in 0..self.data.goods.len(){let rule=self.game.companies[c].posts[&city].rules[good].clone();
-    if rule.sell {let available=self.game.companies[c].posts[&city].stock.iter().filter(|s|s.good==good).map(|s|s.quantity).sum();
-     let stock=self.game.markets[city*self.data.goods.len()+good].stock;
-     let q=price_quantity(available,|q|ratio(stock+q as f64)>=1.0+rule.sell_above/100.0);
-     if q>0{let _=self.take_stock(c,city,good,q,None);self.trade(c,city,good,q,false,None);}
-    }
-    if rule.buy {let stock=self.game.markets[city*self.data.goods.len()+good].stock;let cash=(self.game.companies[c].cash-self.game.companies[c].automation.reserve).max(0.0);
-     let q=price_quantity(self.warehouse_room(c,city).min(stock.floor() as usize),|q|ratio(stock-q as f64)<=1.0-rule.buy_below/100.0&&integrated(self.data.goods[good].base,stock-q as f64,stock)*(1.0+self.post_tax(c,city))<=cash);
-     if q>0{let(quantity,cost)=self.trade(c,city,good,q,true,None);self.put_stock(c,city,Cargo{good,quantity,cost},None);}
-    }
-   }
-   self.facility_immediate(c,city,0);
   }
  }
  pub fn posts_view(&self,c:usize)->Value{

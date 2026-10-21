@@ -1,6 +1,7 @@
 use crate::model::Data;
 use std::collections::BTreeMap;
 
+#[derive(serde::Serialize,serde::Deserialize)]
 pub struct WaterConnection {
     pub sloop_only: bool,
     pub nm: f64,

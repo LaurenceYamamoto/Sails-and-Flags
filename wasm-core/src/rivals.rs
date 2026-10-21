@@ -94,7 +94,7 @@ impl Engine {
             }
         }
     }
-    fn plan_investment(&mut self, c: usize) {
+    pub(crate) fn plan_investment(&mut self, c: usize) {
         self.scale_investment(c, 0.0);
         let (reserve, daily) = self.investment_budget(c);
         if daily <= 0.0 {
@@ -219,7 +219,7 @@ impl Engine {
             self.game.roads[i].security_budget = share / 3.0;
         }
     }
-    pub fn rival(&mut self, c: usize) {
+    pub(crate) fn rival_facilities(&mut self, c: usize) {
         // Facility spending must leave operating capital, not just construction cash.
         let (reserve, daily) = self.investment_budget(c);
         if daily > 0.0 {
@@ -252,7 +252,5 @@ impl Engine {
             }
         }
 
-        self.rival_expand(c);
-        self.plan_investment(c);
     }
 }

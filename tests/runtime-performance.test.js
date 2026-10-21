@@ -60,7 +60,7 @@ test('fractional ticks omit full views and autosave IO does not block simulation
   if(q.op==='saveInfo')return {day,name:'Test'};
   return {};
  };
- const context=vm.createContext({bridge:()=>core,SaveClient:class{
+ const context=vm.createContext({ParallelSimulation:class{constructor(c){this.core=c;}call(q){return this.core(q);}},bridge:()=>core,SaveClient:class{
   async list(){return [];}
   write(){writeCount++;return new Promise(resolve=>finish=resolve);}
  },fetch:()=>{},WebAssembly:{instantiateStreaming:async()=>({instance:{}})},postMessage:m=>messages.push(m)});
@@ -96,7 +96,7 @@ test('new games wait for the pending autosave and storage queue survives failure
   if(q.op==='save')return 'old-game';
   return {};
  };
- const context=vm.createContext({bridge:()=>core,SaveClient:class{async list(){return [];}write(){return new Promise(resolve=>finish=resolve);}},fetch:()=>{},WebAssembly:{instantiateStreaming:async()=>({instance:{}})},postMessage:m=>messages.push(m)});
+ const context=vm.createContext({ParallelSimulation:class{constructor(c){this.core=c;}call(q){return this.core(q);}},bridge:()=>core,SaveClient:class{async list(){return [];}write(){return new Promise(resolve=>finish=resolve);}},fetch:()=>{},WebAssembly:{instantiateStreaming:async()=>({instance:{}})},postMessage:m=>messages.push(m)});
  vm.runInContext(fs.readFileSync('src/game-worker.js','utf8').replace(/^import .*;\r?\n/gm,''),context);
  context.onmessage({data:{op:'boot',id:1}});await vm.runInContext('queue',context);
  context.onmessage({data:{op:'advance',id:2}});await vm.runInContext('queue',context);

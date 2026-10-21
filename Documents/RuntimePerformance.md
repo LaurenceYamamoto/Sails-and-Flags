@@ -1,5 +1,11 @@
 # Runtime performance — 2026-10-20
 
+This document records the 4.1.2 release. Subsequent game-computation parallelism,
+including its adaptive fallback and limits, is described in
+[ParallelSimulation.md](ParallelSimulation.md) and the later
+[trade-intent experiment](TradeIntentSimulation.md). The single-simulation-thread
+statements below describe the earlier release.
+
 ## Implemented
 
 - The Wasm simulation still owns all authoritative state and game decisions. Per-company fleet indexes and departure phases are built once per update instead of repeatedly scanning every vessel for each route or departure. Daily market updates reuse the seasonal factor and city consumption multiplier.
@@ -49,3 +55,8 @@ Open `http://127.0.0.1:4197/tests/runtime-browser.html?fixture=../runtime-fixtur
 `tests/runtime-performance.test.js` covers lightweight snapshots and invalidation, selected-route details, geometry boundaries, unavailable WebGL, worker failure fallback, fractional clock updates, and nonblocking/one-in-flight automatic saves. Existing save tests cover retention and storage quota handling.
 
 Measured results and regressions are recorded in [the work log](../AgentNote/2026-10-20-runtime-performance.md). The target old Threadripper has not been measured.
+
+
+## Ship/city/company phases (2026-10-21, local only)
+
+The current simulation groups vessel motion, city market/warehouse settlement, and company investment into independent Rust jobs. See [the phase architecture](CityTradeParallelism.md) and [all measured results](../AgentNote/2026-10-21-city-phases.md). In the 2,400-vessel fixture the default adaptive mode fell from 11.171 to 3.539 ms/day, while the supplied real save rose from 4.018 to 4.177 ms/day. Forced parallel execution was slower in all three measured workloads. Structural improvements and actual parallel speedup must not be conflated; old/new economic states differ, but new serial/parallel states match exactly.

@@ -1,6 +1,7 @@
 use crate::model::*;
 use std::collections::BTreeMap;
 
+#[derive(serde::Serialize,serde::Deserialize)]
 pub struct LandConnection { pub roads: Vec<usize>, pub km: f64 }
 
 // Immutable topology, calculated once. Preserve direct services; otherwise use

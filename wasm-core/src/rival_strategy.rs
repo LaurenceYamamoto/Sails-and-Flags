@@ -33,7 +33,16 @@ impl RivalState {
         && self.closed.iter().all(|r|r.a<cities&&r.b<cities&&r.a!=r.b&&["sea","land"].contains(&r.mode.as_str())&&r.until<=day.saturating_add(365))
     }
 }
-struct Candidate {a:usize,b:usize,kind:String,missing:Vec<usize>,post:Option<usize>,score:f64}
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct Candidate {a:usize,b:usize,kind:String,missing:Vec<usize>,post:Option<usize>,score:f64}
+impl Candidate {
+    pub(crate) fn matches(&self,a:usize,b:usize)->bool {
+        self.a==a&&self.b==b&&self.score.is_finite()&&self.score>0.0
+            && ["sloop","brig","fluyt","wagon","caravan"].contains(&self.kind.as_str())
+            && self.post.is_none_or(|i|i==a||i==b)
+    }
+}
+
 impl Engine {
     // National affinities are fixed to the company's original charter, even
     // after it relinquishes a license. Regions affect AI selection only.
@@ -199,7 +208,7 @@ impl Engine {
             }}
         }
     }
-    fn rival_candidate(&self,c:usize,a:usize,b:usize,kind:&str)->Option<Candidate> {
+    pub(crate) fn rival_candidate(&self,c:usize,a:usize,b:usize,kind:&str)->Option<Candidate> {
         let co=&self.game.companies[c];let spec=self.spec(kind).ok()?;
         if !self.can_serve(kind,&[a,b]) || (co.kind=="small"&&["brig","fluyt"].contains(&kind)){return None;}
         let state=co.rival_state.as_ref()?;
@@ -249,49 +258,61 @@ impl Engine {
         }else{(self.rival_city_weight(c,a)*self.rival_city_weight(c,b)).sqrt()};
         Some(Candidate{a,b,kind:kind.into(),missing,post,score:net*affinity})
     }
-    pub fn rival_expand(&mut self,c:usize) {
+    pub(crate) fn rival_pairs(&self,c:usize,phase:usize)->Vec<(usize,usize)> {
         let n=self.data.cities.len();
-        let hubs=self.game.companies[c].posts.keys().copied().collect::<Vec<_>>();
         let mut pairs=BTreeSet::new();
-        for &a in &hubs {for b in 0..n {if a!=b{pairs.insert((a.min(b),a.max(b)));}}}
-        // Evaluate existing hubs first; opening another post is a fallback only.
-        for phase in 0..2 {
-            if phase==1 {
-                if self.game.companies[c].routes.len()>=50{return;}
-                let mut cities=(0..n).collect::<Vec<_>>();
-                cities.sort_by(|&a,&b|self.rival_city_weight(c,b).total_cmp(&self.rival_city_weight(c,a)).then(a.cmp(&b)));
-                let offset=(self.game.day as usize/30*17+c*7)%cities.len();
-                let anchors=cities.iter().take(16).chain(cities.iter().cycle().skip(offset).take(8)).copied().collect::<BTreeSet<_>>();
-                pairs.clear();
-                for a in anchors {
-                    let mut targets=(0..n).filter(|&b|b!=a).collect::<Vec<_>>();
-                    let score=|b:usize|{let x=&self.data.cities[a];let y=&self.data.cities[b];self.rival_city_weight(c,b)/(1.0+(x.lon-y.lon).hypot(x.lat-y.lat))};
-                    targets.sort_by(|&a,&b|score(b).total_cmp(&score(a)).then(a.cmp(&b)));
-                    for b in targets.into_iter().take(16){if !self.has_post(c,&[a,b]){pairs.insert((a.min(b),a.max(b)));}}
-                }
-            }
-            let mut best:Option<Candidate>=None;
-            for &(a,b) in &pairs {
-                for kind in ["sloop","brig","fluyt","wagon","caravan"] {
-                    if let Some(candidate)=self.rival_candidate(c,a,b,kind) {
-                        if best.as_ref().is_none_or(|old|candidate.score>old.score){best=Some(candidate);}
-                    }
-                }
-            }
-            if let Some(best)=best {
-                // Avoid a partially bought charter/post if opening is rejected.
-                let before=self.game.clone();
-                let result=(||->Result<()>{
-                    for nation in best.missing{self.buy_license(c,nation)?;}
-                    if let Some(city)=best.post{self.build_post(c,city)?;}
-                    self.open(c,&best.kind,vec![best.a,best.b],(0..self.data.goods.len()).collect(),0.0)?;
-                    Ok(())
-                })();
-                if result.is_err(){self.game=before;}
-                return;
+        if phase==0 {
+            for &a in self.game.companies[c].posts.keys() {for b in 0..n {if a!=b{pairs.insert((a.min(b),a.max(b)));}}}
+        } else if self.game.companies[c].routes.len()<50 {
+            let mut cities=(0..n).collect::<Vec<_>>();
+            cities.sort_by(|&a,&b|self.rival_city_weight(c,b).total_cmp(&self.rival_city_weight(c,a)).then(a.cmp(&b)));
+            let offset=(self.game.day as usize/30*17+c*7)%cities.len();
+            let anchors=cities.iter().take(16).chain(cities.iter().cycle().skip(offset).take(8)).copied().collect::<BTreeSet<_>>();
+            for a in anchors {
+                let mut targets=(0..n).filter(|&b|b!=a).collect::<Vec<_>>();
+                let score=|b:usize|{let x=&self.data.cities[a];let y=&self.data.cities[b];self.rival_city_weight(c,b)/(1.0+(x.lon-y.lon).hypot(x.lat-y.lat))};
+                targets.sort_by(|&a,&b|score(b).total_cmp(&score(a)).then(a.cmp(&b)));
+                for b in targets.into_iter().take(16){if !self.has_post(c,&[a,b]){pairs.insert((a.min(b),a.max(b)));}}
             }
         }
+        pairs.into_iter().collect()
     }
+    pub(crate) fn rival_pair_best(&self,c:usize,a:usize,b:usize)->Option<Candidate> {
+        let mut best:Option<Candidate>=None;
+        for kind in ["sloop","brig","fluyt","wagon","caravan"] {
+            if let Some(candidate)=self.rival_candidate(c,a,b,kind) {
+                if best.as_ref().is_none_or(|old|candidate.score>old.score){best=Some(candidate);}
+            }
+        }
+        best
+    }
+    pub(crate) fn rival_best(candidates:Vec<Option<Candidate>>)->Option<Candidate> {
+        // Strict comparison preserves original pair/type tie order, regardless
+        // of the order in which workers finish their chunks.
+        let mut best:Option<Candidate>=None;
+        for candidate in candidates.into_iter().flatten() {
+            if best.as_ref().is_none_or(|old|candidate.score>old.score){best=Some(candidate);}
+        }
+        best
+    }
+    pub(crate) fn apply_rival_candidate(&mut self,c:usize,best:Candidate) {
+        let before=self.game.clone();
+        let result=(||->Result<()>{
+            for nation in best.missing{self.buy_license(c,nation)?;}
+            if let Some(city)=best.post{self.build_post(c,city)?;}
+            self.open(c,&best.kind,vec![best.a,best.b],(0..self.data.goods.len()).collect(),0.0)?;
+            Ok(())
+        })();
+        if result.is_err(){self.game=before;}
+    }
+    #[cfg(test)]
+    pub fn rival_expand(&mut self,c:usize) {
+        for phase in 0..2 {
+            let candidates=self.rival_pairs(c,phase).into_iter().map(|(a,b)|self.rival_pair_best(c,a,b)).collect();
+            if let Some(best)=Self::rival_best(candidates){self.apply_rival_candidate(c,best);return;}
+        }
+    }
+
 }
 
 #[cfg(test)]

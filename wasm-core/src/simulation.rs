@@ -1,5 +1,6 @@
 use crate::model::*;
 use crate::trade::ratio;
+use crate::parallel::{Stage,Work};
 
 // Same initial slope as level / (5 + level), but no finite growth ceiling.
 fn development_effect(level: f64) -> f64 {
@@ -50,27 +51,48 @@ impl Engine {
         (production, requested, consumed, stock - consumed)
     }
     pub fn tick(&mut self) {
-        let previous_day=self.game.day;
-        self.tick_day();
-        self.clear_bankrupt_rivals();
-        if self.game.day>previous_day && !self.game.companies[0].bankrupt {self.maybe_enter_rival();}
-        self.capture_accounts();
-    }
-    fn tick_day(&mut self) {
-        if self.game.companies[0].bankrupt {
-            return;
+        let mut stage=Stage::Begin;
+        while !matches!(stage,Stage::Done) {
+            let (next,work)=self.day_step(stage);
+            stage=next;
+            if let Some(work)=work {stage=self.finish_work(work,None).expect("local planning");}
         }
-        self.game.day += 1;
-        self.advance_world();
-        for c in 0..self.game.companies.len() {
-            if self.game.companies[c].acquired || self.game.companies[c].bankrupt {
-                continue;
+    }
+    fn after_insolvency(&self,c:usize)->(Stage,Option<Work>) {
+        (if c==0{Stage::End(false)}else{Stage::Start(c+1)},None)
+    }
+    pub(crate) fn day_step(&mut self,stage:Stage)->(Stage,Option<Work>) {
+        match stage {
+            Stage::Motion(day)=>{let work=self.motion_work(day);(Stage::Done,Some(work))}
+            Stage::Sales(day,jobs,deliveries)=>(Stage::Done,Some(Work::Sales{day,jobs,deliveries})),
+            Stage::Purchases(day,jobs,context)=>(Stage::Done,Some(Work::Purchases{day,jobs,context})),
+            Stage::Begin=>{
+                if self.game.companies[0].bankrupt {
+                    self.clear_bankrupt_rivals();self.capture_accounts();return (Stage::Done,None);
+                }
+                self.day_fleets.clear();
+                self.game.day+=1;self.advance_world();(Stage::Start(0),None)
             }
-            if c>0 {self.rival_retreat(c); if self.game.day==1 || self.game.companies[c].entered_day==Some(self.game.day-1) {self.rival(c);}}
+            Stage::Start(c)=>{
+                if c>=self.game.companies.len(){return (Stage::Done,Some(Work::PostMarkets{jobs:self.post_market_jobs()}));}
+                if self.game.companies[c].acquired||self.game.companies[c].bankrupt{return (Stage::Start(c+1),None);}
+                if c>0 {
+                    self.rival_retreat(c);
+                    if self.game.day==1 || self.game.companies[c].entered_day==Some(self.game.day-1) {
+                        self.rival_facilities(c);return (Stage::Rival(c,0,true),None);
+                    }
+                }
+                (Stage::Bills(c),None)
+            }
+            Stage::Rival(c,phase,early)=>{
+                let pairs=self.rival_pairs(c,phase);
+                (Stage::Done,Some(Work::Rival{c,phase,early,pairs}))
+            }
+            Stage::Bills(c)=>{
             self.advance_posts(c);
-            if self.game.companies[c].bankrupt {if c==0{return;}else{continue;}}
+            if self.game.companies[c].bankrupt {return self.after_insolvency(c);}
             self.advance_diplomacy(c);
-            if c != 0 { self.advance_industry(c); }
+
             if c == 0 {
                 let (_,_,ordinal,length)=self.calendar();
                 let season=(std::f64::consts::TAU * ordinal as f64 / length as f64).cos();
@@ -97,7 +119,7 @@ impl Engine {
                 }
             }
             if self.game.companies[c].bankrupt {
-                if c == 0 { return } else { continue }
+                return self.after_insolvency(c);
             }
             // Charge the whole fleet before trading, preserving the cash boundary.
             for i in 0..self.game.companies[c].ships.len() {
@@ -117,7 +139,7 @@ impl Engine {
                 }
             }
             if self.game.companies[c].bankrupt {
-                if c == 0 { return } else { continue }
+                return self.after_insolvency(c);
             }
             let routes = self.game.companies[c].routes.clone();
             for r in &routes {
@@ -131,8 +153,15 @@ impl Engine {
                     );
                 }
             }
-            if !self.game.companies[c].bankrupt {
-                self.sail(c);
+
+                if self.game.companies[c].bankrupt{return (if c==0{Stage::End(false)}else{Stage::Start(c+1)},None);}
+                self.prepare_sail(c);
+                (Stage::Done,Some(Work::Schedules{c}))
+            }
+            Stage::After(c)=>{
+                if c>=self.game.companies.len(){let jobs=self.investment_jobs();return (Stage::Done,Some(Work::Investments{jobs}));}
+                if self.game.companies[c].bankrupt||self.game.companies[c].acquired{return (Stage::After(c+1),None);}
+
                 self.automate(c);
                 if c == 0 {
                     self.auto_create_routes();
@@ -141,22 +170,24 @@ impl Engine {
                     if self.game.companies[0].investment_plan.is_some() {
                         self.prepare_investment(true);
                     }
-                    self.advance_industry(0);
+
                 }
                 if c > 0 && self.game.day>1 && (self.calendar().1 == 1 || self.game.companies[c].routes.is_empty() && self.game.day % 7 == c as u32 % 7) {
-                    self.rival(c);
+                    self.rival_facilities(c);
+                    return (Stage::Rival(c,0,false),None);
                 }
+                if self.game.companies[c].bankrupt && c==0 {return (Stage::End(false),None);}
+                (Stage::History(c),None)
             }
-            if self.game.companies[c].bankrupt && c == 0 {
-                return;
-            }
-            let assets = self.assets(c);
-            let co = &mut self.game.companies[c];
-            co.history.push([self.game.day as f64, co.cash, assets]);
-            if co.history.len() > 365 {
-                co.history.remove(0);
-            }
-        }
+            Stage::History(c)=>(Stage::After(c+1),None),
+            Stage::End(rank)=>{
+                for c in 0..self.game.companies.len(){
+                    if self.game.companies[c].bankrupt||self.game.companies[c].acquired{continue;}
+                    let assets=self.assets(c);let co=&mut self.game.companies[c];
+                    co.history.push([self.game.day as f64,co.cash,assets]);if co.history.len()>365{co.history.remove(0);}
+                }
+
+                if rank {
         if self.game.first_rank.is_none()
             && !self.game.companies[0].bankrupt
             && (1..self.game.companies.len())
@@ -165,6 +196,13 @@ impl Engine {
         {
             self.game.first_rank = Some(self.game.day);
             self.event("firstRank", "初めて資産総額1位になりました。".into());
+        }
+                }
+                self.clear_bankrupt_rivals();
+                if !self.game.companies[0].bankrupt{self.maybe_enter_rival();}
+                self.capture_accounts();(Stage::Done,None)
+            }
+            Stage::Done=>(Stage::Done,None),
         }
     }
     fn advance_world(&mut self) {
@@ -304,89 +342,6 @@ impl Engine {
             }
         }
         self.game.companies[c].trade.fill(0.0);
-    }
-    fn advance_industry(&mut self, c: usize) {
-        let owner = self.game.companies[c].id.clone();
-        if c > 0 {
-            self.guard_rival_budget(c);
-        }
-        for t in 0..8 {
-            let budget = self.game.companies[c].tech_budget[t];
-            if budget > 0.0 && self.game.companies[c].cash >= budget {
-                self.entry(c, "technologyInvestment", -budget, None, t.to_string());
-                let level = &mut self.game.companies[c].technology[t];
-                *level += budget.sqrt() / 100.0 / (1.0 + *level / 50.0);
-            }
-        }
-        let effect=self.post_investment_effect(c);
-        let cities:Vec<_>=self.game.companies[c].posts.keys().copied().collect();
-        for city in cities {
-            let size = self.game.companies[c].posts[&city].size_budget;
-            if size > 0.0 && self.game.companies[c].cash >= size {
-                self.entry(
-                    c,
-                    "cityInvestment",
-                    -size,
-                    None,
-                    self.data.cities[city].id.clone(),
-                );
-                let d = &mut self.game.development[city];
-                d.size += effect * size.sqrt() / 200.0 / (1.0 + d.size / 5.0);
-            }
-            for g in 0..self.data.goods.len() {
-                let value = self.game.companies[c].posts[&city].production_budget[g];
-                if value > 0.0 && self.game.companies[c].cash >= value {
-                    let apt = self.data.cities[city].supply[g]
-                        / self.data.cities[city]
-                            .supply
-                            .iter()
-                            .copied()
-                            .fold(1.0, f64::max);
-                    self.entry(
-                        c,
-                        "cityInvestment",
-                        -value,
-                        None,
-                        format!("{} {}", self.data.cities[city].id, self.data.goods[g].id),
-                    );
-                    let level = &mut self.game.development[city].production[g];
-                    *level += effect * value.sqrt() * apt / 200.0 / (1.0 + *level / 5.0);
-                }
-            }
-        }
-        for i in 0..self.game.roads.len() {
-            if self.game.roads[i].owner != owner {
-                continue;
-            }
-            let income = self.game.roads[i].pool;
-            self.game.roads[i].pool = 0.0;
-            if income > 0.0 {
-                self.entry(c, "roadIncome", income, None, self.data.roads[i].id.clone());
-            }
-            for security in [false, true] {
-                let budget = if security {
-                    self.game.roads[i].security_budget
-                } else {
-                    self.game.roads[i].road_budget
-                };
-                if budget > 0.0 && self.game.companies[c].cash >= budget {
-                    self.entry(
-                        c,
-                        "roadInvestment",
-                        -budget,
-                        None,
-                        self.data.roads[i].id.clone(),
-                    );
-                    let d = &mut self.game.roads[i];
-                    let level = if security {
-                        &mut d.security
-                    } else {
-                        &mut d.quality
-                    };
-                    *level += budget.sqrt() / 150.0 / (1.0 + *level / 5.0);
-                }
-            }
-        }
     }
     pub fn risk(&self, c: usize, r: &Route, kind: &str, a: usize, b: usize) -> (f64, f64, f64) {
         if !self.game.events_enabled || self.game.day <= 60 {

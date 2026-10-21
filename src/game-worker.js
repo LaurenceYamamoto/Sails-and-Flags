@@ -1,13 +1,18 @@
 import {bridge} from './wasm-bridge.js';
 import {SaveClient} from './save-client.js';
+import {ParallelSimulation} from './simulation-parallel.js';
 const storage=new SaveClient();
-const ready=WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm')).then(r=>bridge(r.instance));
+let simulation;
+const ready=WebAssembly.instantiateStreaming(fetch('../assets/wasm/engine.wasm')).then(r=>{
+  const core=bridge(r.instance);simulation=new ParallelSimulation(core,r.module);return core;
+});
 let queue=Promise.resolve(),selectedCity=0,lastAutoDay=0,lastViewDay=-1,autosaving=null;
 onmessage=({data})=>{queue=queue.then(async()=>{
   try{
     const core=await ready;let value;
     const view=(paths=false)=>{const v=core({op:'runtimeView',city:selectedCity,company:data.company,route:data.route,paths});lastViewDay=v.day;return v;};
-    if(data.op==='boot'){
+    if(data.op==='parallelStatus'){value=simulation.status();}
+    else if(data.op==='boot'){
       let restored=false;
       try {
         const rows=(await storage.list()).sort((a,b)=>b.savedAt-a.savedAt);
@@ -27,7 +32,7 @@ onmessage=({data})=>{queue=queue.then(async()=>{
       if(data.op==='view')value=view();
       else {
         if(data.op==='load'||data.command?.action==='new'){if(autosaving)await autosaving;}
-        value=core(data);
+        value=await simulation.call(data);
         if(data.op==='advance'){
           const clock=core({op:'clock'});
           value=clock.day===lastViewDay?{...clock,frame:true}:view();
